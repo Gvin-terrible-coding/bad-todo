@@ -1,14 +1,21 @@
 //used libraries: React, Recharts, TailwindCSS, Firebase, Babel or similar, PostCSS
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// Global variables provided by the Canvas environment
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+// Global variables
+const appId = 'default-app-id';
+const firebaseConfig = {
+  apiKey: "AIzaSyCsx6RHun1exNzs-ihuwXGpsnJGR4jQMW8",
+  authDomain: "assignment-tracker-d2dc2.firebaseapp.com",
+  projectId: "assignment-tracker-d2dc2",
+  storageBucket: "assignment-tracker-d2dc2.firebasestorage.app",
+  messagingSenderId: "382969075357",
+  appId: "1:382969075357:web:ee7194ec6c12a8faece674",
+  measurementId: "G-47D2YMVQN3"
+};
 
 // Initialize Firebase (only once)
 let app;
@@ -2507,7 +2514,70 @@ const XpBarAnimation = ({ xpGained, stats, calculateLevelInfo, onAnimationComple
 };
 
 // Main App Component
+// THIS IS THE NEW CODE
+
+const AuthComponent = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!auth) {
+        setError("Firebase is not configured correctly.");
+        return;
+    }
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+    } catch (err) {
+      setError(err.message.replace('Firebase: ', ''));
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
+      <div className="w-full max-w-md p-8 space-y-6 bg-slate-800 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-center">{isLogin ? 'Sign In' : 'Sign Up'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="text-sm font-bold text-slate-400 block mb-2">Email Address</label>
+            <input
+              type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              className="w-full p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="password"className="text-sm font-bold text-slate-400 block mb-2">Password</label>
+            <input
+              type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+              className="w-full p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          <button type="submit" className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-bold transition-colors">
+            {isLogin ? 'Sign In' : 'Create Account'}
+          </button>
+        </form>
+        <div className="text-center">
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-indigo-400 hover:underline">
+            {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
+  const [user, setUser] = useState(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeSheet, setActiveSheet] = useState('Assignment Tracker');
   const [assignments, setAssignments] = useState([]);
   const [trophies, setTrophies] = useState([]);
@@ -2516,51 +2586,39 @@ const App = () => {
     currentLevel: 1,
     xpProgress: 0,
     badgesEarned: {},
-    lastAwardedWeek: {}, // To track weekly badges
-    lastAwardedDay: {},  // To track daily badges
-    totalPointsEarned: 0, // For Point Accumulator badge (sum of pointsEarned)
-    lastPointAccumulatorThreshold: 0, // For Point Accumulator badge
-    ownedItems: [], // Array of owned cosmetic item IDs
+    lastAwardedWeek: {},
+    lastAwardedDay: {},
+    totalPointsEarned: 0,
+    lastPointAccumulatorThreshold: 0,
+    ownedItems: [],
     equippedItems: { avatar: null, banner: null, background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} },
-    petStatus: 'none', // 'none' | 'egg' | 'hatched'
-    assignmentsToHatch: 0, // Assignments needed to hatch
-    currentPet: null, // The currently active pet for buffs
-    ownedPets: [], // Array of owned pet objects (now stores full pet objects including evolutions)
-    friends: [], // Array of friend UIDs
-    assignmentsCompleted: 0, // Counter for leaderboard
-    trophiesEarned: 0, // For leaderboard
-    dungeon_floor: 0, // For leaderboard
+    petStatus: 'none',
+    assignmentsToHatch: 0,
+    currentPet: null,
+    ownedPets: [],
+    friends: [],
+    assignmentsCompleted: 0,
+    trophiesEarned: 0,
+    dungeon_floor: 0,
     dungeon_state: null,
-    ownedFurniture: [], // IDs of purchased furniture
-    sanctumLayout: { placedItems: [] }, // Position and ID of placed furniture
-  td_wave: 0,
-  td_castleHealth: 5,
-  td_towers: [],
-  td_path: [],
-  td_gameOver: false,
-  td_gameWon: false,
-  td_wins: 10,
-  td_unlockedTowers: [],
-  td_towerUpgrades: {},
-    // Science Lab State
+    ownedFurniture: [],
+    sanctumLayout: { placedItems: [] },
+    td_wave: 0,
+    td_castleHealth: 5,
+    td_towers: [],
+    td_path: [],
+    td_gameOver: false,
+    td_gameWon: false,
+    td_wins: 0,
+    td_unlockedTowers: [],
+    td_towerUpgrades: {},
     sciencePoints: 0,
     lastLogin: null,
     labEquipment: {
-      beaker: 0,
-      microscope: 0,
-      bunsen_burner: 0,
-      computer: 0,
-      particle_accelerator: 0,
-      quantum_computer: 0,
-      manual_clicker: 1, // Start with 1 click power
+      beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1,
     },
-    labXpUpgrades: {}, // e.g., { beaker: true }
+    labXpUpgrades: {},
   });
-
-
-  const [userId, setUserId] = useState(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State for Add Assignment modal
   const [isSlotAnimationOpen, setIsSlotAnimationOpen] = useState(false); // State for Slot Machine Animation modal
   const [currentSlotReward, setCurrentSlotReward] = useState(null);
@@ -2572,6 +2630,8 @@ const App = () => {
   const primeAudioRef = useRef(null); // To hold the audio priming function
   const statsRef = useRef(stats);
   useEffect(() => { statsRef.current = stats; }, [stats]);
+
+  const userId = user?.uid;
 
   // New Leveling System Helpers
   const getTotalXpForLevel = useCallback((level) => {
@@ -2604,32 +2664,17 @@ const App = () => {
 
 
   // Firebase Initialization and Auth Listener
-  useEffect(() => {
-    if (!db || !auth) {
-      showMessageBox("Firebase not initialized. Please check configuration.", "error");
-      setLoading(false);
+useEffect(() => {
+    if (!auth) {
+      console.error("Firebase not initialized. Please check configuration.");
+      setIsAuthReady(true);
       return;
     }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        try {
-          if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
-          } else {
-            await signInAnonymously(auth);
-          }
-        } catch (error) {
-          console.error("Error signing in:", error);
-          showMessageBox("Failed to sign in. Some features may not work.", "error");
-        }
-      }
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setIsAuthReady(true);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -2796,16 +2841,17 @@ const unsubscribeStats = onSnapshot(statsDocRef, (docSnap) => {
   };
 
   // Function to update stats in Firestore
-  const updateStatsInFirestore = async (newStats) => {
-    if (!db || !userId) return;
+// THIS IS THE NEW FUNCTION
+  const updateStatsInFirestore = useCallback(async (newStats) => {
+    if (!db || !user) return;
     try {
-      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}`);
+      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}`);
       await setDoc(statsDocRef, newStats, { merge: true });
     } catch (error) {
       console.error("Error updating stats:", error);
       showMessageBox("Failed to update stats.", "error");
     }
-  };
+  }, [user]); // Now depends on the user object
 
   // Function to add trophy to Firestore
   const addTrophyToFirestore = async (newTrophy) => {
@@ -3022,7 +3068,7 @@ const unsubscribeStats = onSnapshot(statsDocRef, (docSnap) => {
 
   // Pet Evolution Function
   const handleEvolvePet = useCallback(async (petToEvolve) => {
-    if (!db || !userId) return;
+    if (!db || !user) return; // Uses user
 
     // Find the full definition of the current pet stage
     let currentPetDefinition = null;
@@ -3093,7 +3139,7 @@ const unsubscribeStats = onSnapshot(statsDocRef, (docSnap) => {
 
     showMessageBox(`Your ${petToEvolve.name} evolved into a ${nextEvolution.name}! You spent ${nextEvolution.xpCost} XP.`, "info", 5000);
 
-  }, [stats, db, userId, updateStatsInFirestore]);
+  }, [stats, user, updateStatsInFirestore]); // Uses user
 
 // In App.jsx, add this entire function
 const generateInitialDungeonState = () => {
@@ -3319,17 +3365,13 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             showMessageBox("A server error occurred. Your XP was not spent.", "error");
         }
     }
-}, [userId, db, appId, calculateLevelInfo]);
-
-  // Badge System Logic
+}, [user, calculateLevelInfo]);
   const checkAndAwardBadges = useCallback(async (completedAssignment) => {
-    if (!db || !userId) return;
+    if (!db || !user) return;
 
-    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}`);
 
     try {
-      // Use a transaction to calculate XP gain and update stats atomically.
-      // The transaction will return the final XP bonus amount.
       const xpBonus = await runTransaction(db, async (transaction) => {
         const statsDoc = await transaction.get(statsDocRef);
         if (!statsDoc.exists()) throw new Error("Stats doc missing!");
@@ -3382,15 +3424,13 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         };
 
         transaction.update(statsDocRef, updatePayload);
-        return finalXpGained; // Return the final XP amount
+        return finalXpGained;
       });
 
-      // After the transaction is successful, trigger the animations.
       showMessageBox(`Task complete! +${xpBonus} XP.`, "info");
       setXpGainToShow(xpBonus);
       setXpAnimationKey(k => k + 1);
       
-      // Check if egg hatches (using pre-update stats for the check)
       if (stats.petStatus === 'egg' && (stats.assignmentsToHatch - 1) <= 0) {
         await hatchEgg();
       }
@@ -3399,7 +3439,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
       console.error("XP Award Transaction failed: ", error);
       showMessageBox("Failed to award XP due to a server error.", "error");
     }
-  }, [stats, db, userId, appId, hatchEgg, calculateLevelInfo]);
+  }, [stats, user, hatchEgg, calculateLevelInfo]);
 
   // Handle assignment status change (now driven by checkbox)
   const handleCompletedToggle = async (e, id, currentAssignment) => {
@@ -4862,7 +4902,7 @@ const Leaderboard = ({ db, appId, userId, friends }) => {
                 </div>
                 <div className="flex-1 text-left">
                     <p className="text-sm font-semibold text-white">My Profile</p>
-                    <p className="text-xs text-slate-400 truncate">ID: {userId}</p>
+                    <p className="text-xs text-slate-400 truncate">ID: {user.uid}</p>
                 </div>
             </button>
         </div>
@@ -4872,9 +4912,9 @@ const Leaderboard = ({ db, appId, userId, friends }) => {
       <main className="flex-grow p-8 overflow-auto">
         {activeSheet === 'Assignment Tracker' && <AssignmentTracker />}
         {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker />}
-        {activeSheet === 'My Profile' && <MyProfile 
+{activeSheet === 'My Profile' && <MyProfile 
             stats={stats} 
-            userId={userId} 
+            userId={user.uid} 
             updateStatsInFirestore={updateStatsInFirestore} 
             handleEvolvePet={handleEvolvePet}
             getFullPetDetails={getFullPetDetails} 
@@ -4886,10 +4926,10 @@ const Leaderboard = ({ db, appId, userId, friends }) => {
             trophies={trophies} 
             updateStatsInFirestore={updateStatsInFirestore} 
             showMessageBox={showMessageBox} 
-            getFullCosmeticDetails={getFullCosmeticDetails} // Pass this down
-            getItemStyle={getItemStyle}                   // Pass this down
+            getFullCosmeticDetails={getFullCosmeticDetails}
+            getItemStyle={getItemStyle}
         />}
-        {activeSheet === 'Leaderboard' && <Leaderboard db={db} appId={appId} userId={userId} friends={stats.friends} />}
+        {activeSheet === 'Leaderboard' && <Leaderboard db={db} appId={appId} userId={user.uid} friends={stats.friends} />}
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView />}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics />}
@@ -4906,6 +4946,6 @@ const Leaderboard = ({ db, appId, userId, friends }) => {
       </main>
     </div>
   );
-};
+}
 
 export default App;
