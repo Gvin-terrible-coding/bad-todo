@@ -4687,14 +4687,19 @@ const Leaderboard = ({ db, appId, userId, friends }) => {
   const equippedFontStyle = stats.equippedItems.font ? (cosmeticItems.fonts.find(f => f.id === stats.equippedItems.font) || {}).style : 'font-inter';
 
 
-  if (loading) {
+  if (!isAuthReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-blue-600 text-2xl font-semibold">Loading your tracker...</div>
+      <div className="flex items-center justify-center min-h-screen bg-slate-900">
+        <div className="text-slate-400 text-2xl font-semibold">Authenticating...</div>
       </div>
     );
   }
 
+  if (!user) {
+    return <AuthComponent />;
+  }
+
+  // If we reach this point, the user is authenticated and ready.
   return (
     <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 ${equippedFontStyle || 'font-inter'}`}>
       <style>
