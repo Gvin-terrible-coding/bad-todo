@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // This rule matches collections where the document ID itself is the user's ID.
+    // Example: /artifacts/{appId}/public/data/userProfiles/USER_ID_123
+    match /artifacts/{appId}/public/data/{collection}/{userId} {
+      // Users can only read, update, or delete their OWN documents.
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      // Users can only create a document for THEMSELVES.
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Specific rule for the trophyWall collection.
+    // NOTE: This allows ANY authenticated user to read and write to the entire collection.
+    match /artifacts/{appId}/public/data/trophyWall/{docId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Specific rule for the assignmentTracker collection.
+    // This collection does not use the user's ID as the document ID.
+    match /artifacts/{appId}/public/data/assignmentTracker/{assignmentId} {
+      // Any authenticated user can read all assignments (e.g., to see a list).
+      allow read: if request.auth != null;
+
+      // A user can only create an assignment for themselves.
+      // This checks the 'userId' field in the new document's data.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // A user can only update or delete an assignment that belongs to them.
+      // This checks the 'userId' field in the existing document's data.
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+  } // This closing brace for 'documents' was missing.
+}
