@@ -924,7 +924,7 @@ const Projectile = ({ from, to }) => {
   );
 };
 // REWORKED: Entire Dungeon Crawler Component
-const DungeonCrawler = ({ stats, dungeonState, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails }) => {
+const DungeonCrawler = ({ stats, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails }) => {
   // NEW: Local state to manage the game without constant DB writes
   const [localDungeonState, setLocalDungeonState] = useState(dungeonState);
 
@@ -934,9 +934,9 @@ const DungeonCrawler = ({ stats, dungeonState, updateStatsInFirestore, showMessa
   // NEW: A function to explicitly save the game state to Firebase
   const saveGame = useCallback((stateToSave) => {
     if (stateToSave) {
-      updateStatsInFirestore({ dungeon_state: stateToSave });
+      updateGameStateInFirestore({ dungeon_state: stateToSave });
     }
-  }, [updateStatsInFirestore]);
+  }, [updateGameStateInFirestore]);
 
 useEffect(() => {
     // This hook is now correctly designed to prevent "rubberbanding".
@@ -1260,9 +1260,8 @@ useEffect(() => {
       log: [`You have entered the dungeon as a ${classDef.name}!`],
       player: initialPlayerState,
     };
-
     setLocalDungeonState(newGameState);
-    updateStatsInFirestore({
+    updateGameStateInFirestore({
       dungeon_state: newGameState
     });
   };
@@ -1270,21 +1269,13 @@ useEffect(() => {
   const goToNextFloor = () => {
     const nextFloor = localDungeonState.floor + 1;
     const { newBoard, newEnemies } = generateFloor(nextFloor);
-    
-    let updatedEffects = (localDungeonState.player.activeEffects || [])
-        .map(effect => ({ ...effect, remainingFloors: effect.remainingFloors - 1 }))
-        .filter(effect => effect.remainingFloors > 0);
-
+    let updatedEffects = (localDungeonState.player.activeEffects || []).map(effect => ({ ...effect, remainingFloors: effect.remainingFloors - 1 })).filter(effect => effect.remainingFloors > 0);
     let newAbilityUses = { ...localDungeonState.player.abilityUses };
     let newLogMessages = [{ message: `You descended to floor ${nextFloor}.`, style: 'text-slate-300' }];
 
     if (nextFloor % 5 === 0) {
-        newLogMessages.unshift({ message: `You feel re-energized. Ability uses have been restored!`, style: 'text-cyan-400 font-bold' });
-        dungeonDefinitions.attacks
-          .filter(a => a.class === localDungeonState.playerClass)
-          .forEach(a => {
-            newAbilityUses[a.id] = a.maxUses;
-          });
+      newLogMessages.unshift({ message: `You feel re-energized. Ability uses have been restored!`, style: 'text-cyan-400 font-bold' });
+      dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).forEach(a => { newAbilityUses[a.id] = a.maxUses; });
     }
 
     const nextState = {
@@ -1292,20 +1283,11 @@ useEffect(() => {
         floor: nextFloor,
         board: newBoard,
         enemies: newEnemies,
-        player: { 
-            ...localDungeonState.player, 
-            x: 1, 
-            y: 1, 
-            hp: localDungeonState.player.hp, // Keep current HP
-            hasKey: false,
-            activeEffects: updatedEffects,
-            abilityUses: newAbilityUses,
-        },
+        player: { ...localDungeonState.player, x: 1, y: 1, hasKey: false, activeEffects: updatedEffects, abilityUses: newAbilityUses },
         log: newLogMessages,
     };
-
     setLocalDungeonState(nextState);
-    updateStatsInFirestore({
+    updateGameStateInFirestore({
         dungeon_floor: Math.max(stats.dungeon_floor || 1, nextFloor),
         dungeon_state: nextState
     });
@@ -1313,16 +1295,12 @@ useEffect(() => {
 
   const handleTileClick = (x, y) => {
     if (localDungeonState.gameOver || !localDungeonState.playerClass) return;
-
     const targetTile = localDungeonState.board[`${y},${x}`];
-
     if (abilityTarget) {
       if (targetTile.type === 'enemy') {
-          const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
-          if (enemy) handleAttack(enemy, abilityTarget);
-      } else {
-          addLog("No enemy at that location. Ability cancelled.", 'text-yellow-400');
-      }
+        const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
+        if (enemy) handleAttack(enemy, abilityTarget);
+      } else { addLog("No enemy at that location. Ability cancelled.", 'text-yellow-400'); }
       setAbilityTarget(null);
       return;
     }
@@ -1330,19 +1308,13 @@ useEffect(() => {
       if (targetTile.type === 'enemy') {
         const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
         if (enemy) handleAttack(enemy, 'attack_normal');
-      } else {
-        addLog("No enemy at that location. Attack cancelled.", 'text-yellow-400');
-      }
+      } else { addLog("No enemy at that location. Attack cancelled.", 'text-yellow-400'); }
       setAttackTarget(null);
       return;
     }
 
-    const dx = Math.abs(x - localDungeonState.player.x);
-    const dy = Math.abs(y - localDungeonState.player.y);
-    if (dx === 0 && dy === 0) { addLog("You wait a turn."); return; }
-    if (dx > 1 || dy > 1) { addLog("You can only move to adjacent tiles."); return; }
+    if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
     if (targetTile.type === 'wall') { addLog("You can't move through a wall."); return; }
-    
     const moveCost = localDungeonState.player.moveCost || 5;
     if (stats.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
 
@@ -1350,234 +1322,147 @@ useEffect(() => {
     const newBoard = { ...localDungeonState.board };
     newBoard[`${localDungeonState.player.y},${localDungeonState.player.x}`] = { type: 'empty', visited: true };
     newBoard[`${y},${x}`] = { type: 'player', visited: true };
-    
     let playerHp = localDungeonState.player.hp;
     const newLogMessages = [];
-
-    // Enemy movement and attacks
     let updatedEnemies = JSON.parse(JSON.stringify(localDungeonState.enemies));
     updatedEnemies.forEach(enemy => {
-        // Handle status effects
-        let canAct = true;
-        if(enemy.statusEffects) {
-            enemy.statusEffects = enemy.statusEffects.map(effect => ({...effect, duration: effect.duration - 1})).filter(e => e.duration > 0);
-            if(enemy.statusEffects.some(e => e.type === 'stunned' || e.type === 'crippled')) {
-                canAct = false;
-            }
-        }
-        
-        if (canAct && Math.hypot(enemy.x - x, enemy.y - y) <= (enemy.isRanged ? 5 : 1.5)) {
-            playerHp -= enemy.atk;
-            newLogMessages.push({ message: `The ${enemy.name} hit you for ${enemy.atk} damage.`, style: 'text-orange-400' });
-        }
+      let canAct = true;
+      if (enemy.statusEffects) {
+        enemy.statusEffects = enemy.statusEffects.map(effect => ({ ...effect, duration: effect.duration - 1 })).filter(e => e.duration > 0);
+        if (enemy.statusEffects.some(e => e.type === 'stunned' || e.type === 'crippled')) canAct = false;
+      }
+      if (canAct && Math.hypot(enemy.x - x, enemy.y - y) <= (enemy.isRanged ? 5 : 1.5)) {
+        playerHp -= enemy.atk;
+        newLogMessages.push({ message: `The ${enemy.name} hit you for ${enemy.atk} damage.`, style: 'text-orange-400' });
+      }
     });
 
     if (playerHp <= 0) { handleGameOver(); return; }
-
-    let newState = {
-      ...localDungeonState,
-      player: { ...localDungeonState.player, x, y, hp: playerHp },
-      board: newBoard,
-      enemies: updatedEnemies,
-      log: [...newLogMessages, ...(localDungeonState.log || [])].slice(0, 5)
-    };
-
+    let newState = { ...localDungeonState, player: { ...localDungeonState.player, x, y, hp: playerHp }, board: newBoard, enemies: updatedEnemies, log: [...newLogMessages, ...localDungeonState.log].slice(0, 5) };
     if (targetTile.type === 'key') {
-        newState.player.hasKey = true;
-        newState.log.unshift({ message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
+      newState.player.hasKey = true;
+      newState.log.unshift({ message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
     }
-
     if (targetTile.type === 'chest' && !targetTile.opened) {
       let goldFound = Math.floor(Math.random() * (20 + localDungeonState.floor * 5)) + 10;
       newGold += goldFound;
       newState.log.unshift({ message: `You opened a chest and found ${goldFound} gold!`, style: 'text-yellow-400 font-bold' });
       newBoard[`${y},${x}`].opened = true;
     }
-
     if (targetTile.type === 'hatch') {
-      if (localDungeonState.player.hasKey) {
-        goToNextFloor(); return;
-      } else {
-        newState.log.unshift({ message: "The hatch is locked. You need a key.", style: 'text-yellow-400' });
-      }
+      if (localDungeonState.player.hasKey) { goToNextFloor(); return; }
+      else { newState.log.unshift({ message: "The hatch is locked. You need a key.", style: 'text-yellow-400' }); }
     }
-    
     setLocalDungeonState(newState);
-    updateStatsInFirestore({
-      totalXP: stats.totalXP - moveCost,
-      dungeon_gold: newGold,
-    });
+    updateProfileInFirestore({ totalXP: stats.totalXP - moveCost });
+    updateGameStateInFirestore({ dungeon_gold: newGold });
   };
 
-const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
+  const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
     const attackDef = dungeonDefinitions.attacks.find(a => a.id === attackId);
     if (!attackDef) return;
-
     const attackCost = attackId === 'attack_normal' ? localDungeonState.player.attackCost : attackDef.cost;
     const attackRange = attackId === 'attack_normal' ? localDungeonState.player.attackRange : attackDef.range;
-
-    // --- Validation Checks ---
     if (localDungeonState.gameOver) return;
-    if (stats.totalXP < attackCost) {
-        addLog(`Not enough XP for ${attackDef.name} (costs ${attackCost}).`, 'text-red-400');
-        setAttackTarget(null);
-        setAbilityTarget(null);
-        return;
-    }
-    if (attackId !== 'attack_normal' && (localDungeonState.player.abilityUses[attackId] || 0) <= 0) {
-        addLog(`No uses left for ${attackDef.name}.`, 'text-yellow-400');
-        return;
-    }
+    if (stats.totalXP < attackCost) { addLog(`Not enough XP for ${attackDef.name} (costs ${attackCost}).`, 'text-red-400'); setAttackTarget(null); setAbilityTarget(null); return; }
+    if (attackId !== 'attack_normal' && (localDungeonState.player.abilityUses[attackId] || 0) <= 0) { addLog(`No uses left for ${attackDef.name}.`, 'text-yellow-400'); return; }
     const distance = Math.hypot(targetEnemy.x - localDungeonState.player.x, targetEnemy.y - localDungeonState.player.y);
-    if (distance > attackRange) {
-        addLog("Target is out of range.", 'text-yellow-400');
-        setAttackTarget(null);
-        setAbilityTarget(null);
-        return;
-    }
+    if (distance > attackRange) { addLog("Target is out of range.", 'text-yellow-400'); setAttackTarget(null); setAbilityTarget(null); return; }
 
-    let newGold = stats.dungeon_gold || 0;
     let isGameOver = false;
-
-    // --- State Update Logic ---
     setLocalDungeonState(prevState => {
-        let newState = JSON.parse(JSON.stringify(prevState));
-        let { enemies, board, player, log } = newState;
-        
-        if (attackId !== 'attack_normal') {
-            player.abilityUses[attackId]--;
-        }
-
-        const baseAttackPower = fullPlayerStats.attack + (attackDef.power || 0);
-        
-        // --- Main Hit Processing ---
-        const mainTargetIndex = enemies.findIndex(e => e.id === targetEnemy.id);
-        if (mainTargetIndex === -1) return prevState; // Target already gone
-        let mainTarget = enemies[mainTargetIndex];
-
-        const damageMultiplier = attackDef.effect?.damageMultiplier || 1;
-        let finalDamage = Math.round(baseAttackPower * damageMultiplier);
-        if(mainTarget.armor) finalDamage = Math.max(1, finalDamage - mainTarget.armor);
-
-        mainTarget.hp -= finalDamage;
-        log.unshift({ message: `You hit ${mainTarget.name} with ${attackDef.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
-        
-        // --- AOE Damage Logic ---
-        if (attackDef.effect?.aoe) {
-            enemies.forEach((enemy, index) => {
-                if (enemy.id === mainTarget.id) return; // Skip main target
-                const aoeDist = Math.hypot(enemy.x - mainTarget.x, enemy.y - mainTarget.y);
-                if (aoeDist <= attackDef.effect.aoe) {
-                    let aoeDamage = Math.round(baseAttackPower * damageMultiplier);
-                    if(enemy.armor) aoeDamage = Math.max(1, aoeDamage - enemy.armor);
-                    enemies[index].hp -= aoeDamage;
-                    log.unshift({ message: `${enemy.name} is hit by the blast for ${aoeDamage} damage!`, style: 'text-orange-300' });
-                }
-            });
-        }
-        
-        // --- Process all enemies that took damage ---
-        let enemiesToRemove = [];
-        enemies.forEach(enemy => {
-            if (enemy.hp <= 0) {
-                enemiesToRemove.push(enemy.id);
-                log.unshift({ message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
-                if (enemy.isKeyholder) {
-                    board[`${enemy.y},${enemy.x}`] = { type: 'key', visited: true };
-                } else {
-                    board[`${enemy.y},${enemy.x}`] = { type: 'empty', visited: true };
-                }
-                if (enemy.onDefeat?.type === 'split') {
-                    // Slime splitting logic...
-                }
-            }
+      let newState = JSON.parse(JSON.stringify(prevState));
+      let { enemies, board, player, log } = newState;
+      if (attackId !== 'attack_normal') player.abilityUses[attackId]--;
+      const baseAttackPower = fullPlayerStats.attack + (attackDef.power || 0);
+      const mainTargetIndex = enemies.findIndex(e => e.id === targetEnemy.id);
+      if (mainTargetIndex === -1) return prevState;
+      let mainTarget = enemies[mainTargetIndex];
+      const damageMultiplier = attackDef.effect?.damageMultiplier || 1;
+      let finalDamage = Math.round(baseAttackPower * damageMultiplier);
+      if (mainTarget.armor) finalDamage = Math.max(1, finalDamage - mainTarget.armor);
+      mainTarget.hp -= finalDamage;
+      log.unshift({ message: `You hit ${mainTarget.name} with ${attackDef.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
+      if (attackDef.effect?.aoe) {
+        enemies.forEach((enemy, index) => {
+          if (enemy.id === mainTarget.id) return;
+          const aoeDist = Math.hypot(enemy.x - mainTarget.x, enemy.y - mainTarget.y);
+          if (aoeDist <= attackDef.effect.aoe) {
+            let aoeDamage = Math.round(baseAttackPower * damageMultiplier);
+            if (enemy.armor) aoeDamage = Math.max(1, aoeDamage - enemy.armor);
+            enemies[index].hp -= aoeDamage;
+            log.unshift({ message: `${enemy.name} is hit by the blast for ${aoeDamage} damage!`, style: 'text-orange-300' });
+          }
         });
-        
-        newState.enemies = enemies.filter(e => !enemiesToRemove.includes(e.id));
-
-        // --- Retaliation from main target (if it survived) ---
-        mainTarget = newState.enemies.find(e => e.id === targetEnemy.id); // Re-find it in case it was removed
-        if (mainTarget) {
-            const retaliates = mainTarget.isRanged || distance <= 1.5;
-            const isStunned = mainTarget.statusEffects?.some(e => e.type === 'stunned' || e.type === 'crippled');
-            if (retaliates && !isStunned) {
-                const counterDamage = Math.max(1, Math.round(mainTarget.atk / 2));
-                player.hp -= counterDamage;
-                log.unshift({ message: `The ${mainTarget.name} retaliates for ${counterDamage} damage.`, style: 'text-orange-400' });
-                if (player.hp <= 0) { player.hp = 0; isGameOver = true; }
-            }
+      }
+      let enemiesToRemove = [];
+      enemies.forEach(enemy => {
+        if (enemy.hp <= 0) {
+          enemiesToRemove.push(enemy.id);
+          log.unshift({ message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
+          board[`${enemy.y},${enemy.x}`] = { type: enemy.isKeyholder ? 'key' : 'empty', visited: true };
         }
-        
-        newState.log = log.slice(0, 5);
-        return newState;
+      });
+      newState.enemies = enemies.filter(e => !enemiesToRemove.includes(e.id));
+      mainTarget = newState.enemies.find(e => e.id === targetEnemy.id);
+      if (mainTarget) {
+        const retaliates = mainTarget.isRanged || distance <= 1.5;
+        const isStunned = mainTarget.statusEffects?.some(e => e.type === 'stunned' || e.type === 'crippled');
+        if (retaliates && !isStunned) {
+          const counterDamage = Math.max(1, Math.round(mainTarget.atk / 2));
+          player.hp -= counterDamage;
+          log.unshift({ message: `The ${mainTarget.name} retaliates for ${counterDamage} damage.`, style: 'text-orange-400' });
+          if (player.hp <= 0) { player.hp = 0; isGameOver = true; }
+        }
+      }
+      newState.log = log.slice(0, 5);
+      return newState;
     });
-
     setAttackTarget(null);
     setAbilityTarget(null);
-    updateStatsInFirestore({
-        totalXP: stats.totalXP - attackCost,
-        dungeon_gold: newGold,
-    });
+    updateProfileInFirestore({ totalXP: stats.totalXP - attackCost });
     if (isGameOver) handleGameOver();
   };
 
   const handleBuyItem = (item, type, currency) => {
-      const cost = item.cost;
-      if (currency === 'xp' && stats.totalXP < cost) { showMessageBox("Not enough XP!", 'error'); return; }
-      if (currency === 'gold' && (stats.dungeon_gold || 0) < cost) { showMessageBox("Not enough Gold!", 'error'); return; }
+    const cost = item.cost;
+    if (currency === 'xp' && stats.totalXP < cost) { showMessageBox("Not enough XP!", 'error'); return; }
+    if (currency === 'gold' && (stats.dungeon_gold || 0) < cost) { showMessageBox("Not enough Gold!", 'error'); return; }
 
-      const newDungeonState = { ...localDungeonState };
-      let updatedStats = {};
-
-      switch(type) {
-          case 'weapon': newDungeonState.ownedWeapons.push(item.id); newDungeonState.equippedWeapon = item.id; break;
-          case 'armor': newDungeonState.ownedArmor.push(item.id); newDungeonState.equippedArmor = item.id; break;
-          case 'attack': newDungeonState.ownedAttacks.push(item.id); break;
-          case 'potion': newDungeonState.potions = (newDungeonState.potions || 0) + 1; break;
-          case 'temp_potion': {
-            const existingEffects = newDungeonState.player.activeEffects || [];
-            const effectIndex = existingEffects.findIndex(e => e.id === item.id);
-            if (effectIndex > -1) {
-              existingEffects[effectIndex].remainingFloors = item.duration;
-            } else {
-              existingEffects.push({ id: item.id, remainingFloors: item.duration });
-            }
-            newDungeonState.player.activeEffects = existingEffects;
-            break;
-          }
-          default: break;
-      }
-      
-      if (currency === 'xp') updatedStats.totalXP = stats.totalXP - cost;
-      if (currency === 'gold') updatedStats.dungeon_gold = (stats.dungeon_gold || 0) - cost;
-      
-      // NEW: Update local state AND save to Firebase
-      setLocalDungeonState(newDungeonState);
-      updateStatsInFirestore({ ...updatedStats, dungeon_state: newDungeonState });
-      showMessageBox(`You bought ${item.name}!`, 'info');
+    const newDungeonState = { ...localDungeonState };
+    if (type === 'weapon') { newDungeonState.ownedWeapons.push(item.id); newDungeonState.equippedWeapon = item.id; }
+    else if (type === 'armor') { newDungeonState.ownedArmor.push(item.id); newDungeonState.equippedArmor = item.id; }
+    else if (type === 'potion') newDungeonState.potions = (newDungeonState.potions || 0) + 1;
+    else if (type === 'temp_potion') {
+      const existingEffects = newDungeonState.player.activeEffects || [];
+      const effectIndex = existingEffects.findIndex(e => e.id === item.id);
+      if (effectIndex > -1) existingEffects[effectIndex].remainingFloors = item.duration;
+      else existingEffects.push({ id: item.id, remainingFloors: item.duration });
+      newDungeonState.player.activeEffects = existingEffects;
+    }
+    
+    setLocalDungeonState(newDungeonState);
+    if (currency === 'xp') updateProfileInFirestore({ totalXP: stats.totalXP - cost });
+    if (currency === 'gold') updateGameStateInFirestore({ dungeon_gold: (stats.dungeon_gold || 0) - cost });
+    updateGameStateInFirestore({ dungeon_state: newDungeonState });
+    showMessageBox(`You bought ${item.name}!`, 'info');
   };
   
   const handleBuyStat = (stat) => {
-      if(stats.totalXP < 300) { showMessageBox("Not enough XP!", 'error'); return; }
-      const newDungeonState = {...localDungeonState, boughtStats: {...localDungeonState.boughtStats, [stat]: (localDungeonState.boughtStats[stat] || 0) + 10}};
-      // Update local state and save to Firestore
-      setLocalDungeonState(newDungeonState);
-      updateStatsInFirestore({
-          totalXP: stats.totalXP - 300,
-          dungeon_state: newDungeonState
-      });
-      showMessageBox(`You bought +10 ${stat}!`, 'info');
+    if (stats.totalXP < 300) { showMessageBox("Not enough XP!", 'error'); return; }
+    const newDungeonState = { ...localDungeonState, boughtStats: { ...localDungeonState.boughtStats, [stat]: (localDungeonState.boughtStats[stat] || 0) + 10 } };
+    setLocalDungeonState(newDungeonState);
+    updateProfileInFirestore({ totalXP: stats.totalXP - 300 });
+    updateGameStateInFirestore({ dungeon_state: newDungeonState });
+    showMessageBox(`You bought +10 ${stat}!`, 'info');
   };
 
   const handleBuyPotion = () => {
-    if(stats.totalXP < 100) { showMessageBox("Not enough XP to buy a potion.", "error"); return; }
-    const newDungeonState = {...localDungeonState, potions: (localDungeonState.potions || 0) + 1};
-    // Update local state and save to Firestore
+    if (stats.totalXP < 100) { showMessageBox("Not enough XP.", "error"); return; }
+    const newDungeonState = { ...localDungeonState, potions: (localDungeonState.potions || 0) + 1 };
     setLocalDungeonState(newDungeonState);
-    updateStatsInFirestore({
-        totalXP: stats.totalXP - 100,
-        dungeon_state: newDungeonState
-    });
+    updateProfileInFirestore({ totalXP: stats.totalXP - 100 });
+    updateGameStateInFirestore({ dungeon_state: newDungeonState });
     showMessageBox("You bought a potion!", "info");
   };
 
@@ -1747,7 +1632,7 @@ const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
                                 newPlayerState.abilityUses = { ...newPlayerState.abilityUses, [attack.id]: usesLeft - 1 };
                                 return { ...prev, player: newPlayerState, log: newLog.slice(0, 5) };
                             });
-                            updateStatsInFirestore({ totalXP: stats.totalXP - attack.cost });
+                            updateProfileInFirestore({ totalXP: stats.totalXP - attack.cost });
                         } else {
                             setAbilityTarget(attack.id);
                         }
@@ -1844,8 +1729,10 @@ const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
 };
 
 // Component for Science Lab Idle Clicker
-const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
-  const [localSciencePoints, setLocalSciencePoints] = useState(stats.sciencePoints || 0);
+const ScienceLab = ({ stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox }) => {
+  const { lab_state } = stats;
+  
+  const [localSciencePoints, setLocalSciencePoints] = useState(lab_state?.sciencePoints || 0);
   const sciencePerSecond = useRef(0);
   const PRESTIGE_THRESHOLD = 1e12; // 1 Trillion
 
@@ -1858,18 +1745,24 @@ const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
   };
 
   const { totalSPS, totalClickPower, prestigeBonus } = useMemo(() => {
+    if (!lab_state) return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
     let sps = 0;
     let clickPower = 0;
-    const prestigeLevel = stats.prestigeLevel || 0;
-    const prestigeBonusMultiplier = 1 + prestigeLevel * 0.10; // 10% bonus per prestige level
+    const prestigeLevel = lab_state.prestigeLevel || 0;
+    const prestigeBonusMultiplier = 1 + prestigeLevel * 0.10;
 
-    for (const key in stats.labEquipment) {
+    // FIX: Add a guard clause to prevent crash if labEquipment hasn't loaded
+    if (!lab_state.labEquipment) {
+        return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
+    }
+
+    for (const key in lab_state.labEquipment) {
       const definition = labEquipmentDefinitions[key];
-      const count = stats.labEquipment[key] || 0;
+      const count = lab_state.labEquipment[key] || 0;
       if (count > 0) {
         let itemSPS = definition.baseSPS;
         let itemClickPower = definition.clickPower;
-        if (stats.labXpUpgrades && stats.labXpUpgrades[key]) {
+        if (lab_state.labXpUpgrades && lab_state.labXpUpgrades[key]) {
           itemSPS *= definition.xpUpgrade.multiplier;
           itemClickPower *= definition.xpUpgrade.multiplier;
         }
@@ -1883,7 +1776,7 @@ const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
 
     sciencePerSecond.current = finalSPS;
     return { totalSPS: finalSPS, totalClickPower: finalClickPower, prestigeBonus: prestigeBonusMultiplier };
-  }, [stats.labEquipment, stats.labXpUpgrades, stats.prestigeLevel]);
+  }, [lab_state]);
 
   useEffect(() => {
     const gameLoop = setInterval(() => {
@@ -1893,78 +1786,85 @@ const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
   }, []);
 
   useEffect(() => {
+    if (!lab_state) return;
     const persistenceLoop = setInterval(() => {
-      updateStatsInFirestore({ sciencePoints: localSciencePoints, lastLogin: serverTimestamp() });
-    }, 1800000); // Changed to 30 minutes
+      updateGameStateInFirestore({ lab_state: { ...lab_state, sciencePoints: localSciencePoints, lastLogin: serverTimestamp() } });
+    }, 30000);
     return () => clearInterval(persistenceLoop);
-  }, [localSciencePoints, updateStatsInFirestore]);
+  }, [localSciencePoints, lab_state, updateGameStateInFirestore]);
 
   useEffect(() => {
     let isMounted = true;
     const calculateOfflineProgress = async () => {
-      if (stats.lastLogin) {
-        const lastLoginTime = stats.lastLogin.toDate();
+      if (lab_state?.lastLogin) {
+        const lastLoginTime = lab_state.lastLogin.toDate();
         const currentTime = new Date();
         const timeDifferenceSeconds = Math.round((currentTime - lastLoginTime) / 1000);
 
         if (timeDifferenceSeconds > 10) {
-          const offlineSPS = sciencePerSecond.current;
-          const pointsEarned = timeDifferenceSeconds * offlineSPS;
+          const pointsEarned = timeDifferenceSeconds * sciencePerSecond.current;
           if (pointsEarned > 0 && isMounted) {
             setLocalSciencePoints(prev => prev + pointsEarned);
-            showMessageBox(`Welcome back! You earned ${formatNumber(pointsEarned)} Science Points while away.`, 'info', 5000);
+            showMessageBox(`Welcome back! You earned ${formatNumber(pointsEarned)} Science Points.`, 'info', 5000);
           }
         }
       }
-      updateStatsInFirestore({ lastLogin: serverTimestamp() });
+      if (lab_state) {
+        updateGameStateInFirestore({ lab_state: { ...lab_state, lastLogin: serverTimestamp() } });
+      }
     };
     calculateOfflineProgress();
     return () => { isMounted = false; };
-  }, [stats.lastLogin, updateStatsInFirestore, showMessageBox]);
+  }, [lab_state]);
 
+  // FIX: This now returns JSX, preventing conditional hook calls
+  if (!lab_state) {
+    return <div className="text-center p-10 text-xl text-slate-400">Loading Science Lab...</div>;
+  }
   const handleManualClick = () => {
     setLocalSciencePoints(prev => prev + totalClickPower);
   };
 
   const handleBuyEquipment = (key) => {
     const definition = labEquipmentDefinitions[key];
-    const currentCount = stats.labEquipment[key] || 0;
+    const currentCount = lab_state.labEquipment?.[key] || 0;
     const cost = definition.baseCost * Math.pow(1.15, currentCount);
 
     if (localSciencePoints >= cost) {
       const newSciencePoints = localSciencePoints - cost;
       setLocalSciencePoints(newSciencePoints);
-      const newEquipmentStats = { ...stats.labEquipment, [key]: currentCount + 1 };
-      updateStatsInFirestore({ sciencePoints: newSciencePoints, labEquipment: newEquipmentStats });
+      const newEquipmentStats = { ...(lab_state.labEquipment || {}), [key]: currentCount + 1 };
+      updateGameStateInFirestore({ lab_state: { ...lab_state, sciencePoints: newSciencePoints, labEquipment: newEquipmentStats } });
     }
   };
 
   const handleBuyXpUpgrade = (key) => {
     const definition = labEquipmentDefinitions[key];
-    if (stats.totalXP >= definition.xpUpgrade.cost && !(stats.labXpUpgrades && stats.labXpUpgrades[key])) {
-      const newXpUpgrades = { ...(stats.labXpUpgrades || {}), [key]: true };
-      updateStatsInFirestore({
-        totalXP: stats.totalXP - definition.xpUpgrade.cost,
-        labXpUpgrades: newXpUpgrades
-      });
+    if (stats.totalXP >= definition.xpUpgrade.cost && !(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key])) {
+      const newXpUpgrades = { ...(lab_state.labXpUpgrades || {}), [key]: true };
+      updateProfileInFirestore({ totalXP: stats.totalXP - definition.xpUpgrade.cost });
+      updateGameStateInFirestore({ lab_state: { ...lab_state, labXpUpgrades: newXpUpgrades } });
       showMessageBox(`${definition.name} production doubled!`, 'info');
     }
   };
 
   const handlePrestige = () => {
     if (localSciencePoints < PRESTIGE_THRESHOLD) {
-      showMessageBox("You have not reached the required Science Points to prestige.", "error");
+      showMessageBox("Not enough Science Points to prestige.", "error");
       return;
     }
-    const newPrestigeLevel = (stats.prestigeLevel || 0) + 1;
-    updateStatsInFirestore({
-      sciencePoints: 0,
-      labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
-      labXpUpgrades: {},
-      prestigeLevel: newPrestigeLevel,
+    const newPrestigeLevel = (lab_state.prestigeLevel || 0) + 1;
+    updateGameStateInFirestore({
+      lab_state: {
+        sciencePoints: 0,
+        labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
+        labXpUpgrades: {},
+        prestigeLevel: newPrestigeLevel,
+        lastLogin: serverTimestamp(),
+      }
     });
     setLocalSciencePoints(0);
-    showMessageBox(`Prestige successful! You are now at Prestige Level ${newPrestigeLevel} and gain a permanent +10% boost to all Science Point generation.`, "info", 6000);
+    showMessageBox(`Prestige successful! Level ${newPrestigeLevel}. You gain a +10% boost to all future generation.`, "info", 6000);
   };
 
   const scienceShopItems = [
@@ -2013,20 +1913,20 @@ const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
             <div className="bg-slate-800/50 p-6 rounded-2xl shadow-xl">
                <h3 className="text-xl font-semibold text-white mb-4">Lab Equipment</h3>
                <div className="space-y-3">
-                 {Object.entries(labEquipmentDefinitions).map(([key, item]) => {
-                    const currentCount = stats.labEquipment[key] || 0;
+                 {lab_state.labEquipment && Object.entries(labEquipmentDefinitions).map(([key, item]) => {
+                    const currentCount = lab_state.labEquipment[key] || 0;
                     const cost = item.baseCost * Math.pow(1.15, currentCount);
                     return (
                         <div key={key} className="bg-slate-800/70 p-3 rounded-lg flex items-center justify-between gap-4">
                             <div className="flex-1">
                                 <h4 className="font-bold text-white">{item.name} <span className="text-sm text-slate-400">(Owned: {currentCount})</span></h4>
                                 <p className="text-xs text-cyan-400">
-                                    {item.baseSPS > 0 && `+${formatNumber(item.baseSPS * ((stats.labXpUpgrades && stats.labXpUpgrades[key]) ? 2 : 1) * prestigeBonus)} SPS each`}
-                                    {item.clickPower > 0 && `+${formatNumber(item.clickPower * ((stats.labXpUpgrades && stats.labXpUpgrades[key]) ? 2 : 1) * prestigeBonus)} Click Power each`}
+                                    {item.baseSPS > 0 && `+${formatNumber(item.baseSPS * ((lab_state.labXpUpgrades && lab_state.labXpUpgrades[key]) ? 2 : 1) * prestigeBonus)} SPS each`}
+                                    {item.clickPower > 0 && `+${formatNumber(item.clickPower * ((lab_state.labXpUpgrades && lab_state.labXpUpgrades[key]) ? 2 : 1) * prestigeBonus)} Click Power each`}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                {!stats.labXpUpgrades[key] && (
+                                {!(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key]) && (
                                    <button onClick={() => handleBuyXpUpgrade(key)} disabled={stats.totalXP < item.xpUpgrade.cost} className="text-xs bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
                                        2x with {item.xpUpgrade.cost} XP
                                    </button>
@@ -2047,7 +1947,7 @@ const ScienceLab = ({ stats, updateStatsInFirestore, showMessageBox }) => {
   );
 };
 
-const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onResetGame, updateTowerDefenseState, getFullCosmeticDetails, generatePath }) => {
+const TowerDefenseGame = ({ stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath }) => {
   const [gameSpeed, setGameSpeed] = useState(1);
   const [localState, setLocalState] = useState({
     selectedTile: null,
@@ -2071,6 +1971,15 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
     td_unlockedTowers = [],
     td_towerUpgrades = {},
   } = stats;
+
+  // FIX: This hook automatically resets the game if the path is missing,
+  // preventing crashes for users with corrupted game states.
+  useEffect(() => {
+    if ((!td_path || td_path.length === 0) && td_wave > 0 && !td_gameOver && !td_gameWon) {
+        showMessageBox("Tower Defense state error detected. Resetting game.", "error", 4000);
+        onResetGame();
+    }
+  }, [td_path, td_wave, td_gameOver, td_gameWon, onResetGame, showMessageBox]);
 
   // Local state for tracking health BETWEEN saves
   const [sessionHealth, setSessionHealth] = useState(td_castleHealth);
@@ -2096,8 +2005,8 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
   const handlePurchaseShopItem = (item) => {
     if (stats.totalXP < item.cost || td_wins < item.winsRequired) return;
     
-    updateStatsInFirestore({
-      totalXP: stats.totalXP - item.cost,
+    updateProfileInFirestore({ totalXP: stats.totalXP - item.cost });
+    updateGameStateInFirestore({
       td_unlockedTowers: [...td_unlockedTowers, item.unlocks]
     });
     showMessageBox(`Unlocked ${item.name}!`, "info");
@@ -2121,8 +2030,8 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
 
     const newTowerUpgrades = { ...td_towerUpgrades, [towerId]: [...(td_towerUpgrades[towerId] || []), upgrade.id] };
 
-    updateStatsInFirestore({
-        totalXP: stats.totalXP - upgrade.cost,
+    updateProfileInFirestore({ totalXP: stats.totalXP - upgrade.cost });
+    updateGameStateInFirestore({
         td_towers: newTowers,
         td_towerUpgrades: newTowerUpgrades,
     });
@@ -2259,10 +2168,8 @@ const towerUpgrades = {
     if (!localState.selectedTile || stats.totalXP < tower.cost) return;
     const newTower = { ...tower, id: `${tower.id}_${Date.now()}`, x: localState.selectedTile.x, y: localState.selectedTile.y, lastAttack: 0 };
     
-    updateStatsInFirestore({
-        totalXP: stats.totalXP - tower.cost,
-        td_towers: [...td_towers, newTower]
-    });
+    updateProfileInFirestore({ totalXP: stats.totalXP - tower.cost });
+    updateGameStateInFirestore({ td_towers: [...td_towers, newTower] });
     setLocalState(prev => ({ ...prev, selectedTile: null, selectedTower: null }));
   };
 
@@ -2273,10 +2180,8 @@ const towerUpgrades = {
     const tower = td_towers[towerIndex];
     const refund = Math.floor(tower.cost * (petEffects.squirrel?.sellRefund || 0.15));
     
-    updateStatsInFirestore({
-        totalXP: stats.totalXP + refund,
-        td_towers: td_towers.filter((_, i) => i !== towerIndex)
-    });
+    updateProfileInFirestore({ totalXP: stats.totalXP + refund });
+    updateGameStateInFirestore({ td_towers: td_towers.filter((_, i) => i !== towerIndex) });
     setLocalState(prev => ({ ...prev, selectedTile: null, selectedTower: null }));
   };
 
@@ -2286,7 +2191,7 @@ const towerUpgrades = {
     if (localState.waveInProgress || td_gameOver || td_gameWon) return;
     const waveNumber = td_wave + 1;
     const newEnemies = generateWave(waveNumber);
-    updateTowerDefenseState({ td_wave: waveNumber });
+    updateGameStateInFirestore({ td_wave: waveNumber });
     setLocalState(prev => ({ 
       ...prev, 
       waveInProgress: true, 
@@ -2294,6 +2199,7 @@ const towerUpgrades = {
       towers: [...td_towers] // Creates the local copy for this wave
     }));
   };
+
 
   const generateWave = (waveNumber) => {
     const enemies = [];
@@ -2325,7 +2231,7 @@ const towerUpgrades = {
     // This local ref will track damage within a single wave without causing re-renders
     const waveDamage = { current: 0 };
 
-const interval = setInterval(() => {
+    const interval = setInterval(() => {
       setLocalState(prevLocal => {
         if (!prevLocal.waveInProgress) return prevLocal;
 
@@ -2383,7 +2289,7 @@ const interval = setInterval(() => {
               firestoreUpdate.td_wins = winsRef.current + 1;
             }
             if (Object.keys(firestoreUpdate).length > 0) {
-              updateTowerDefenseState(firestoreUpdate);
+              updateGameStateInFirestore(firestoreUpdate);
               showMessageBox(`Progress saved to server on wave ${waveRef.current}.`, 'info');
             }
           }
@@ -2397,7 +2303,7 @@ const interval = setInterval(() => {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [localState.waveInProgress, updateTowerDefenseState]);
+  }, [localState.waveInProgress, gameSpeed, updateGameStateInFirestore, showMessageBox]);
 
 
 const petEffectsApplied = stats.currentPet ? (petEffects[stats.currentPet.id.split('_')[0]] || {}) : {};
@@ -2591,7 +2497,7 @@ const WhyTab = () => {
   );
 };
 // Component for the Sanctum
-const Sanctum = ({ stats, trophies, updateStatsInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle }) => {
+const Sanctum = ({ stats, trophies, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle }) => {
   const [editMode, setEditMode] = useState(false);
   const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);
   const [ghostPosition, setGhostPosition] = useState(null);
@@ -2654,8 +2560,9 @@ const Sanctum = ({ stats, trophies, updateStatsInFirestore, showMessageBox, getF
   }, [stats.ownedFurniture]);
 
   const updateLayout = (newPlacedItems) => {
-    updateStatsInFirestore({ sanctumLayout: { ...stats.sanctumLayout, placedItems: newPlacedItems } });
+    updateInventoryInFirestore({ sanctumLayout: { ...stats.sanctumLayout, placedItems: newPlacedItems } });
   };
+
 
   const handleSelectForPlacing = (item) => {
     setSelectedItemForPlacing(item);
@@ -3116,7 +3023,7 @@ const AuthComponent = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       setError('');
-      if (!auth) {
+      if (!auth || !db) { // Also check for db
           setError("Firebase is not configured correctly.");
           return;
       }
@@ -3124,7 +3031,51 @@ const AuthComponent = () => {
         if (isLogin) {
           await signInWithEmailAndPassword(auth, email, password);
         } else {
-          await createUserWithEmailAndPassword(auth, email, password);
+          // Create the user first
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          // If user creation is successful, create their data documents
+          if (user) {
+            const defaultProfile = { username: email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null };
+            const defaultInventory = { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 };
+            const defaultGameState = {
+              dungeon_state: generateInitialDungeonState(),
+              dungeon_floor: 0,
+              dungeon_gold: 0,
+              td_wins: 0,
+              td_wave: 0,
+              td_castleHealth: 5,
+              td_towers: [],
+              td_path: generatePath(),
+              td_gameOver: false,
+              td_gameWon: false,
+              td_unlockedTowers: [],
+              td_towerUpgrades: {},
+              lab_state: {
+                sciencePoints: 0,
+                lastLogin: serverTimestamp(),
+                labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
+                labXpUpgrades: {},
+                prestigeLevel: 0,
+              },
+              studyZone: { flashcardsText: '', platformerHighScore: 0 }
+            };
+            const defaultGameProgress = { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() };
+
+            const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+            const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+            const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
+            const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
+
+            // Use Promise.all to create all documents efficiently
+            await Promise.all([
+              setDoc(profileDocRef, defaultProfile),
+              setDoc(inventoryDocRef, defaultInventory),
+              setDoc(gameStateDocRef, defaultGameState),
+              setDoc(gameProgressDocRef, defaultGameProgress)
+            ]);
+          }
         }
       } catch (err) {
         setError(err.message.replace('Firebase: ', ''));
@@ -3433,7 +3384,7 @@ const AuthComponent = () => {
   };
     
 // Component for My Profile Sheet
-const MyProfile = ({ stats, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox }) => {  // --- Local State Management ---
+const MyProfile = ({ stats, userId, updateProfileInFirestore, updateInventoryInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox }) => {  // --- Local State Management ---
   const [draftStats, setDraftStats] = useState(stats);
   const [activeTab, setActiveTab] = useState('collections');
   const [friendIdInput, setFriendIdInput] = useState('');
@@ -3462,7 +3413,11 @@ const MyProfile = ({ stats, userId, updateStatsInFirestore, handleEvolvePet, get
 
   // --- Handlers for Save/Discard ---
   const handleSaveChanges = () => {
-    updateStatsInFirestore(draftStats);
+    const { username, friends } = draftStats;
+    const { equippedItems, currentPet } = draftStats;
+
+    updateProfileInFirestore({ username, friends });
+    updateInventoryInFirestore({ equippedItems, currentPet });
     showMessageBox("Profile changes saved!", "info");
   };
 
@@ -3500,12 +3455,18 @@ const MyProfile = ({ stats, userId, updateStatsInFirestore, handleEvolvePet, get
   const handleBuyItem = async (item) => {
     if (stats.totalXP < item.cost) { showMessageBox("Not enough XP.", "error"); return; }
     if (stats.ownedItems.includes(item.id) || stats.ownedFurniture.includes(item.id)) { showMessageBox("Already owned.", "error"); return; }
+    
     const isFurniture = item.type === 'furniture';
-    await updateStatsInFirestore({
+    
+    // Use separate update functions for profile (XP) and inventory (items)
+    await updateProfileInFirestore({
         totalXP: stats.totalXP - item.cost,
+    });
+    await updateInventoryInFirestore({
         ownedItems: !isFurniture ? [...stats.ownedItems, item.id] : stats.ownedItems,
         ownedFurniture: isFurniture ? [...stats.ownedFurniture, item.id] : stats.ownedFurniture,
     });
+
     showMessageBox(`Purchased ${item.name}!`, 'info');
   };
   
@@ -3769,7 +3730,6 @@ const QuestsComponent = ({ quests }) => {
 
   const StatsXPTracker = ({ stats, assignments, trophies, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
     const persona = getProductivityPersona();
-
     const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => stats.currentLevel >= t.level) || { title: 'Novice Learner' };
     const currentTitle = stats.equippedItems.title ? cosmeticItems.titles.find(t => t.id === stats.equippedItems.title)?.name : currentLevelBasedTitle.title;
 
@@ -4270,26 +4230,21 @@ const QuestsComponent = ({ quests }) => {
     );
   };
 // NEW FEATURE: Study Zone (Platformer + Flashcards)
-const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox }) => {
-  const [activeTab, setActiveTab] = useState('game'); // 'game' or 'flashcards'
-  const studyZoneState = stats.studyZone || { flashcardsText: '', platformerHighScore: 0, platformerCurrentState: null };
+const StudyZone = ({ stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox }) => {
+    const [activeTab, setActiveTab] = useState('game');
+    const studyZoneState = stats.studyZone || { flashcardsText: '', platformerHighScore: 0 };
+    
+    const updateStudyZoneState = (newState) => {
+        updateGameStateInFirestore({ studyZone: { ...studyZoneState, ...newState } });
+    };
 
-  const updateStudyZoneState = (newState) => {
-    updateStatsInFirestore({
-      studyZone: {
-        ...studyZoneState,
-        ...newState,
-      }
-    });
-  };
+    const StudyZoneTabButton = ({ tabName, children }) => (
+      <button onClick={() => setActiveTab(tabName)} className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === tabName ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>
+        {children}
+      </button>
+    );
 
-  const StudyZoneTabButton = ({ tabName, children }) => (
-    <button onClick={() => setActiveTab(tabName)} className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === tabName ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>
-      {children}
-    </button>
-  );
-
-  return (
+    return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -4303,13 +4258,14 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox }) => {
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
         </div>
         <div className="p-6">
-          {activeTab === 'game' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} />}
+          {activeTab === 'game' && <PlatformerGame stats={stats} updateProfileInFirestore={updateProfileInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} />}
           {activeTab === 'flashcards' && <FlashcardManager studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} />}
         </div>
       </div>
     </div>
   );
 };
+
 
 // --- Sub-components for Study Zone ---
 
@@ -4366,7 +4322,7 @@ const FlashcardManager = ({ studyZoneState, updateStudyZoneState }) => {
   );
 };
 
-const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateStatsInFirestore, showMessageBox }) => {
+const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateProfileInFirestore, showMessageBox }) => {
 
 
   // --- Core Game Constants ---
@@ -4531,7 +4487,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, 
   const startGameWithFlashcards = () => { setIsXpMode(false); commonStartLogic(); };
   const startXpLevel = () => {
     if (stats.totalXP < 100) { showMessageBox("You need 100 XP to play a single level.", "error"); return; }
-    updateStatsInFirestore({ totalXP: stats.totalXP - 100 });
+    updateProfileInFirestore({ totalXP: stats.totalXP - 100 });
     setIsXpMode(true);
     commonStartLogic();
   };
@@ -4682,10 +4638,10 @@ animationFrameId = requestAnimationFrame(gameLoop);
       }
     }
      if (uiGameState === 'levelwon' && isXpMode) {
-        updateStatsInFirestore({ totalXP: stats.totalXP + 250 });
+        updateProfileInFirestore({ totalXP: stats.totalXP + 250 });
         showMessageBox(`Level Complete! You earned 250 XP!`, 'info');
      }
-  }, [uiGameState]);
+  }, [uiGameState, score, isXpMode, showMessageBox, stats.totalXP, studyZoneState.platformerHighScore, updateProfileInFirestore, updateStudyZoneState]);
 
   return (
     <div className="flex flex-col items-center">
@@ -4995,6 +4951,37 @@ const App = () => {
     statsRef.current = stats;
   }, [stats]);
 
+  const updateProfileInFirestore = useCallback(async (dataToUpdate) => {
+    if (!db || !user) return;
+    try {
+      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+      await setDoc(docRef, dataToUpdate, { merge: true });
+    } catch (error) { showMessageBox(`Failed to update profile.`, "error"); }
+  }, [user, db, appId]);
+
+  const updateInventoryInFirestore = useCallback(async (dataToUpdate) => {
+    if (!db || !user) return;
+    try {
+      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+      await setDoc(docRef, dataToUpdate, { merge: true });
+    } catch (error) { showMessageBox(`Failed to update inventory.`, "error"); }
+  }, [user, db, appId]);
+
+  const updateGameStateInFirestore = useCallback(async (dataToUpdate) => {
+    if (!db || !user) return;
+    try {
+      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
+      await setDoc(docRef, dataToUpdate, { merge: true });
+    } catch (error) { showMessageBox(`Failed to update game state.`, "error"); }
+  }, [user, db, appId]);
+
+  const updateGameProgressInFirestore = useCallback(async (dataToUpdate) => {
+    if (!db || !user) return;
+    try {
+      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
+      await setDoc(docRef, dataToUpdate, { merge: true });
+    } catch (error) { showMessageBox(`Failed to update game progress.`, "error"); }
+  }, [user, db, appId]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSlotAnimationOpen, setIsSlotAnimationOpen] = useState(false);
@@ -5119,23 +5106,25 @@ const App = () => {
       setTrophies(fetchedTrophies);
     }, (error) => console.error("Error fetching trophies:", error));
 
-    const listenToDoc = (collectionName, stateSetter, defaultState) => {
-      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}`);
+    // CORRECTED: Listener for sub-collections
+    const listenToSubCollection = (subCollectionName, stateSetter, defaultState) => {
+      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/${subCollectionName}/doc`);
       return onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
           stateSetter(docSnap.data());
         } else {
-          setDoc(docRef, defaultState, {merge: true}).catch(e => console.error(`Failed to create ${collectionName} doc`, e));
+          // If the doc doesn't exist, create it with default values
+          setDoc(docRef, defaultState).catch(e => console.error(`Failed to create ${subCollectionName} doc`, e));
           stateSetter(defaultState);
         }
-      }, (error) => console.error(`Error fetching ${collectionName}:`, error));
+      }, (error) => console.error(`Error fetching ${subCollectionName}:`, error));
     };
 
-    const unsubProfile = listenToDoc('profile', setProfile, { username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null });
-    const unsubInventory = listenToDoc('inventory', setInventory, { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 });
-    const unsubGameState = listenToDoc('gameState', setGameState, { dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, td_state: { wave: 0, castleHealth: 5, towers: [], path: generatePath(), gameOver: false, gameWon: false, unlockedTowers: [], towerUpgrades: {} }, td_wins: 0, lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, }, studyZone: { flashcardsText: '', platformerHighScore: 0 } });
-    const unsubGameProgress = listenToDoc('gameProgress', setGameProgress, { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() });
-
+    const unsubProfile = listenToSubCollection('profile', setProfile, { username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null });
+    const unsubInventory = listenToSubCollection('inventory', setInventory, { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 });
+    const unsubGameState = listenToSubCollection('gameState', setGameState, { dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {}, td_wins: 0, lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, }, studyZone: { flashcardsText: '', platformerHighScore: 0 } });
+    const unsubGameProgress = listenToSubCollection('gameProgress', setGameProgress, { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() });
+    
     return () => {
       unsubscribeAssignments();
       unsubscribeTrophies();
@@ -5144,7 +5133,20 @@ const App = () => {
       unsubGameState();
       unsubGameProgress();
     };
-  }, [user, isAuthReady, generatePath]);
+  }, [user, isAuthReady]);
+
+  // NEW: Effect to check for and generate new daily/weekly quests on load
+  useEffect(() => {
+    if (user && gameProgress.quests && gameProgress.quests.lastUpdated) {
+      if (shouldGenerateQuests(gameProgress.quests.lastUpdated)) {
+        console.log("Generating new daily/weekly quests...");
+        const newQuests = generateQuests();
+        updateGameProgressInFirestore({ quests: newQuests });
+        showMessageBox("Your daily and weekly quests have been refreshed!", "info");
+      }
+    }
+  }, [user, gameProgress.quests, updateGameProgressInFirestore]);
+
 
   // Function to calculate days early
   const calculateDaysEarly = (dueDate, dateCompleted) => {
@@ -5177,6 +5179,7 @@ const App = () => {
   };
 
   // Function to add assignment to Firestore
+  // Function to add assignment to Firestore
   const addAssignmentToFirestore = async (newAssignment) => {
     if (!db || !user?.uid) return;
     try {
@@ -5204,17 +5207,6 @@ const App = () => {
       showMessageBox("Failed to delete assignment.", "error");
     }
   };
-
-  const updateStatsInFirestore = useCallback(async (newStats) => {
-    if (!db || !user) return;
-    try {
-      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}`);
-      await setDoc(statsDocRef, newStats, { merge: true });
-    } catch (error) {
-      console.error("Error updating stats:", error);
-      showMessageBox("Failed to update stats.", "error");
-    }
-  }, [user, db, appId]); 
 
    // Productivity Persona Logic
   const getProductivityPersona = useCallback(() => {
@@ -5285,92 +5277,66 @@ const App = () => {
     return availablePetsOfRarity[Math.floor(Math.random() * availablePetsOfRarity.length)];
   }, []);
   
-  const collectFirstEgg = useCallback(async () => {
-    await updateStatsInFirestore({ petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
+const collectFirstEgg = useCallback(async () => {
+    await updateInventoryInFirestore({ petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
     showMessageBox(`You found your first egg! Complete ${EGG_REQUIREMENT} assignments to hatch it.`, "info", 3000);
-  }, [updateStatsInFirestore]);
-
-  const hatchEgg = useCallback(async () => {
-    if (stats.petStatus !== 'egg' || stats.assignmentsToHatch > 0) return;
-    const newPet = generateNewPet();
-    await updateStatsInFirestore({
-      petStatus: 'hatched',
-      currentPet: newPet,
-      ownedPets: [...stats.ownedPets, newPet],
-      assignmentsToHatch: EGG_REQUIREMENT
-    });
-    showMessageBox(`Your egg hatched! You got a ${newPet.rarity.toUpperCase()} ${newPet.name}! It grants +${(newPet.xpBuff * 100).toFixed(0)}% XP!`, "info", 5000);
-  }, [stats.petStatus, stats.assignmentsToHatch, stats.ownedPets, generateNewPet, updateStatsInFirestore]);
+  }, [updateInventoryInFirestore]);
 
   const collectNewEgg = useCallback(async () => {
-    if (stats.petStatus !== 'hatched' && stats.petStatus !== 'none') return;
-    await updateStatsInFirestore({ petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
+    if (inventory.petStatus !== 'hatched' && inventory.petStatus !== 'none') return;
+    await updateInventoryInFirestore({ petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
     showMessageBox(`You found a new egg! Complete ${EGG_REQUIREMENT} assignments to hatch it.`, "info", 3000);
-  }, [stats.petStatus, updateStatsInFirestore]);
+  }, [inventory.petStatus, updateInventoryInFirestore]);
 
-  // Pet Evolution Function
   const handleEvolvePet = useCallback(async (petToEvolve) => {
-    if (!db || !user) return; 
-
+    if (!db || !user) return;
     let basePetOfCurrent = null;
     for (const rarityGroup of Object.values(petDefinitions)) {
-      basePetOfCurrent = rarityGroup.find(p => p.id === petToEvolve.id || (p.evolutions && p.evolutions.some(e => e.id === petToEvolve.id)));
-      if (basePetOfCurrent) break;
+        basePetOfCurrent = rarityGroup.find(p => p.id === petToEvolve.id || (p.evolutions && p.evolutions.some(e => e.id === petToEvolve.id)));
+        if (basePetOfCurrent) break;
     }
-
     let nextEvolution = null;
-    if (basePetOfCurrent && basePetOfCurrent.evolutions) {
-      const currentIndexInEvoChain = basePetOfCurrent.evolutions.findIndex(e => e.id === petToEvolve.id);
-      if (currentIndexInEvoChain + 1 < basePetOfCurrent.evolutions.length) {
-        nextEvolution = basePetOfCurrent.evolutions[currentIndexInEvoChain + 1];
-      }
+    if (basePetOfCurrent?.evolutions) {
+        const currentIndex = basePetOfCurrent.evolutions.findIndex(e => e.id === petToEvolve.id);
+        if (currentIndex + 1 < basePetOfCurrent.evolutions.length) {
+            nextEvolution = basePetOfCurrent.evolutions[currentIndex + 1];
+        }
     }
-
     if (!nextEvolution) { showMessageBox("This pet has reached its final evolution!", "info"); return; }
-    if (stats.currentLevel < nextEvolution.levelRequired) { showMessageBox(`You need to reach Level ${nextEvolution.levelRequired} to evolve.`, "error"); return; }
-    if (stats.totalXP < nextEvolution.xpCost) { showMessageBox(`You need ${nextEvolution.xpCost} XP to evolve.`, "error"); return; }
+    if (profile.currentLevel < nextEvolution.levelRequired) { showMessageBox(`Level ${nextEvolution.levelRequired} required.`, "error"); return; }
+    if (profile.totalXP < nextEvolution.xpCost) { showMessageBox(`You need ${nextEvolution.xpCost} XP to evolve.`, "error"); return; }
+    
+    const newTotalXP = profile.totalXP - nextEvolution.xpCost;
+    const { level: newLevel } = calculateLevelInfo(newTotalXP);
+    const updatedOwnedPets = inventory.ownedPets.map(p => p.id === petToEvolve.id ? nextEvolution : p);
 
-    const newTotalXP = stats.totalXP - nextEvolution.xpCost;
-    const { level: newLevel, xpProgressInLevel: newXpProgress } = calculateLevelInfo(newTotalXP);
-    const updatedOwnedPets = stats.ownedPets.map(p => p.id === petToEvolve.id ? nextEvolution : p);
-
-    await updateStatsInFirestore({
-      totalXP: newTotalXP,
-      currentLevel: newLevel,
-      xpProgress: newXpProgress,
-      currentPet: nextEvolution,
-      ownedPets: updatedOwnedPets,
-    });
+    await updateProfileInFirestore({ totalXP: newTotalXP, currentLevel: newLevel });
+    await updateInventoryInFirestore({ currentPet: nextEvolution, ownedPets: updatedOwnedPets });
+    
     showMessageBox(`Your ${petToEvolve.name} evolved into a ${nextEvolution.name}!`, "info", 5000);
-  }, [stats, user, updateStatsInFirestore, calculateLevelInfo]); 
+  }, [user, db, profile, inventory, calculateLevelInfo, updateProfileInFirestore, updateInventoryInFirestore]);
 
+  const resetDungeonGame = () => {
+    const newDungeonState = generateInitialDungeonState();
+    const pet = inventory.currentPet ? getFullPetDetails(inventory.currentPet.id) : null;
+    newDungeonState.player.attack = 10 + (pet?.xpBuff * 50 || 0);
+    updateGameStateInFirestore({ dungeon_state: newDungeonState, dungeon_floor: 1 });
+    showMessageBox("Dungeon has been reset!", "info");
+  };
 
-const resetDungeonGame = () => {
-  const newDungeonState = generateInitialDungeonState();
-  const pet = stats.currentPet ? getFullPetDetails(stats.currentPet.id) : null;
-  newDungeonState.player.attack = 10 + (pet?.xpBuff * 50 || 0);
-  updateStatsInFirestore({ dungeon_state: newDungeonState, dungeon_floor: 1 });
-  showMessageBox("Dungeon has been reset!", "info");
-};
-
-const updateTowerDefenseState = useCallback((newState) => {
-    updateStatsInFirestore(newState);
-}, [updateStatsInFirestore]);
-
-const resetTowerDefenseGame = useCallback(() => {
+  const resetTowerDefenseGame = useCallback(() => {
     const petEffects = { dragon: { castleHealth: 1 } };
-    const petEffectsApplied = stats.currentPet ? (petEffects[stats.currentPet.id.split('_')[1]] || {}) : {};
-    const newPath = generatePath();
-    updateStatsInFirestore({
+    const petEffectsApplied = inventory.currentPet ? (petEffects[inventory.currentPet.id.split('_')[1]] || {}) : {};
+    updateGameStateInFirestore({
         td_wave: 0,
         td_castleHealth: 5 + (petEffectsApplied.castleHealth || 0),
         td_towers: [],
-        td_path: newPath,
+        td_path: generatePath(),
         td_gameOver: false,
         td_gameWon: false,
     });
     showMessageBox("New game started!", "info");
-}, [stats.currentPet, generatePath, updateStatsInFirestore]);
+  }, [inventory.currentPet, updateGameStateInFirestore]);
 
 const spinProductivitySlotMachine = useCallback(() => {
     if (statsRef.current.totalXP < 50) {
@@ -5434,94 +5400,121 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
     }
 }, [userId, calculateLevelInfo, db, appId]);
 
-const processCompletionRewards = useCallback(async (completedAssignment) => {
-    if (!db || !user) return;
-    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}`);
-    try {
-        const { xpBonus, newAchievements, completedQuests } = await runTransaction(db, async (transaction) => {
-            const statsDoc = await transaction.get(statsDocRef);
-            if (!statsDoc.exists()) throw new Error("Stats doc missing!");
-            
-            const serverStats = statsDoc.data();
-            let calculatedXpBonus = 0, shardBonus = 0;
-            let newAchievementsAwarded = [], newlyCompletedQuests = [];
+  const hatchEgg = useCallback(async () => {
+    if (inventory.petStatus !== 'egg' || inventory.assignmentsToHatch > 0) return;
+    const newPet = generateNewPet();
+    
+    // Create a new array for ownedPets
+    const updatedOwnedPets = [...inventory.ownedPets, newPet];
 
-            const difficultyXpMap = { 'Easy': 10, 'Medium': 15, 'Hard': 20 };
-            const baseXpForTask = difficultyXpMap[completedAssignment.difficulty] || 10;
-            calculatedXpBonus += baseXpForTask;
-            
-            const newAssignmentsToHatch = serverStats.petStatus === 'egg' ? Math.max(0, (serverStats.assignmentsToHatch || 0) - 1) : serverStats.assignmentsToHatch;
-            const petBuff = serverStats.currentPet?.xpBuff || 0;
-                        
-            let quests = JSON.parse(JSON.stringify(serverStats.quests || { daily: [], weekly: [] }));
-            const processQuestList = (list) => {
-                list.forEach(q => {
-                    if (q.completed) return;
-                    let progressMade = false;
-                    if (q.type === 'difficulty' && completedAssignment.difficulty === 'Hard') progressMade = true;
-                    else if (q.type === 'tag' && completedAssignment.tags?.includes(q.tag)) progressMade = true;
-                    else if (q.type === 'xp') { q.progress = (q.progress || 0) + baseXpForTask; progressMade = true; }
-                    else if (!q.type) progressMade = true;
-                    
-                    if(progressMade && !q.type?.includes('xp')) q.progress = (q.progress || 0) + 1;
+    await updateInventoryInFirestore({
+      petStatus: 'hatched',
+      currentPet: newPet,
+      ownedPets: updatedOwnedPets,
+      assignmentsToHatch: EGG_REQUIREMENT // Reset for next potential egg
+    });
+    
+    showMessageBox(
+      `Your egg hatched! You got a ${newPet.rarity.toUpperCase()} ${newPet.name}! It grants +${(newPet.xpBuff * 100).toFixed(0)}% XP!`, 
+      "info", 
+      5000
+    );
+  }, [inventory, generateNewPet, updateInventoryInFirestore]);
 
-                    if (q.progress >= q.goal) {
-                        q.completed = true;
-                        calculatedXpBonus += q.reward.xp;
-                        shardBonus += (q.reward.shards || 0);
-                        newlyCompletedQuests.push(q);
-                    }
-                });
-            };
-            processQuestList(quests.daily);
-            processQuestList(quests.weekly);
+  const processCompletionRewards = useCallback(async (completedAssignment) => {
+      if (!db || !user) return;
+      const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+      const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+      const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
 
-            let achievements = serverStats.achievements || {};
-            const checkAchievement = (key) => {
-              const def = achievementDefinitions[key];
-              let current = achievements[key] || { tier: 0, progress: 0 };
-              current.progress += 1;
-              const nextTier = def.tiers[current.tier];
-              if (nextTier && current.progress >= nextTier.goal) {
-                current.tier += 1;
-                calculatedXpBonus += nextTier.reward.xp;
-                shardBonus += nextTier.reward.shards || 0;
-                newAchievementsAwarded.push(nextTier);
+      try {
+          const { xpBonus, newAchievements, completedQuests, assignmentsToHatch } = await runTransaction(db, async (transaction) => {
+              const profileDoc = await transaction.get(profileDocRef);
+              const inventoryDoc = await transaction.get(inventoryDocRef);
+              const gameProgressDoc = await transaction.get(gameProgressDocRef);
+
+              if (!profileDoc.exists() || !inventoryDoc.exists() || !gameProgressDoc.exists()) {
+                  throw new Error("One or more user documents are missing!");
               }
-              achievements[key] = current;
-            };
-            checkAchievement('assignmentsCompleted');
-            if (completedAssignment.difficulty === 'Hard') checkAchievement('hardAssignmentsCompleted');
-            
-            const finalXpGained = Math.round(calculatedXpBonus * (1 + petBuff));
-            const newTotalXP = (serverStats.totalXP || 0) + finalXpGained;
-            const newShards = (serverStats.cosmeticShards || 0) + shardBonus;
-            const { level: newLevel, xpProgressInLevel: newXpProgress } = calculateLevelInfo(newTotalXP);
 
-            transaction.update(statsDocRef, {
-                totalXP: newTotalXP,
-                currentLevel: newLevel,
-                xpProgress: newXpProgress,
-                assignmentsToHatch: newAssignmentsToHatch,
-                assignmentsCompleted: (serverStats.assignmentsCompleted || 0) + 1,
-                quests, achievements, cosmeticShards: newShards,
-            });
-            return { xpBonus: finalXpGained, newAchievements: newAchievementsAwarded, completedQuests: newlyCompletedQuests };
-        });
+              const serverProfile = profileDoc.data();
+              const serverInventory = inventoryDoc.data();
+              const serverGameProgress = gameProgressDoc.data();
 
-        showMessageBox(`Task complete! +${xpBonus} XP.`, "info");
-        setXpGainToShow(xpBonus);
-        setXpAnimationKey(k => k + 1);
-        
-        newAchievements.forEach(a => showMessageBox(`Achievement Unlocked: ${a.name}!`, 'info', 4000));
-        completedQuests.forEach(q => showMessageBox(`Quest Complete: ${q.name}!`, 'info', 4000));
+              let calculatedXpBonus = 0, shardBonus = 0;
+              let newAchievementsAwarded = [], newlyCompletedQuests = [];
+              const difficultyXpMap = { 'Easy': 10, 'Medium': 15, 'Hard': 20 };
+              const baseXpForTask = difficultyXpMap[completedAssignment.difficulty] || 10;
+              calculatedXpBonus += baseXpForTask;
+              const petBuff = serverInventory.currentPet?.xpBuff || 0;
+              const newAssignmentsToHatch = serverInventory.petStatus === 'egg' ? Math.max(0, (serverInventory.assignmentsToHatch || 0) - 1) : serverInventory.assignmentsToHatch;
+              
+              let quests = JSON.parse(JSON.stringify(serverGameProgress.quests || { daily: [], weekly: [] }));
+              const processQuestList = (list) => {
+                  list.forEach(q => {
+                      if (q.completed) return;
+                      let progressMade = false;
+                      if (q.type === 'difficulty' && completedAssignment.difficulty === 'Hard') progressMade = true;
+                      else if (q.type === 'tag' && completedAssignment.tags?.includes(q.tag)) progressMade = true;
+                      else if (q.type === 'xp') { q.progress = (q.progress || 0) + baseXpForTask; progressMade = true; }
+                      else if (!q.type) progressMade = true;
+                      
+                      if(progressMade && !q.type?.includes('xp')) q.progress = (q.progress || 0) + 1;
 
-        if (stats.petStatus === 'egg' && (stats.assignmentsToHatch - 1) <= 0) await hatchEgg();
-    } catch (error) {
-        console.error("Reward processing failed: ", error);
-        showMessageBox("Failed to award XP.", "error");
-    }
-}, [stats, user, hatchEgg, calculateLevelInfo, db, appId]);
+                      if (q.progress >= q.goal) {
+                          q.completed = true;
+                          calculatedXpBonus += q.reward.xp;
+                          shardBonus += (q.reward.shards || 0);
+                          newlyCompletedQuests.push(q);
+                      }
+                  });
+              };
+              processQuestList(quests.daily);
+              processQuestList(quests.weekly);
+
+              let achievements = serverGameProgress.achievements || {};
+              const checkAchievement = (key) => {
+                const def = achievementDefinitions[key];
+                let current = achievements[key] || { tier: 0, progress: 0 };
+                current.progress += 1;
+                const nextTier = def.tiers[current.tier];
+                if (nextTier && current.progress >= nextTier.goal) {
+                  current.tier += 1;
+                  calculatedXpBonus += nextTier.reward.xp;
+                  shardBonus += nextTier.reward.shards || 0;
+                  newAchievementsAwarded.push(nextTier);
+                }
+                achievements[key] = current;
+              };
+              checkAchievement('assignmentsCompleted');
+              if (completedAssignment.difficulty === 'Hard') checkAchievement('hardAssignmentsCompleted');
+              
+              const finalXpGained = Math.round(calculatedXpBonus * (1 + petBuff));
+              const newTotalXP = (serverProfile.totalXP || 0) + finalXpGained;
+              const newShards = (serverInventory.cosmeticShards || 0) + shardBonus;
+              const { level: newLevel } = calculateLevelInfo(newTotalXP);
+
+              transaction.update(profileDocRef, { totalXP: newTotalXP, currentLevel: newLevel, assignmentsCompleted: (serverProfile.assignmentsCompleted || 0) + 1 });
+              transaction.update(inventoryDocRef, { assignmentsToHatch: newAssignmentsToHatch, cosmeticShards: newShards });
+              transaction.update(gameProgressDocRef, { quests, achievements });
+
+              return { xpBonus: finalXpGained, newAchievements: newAchievementsAwarded, completedQuests: newlyCompletedQuests, assignmentsToHatch: newAssignmentsToHatch };
+          });
+
+          showMessageBox(`Task complete! +${xpBonus} XP.`, "info");
+          setXpGainToShow(xpBonus);
+          setXpAnimationKey(k => k + 1);
+          newAchievements.forEach(a => showMessageBox(`Achievement Unlocked: ${a.name}!`, 'info', 4000));
+          completedQuests.forEach(q => showMessageBox(`Quest Complete: ${q.name}!`, 'info', 4000));
+
+          if (inventory.petStatus === 'egg' && assignmentsToHatch <= 0) {
+            await hatchEgg();
+          }
+      } catch (error) {
+          console.error("Reward processing transaction failed: ", error);
+          showMessageBox("Failed to award XP due to a server error.", "error");
+      }
+  }, [user, db, appId, calculateLevelInfo, hatchEgg, inventory.petStatus]);
 
   const handleCompletedToggle = async (e, id, currentAssignment) => {
     if (!db || !user?.uid) return;
@@ -5555,7 +5548,7 @@ const processCompletionRewards = useCallback(async (completedAssignment) => {
             const q = query(trophyCollectionRef, where("sourceAssignmentId", "==", id));
             const querySnapshot = await getDocs(q);
             await Promise.all(querySnapshot.docs.map(doc => deleteDoc(doc.ref)));
-            await updateStatsInFirestore({ assignmentsCompleted: Math.max(0, stats.assignmentsCompleted - 1) });
+            await updateProfileInFirestore({ assignmentsCompleted: Math.max(0, profile.assignmentsCompleted - 1) });
             showMessageBox("Assignment marked as not completed.", "info");
         }
     } catch (error) {
@@ -5573,7 +5566,7 @@ const processCompletionRewards = useCallback(async (completedAssignment) => {
   }
 
   return (
-    <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 ${equippedFontStyle || 'font-inter'}`}>
+        <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 ${equippedFontStyle || 'font-inter'}`}>
       <style>{`
           /* All your @import and CSS variables... */
           @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Inter:wght@400;700&family=Oswald&family=Permanent+Marker&family=Playfair+Display&family=Press+Start+2P&family=Roboto+Slab&family=Space+Mono&family=Cinzel+Decorative&family=Comic+Neue&family=Libre+Baskerville&family=Lato&family=Merriweather&family=Raleway&family=Ubuntu&display=swap');
@@ -5627,25 +5620,25 @@ const processCompletionRewards = useCallback(async (completedAssignment) => {
       <nav className="w-64 bg-slate-900 p-6 flex-shrink-0 flex flex-col shadow-2xl">
         <ul className="space-y-2 flex-grow">
           {[
-            { name: 'Dashboard', sheet: 'Stats + XP Tracker' },
-            { name: 'Assignments', sheet: 'Assignment Tracker' },
-            { name: 'Guild', sheet: 'Guild' },
-            { name: 'Sanctum', sheet: 'Sanctum' },
-            { name: 'Leaderboard', sheet: 'Leaderboard' },
-            { name: 'Calendar', sheet: 'Calendar View' },
-            { name: 'Analytics', sheet: 'GPA & Tags Analytics' },
-            { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler' },
-            { name: 'Tower Defense', sheet: 'Tower Defense' },
-            { name: 'Science Lab', sheet: 'Science Lab' },
-            { name: 'Study Zone', sheet: 'Study Zone' },
+            { name: 'Dashboard', sheet: 'Stats + XP Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg> },
+            { name: 'Assignments', sheet: 'Assignment Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg> },
+            { name: 'Guild', sheet: 'Guild', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0118 15v3h-2zM4.75 12.094A5.973 5.973 0 004 15v3H2v-3a3.005 3.005 0 012.25-2.906z" /></svg> },
+            { name: 'Sanctum', sheet: 'Sanctum', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4a1 1 0 112 0v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V7H8a1 1 0 010-2h1V4z" /></svg> },
+            { name: 'Leaderboard', sheet: 'Leaderboard', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg> },
+            { name: 'Calendar', sheet: 'Calendar View', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg> },
+            { name: 'Analytics', sheet: 'GPA & Tags Analytics', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> },
+            { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M1.5 6.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM6 11a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h4a1 1 0 100-2H7zM2 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM2.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM14 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM13.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2z" clipRule="evenodd"/></svg>},
+            { name: 'Tower Defense', sheet: 'Tower Defense', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 3a1 1 0 011-1h8a1 1 0 011 1v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h1V3zm3 4a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" /></svg>},
+            { name: 'Science Lab', sheet: 'Science Lab', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 2a.5.5 0 01.5.5V3h5V2.5a.5.5 0 011 0V3h1a2 2 0 012 2v1.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a2 2 0 012-2h1V2.5A.5.5 0 017 2zM4.002 8.5a.5.5 0 01.498.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM16 8.5a.5.5 0 01.5.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM7 9a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1z" clipRule="evenodd" /></svg>},
+            { name: 'Study Zone', sheet: 'Study Zone', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L9 9.58v5.528l-3-1.286a1 1 0 00-1.212.86l-.5 2.5a1 1 0 00.97 1.245l5-1a1 1 0 00.484 0l5 1a1 1 0 00.97-1.245l-.5-2.5a1 1 0 00-1.212-.86l-3 1.286V9.58l6.406-2.658a1 1 0 000-1.84l-7-3zM9 4.399l5.223 2.155L10 8.517 4.777 6.554 9 4.399z" /></svg>},
           ].map((item) => (
-            <li key={item.name}><button onClick={() => setActiveSheet(item.sheet)} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}><span>{item.name}</span></button></li>
+            <li key={item.name}><button onClick={() => setActiveSheet(item.sheet)} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{item.icon}<span>{item.name}</span></button></li>
           ))}
         </ul>
 
         <div className="border-t border-slate-700 mx-[-1.5rem] my-4"></div>
         <ul className="space-y-2">
-            <li><button onClick={() => setActiveSheet('Why')} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-3 ${activeSheet === 'Why' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}><span>Why I Built This</span></button></li>
+            <li><button onClick={() => setActiveSheet('Why')} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-3 ${activeSheet === 'Why' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg><span>Why I Built This</span></button></li>
         </ul>
 
         <div className="mt-auto pt-4 space-y-2">
@@ -5653,24 +5646,24 @@ const processCompletionRewards = useCallback(async (completedAssignment) => {
                 <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl border-2 border-slate-600">{equippedAvatarDisplay}</div>
                 <div className="flex-1 text-left"><p className="text-sm font-semibold text-white">My Profile</p><p className="text-xs text-slate-400 truncate">ID: {user?.uid}</p></div>
             </button>
-            <button onClick={handleSignOut} className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-900/50 hover:text-white transition-colors"><span>Sign Out</span></button>
+            <button onClick={handleSignOut} className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-900/50 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg><span>Sign Out</span></button>
         </div>
       </nav>
 
-      <main key={appKey} className="flex-grow p-8 overflow-auto">
+            <main key={appKey} className="flex-grow p-8 overflow-auto">
         {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} profile={profile} inventory={inventory} gameProgress={gameProgress} assignments={assignments} trophies={trophies} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} trophies={trophies} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
         {activeSheet === 'Guild' && <GuildPage />}
-        {activeSheet === 'My Profile' && <MyProfile stats={stats} profile={profile} inventory={inventory} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox}/>}
-        {activeSheet === 'Sanctum' && <Sanctum stats={stats} trophies={trophies} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle}/>}
+        {activeSheet === 'My Profile' && <MyProfile stats={stats} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateInventoryInFirestore={updateInventoryInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox}/>}
+        {activeSheet === 'Sanctum' && <Sanctum stats={stats} trophies={trophies} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle}/>}
         {activeSheet === 'Leaderboard' && <Leaderboard db={db} appId={appId} userId={user?.uid} friends={profile.friends} showMessageBox={showMessageBox} />}
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics trophies={trophies}/>}
-        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} dungeonState={gameState.dungeon_state} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} />}
-        {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} updateTowerDefenseState={updateTowerDefenseState} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} />}
-        {activeSheet === 'Science Lab' && <ScienceLab stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
-        {activeSheet === 'Study Zone' && <StudyZone stats={stats} gameState={gameState} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} />}
+        {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} />}
+        {activeSheet === 'Science Lab' && <ScienceLab stats={stats} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} />}
       </main>
     </div>
   );
