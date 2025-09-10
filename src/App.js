@@ -382,7 +382,68 @@ const achievementDefinitions = {
       { id: 'hc3', name: "Peak Bagger", goal: 50, reward: { xp: 500, shards: 25 } },
     ]
   },
-  // Add more achievement categories here...
+  towerDefenseWins: {
+    name: "Master Strategist", icon: "🏰",
+    tiers: [
+      { id: 'tdw1', name: "Castle Defender", goal: 1, reward: { xp: 100 } },
+      { id: 'tdw2', name: "Strategic Mind", goal: 5, reward: { xp: 250, shards: 10 } },
+      { id: 'tdw3', name: "Grand Tactician", goal: 10, reward: { xp: 500, shards: 25 } },
+    ]
+  },
+  dungeonFloors: {
+    name: "Dungeon Delver", icon: "🗺️",
+    tiers: [
+      { id: 'df1', name: "Spelunker", goal: 10, reward: { xp: 100 } },
+      { id: 'df2', name: "Explorer", goal: 25, reward: { xp: 250, shards: 10 } },
+      { id: 'df3', name: "Abyss Walker", goal: 50, reward: { xp: 500, shards: 25 } },
+    ]
+  },
+  petsEvolved: {
+    name: "Pet Trainer", icon: "🐾",
+    tiers: [
+        { id: 'pe1', name: "Evolver", goal: 1, reward: { xp: 50 } },
+        { id: 'pe2', name: "Beast Master", goal: 5, reward: { xp: 200, shards: 15 } },
+    ]
+  },
+  sciencePoints: {
+    name: "Mad Scientist", icon: "🧪",
+    tiers: [
+      { id: 'sp1', name: "Researcher", goal: 1000000, reward: { xp: 100 } }, // 1 Million
+      { id: 'sp2', name: "Lead Scientist", goal: 1000000000, reward: { xp: 500, shards: 20 } }, // 1 Billion
+      { id: 'sp3', name: "Nobel Laureate", goal: 1000000000000, reward: { xp: 1000, shards: 50 } }, // 1 Trillion
+    ]
+  },
+  cosmeticsCrafted: {
+    name: "Artisan", icon: "💎",
+    tiers: [
+      { id: 'cc1', name: "Tinkerer", goal: 1, reward: { xp: 50 } },
+      { id: 'cc2', name: "Crafter", goal: 5, reward: { xp: 150, shards: 10 } },
+      { id: 'cc3', name: "Master Artisan", goal: 10, reward: { xp: 300, shards: 25 } },
+    ]
+  },
+  xpSpentInShop: {
+    name: "Shopaholic", icon: "🛍️",
+    tiers: [
+      { id: 'xs1', name: "Window Shopper", goal: 1000, reward: { xp: 50 } },
+      { id: 'xs2', name: "Valued Customer", goal: 5000, reward: { xp: 200, shards: 10 } },
+      { id: 'xs3', name: "High Roller", goal: 10000, reward: { xp: 400, shards: 20 } },
+    ]
+  },
+  highScore: {
+    name: "Arcade Champion", icon: "🕹️",
+    tiers: [
+      { id: 'hs1', name: "Gamer", goal: 1000, reward: { xp: 50 } },
+      { id: 'hs2', name: "Pro Gamer", goal: 2500, reward: { xp: 150, shards: 10 } },
+    ]
+  },
+  furniturePlaced: {
+    name: "Interior Designer", icon: "🛋️",
+    tiers: [
+      { id: 'fp1', name: "Decorator", goal: 1, reward: { xp: 25 } },
+      { id: 'fp2', name: "Home Maker", goal: 5, reward: { xp: 100, shards: 5 } },
+      { id: 'fp3', name: "Sanctum Architect", goal: 10, reward: { xp: 200, shards: 15 } },
+    ]
+  }
 };
 
 // NEW: Quest Definitions
@@ -929,7 +990,7 @@ const Projectile = ({ from, to }) => {
   );
 };
 // REWORKED: Entire Dungeon Crawler Component
-const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails }) => {
+const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement }) => {
   // This state holds the entire dungeon object (board, enemies, player location, etc.)
   const [localDungeonState, setLocalDungeonState] = useState(dungeonState);
   
@@ -1306,6 +1367,9 @@ const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updatePro
     updateGameStateInFirestore({
         dungeon_floor: Math.max(gameState.dungeon_floor || 1, nextFloor),
         dungeon_state: nextState
+    }).then(() => {
+        // Pass the achievement check function down from App
+        processAchievement('dungeonFloors', nextFloor);
     });
   };
 
@@ -1754,7 +1818,7 @@ const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updatePro
   );
 };
 
-const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, actionLock }) => {
+const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, actionLock, processAchievement }) => {
 
   const { lab_state } = gameState;
 
@@ -1847,6 +1911,9 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
           sciencePoints: localSciencePointsRef.current,
           lastLogin: serverTimestamp()
         } 
+      }).then(() => {
+        // After saving, check the achievement based on the final total.
+        processAchievement('sciencePoints', localSciencePointsRef.current);
       });
     };
   }, [updateGameStateInFirestore]); // This dependency is stable and will not cause re-runs.
@@ -2009,7 +2076,7 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
   );
 };
 
-const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath }) => {
+const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath, processAchievement }) => {
   const [gameSpeed, setGameSpeed] = useState(1);
   // This local state is for transient, in-wave data like enemies, projectiles, and the towers active for the wave
   const [localWaveState, setLocalWaveState] = useState({
@@ -2385,7 +2452,12 @@ const startWave = () => {
               firestoreUpdate.td_wins = winsRef.current + 1;
             }
             if (Object.keys(firestoreUpdate).length > 0) {
-              updateGameStateInFirestore(firestoreUpdate);
+              updateGameStateInFirestore(firestoreUpdate).then(() => {
+                if (firestoreUpdate.td_gameWon) {
+                  // Pass the achievement check function down from App
+                  processAchievement('towerDefenseWins'); 
+                }
+              });
               showMessageBox(`Progress saved to server on wave ${waveRef.current}.`, 'info');
             }
           }
@@ -2551,7 +2623,68 @@ const startWave = () => {
     </div>
   );
 };
- // Component for the "Why I made this" tab
+// Component for Achievements Page
+const AchievementsComponent = ({ gameProgress }) => {
+  const allAchievements = Object.entries(achievementDefinitions);
+  const userAchievements = gameProgress.achievements || {};
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-white">Achievements</h2>
+        <p className="text-slate-400">Track your long-term progress and earn rewards for your dedication.</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {allAchievements.map(([key, def]) => {
+          const userAch = userAchievements[key] || { tier: 0, progress: 0 };
+          const currentTierIndex = userAch.tier;
+          const nextTier = def.tiers[currentTierIndex];
+          const lastTier = def.tiers[def.tiers.length - 1];
+          const isMaxed = !nextTier;
+
+          let progressPercent = 0;
+          let goalText = '';
+          let rewardText = '';
+          let currentTierName = isMaxed ? lastTier.name : (def.tiers[currentTierIndex - 1]?.name || 'Unranked');
+
+          if (isMaxed) {
+            progressPercent = 100;
+            goalText = "Completed!";
+            rewardText = `All tiers of ${def.name} complete.`;
+          } else {
+            progressPercent = Math.min(100, (userAch.progress / nextTier.goal) * 100);
+            goalText = `${userAch.progress} / ${nextTier.goal}`;
+            rewardText = `Next: ${nextTier.reward.xp} XP` + (nextTier.reward.shards ? ` & ${nextTier.reward.shards}💎` : '');
+          }
+
+          return (
+            <div key={key} className={`bg-slate-800/50 border border-slate-700 p-5 rounded-2xl shadow-lg flex flex-col transition-all duration-300 ${isMaxed ? 'opacity-60 bg-slate-800' : ''}`}>
+              <div className="flex items-start gap-4">
+                <span className="text-4xl pt-1">{def.icon}</span>
+                <div className="flex-1">
+                  <h3 className={`font-bold text-lg ${isMaxed ? 'text-yellow-400' : 'text-white'}`}>{def.name}</h3>
+                  <p className="text-xs text-slate-400">{isMaxed ? 'Mastered' : `Current Tier: ${currentTierName}`}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex-grow">
+                <div className="flex justify-between items-center text-xs text-slate-400 mb-1">
+                  <span>{isMaxed ? 'Mastered' : nextTier.name}</span>
+                  <span className="font-mono">{goalText}</span>
+                </div>
+                <div className="w-full bg-slate-700 rounded-full h-2.5">
+                  <div className={`h-2.5 rounded-full transition-width duration-500 ${isMaxed ? 'bg-yellow-500' : 'bg-indigo-500'}`} style={{ width: `${progressPercent}%` }}></div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-300 mt-2 text-center h-4">{rewardText}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Component for the "Why I made this" tab
 const WhyTab = () => {
   return (
     <div>
@@ -2591,8 +2724,133 @@ const WhyTab = () => {
     </div>
   );
 };
+// Component for the Focus Session Modal
+const FocusSessionModal = ({ assignment, onStart, onClose }) => {
+  const [duration, setDuration] = useState(25); // Default to 25 minutes
+
+  const handleStart = () => {
+    onStart(assignment, duration);
+    onClose();
+  };
+
+  const reward = 5 + (Math.floor(duration / 20) * 20);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 w-full max-w-md text-white" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-2 text-center">Start Focus Session</h3>
+        <p className="text-center text-slate-400 mb-4">Focus on: <strong className="text-indigo-300">{assignment.assignment}</strong></p>
+        
+        <div className="my-6">
+          <label htmlFor="duration-slider" className="block text-center text-4xl font-bold mb-2 text-cyan-400">{duration} min</label>
+          <input
+            id="duration-slider"
+            type="range"
+            min="25"
+            max="120"
+            step="20"
+            value={duration}
+            onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+          />
+        </div>
+
+        <div className="text-center bg-slate-900/50 p-4 rounded-lg">
+          <p className="font-semibold">Potential Reward:</p>
+          <p className="text-xl font-bold text-yellow-400">{reward} XP</p>
+          <p className="text-xs text-slate-500">(+5 XP for starting, +{reward - 5} XP banked for completion)</p>
+        </div>
+
+        <div className="flex justify-end space-x-4 mt-6">
+          <button type="button" onClick={onClose} className="bg-slate-600 text-slate-300 px-5 py-2 rounded-md hover:bg-slate-500">Cancel</button>
+          <button type="button" onClick={handleStart} className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700">Start Focusing</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Component for the Full-Screen Focus Mode
+const FocusMode = ({ session, onEnd, onComplete }) => {
+  const [remainingTime, setRemainingTime] = useState(session.duration * 60);
+  const [graceTimeLeft, setGraceTimeLeft] = useState(15);
+
+  const plantGrowth = (session.duration * 60 - remainingTime) / (session.duration * 60);
+  
+  let plantSvg;
+  if (session.isFailed) {
+    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" stroke="#f87171" />'; // Withered
+  } else if (plantGrowth > 0.8) {
+    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75l.165-.165c.243-.243.49-.483.744-.718.51-.48 1.03-.953 1.564-1.393a23.172 23.172 0 011.606-1.31c.264-.203.538-.401.82-.592.28-.19.57-.37.86-.54l.288-.168c.28-.163.56-.32.84-.468.28-.15.56-.29.84-.42a21 21 0 014.242-1.92c.32-.12.64-.23.96-.33a21 21 0 014.242 1.92c.28.13.56.27.84.42.28.148.56.305.84.468l.288.168c.29.17.58.35.86.54.282.19.556.39.82.592a23.172 23.172 0 011.606 1.31c.534.44 1.054.913 1.564 1.393.254.235.5.475.744.718l.165.165M2.25 12.75a23.172 23.172 0 001.606 1.31c.534.44 1.054.913 1.564 1.393.254.235.5.475.744.718l.165.165M12 12.75a23.172 23.172 0 011.606-1.31c.534-.44 1.054-.913 1.564-1.393.254-.235.5-.475.744-.718l.165-.165M12 12.75v9M12 12.75a23.172 23.172 0 00-1.606 1.31c-.534.44-1.054.913-1.564 1.393-.254.235-.5.475-.744.718l-.165.165" stroke="#86efac" />'; // Full
+  } else if (plantGrowth > 0.3) {
+    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#a7f3d0" />'; // Medium
+  } else {
+    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="#dcfce7" />'; // Seedling
+  }
+
+  // Main Timer
+  useEffect(() => {
+    if (session.isFailed) return;
+    const timer = setInterval(() => {
+      setRemainingTime(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onComplete();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [onComplete, session.isFailed]);
+
+  // Grace Period Timer
+  useEffect(() => {
+    if (session.isGracePeriod && !session.isFailed) {
+      const graceTimer = setInterval(() => {
+        setGraceTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(graceTimer);
+            onEnd(true); // Signal that it failed
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(graceTimer);
+    }
+  }, [session.isGracePeriod, session.isFailed, onEnd]);
+  
+  const formatTime = (seconds) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+
+  return (
+    <div className="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-4 text-white">
+      <div className="text-center">
+        <p className="text-slate-400">Focusing on:</p>
+        <h2 className="text-3xl font-bold mb-8 text-indigo-300">{session.assignmentName}</h2>
+      </div>
+      <div className={`w-64 h-64 transition-all duration-1000 ${session.isFailed ? 'grayscale opacity-50' : ''}`}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">{plantSvg}</svg>
+      </div>
+      <p className="text-8xl font-mono font-bold my-8">{formatTime(remainingTime)}</p>
+      <p className="text-slate-500 text-sm mb-4">This feature is designed for mobile. Stay on this tab to succeed.</p>
+      <button onClick={() => onEnd(true)} className="bg-red-800/80 px-8 py-3 rounded-lg hover:bg-red-700">Give Up</button>
+      
+      {/* Grace Period Overlay */}
+      {session.isGracePeriod && !session.isFailed && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
+          <h3 className="text-4xl font-bold text-yellow-400">Are you still there?</h3>
+          <p className="text-6xl font-mono my-4">{graceTimeLeft}</p>
+          <p className="text-slate-400 mb-6">Your session will fail if you don't return.</p>
+          <button onClick={() => onEnd(false)} className="bg-green-600 px-6 py-3 rounded-lg text-xl hover:bg-green-700">I'm still here!</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Component for the Sanctum
-const Sanctum = ({ inventory, trophies, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle }) => {
+const Sanctum = ({ inventory, trophies, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {
   const [editMode, setEditMode] = useState(false);
   const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);
   const [ghostPosition, setGhostPosition] = useState(null);
@@ -2701,6 +2959,7 @@ const Sanctum = ({ inventory, trophies, updateInventoryInFirestore, showMessageB
         
         const newItem = { instanceId: `${inventoryItem.id}_${Date.now()}`, id: inventoryItem.id, x, y };
         updateLayout([...placedItems, newItem]);
+        processAchievement('furniturePlaced');
         setSelectedItemForPlacing(null);
         setGhostPosition(null);
     } else {
@@ -3149,6 +3408,22 @@ const useDebounce = (value, delay) => {
   }, [value, delay]);
   return debouncedValue;
 };
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  useEffect(() => {
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return windowSize;
+};
+
 const AuthComponent = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -3252,10 +3527,11 @@ const AuthComponent = () => {
   };
 
 // Component for Assignment Tracker Sheet
-  const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen }) => {
+  const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, startFocusSession }) => {
     const [expandedAssignmentId, setExpandedAssignmentId] = useState(null);
     const [editingAssignmentData, setEditingAssignmentData] = useState(null);
     const [newSubtaskName, setNewSubtaskName] = useState('');
+    const [focusModalState, setFocusModalState] = useState({ isOpen: false, assignment: null });
 
     const handleAddAssignment = async (newAssignmentData) => {
       if (!newAssignmentData.assignment) {
@@ -3373,7 +3649,19 @@ const AuthComponent = () => {
             <span>Add New</span>
           </button>
         </div>
+        <AddAssignmentModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSubmit={handleAddAssignment}
+        />
 
+        {focusModalState.isOpen && (
+          <FocusSessionModal 
+            assignment={focusModalState.assignment} 
+            onStart={startFocusSession} 
+            onClose={() => setFocusModalState({ isOpen: false, assignment: null })}
+          />
+        )}
         <AddAssignmentModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
@@ -3418,10 +3706,19 @@ const AuthComponent = () => {
                           </div>
                         </td>
                         <td className="py-3 px-6 text-center">
-                          <button onClick={() => handleDelete(assignment.id)} className="text-red-400 hover:text-red-600 transition-colors duration-200 mr-2">Delete</button>
-                          <button onClick={() => handleToggleDetails(assignment)} className="text-indigo-400 hover:text-indigo-300 transition-colors duration-200">
-                            {expandedAssignmentId === assignment.id ? 'Hide' : 'Details'}
-                          </button>
+                          <div className="flex items-center justify-center gap-2">
+                            {assignment.status !== 'Completed' && (
+                              <button onClick={() => setFocusModalState({ isOpen: true, assignment })} className="text-green-400 hover:text-green-300 p-1" title="Start Focus Session">
+                                🌱
+                              </button>
+                            )}
+                            <button onClick={() => handleToggleDetails(assignment)} className="text-indigo-400 hover:text-indigo-300 p-1" title="Details">
+                              {expandedAssignmentId === assignment.id ? '🔼' : '🔽'}
+                            </button>
+                             <button onClick={() => handleDelete(assignment.id)} className="text-red-400 hover:text-red-600 p-1" title="Delete">
+                              🗑️
+                            </button>
+                          </div>
                         </td>
                       </tr>
                       {expandedAssignmentId === assignment.id && editingAssignmentData && (
@@ -3519,7 +3816,7 @@ const AuthComponent = () => {
   };
     
 // Component for My Profile Sheet
-const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileInFirestore, updateInventoryInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock }) => {
+const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileInFirestore, updateInventoryInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement }) => {
   // Create a unified draft state from the incoming props
   const [draftState, setDraftState] = useState({ ...profile, ...inventory });
   const [activeTab, setActiveTab] = useState('collections');
@@ -3591,7 +3888,9 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
             });
         });
         showMessageBox(`Successfully crafted ${itemToCraft.name}!`, "info");
+        processAchievement('cosmeticsCrafted');
     } catch (e) {
+
         const errorMsg = e.message.includes('permission-denied') ? "You're crafting too fast!" :
                          e.message === "INSUFFICIENT_SHARDS" ? "You don't have enough shards." :
                          e.message === "ALREADY_OWNED" ? "You already own this item." : "A server error occurred.";
@@ -3627,7 +3926,9 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
         });
       });
       showMessageBox(`Purchased ${item.name}!`, 'info');
+      processAchievement('xpSpentInShop', item.cost); // We send the cost as progress
     } catch (error) {
+
         const errorMsg = error.message.includes('permission-denied') ? "You're buying too fast!" : error.message;
         showMessageBox(errorMsg, "error");
     }
@@ -4393,7 +4694,7 @@ const QuestsComponent = ({ quests }) => {
     );
   };
 // NEW FEATURE: Study Zone (Platformer + Flashcards)
-const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox }) => {
+const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, processAchievement }) => {
     const [activeTab, setActiveTab] = useState('game');
     const studyZoneState = gameState.studyZone || { flashcardsText: '', platformerHighScore: 0 };
     
@@ -4421,7 +4722,7 @@ const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameSta
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
         </div>
         <div className="p-6">
-          {activeTab === 'game' && <PlatformerGame profile={profile} updateProfileInFirestore={updateProfileInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} />}
+          {activeTab === 'game' && <PlatformerGame profile={profile} updateProfileInFirestore={updateProfileInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
           {activeTab === 'flashcards' && <FlashcardManager studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} />}
         </div>
       </div>
@@ -4497,8 +4798,7 @@ const FlashcardManager = ({ studyZoneState, updateStudyZoneState }) => {
   );
 };
 
-const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateProfileInFirestore, showMessageBox }) => {
-
+const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateProfileInFirestore, showMessageBox, processAchievement }) => {
 
   // --- Core Game Constants ---
   const GAME_WIDTH = 800;
@@ -4587,6 +4887,9 @@ const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, 
     </>
   );
 });
+  const handleButtonPress = (key, isDown) => {
+    keysRef.current[key] = isDown;
+  };
   // --- Level Generation ---
   const generateLevel = useCallback((currentLevel) => {
     const platforms = [], enemies = [], coins = [];
@@ -4808,7 +5111,9 @@ animationFrameId = requestAnimationFrame(gameLoop);
       if (score > studyZoneState.platformerHighScore) {
         updateStudyZoneState({ platformerHighScore: score });
         showMessageBox(`Game Over! New high score: ${score}`, 'info');
+        processAchievement('highScore', score);
       } else {
+
         showMessageBox(`Game Over! Your score: ${score}`, 'error');
       }
     }
@@ -4871,10 +5176,44 @@ animationFrameId = requestAnimationFrame(gameLoop);
           />
         )}
       </div>
-       <p className="text-slate-500 mt-2 text-sm">Controls: Arrow keys or A/D to move, Arrow Up, W, or Space to jump/double-jump.</p>
+       <p className="text-slate-500 mt-2 text-sm hidden md:block">Controls: Arrow keys or A/D to move, Arrow Up, W, or Space to jump/double-jump.</p>
+      
+      {/* --- On-Screen Controls for Mobile --- */}
+      <div className="md:hidden fixed bottom-5 left-5 right-5 flex justify-between items-center z-20">
+        <div className="flex gap-4">
+          <button
+            onTouchStart={() => handleButtonPress('ArrowLeft', true)}
+            onTouchEnd={() => handleButtonPress('ArrowLeft', false)}
+            onMouseDown={() => handleButtonPress('ArrowLeft', true)}
+            onMouseUp={() => handleButtonPress('ArrowLeft', false)}
+            className="w-20 h-20 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
+          >
+            ←
+          </button>
+          <button
+            onTouchStart={() => handleButtonPress('ArrowRight', true)}
+            onTouchEnd={() => handleButtonPress('ArrowRight', false)}
+            onMouseDown={() => handleButtonPress('ArrowRight', true)}
+            onMouseUp={() => handleButtonPress('ArrowRight', false)}
+            className="w-20 h-20 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
+          >
+            →
+          </button>
+        </div>
+        <button
+          onTouchStart={() => handleButtonPress(' ', true)}
+          onTouchEnd={() => handleButtonPress(' ', false)}
+          onMouseDown={() => handleButtonPress(' ', true)}
+          onMouseUp={() => handleButtonPress(' ', false)}
+          className="w-24 h-24 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
+        >
+          ↑
+        </button>
+      </div>
     </div>
   );
 };
+
 
 
 const FlashcardQuizModal = ({ cards, onComplete }) => {
@@ -4962,120 +5301,26 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
     );
   };
 
-  // Component for Friends Leaderboard
-  const Leaderboard = ({ db, appId, userId, friends, showMessageBox }) => {
-    const [leaderboardData, setLeaderboardData] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [sortConfig, setSortConfig] = useState({ key: 'totalXP', direction: 'descending' });
 
-    const fetchLeaderboardData = useCallback(async () => {
-      if (!db || !userId) return;
-      setIsLoading(true);
-      const userIdsToFetch = [userId, ...(friends || [])];
-      const uniqueUserIds = [...new Set(userIdsToFetch)];
-      try {
-        const promises = uniqueUserIds.map(id => getDoc(doc(db, `artifacts/${appId}/public/data/stats/${id}`)));
-        const userDocs = await Promise.all(promises);
-        const data = userDocs.filter(doc => doc.exists()).map(doc => ({ id: doc.id, ...doc.data() }));
-        setLeaderboardData(data);
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-        showMessageBox("Could not load leaderboard data.", "error");
-      } finally {
-        setIsLoading(false);
-      }
-    }, [db, appId, userId, friends, showMessageBox]);
-
-    useEffect(() => {
-      fetchLeaderboardData();
-    }, [fetchLeaderboardData]);
-
-    const sortedData = useMemo(() => {
-      let sortableItems = [...leaderboardData];
-      if (sortConfig.key !== null) {
-        sortableItems.sort((a, b) => {
-          const valA = a[sortConfig.key] || 0;
-          const valB = b[sortConfig.key] || 0;
-          if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
-          if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
-          return 0;
-        });
-      }
-      return sortableItems;
-    }, [leaderboardData, sortConfig]);
-
-    const requestSort = (key) => {
-      let direction = 'descending';
-      if (sortConfig.key === key && sortConfig.direction === 'descending') {
-        direction = 'ascending';
-      }
-      setSortConfig({ key, direction });
-    };
-
-    const getSortIndicator = (key) => {
-      if (sortConfig.key !== key) return null;
-      return sortConfig.direction === 'descending' ? '▼' : '▲';
-    };
-
-    const SortableHeader = ({ sortKey, children }) => (
-      <th className="py-3 px-6 text-left cursor-pointer" onClick={() => requestSort(sortKey)}>
-        {children} {getSortIndicator(sortKey)}
-      </th>
-    );
-
-    if (isLoading) {
-      return <div>Loading Leaderboard...</div>;
-    }
-
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-white">Leaderboard</h2>
-            <p className="text-slate-400">See how you stack up against your friends.</p>
-          </div>
-          <button
-            onClick={fetchLeaderboardData}
-            disabled={isLoading}
-            className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 disabled:bg-slate-600 transition-colors"
-          >
-            {isLoading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-white">
-              <thead>
-                <tr className="text-slate-400 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">Player</th>
-                  <SortableHeader sortKey="totalXP">Total XP</SortableHeader>
-                  <SortableHeader sortKey="currentLevel">Level</SortableHeader>
-                  <SortableHeader sortKey="assignmentsCompleted">Tasks Done</SortableHeader>
-                  <SortableHeader sortKey="dungeon_floor">Dungeon Floor</SortableHeader>
-                </tr>
-              </thead>
-              <tbody className="text-slate-300 text-sm font-light">
-                {sortedData.map(userStats => (
-                  <tr key={userStats.id} className={`border-b border-slate-700 hover:bg-slate-800/70 ${userStats.id === userId ? 'bg-indigo-900/50 font-bold' : ''}`}>
-                    <td className="py-3 px-6 text-left whitespace-nowrap truncate max-w-xs">{userStats.username || userStats.id}</td>
-                    <td className="py-3 px-6 text-left">{userStats.totalXP || 0}</td>
-                    <td className="py-3 px-6 text-left">{userStats.currentLevel || 1}</td>
-                    <td className="py-3 px-6 text-left">{userStats.assignmentsCompleted || 0}</td>
-                    <td className="py-3 px-6 text-left">{userStats.dungeon_floor || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeSheet, setActiveSheet] = useState('Stats + XP Tracker');
+  
+  // --- Focus Mode State ---
+  const [focusSession, setFocusSession] = useState({ isActive: false });
+  const offPageCheckTimeout = useRef(null);
+
+  // --- Mobile Responsiveness State ---
+  const { width } = useWindowSize();
+  const isMobile = width < 768; // Tailwind's `md` breakpoint
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+
+  // Effect to handle sidebar state when resizing across the breakpoint
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
   const [assignments, setAssignments] = useState([]);
   const [trophies, setTrophies] = useState([]);
   const statsRef = useRef({});
@@ -5569,6 +5814,8 @@ const App = () => {
         });
 
         showMessageBox(`Your ${petToEvolve.name} evolved into a ${nextEvolution.name}!`, "info", 5000);
+        // After the evolution is successful, check for an achievement.
+        await processAchievement('petsEvolved');
       } catch (error) {
         console.error("Evolution transaction failed: ", error);
         const errorMsg = error.message.includes('permission-denied') ? "You're acting too quickly! Please wait a moment." : error.message;
@@ -5754,6 +6001,12 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
 
               let calculatedXpBonus = 0, shardBonus = 0;
               let newAchievementsAwarded = [], newlyCompletedQuests = [];
+              
+              // Add banked focus XP if it exists on the assignment
+              if (completedAssignment.focusXpReward) {
+                calculatedXpBonus += completedAssignment.focusXpReward;
+              }
+
               const difficultyXpMap = { 'Easy': 10, 'Medium': 15, 'Hard': 20 };
               const baseXpForTask = difficultyXpMap[completedAssignment.difficulty] || 10;
               calculatedXpBonus += baseXpForTask;
@@ -5831,7 +6084,68 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           showMessageBox("Failed to award XP due to a server error.", "error");
       }
   }, [user, db, appId, calculateLevelInfo, hatchEgg, inventory.petStatus]);
+  const processAchievement = useCallback(async (achievementKey, progressValue = null) => {
+    if (!db || !user) return;
+    const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    
+    try {
+        await runTransaction(db, async (transaction) => {
+            const [progressDoc, profileDoc, inventoryDoc] = await Promise.all([
+                transaction.get(gameProgressDocRef),
+                transaction.get(profileDocRef),
+                transaction.get(inventoryDocRef)
+            ]);
+            if (!progressDoc.exists() || !profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing for achievement.");
 
+            const serverProgress = progressDoc.data();
+            const serverProfile = profileDoc.data();
+            const serverInventory = inventoryDoc.data();
+            
+            const achievements = serverProgress.achievements || {};
+            const achievement = achievements[achievementKey] || { tier: 0, progress: 0 };
+            const definition = achievementDefinitions[achievementKey];
+            const nextTier = definition.tiers[achievement.tier];
+            
+            // If there's no next tier, the achievement is maxed out.
+            if (!nextTier) return;
+
+            // If a specific progress value is provided (like dungeon floor), update to it if it's higher.
+            // Otherwise, just increment by 1.
+            const newProgress = progressValue ? Math.max(achievement.progress, progressValue) : achievement.progress + 1;
+            
+            if (newProgress >= nextTier.goal) {
+                achievement.tier += 1;
+                achievement.progress = newProgress; // Update progress for categories that aren't just counters
+                
+                const { xp, shards } = nextTier.reward;
+                const petBuff = serverInventory.currentPet?.xpBuff || 0;
+                const finalXp = Math.round(xp * (1 + petBuff));
+                
+                const newTotalXP = serverProfile.totalXP + finalXp;
+                const { level: newLevel } = calculateLevelInfo(newTotalXP);
+                
+                transaction.update(profileDocRef, { totalXP: newTotalXP, currentLevel: newLevel });
+                if (shards) {
+                    transaction.update(inventoryDocRef, { cosmeticShards: (serverInventory.cosmeticShards || 0) + shards });
+                }
+                transaction.update(gameProgressDocRef, { achievements });
+
+                // Use a timeout to show the message after the transaction commits
+                setTimeout(() => {
+                    showMessageBox(`Achievement Unlocked: ${nextTier.name}!`, 'info', 4000);
+                }, 500);
+            } else {
+                // If the goal isn't met, just update the progress.
+                achievement.progress = newProgress;
+                transaction.update(gameProgressDocRef, { achievements });
+            }
+        });
+    } catch (error) {
+        console.error(`Achievement processing failed for ${achievementKey}:`, error);
+    }
+  }, [user, db, appId, calculateLevelInfo]);
   const handleCompletedToggle = async (e, id, currentAssignment, currentProfile, currentInventory, currentGameProgress) => {
     if (!db || !user?.uid) return;
     const isCompleting = currentAssignment.status !== 'Completed';
@@ -5883,16 +6197,79 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
     }
   };
 
-    if (!isAuthReady) {
+  const startFocusSession = useCallback(async (assignment, duration) => {
+    if (profile.totalXP < 5) {
+      showMessageBox("You need at least 5 XP to start a focus session.", "error");
+      return;
+    }
+    await updateProfileInFirestore({ totalXP: profile.totalXP - 5 });
+    setFocusSession({
+      isActive: true,
+      assignmentId: assignment.id,
+      assignmentName: assignment.assignment,
+      duration: duration,
+      startTime: Date.now(),
+      isGracePeriod: false,
+      isFailed: false,
+      xpReward: Math.floor(duration / 20) * 20,
+    });
+  }, [profile.totalXP, updateProfileInFirestore]);
+
+  const endFocusSession = (didFail = false) => {
+    if (didFail) {
+      setFocusSession(prev => ({ ...prev, isFailed: true, isGracePeriod: false }));
+      showMessageBox("Focus session failed. Try again!", "error");
+      setTimeout(() => setFocusSession({ isActive: false }), 2000);
+    } else {
+      setFocusSession({ isActive: false });
+    }
+  };
+
+  const completeFocusSession = async () => {
+    await updateAssignmentInFirestore(focusSession.assignmentId, {
+      focusXpReward: focusSession.xpReward
+    });
+    showMessageBox(`Focus session complete! +${focusSession.xpReward} XP is banked. Mark the assignment as complete to claim it.`, "info", 6000);
+    endFocusSession(false);
+  };
+  
+  // Page Visibility API Logic
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      clearTimeout(offPageCheckTimeout.current);
+      if (document.hidden || !document.hasFocus()) {
+        offPageCheckTimeout.current = setTimeout(() => {
+          if (focusSession.isActive && !focusSession.isGracePeriod && (document.hidden || !document.hasFocus())) {
+            setFocusSession(prev => ({ ...prev, isGracePeriod: true }));
+          }
+        }, 500); // Small delay to confirm user is truly off-page
+      } else {
+        if (focusSession.isActive && focusSession.isGracePeriod) {
+          setFocusSession(prev => ({ ...prev, isGracePeriod: false }));
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleVisibilityChange);
+    window.addEventListener("blur", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleVisibilityChange);
+      window.removeEventListener("blur", handleVisibilityChange);
+      clearTimeout(offPageCheckTimeout.current);
+    };
+  }, [focusSession]);
+  if (!isAuthReady) {
     return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Loading...</div>;
   }
 
   if (!user) {
     return <AuthComponent />;
   }
-
   return (
-        <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 ${equippedFontStyle || 'font-inter'}`}>
+    <>
+      {focusSession.isActive && <FocusMode session={focusSession} onEnd={endFocusSession} onComplete={completeFocusSession} />}
+      <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 relative ${equippedFontStyle || 'font-inter'} ${focusSession.isActive ? 'pointer-events-none' : ''}`}>
       <style>{`
           /* All your @import and CSS variables... */
           @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Inter:wght@400;700&family=Oswald&family=Permanent+Marker&family=Playfair+Display&family=Press+Start+2P&family=Roboto+Slab&family=Space+Mono&family=Cinzel+Decorative&family=Comic+Neue&family=Libre+Baskerville&family=Lato&family=Merriweather&family=Raleway&family=Ubuntu&display=swap');
@@ -5935,6 +6312,11 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           @keyframes fly-to-bar-minecraft { 0% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { top: 98vh; left: 50vw; transform: translate(-50%, -50%) scale(0); opacity: 0; } }
       `}</style>
 
+      {/* Mobile Overlay */}
+      {isMobile && isSidebarOpen && (
+        <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/60 z-30 md:hidden"></div>
+      )}
+
       <div id="messageBox" className="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-full opacity-0">
         <p id="messageText" className="text-white"></p>
       </div>
@@ -5955,14 +6337,15 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         originEvent={xpAnimationOriginEvent}
       />
       
-      <nav className="w-64 bg-slate-900 p-6 flex-shrink-0 flex flex-col shadow-2xl">
+      <nav className={`fixed top-0 left-0 h-full w-64 bg-slate-900 p-6 flex-shrink-0 flex flex-col shadow-2xl z-40 transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {/* Nav content is unchanged, but the parent nav tag is now responsive */}
         <ul className="space-y-2 flex-grow">
           {[
             { name: 'Dashboard', sheet: 'Stats + XP Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg> },
             { name: 'Assignments', sheet: 'Assignment Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg> },
+            { name: 'Achievements', sheet: 'Achievements', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" /></svg> },
             { name: 'Guild', sheet: 'Guild', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0118 15v3h-2zM4.75 12.094A5.973 5.973 0 004 15v3H2v-3a3.005 3.005 0 012.25-2.906z" /></svg> },
             { name: 'Sanctum', sheet: 'Sanctum', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4a1 1 0 112 0v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V7H8a1 1 0 010-2h1V4z" /></svg> },
-            { name: 'Leaderboard', sheet: 'Leaderboard', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" /><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" /></svg> },
             { name: 'Calendar', sheet: 'Calendar View', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg> },
             { name: 'Analytics', sheet: 'GPA & Tags Analytics', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> },
             { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M1.5 6.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM6 11a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h4a1 1 0 100-2H7zM2 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM2.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM14 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM13.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2z" clipRule="evenodd"/></svg>},
@@ -5970,17 +6353,17 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             { name: 'Science Lab', sheet: 'Science Lab', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 2a.5.5 0 01.5.5V3h5V2.5a.5.5 0 011 0V3h1a2 2 0 012 2v1.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a2 2 0 012-2h1V2.5A.5.5 0 017 2zM4.002 8.5a.5.5 0 01.498.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM16 8.5a.5.5 0 01.5.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM7 9a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1z" clipRule="evenodd" /></svg>},
             { name: 'Study Zone', sheet: 'Study Zone', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L9 9.58v5.528l-3-1.286a1 1 0 00-1.212.86l-.5 2.5a1 1 0 00.97 1.245l5-1a1 1 0 00.484 0l5 1a1 1 0 00.97-1.245l-.5-2.5a1 1 0 00-1.212-.86l-3 1.286V9.58l6.406-2.658a1 1 0 000-1.84l-7-3zM9 4.399l5.223 2.155L10 8.517 4.777 6.554 9 4.399z" /></svg>},
           ].map((item) => (
-            <li key={item.name}><button onClick={() => setActiveSheet(item.sheet)} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{item.icon}<span>{item.name}</span></button></li>
+            <li key={item.name}><button onClick={() => {setActiveSheet(item.sheet); if(isMobile) setIsSidebarOpen(false);}} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1'}`}>{item.icon}<span>{item.name}</span></button></li>
           ))}
         </ul>
 
         <div className="border-t border-slate-700 mx-[-1.5rem] my-4"></div>
         <ul className="space-y-2">
-            <li><button onClick={() => setActiveSheet('Why')} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-3 ${activeSheet === 'Why' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg><span>Why I Built This</span></button></li>
+            <li><button onClick={() => {setActiveSheet('Why'); if(isMobile) setIsSidebarOpen(false);}} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === 'Why' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1'}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg><span>Why I Built This</span></button></li>
         </ul>
 
         <div className="mt-auto pt-4 space-y-2">
-            <button onClick={() => setActiveSheet('My Profile')} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-colors">
+            <button onClick={() => {setActiveSheet('My Profile'); if(isMobile) setIsSidebarOpen(false);}} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-all duration-200 hover:translate-x-1">
                 <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl border-2 border-slate-600">{equippedAvatarDisplay}</div>
                 <div className="flex-1 text-left"><p className="text-sm font-semibold text-white">My Profile</p><p className="text-xs text-slate-400 truncate">ID: {user?.uid}</p></div>
             </button>
@@ -5988,23 +6371,30 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         </div>
       </nav>
 
-            <main key={appKey} className="flex-grow p-8 overflow-auto">
-        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={(e, id, assignment) => handleCompletedToggle(e, id, assignment, profile, inventory, gameProgress)} />}
+      <main key={appKey} className="flex-grow p-4 md:p-8 overflow-auto w-full md:w-auto">
+        {/* Hamburger Button */}
+        <button onClick={() => setIsSidebarOpen(true)} className="md:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800/80 rounded-md">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={(e, id, assignment) => handleCompletedToggle(e, id, assignment, profile, inventory, gameProgress)} startFocusSession={startFocusSession} />}        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={gameProgress} />}
         {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker profile={profile} inventory={inventory} gameProgress={gameProgress} assignments={assignments} trophies={trophies} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
         {activeSheet === 'Guild' && <GuildPage />}
         {activeSheet === 'My Profile' && <MyProfile profile={profile} inventory={inventory} gameState={gameState} user={user} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateInventoryInFirestore={updateInventoryInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} />}
-        {activeSheet === 'Sanctum' && <Sanctum inventory={inventory} trophies={trophies} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle}/>}
+        {activeSheet === 'Sanctum' && <Sanctum inventory={inventory} trophies={trophies} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
 
-        {activeSheet === 'Leaderboard' && <Leaderboard db={db} appId={appId} userId={user?.uid} friends={profile.friends} showMessageBox={showMessageBox} />}
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics trophies={trophies}/>}
-        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler profile={profile} inventory={inventory} gameState={gameState} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} />}
-        {activeSheet === 'Tower Defense' && <TowerDefenseGame profile={profile} inventory={inventory} gameState={gameState} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} />}
-        {activeSheet === 'Science Lab' && <ScienceLab profile={profile} gameState={gameState} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} />}
-        {activeSheet === 'Study Zone' && <StudyZone profile={profile} gameState={gameState} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler profile={profile} inventory={inventory} gameState={gameState} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} />}
+        {activeSheet === 'Tower Defense' && <TowerDefenseGame profile={profile} inventory={inventory} gameState={gameState} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
+        {activeSheet === 'Science Lab' && <ScienceLab profile={profile} gameState={gameState} gameProgress={gameProgress} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
+        {activeSheet === 'Study Zone' && <StudyZone profile={profile} gameState={gameState} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
+
       </main>
     </div>
+    </>
   );
 }
 
