@@ -2,8 +2,64 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, serverTimestamp, runTransaction, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { 
+  getFirestore, doc, getDoc as originalGetDoc, addDoc as originalAddDoc, setDoc as originalSetDoc, 
+  updateDoc as originalUpdateDoc, deleteDoc as originalDeleteDoc, onSnapshot as originalOnSnapshot, 
+  collection, serverTimestamp, runTransaction as originalRunTransaction, query, where, 
+  getDocs as originalGetDocs, orderBy, limit 
+} from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// --- Firestore Logging Wrappers ---
+const getDoc = (ref) => {
+  console.log('%c[Firestore GET]', 'color: #34d399; font-weight: bold;', { path: ref.path });
+  console.trace('Trace for Get');
+  return originalGetDoc(ref);
+};
+
+const addDoc = (ref, data) => {
+  console.log('%c[Firestore ADD]', 'color: #60a5fa; font-weight: bold;', { path: ref.path, data });
+  console.trace('Trace for Add');
+  return originalAddDoc(ref, data);
+};
+
+const setDoc = (ref, data, options) => {
+  console.log('%c[Firestore SET]', 'color: #facc15; font-weight: bold;', { path: ref.path, data, options });
+  console.trace('Trace for Set');
+  return originalSetDoc(ref, data, options);
+};
+
+const updateDoc = (ref, data) => {
+  console.log('%c[Firestore UPDATE]', 'color: #f97316; font-weight: bold;', { path: ref.path, data });
+  console.trace('Trace for Update');
+  return originalUpdateDoc(ref, data);
+};
+
+const deleteDoc = (ref) => {
+  console.log('%c[Firestore DELETE]', 'color: #ef4444; font-weight: bold;', { path: ref.path });
+  console.trace('Trace for Delete');
+  return originalDeleteDoc(ref);
+};
+
+const getDocs = (queryRef) => {
+    // Note: A query doesn't have a single path, so we inspect its properties if possible.
+    // This is a simplified logger for queries.
+    console.log('%c[Firestore GET (Query)]', 'color: #34d399; font-weight: bold;', { query: queryRef });
+    console.trace('Trace for Get(Query)');
+    return originalGetDocs(queryRef);
+};
+
+const onSnapshot = (ref, callback) => {
+    console.log('%c[Firestore LISTEN]', 'color: #c084fc; font-weight: bold;', { path: ref.path });
+    console.trace('Trace for Listen');
+    return originalOnSnapshot(ref, callback);
+};
+
+const runTransaction = (firestore, updateFunction) => {
+    console.log('%c[Firestore TRANSACTION]', 'color: #ec4899; font-weight: bold;', 'Starting transaction...');
+    console.trace('Trace for Transaction');
+    return originalRunTransaction(firestore, updateFunction);
+};
 // Add this line for a quick test
 console.log("Is my Project ID loading?", process.env.REACT_APP_PROJECT_ID);
 // Global variables
@@ -5110,6 +5166,7 @@ const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateP
   
   // --- Refs for Game Loop ---
   const gameStateRef = useRef('menu');
+  const lastTimeRef = useRef(0);
   const levelRef = useRef({ platforms: [], enemies: [], coins: [], flagpole: null, projectiles: [] });
   const keysRef = useRef({});
   const cameraXRef = useRef(0);
@@ -5278,25 +5335,36 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
   }, [profile.totalXP, commonStartLogic, updateProfileInFirestore]);
 
   useEffect(() => {
-    if (uiGameState !== 'playing') return;
+    // If the game is not in the 'playing' state, ensure the timer ref is reset and do nothing.
+    if (uiGameState !== 'playing') {
+      lastTimeRef.current = 0;
+      return;
+    }
 
-    let lastTime = 0;
     let animationFrameId;
 
     const gameLoop = (timestamp) => {
-      const deltaTime = (timestamp - lastTime) / (1000 / 60);
-      lastTime = timestamp;
+      // Initialize lastTime on the first frame to prevent a huge initial deltaTime
+      if (lastTimeRef.current === 0) {
+        lastTimeRef.current = timestamp;
+      }
+
+      let deltaTime = (timestamp - lastTimeRef.current) / (1000 / 60);
+      lastTimeRef.current = timestamp;
+
+      // Clamp deltaTime to a max value to prevent physics bugs if the tab is inactive for a long time
+      const clampedDeltaTime = Math.min(deltaTime, 3);
 
       if (gameStateRef.current === 'playing') {
         const p = playerState.current;
         p.onGround = false;
-        if (p.invincible > 0) p.invincible -= deltaTime;
+        if (p.invincible > 0) p.invincible -= clampedDeltaTime;
 
         // --- Input & Movement ---
         let targetVx = 0;
         if (keysRef.current['ArrowLeft'] || keysRef.current['a']) targetVx = -PLAYER_SPEED;
         if (keysRef.current['ArrowRight'] || keysRef.current['d']) targetVx = PLAYER_SPEED;
-        p.x += targetVx * deltaTime;
+        p.x += targetVx * clampedDeltaTime;
         
         p.jumpBuffer = (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current[' ']) ? 10 : p.jumpBuffer - 1;
         p.coyoteTime = p.coyoteTime - 1;
@@ -5309,8 +5377,8 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
           }
         }
         
-        p.vy += GRAVITY * deltaTime;
-        p.y += p.vy * deltaTime;
+        p.vy += GRAVITY * clampedDeltaTime;
+        p.y += p.vy * clampedDeltaTime;
         p.scaleY += (1 - p.scaleY) * 0.1;
 
         // --- Collision Detection & Resolution ---
@@ -5321,7 +5389,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
             if (platform.type === 'spike' && p.invincible <= 0) { setGameState('gameover'); return; }
             if (platform.type === 'jumpPad') { p.vy = JUMP_PAD_BOOST; p.canDoubleJump = true; return; }
 
-            if (p.vy >= 0 && playerRect.y + playerRect.height - platform.y < p.vy * deltaTime + 5) {
+            if (p.vy >= 0 && playerRect.y + playerRect.height - platform.y < p.vy * clampedDeltaTime + 5) {
               p.y = platform.y - playerRect.height;
               p.vy = 0;
               p.onGround = true;
@@ -5334,18 +5402,18 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
         });
 
         levelRef.current.platforms = levelRef.current.platforms.filter(platform => {
-          if (platform.crumbling > 0) platform.crumbling -= deltaTime;
+          if (platform.crumbling > 0) platform.crumbling -= clampedDeltaTime;
           return platform.crumbling === undefined || platform.crumbling > 0;
         });
 
         // --- Enemy & Coin Logic ---
         levelRef.current.enemies.forEach(enemy => {
           if (enemy.type === 'patrol' || enemy.type === 'spiky') {
-            enemy.x += enemy.dir * ENEMY_SPEED * deltaTime;
+            enemy.x += enemy.dir * ENEMY_SPEED * clampedDeltaTime;
             if (enemy.x < enemy.startX || enemy.x > enemy.startX + enemy.patrol) enemy.dir *= -1;
           }
           if (enemy.type === 'turret') {
-            enemy.fireCooldown -= deltaTime;
+            enemy.fireCooldown -= clampedDeltaTime;
             if (enemy.fireCooldown <= 0) {
               levelRef.current.projectiles.push({id: `proj_${Date.now()}`, x: enemy.x, y: enemy.y, vx: -3});
               enemy.fireCooldown = TURRET_FIRE_RATE;
@@ -5365,7 +5433,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
         });
 
         levelRef.current.projectiles = levelRef.current.projectiles.filter(proj => {
-            proj.x += proj.vx * deltaTime;
+            proj.x += proj.vx * clampedDeltaTime;
             const projRect = {x: proj.x, y: proj.y, width: 10, height: 10};
             if (p.x < projRect.x + projRect.width && p.x + PLAYER_WIDTH > projRect.x &&
                 p.y < projRect.y + projRect.height && p.y + PLAYER_HEIGHT > projRect.y) {
@@ -5413,19 +5481,22 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
   }, [uiGameState, score, parsedFlashcards, isXpMode]);
   
   useEffect(() => {
-    if (uiGameState === 'gameover' && !isXpMode) {
-      if (score > studyZoneState.platformerHighScore) {
-        updateStudyZoneState({ platformerHighScore: score });
-        showMessageBox(`Game Over! New high score: ${score}`, 'info');
-        processAchievement('highScore', score);
-      } else {
-        showMessageBox(`Game Over! Your score: ${score}`, 'error');
+    // FIX: Only run this logic when the game state is explicitly 'gameover' or 'levelwon'.
+    // This prevents the check from running prematurely when the game starts.
+    if (uiGameState === 'gameover') {
+      if (!isXpMode) {
+        if (score > studyZoneState.platformerHighScore) {
+          updateStudyZoneState({ platformerHighScore: score });
+          showMessageBox(`Game Over! New high score: ${score}`, 'info');
+          processAchievement('highScore', score);
+        } else {
+          showMessageBox(`Game Over! Your score: ${score}`, 'error');
+        }
       }
+    } else if (uiGameState === 'levelwon' && isXpMode) {
+      updateProfileInFirestore({ totalXP: profile.totalXP + 250 });
+      showMessageBox(`Level Complete! You earned 250 XP!`, 'info');
     }
-     if (uiGameState === 'levelwon' && isXpMode) {
-        updateProfileInFirestore({ totalXP: profile.totalXP + 250 });
-        showMessageBox(`Level Complete! You earned 250 XP!`, 'info');
-     }
   }, [uiGameState, score, isXpMode, showMessageBox, profile.totalXP, studyZoneState.platformerHighScore, updateProfileInFirestore, updateStudyZoneState, processAchievement]);
 
   return (
