@@ -290,7 +290,7 @@ const petDefinitions = {
     { id: 'pet_owl_1', name: 'Wise Owl', display: '🦉', xpBuff: 2, rarity: 'epic',
       evolutions: [
         { id: 'pet_owl_2', name: 'Sage Owl', display: '🦉📜', xpBuff: 2.5, levelRequired: 20, xpCost: 200 },
-        { id: 'pet_owl_3', name: 'Oracle Owl', display: '🦉✨', xpBuff: 0.18, levelRequired: 40, xpCost: 400 }
+        { id: 'pet_owl_3', name: 'Oracle Owl', display: '🦉✨', xpBuff: 3.0, levelRequired: 40, xpCost: 400 }
       ]
     },
     { id: 'pet_wolf_1', name: 'Focused Wolf', display: '🐺', xpBuff: 2, rarity: 'epic',
@@ -961,7 +961,7 @@ const TaskCompletionAnimation = ({ show, onAnimationEnd, equippedAnimationEffect
   );
 };
 // Tower Defense Projectile Component
-const Projectile = ({ from, to }) => {
+const Projectile = ({ from, to, type }) => {
   const TILE_SIZE = 40;
   const [position, setPosition] = useState({
     top: from.y * TILE_SIZE + TILE_SIZE / 2,
@@ -974,10 +974,37 @@ const Projectile = ({ from, to }) => {
         top: to.y * TILE_SIZE + TILE_SIZE / 2,
         left: to.x * TILE_SIZE + TILE_SIZE / 2,
       });
-    }, 10); // Delay allows CSS transition to trigger properly
+    }, 10);
 
     return () => clearTimeout(timer);
   }, [from, to]);
+
+  const angle = Math.atan2(to.y - from.y, to.x - from.x) * (180 / Math.PI);
+
+  const getProjectileVisual = () => {
+    switch (type) {
+      case 'arrow':
+        return <div className="w-4 h-1 bg-yellow-300" style={{ transform: `rotate(${angle}deg)` }} />;
+      case 'cannonball':
+        return <div className="w-3 h-3 bg-gray-400 rounded-full" />;
+      case 'iceShard':
+        return <div className="w-3 h-4 bg-blue-300 transform -skew-x-12" />;
+      case 'bolt':
+        return <div className="w-5 h-2 bg-yellow-500" style={{ transform: `rotate(${angle}deg)` }} />;
+      case 'fireball':
+        return <div className="w-4 h-4 bg-orange-500 rounded-full shadow-[0_0_8px_theme('colors.orange.500')]" />;
+      case 'lightning':
+        return <div className="w-2 h-6 bg-yellow-300 rounded-full" />;
+      case 'poisonCloud':
+        return <div className="w-4 h-4 bg-lime-500/50 rounded-full animate-pulse" />;
+      case 'bullet':
+        return <div className="w-2 h-1 bg-gray-300" style={{ transform: `rotate(${angle}deg)` }} />;
+      case 'crystalShard':
+          return <div className="w-3 h-5 bg-purple-400 transform skew-x-12" />;
+      default:
+        return <div className="w-2 h-2 bg-white rounded-full" />;
+    }
+  };
 
   return (
     <div
@@ -986,11 +1013,13 @@ const Projectile = ({ from, to }) => {
         top: `${position.top}px`,
         left: `${position.left}px`,
       }}
-    />
+    >
+      {getProjectileVisual()}
+    </div>
   );
 };
 // REWORKED: Entire Dungeon Crawler Component
-const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement }) => {
+const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp }) => {
   // This state holds the entire dungeon object (board, enemies, player location, etc.)
   const [localDungeonState, setLocalDungeonState] = useState(dungeonState);
   
@@ -1000,24 +1029,52 @@ const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updatePro
 
   const [attackTarget, setAttackTarget] = useState(null); 
   const [abilityTarget, setAbilityTarget] = useState(null);
-
-  // NEW: A function to explicitly save the game state to Firebase
-  // FIX: saveGame is now the primary CHECKPOINT function.
-  // It saves the dungeon layout, session XP, and session Gold all at once.
-  const saveGame = useCallback((stateToSave) => {
-    if (stateToSave) {
-      updateProfileInFirestore({ totalXP: sessionXp });
-      updateGameStateInFirestore({
-        dungeon_state: stateToSave,
-        dungeon_gold: sessionGold,
-        cooldowns: { ...gameState.cooldowns, saveDungeon: serverTimestamp() }
-      }).catch(error => {
-        if (error.message.includes('permission-denied')) {
-          showMessageBox("You're saving too frequently!", "error");
-        }
-      });
+  useEffect(() => {
+    // This effect runs whenever sessionXp changes, updating the parent's ref.
+    if (syncDungeonXp) {
+      syncDungeonXp(sessionXp);
     }
-  }, [updateGameStateInFirestore, updateProfileInFirestore, sessionXp, sessionGold, gameState.cooldowns]);
+  }, [sessionXp, syncDungeonXp]);
+  
+  // FIX: saveGame is now the primary CHECKPOINT function.
+  // It saves the dungeon layout and gold to gameState, and separately updates profile XP.
+const saveGame = useCallback(async (stateToSave) => {
+    if (!stateToSave || !db || !profile.userId) return;
+
+    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${profile.userId}/gameState/doc`);
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${profile.userId}/profile/doc`);
+    
+    try {
+      // With the corrected security rule, we can now use a proper transaction
+      // to atomically save both game state and the latest XP total.
+      await runTransaction(db, async (transaction) => {
+        const gameStateDoc = await transaction.get(gameStateDocRef);
+        if (!gameStateDoc.exists()) throw new Error("User data missing.");
+
+        // Update the gameState document
+        transaction.update(gameStateDocRef, {
+          dungeon_state: stateToSave,
+          dungeon_gold: sessionGold,
+          // Use dot notation to be precise, ensuring we only touch the 'saveDungeon' cooldown
+          'cooldowns.saveDungeon': serverTimestamp()
+        });
+        
+        // Also update the profile document with the current session's XP total
+        transaction.update(profileDocRef, {
+          totalXP: sessionXp
+        });
+      });
+      // Don't show a message on auto-save, only manual
+    } catch (error) {
+      if (error.message.includes('permission-denied')) {
+        showMessageBox("You're saving too frequently!", "error");
+      } else {
+        console.error("Dungeon save transaction failed:", error);
+        showMessageBox("Failed to save progress due to a server error.", "error");
+      }
+    }
+  }, [db, profile.userId, sessionGold, sessionXp, appId, showMessageBox]);
+
 
   useEffect(() => {
     // This is the standard, correct way to sync a component's local state
@@ -1477,14 +1534,39 @@ const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updatePro
         });
       }
       let enemiesToRemove = [];
+      let newEnemiesToAdd = [];
       enemies.forEach(enemy => {
         if (enemy.hp <= 0) {
           enemiesToRemove.push(enemy.id);
           log.unshift({ message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
           board[`${enemy.y},${enemy.x}`] = { type: enemy.isKeyholder ? 'key' : 'empty', visited: true };
+          
+          // Slime splitting logic
+          if (enemy.onDefeat?.type === 'split') {
+            const oozeDef = dungeonDefinitions.enemies.find(e => e.id === enemy.onDefeat.into);
+            if (oozeDef) {
+              for (let i = 0; i < enemy.onDefeat.count; i++) {
+                // Find an empty adjacent tile
+                const adjacent = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y:0}].map(d => ({x: enemy.x+d.x, y: enemy.y+d.y}));
+                const emptyTile = adjacent.find(t => board[`${t.y},${t.x}`]?.type === 'empty');
+                if(emptyTile) {
+                  const newOoze = {
+                    ...oozeDef,
+                    id: `ooze_${Date.now()}_${i}`,
+                    baseId: oozeDef.id,
+                    x: emptyTile.x, y: emptyTile.y,
+                    maxHp: oozeDef.hp,
+                  };
+                  newEnemiesToAdd.push(newOoze);
+                  board[`${emptyTile.y},${emptyTile.x}`] = { type: 'enemy', enemyId: newOoze.id };
+                }
+              }
+              log.unshift({ message: `The ${enemy.name} splits into smaller oozes!`, style: 'text-lime-400' });
+            }
+          }
         }
       });
-      newState.enemies = enemies.filter(e => !enemiesToRemove.includes(e.id));
+      newState.enemies = [...enemies.filter(e => !enemiesToRemove.includes(e.id)), ...newEnemiesToAdd];
       mainTarget = newState.enemies.find(e => e.id === targetEnemy.id);
       if (mainTarget) {
         const retaliates = mainTarget.isRanged || distance <= 1.5;
@@ -1887,59 +1969,49 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
     return () => clearInterval(gameLoop);
   }, []);
 
-  // DECOUPLED SAVE LOGIC: This single effect handles both periodic and exit saves efficiently.
+// WITH THIS SINGLE, MORE EFFICIENT useEffect BLOCK
+  // EFFICIENT OFFLINE & SAVE LOGIC: This single effect runs only once when the
+  // component mounts. It calculates offline progress and saves it immediately.
   useEffect(() => {
-    // This effect runs ONLY ONCE.
-    const periodicSave = setInterval(() => {
-      // It reads from refs to get the latest data without needing dependencies.
-      updateGameStateInFirestore({ 
-        lab_state: { 
-          ...labStateRef.current, 
-          sciencePoints: localSciencePointsRef.current,
-          lastLogin: serverTimestamp()
-        } 
-      });
-    }, 1800000); // 30 minutes
+    if (lab_state && lab_state.lastLogin && !hasRunOfflineCalc.current) {
+      hasRunOfflineCalc.current = true; // Prevent re-running
 
-    // The cleanup function runs when the component unmounts (e.g., switching tabs).
-    return () => {
-      clearInterval(periodicSave);
-      // This is the critical save-on-exit.
-      updateGameStateInFirestore({ 
-        lab_state: { 
-          ...labStateRef.current, 
-          sciencePoints: localSciencePointsRef.current,
-          lastLogin: serverTimestamp()
-        } 
-      }).then(() => {
-        // After saving, check the achievement based on the final total.
-        processAchievement('sciencePoints', localSciencePointsRef.current);
-      });
-    };
-  }, [updateGameStateInFirestore]); // This dependency is stable and will not cause re-runs.
-
-  // OFFLINE PROGRESS: This effect now only calculates progress and updates local state.
-  useEffect(() => {
-    // It runs only once when the component first loads.
-    if (lab_state && !hasRunOfflineCalc.current) {
-      if (lab_state.lastLogin) {
-        const lastLoginTime = lab_state.lastLogin.toDate();
-        const currentTime = new Date();
-        const timeDifferenceSeconds = Math.round((currentTime - lastLoginTime) / 1000);
-        const THIRTY_MINUTES_S = 30 * 60;
-
-        if (timeDifferenceSeconds > THIRTY_MINUTES_S) {
-          const pointsEarned = timeDifferenceSeconds * sciencePerSecond.current;
-          if (pointsEarned > 0) {
-            // It ONLY updates the local state, preventing any database write loops.
-            setLocalSciencePoints(prev => prev + pointsEarned);
-            showMessageBox(`Welcome back! You generated ${formatNumber(pointsEarned)} Science Points.`, 'info', 5000);
-          }
+      const lastLoginTime = lab_state.lastLogin.toDate();
+      const currentTime = new Date();
+      const timeDifferenceSeconds = Math.round((currentTime - lastLoginTime) / 1000);
+      
+      // We only calculate if the user has been away for more than a minute.
+      if (timeDifferenceSeconds > 60) {
+        const pointsEarned = timeDifferenceSeconds * sciencePerSecond.current;
+        
+        if (pointsEarned > 0) {
+          const newTotalPoints = (lab_state.sciencePoints || 0) + pointsEarned;
+          
+          // Perform a single, efficient write to save the new total.
+          updateGameStateInFirestore({
+            lab_state: {
+              ...lab_state,
+              sciencePoints: newTotalPoints,
+              lastLogin: serverTimestamp(),
+            },
+          }).then(() => {
+            // Update local state *after* successful save to ensure sync.
+            setLocalSciencePoints(newTotalPoints);
+            showMessageBox(
+              `Welcome back! You generated ${formatNumber(pointsEarned)} Science Points.`,
+              'info',
+              5000,
+            );
+            // Process achievements after the update is confirmed.
+            processAchievement('sciencePoints', newTotalPoints);
+          });
         }
       }
-      hasRunOfflineCalc.current = true;
     }
-  }, [lab_state]); // Dependency is safe as the ref lock prevents re-runs.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lab_state?.lastLogin]); // This dependency ensures the effect runs when login data is available.
+
+
 
   // FIX: This now returns JSX, preventing conditional hook calls
   if (!lab_state) {
@@ -1973,23 +2045,37 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
   };
 
   const handlePrestige = () => actionLock(async () => {
-    if (localSciencePoints < PRESTIGE_THRESHOLD) { showMessageBox("Not enough Science Points to prestige.", "error"); return; }
-    
-    const newPrestigeLevel = (lab_state.prestigeLevel || 0) + 1;
-    const newLabState = {
-      sciencePoints: 0,
-      labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
-      labXpUpgrades: {},
-      prestigeLevel: newPrestigeLevel,
-      lastLogin: serverTimestamp(),
-    };
+    if (localSciencePoints < PRESTIGE_THRESHOLD) { showMessageBox("Not enough Science Points.", "error"); return; }
+    if (!db || !userId) return;
+
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/profile/doc`);
+    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/gameState/doc`);
 
     try {
-      await updateProfileInFirestore({ cooldowns: { ...profile.cooldowns, prestigeLab: serverTimestamp() } });
-      await updateGameStateInFirestore({ lab_state: newLabState });
+      await runTransaction(db, async (transaction) => {
+        const [profileDoc, gameStateDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(gameStateDocRef)]);
+        if (!profileDoc.exists() || !gameStateDoc.exists()) throw new Error("User data missing.");
+
+        const serverProfile = profileDoc.data();
+        const serverGameState = gameStateDoc.data();
+        const newPrestigeLevel = (serverGameState.lab_state.prestigeLevel || 0) + 1;
+        const newLabState = {
+          sciencePoints: 0,
+          labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
+          labXpUpgrades: {},
+          prestigeLevel: newPrestigeLevel,
+          lastLogin: serverTimestamp(),
+        };
+
+        transaction.update(profileDocRef, { 
+          cooldowns: { ...(serverProfile.cooldowns || {}), prestigeLab: serverTimestamp() },
+          lastActionTimestamp: serverTimestamp()
+        });
+        transaction.update(gameStateDocRef, { lab_state: newLabState });
+      });
       
       setLocalSciencePoints(0);
-      showMessageBox(`Prestige successful! Level ${newPrestigeLevel}. You gain a +10% boost to all future generation.`, "info", 6000);
+      showMessageBox(`Prestige successful! Level ${(lab_state.prestigeLevel || 0) + 1}.`, "info", 6000);
     } catch (error) {
       const errorMsg = error.message.includes('permission-denied') ? "You're acting too quickly!" : "Server error during prestige.";
       showMessageBox(errorMsg, "error");
@@ -2188,22 +2274,22 @@ const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileI
   // FIX: Rebalanced attack speeds for better gameplay and corrected the Dragon's speed.
   const towerTypes = {
     free: [
-      { id: 'archer', name: 'Archer', cost: 100, damage: 3, range: 5, attackSpeed: 1 }, // 1 attack/sec
-      { id: 'cannon', name: 'Cannon', cost: 200, damage: 5, range: 4, attackSpeed: 0.5 }, // 1 attack/2 sec
-      { id: 'icemage', name: 'Ice Mage', cost: 500, damage: 2, range: 5, attackSpeed: 1, slow: 0.5 }, // 1 attack/sec
-      { id: 'barracks', name: 'Barracks', cost: 800, damage: 0, range: 0, attackSpeed: 0, spawnRate: 5 },
-      { id: 'ballista', name: 'Ballista', cost: 1000, damage: 10, range: 6, attackSpeed: 0.3 }, // 1 attack/3.3 sec
+      { id: 'archer', name: 'Archer', cost: 100, damage: 3, range: 5, attackSpeed: 1, projectileType: 'arrow' },
+      { id: 'cannon', name: 'Cannon', cost: 200, damage: 5, range: 4, attackSpeed: 0.5, projectileType: 'cannonball' },
+      { id: 'icemage', name: 'Ice Mage', cost: 500, damage: 2, range: 5, attackSpeed: 1, slow: 0.5, projectileType: 'iceShard' },
+      { id: 'barracks', name: 'Barracks', cost: 800, damage: 0, range: 0, attackSpeed: 0, spawnRate: 5, projectileType: null },
+      { id: 'ballista', name: 'Ballista', cost: 1000, damage: 10, range: 6, attackSpeed: 0.3, projectileType: 'bolt' },
     ],
     unlockable: [
-            { id: 'fire', name: 'Fire Tower', cost: 800, damage: 7, range: 6, attackSpeed: 1.2, dot: 1 }, // 1.2 attacks/sec
-      { id: 'tesla', name: 'Tesla', cost: 900, damage: 7, range: 6, attackSpeed: 1.5, chain: 3 }, // 1.5 attacks/sec
-      { id: 'poison', name: 'Poison Tower', cost: 1000, damage: 2, range: 5, attackSpeed: 1.2, poison: 10 }, // 1.2 attacks/sec
-      { id: 'sniper', name: 'Sniper', cost: 1500, damage: 20, range: 8, attackSpeed: 0.2 }, // 1 attack/5 sec
-      { id: 'dragon', name: 'Dragon', cost: 2000, damage: 0.5, range: 6, attackSpeed: 50, aoe: 2 }, // 1 attack/2.5 sec (damage buffed to compensate)
+      { id: 'fire', name: 'Fire Tower', cost: 800, damage: 7, range: 6, attackSpeed: 1.2, dot: 1, projectileType: 'fireball' },
+      { id: 'tesla', name: 'Tesla', cost: 900, damage: 7, range: 6, attackSpeed: 1.5, chain: 3, projectileType: 'lightning' },
+      { id: 'poison', name: 'Poison Tower', cost: 1000, damage: 2, range: 5, attackSpeed: 1.2, poison: 10, projectileType: 'poisonCloud' },
+      { id: 'sniper', name: 'Sniper', cost: 1500, damage: 20, range: 8, attackSpeed: 0.2, projectileType: 'bullet' },
+      { id: 'dragon', name: 'Dragon', cost: 2000, damage: 0.5, range: 6, attackSpeed: 50, aoe: 2, projectileType: 'fireball' },
     ],
-    dungeon_unlockable: [ // NEW TOWER CATEGORY
-        { id: 'dungeoncannon', name: 'Dungeon Cannon', cost: 1500, damage: 25, range: 5, attackSpeed: 0.4, floorRequired: 10, aoe: 1.0 }, // A stronger cannon
-        { id: 'crystalspire', name: 'Crystal Spire', cost: 2200, damage: 40, range: 7, attackSpeed: 0.2, floorRequired: 20 }, // A stronger sniper
+    dungeon_unlockable: [
+        { id: 'dungeoncannon', name: 'Dungeon Cannon', cost: 1500, damage: 25, range: 5, attackSpeed: 0.4, floorRequired: 10, aoe: 1.0, projectileType: 'cannonball' },
+        { id: 'crystalspire', name: 'Crystal Spire', cost: 2200, damage: 40, range: 7, attackSpeed: 0.2, floorRequired: 20, projectileType: 'crystalShard' },
     ],
   };
 
@@ -2343,7 +2429,8 @@ const startWave = () => {
     const newEnemies = generateWave(waveNumber);
     
     let updateData = { 
-        td_wave: waveNumber 
+        td_wave: waveNumber,
+        cooldowns: { ...(gameState.cooldowns || {}), startWave: serverTimestamp() }
     };
 
     // CHECKPOINT LOGIC: Save tower configuration every 3 waves
@@ -2424,8 +2511,7 @@ const startWave = () => {
             );
             if (targetIndex !== -1) {
               const target = enemiesAfterAttack[targetIndex];
-              newProjectiles.push({ id: `p_${Date.now()}_${Math.random()}`, from: { x: tower.x, y: tower.y }, to: { x: target.x, y: target.y }, expires: Date.now() + 300 });
-              enemiesAfterAttack[targetIndex] = { ...target, health: target.health - tower.damage, justHit: true };
+              newProjectiles.push({ id: `p_${Date.now()}_${Math.random()}`, from: { x: tower.x, y: tower.y }, to: { x: target.x, y: target.y }, type: tower.projectileType, expires: Date.now() + 300 });              enemiesAfterAttack[targetIndex] = { ...target, health: target.health - tower.damage, justHit: true };
               return { ...tower, lastAttack: Date.now() };
             }
           }
@@ -2605,7 +2691,7 @@ const startWave = () => {
             {renderBoard()}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
               {renderEnemies()}
-              {localWaveState.projectiles.map(p => <Projectile key={p.id} from={p.from} to={p.to} />)}
+              {localWaveState.projectiles.map(p => <Projectile key={p.id} from={p.from} to={p.to} type={p.type} />)}
             </div>
           </div>
           <div className="mt-4 flex gap-4">
@@ -2850,8 +2936,7 @@ const FocusMode = ({ session, onEnd, onComplete }) => {
 };
 
 // Component for the Sanctum
-const Sanctum = ({ inventory, trophies, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {
-  const [editMode, setEditMode] = useState(false);
+const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {  const [editMode, setEditMode] = useState(false);
   const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);
   const [ghostPosition, setGhostPosition] = useState(null);
   const [selectedPlacedItem, setSelectedPlacedItem] = useState(null);
@@ -3104,7 +3189,7 @@ const Sanctum = ({ inventory, trophies, updateInventoryInFirestore, showMessageB
           <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 w-full max-w-3xl max-h-[80vh] flex flex-col text-white" onClick={e => e.stopPropagation()}>
             <h3 className="text-2xl font-bold mb-6 text-center">My Trophy Wall</h3>
             <div className="overflow-y-auto pr-2 space-y-4">
-              {trophies.length > 0 ? trophies.map(trophy => (
+              {completedAssignments.length > 0 ? completedAssignments.map(trophy => (
                 <div key={trophy.id} className="bg-slate-700/50 p-4 rounded-lg">
                   <p className="font-bold text-lg text-yellow-400">{trophy.assignment}</p>
                   <p className="text-sm text-slate-300">Class: {trophy.class}</p>
@@ -3397,7 +3482,8 @@ const generateQuests = () => {
   return { daily, weekly, lastUpdated: serverTimestamp() };
 };
 const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
+
+    const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
@@ -3423,7 +3509,31 @@ const useWindowSize = () => {
   }, []);
   return windowSize;
 };
+const cacheData = (key, data) => {
+  const item = {
+    data: data,
+    timestamp: Date.now(),
+  };
+  sessionStorage.setItem(key, JSON.stringify(item));
+};
 
+const getCachedData = (key, maxAgeSeconds) => {
+  const itemStr = sessionStorage.getItem(key);
+  if (!itemStr) return null;
+
+  try {
+    const item = JSON.parse(itemStr);
+    const now = Date.now();
+    if (now - item.timestamp > maxAgeSeconds * 1000) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+    return item.data;
+  } catch (error) {
+    console.error("Failed to parse cached data:", error);
+    return null;
+  }
+};
 const AuthComponent = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -3896,7 +4006,7 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
                          e.message === "ALREADY_OWNED" ? "You already own this item." : "A server error occurred.";
         showMessageBox(errorMsg, "error");
     }
-  }), [user, db, appId, showMessageBox, actionLock]);
+  }), [user, db, appId, showMessageBox, actionLock, processAchievement]);
 
   const handleBuyItem = async (item) => actionLock(async () => {
     if (!db || !user) return;
@@ -3935,23 +4045,45 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
   });
   
   // --- Handlers Refactored for Draft State ---
-  const handleSaveUsername = async () => {
+  const handleSaveUsername = () => actionLock(async () => {
     const trimmedUsername = usernameInput.trim();
     if (trimmedUsername.length < 3 || trimmedUsername.length > 15) { showMessageBox("Username must be 3-15 characters.", "error"); return; }
     if (/\s/.test(trimmedUsername)) { showMessageBox("Username cannot contain spaces.", "error"); return; }
+    if (trimmedUsername === profile.username) { showMessageBox("This is already your username.", "info"); return; }
 
-    const usersRef = collection(db, `artifacts/${appId}/public/data/stats`);
-    const q = query(usersRef, where("username", "==", trimmedUsername));
-    
+    const newUsernameLower = trimmedUsername.toLowerCase();
+    const usernameDocRef = doc(db, `usernames/${newUsernameLower}`);
+
     try {
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty && querySnapshot.docs[0].id !== userId) {
-        showMessageBox("This username is already taken.", "error");
-        return;
-      }
-      setDraftState(prev => ({ ...prev, username: trimmedUsername }));
-    } catch (error) { showMessageBox("Could not validate username.", "error"); }
-  };
+      await runTransaction(db, async (transaction) => {
+        const usernameDoc = await transaction.get(usernameDocRef);
+        
+        // Check if the username is taken by someone else
+        if (usernameDoc.exists() && usernameDoc.data().userId !== user.uid) {
+          throw new Error("This username is already taken.");
+        }
+
+        // If the user is changing from an old username, prepare to delete the old entry
+        const oldUsernameLower = profile.username?.toLowerCase();
+        if (oldUsernameLower && oldUsernameLower !== newUsernameLower) {
+          const oldUsernameDocRef = doc(db, `usernames/${oldUsernameLower}`);
+          transaction.delete(oldUsernameDocRef);
+        }
+        
+        // Create the new username entry
+        transaction.set(usernameDocRef, { userId: user.uid });
+        
+        // Update the draft state in the UI
+        setDraftState(prev => ({ ...prev, username: trimmedUsername }));
+      });
+      
+      showMessageBox(`Username set to "${trimmedUsername}"! Remember to save your profile changes.`, "info");
+    } catch (error) {
+      console.error("Username validation failed:", error);
+      showMessageBox(error.message, "error");
+    }
+  });
+
 
   const handleEquipItem = (item) => {
     setDraftState(prev => {
@@ -4192,7 +4324,7 @@ const QuestsComponent = ({ quests }) => {
 };
 // Component for Stats + XP Tracker Sheet
 
-  const StatsXPTracker = ({ profile, inventory, gameProgress, stats, assignments, trophies, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
+  const StatsXPTracker = ({ profile, inventory, gameProgress, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
     const persona = getProductivityPersona();
     const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => profile.currentLevel >= t.level) || { title: 'Novice Learner' };
     const currentTitle = inventory.equippedItems.title ? cosmeticItems.titles.find(t => t.id === inventory.equippedItems.title)?.name : currentLevelBasedTitle.title;
@@ -4566,13 +4698,13 @@ const QuestsComponent = ({ quests }) => {
   };
 
  // Component for GPA & Tags Analytics Sheet
-  const GPATagsAnalytics = ({ trophies }) => {
+  const GPATagsAnalytics = ({ completedAssignments }) => {
     const calculateGPA = (pointsEarned, pointsMax) => {
       if (!pointsMax || pointsMax <= 0) return null;
       return ((pointsEarned / pointsMax) * 4.0).toFixed(2);
     };
 
-    const completedAssignmentsWithScores = trophies.filter(t =>
+    const completedAssignmentsWithScores = completedAssignments.filter(t =>
       t.pointsEarned !== undefined && t.pointsEarned !== null &&
       t.pointsMax !== undefined && t.pointsMax !== null && t.pointsMax > 0
     );
@@ -4693,14 +4825,15 @@ const QuestsComponent = ({ quests }) => {
       </div>
     );
   };
-// NEW FEATURE: Study Zone (Platformer + Flashcards)
+// NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
 const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, processAchievement }) => {
     const [activeTab, setActiveTab] = useState('game');
-    const studyZoneState = gameState.studyZone || { flashcardsText: '', platformerHighScore: 0 };
+    const [isStudying, setIsStudying] = useState(false);
+    const studyZoneState = gameState.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
     
-    const updateStudyZoneState = (newState) => {
+    const updateStudyZoneState = useCallback((newState) => {
         updateGameStateInFirestore({ studyZone: { ...studyZoneState, ...newState } });
-    };
+    }, [studyZoneState, updateGameStateInFirestore]);
 
     const StudyZoneTabButton = ({ tabName, children }) => (
       <button onClick={() => setActiveTab(tabName)} className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === tabName ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>
@@ -4723,7 +4856,11 @@ const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameSta
         </div>
         <div className="p-6">
           {activeTab === 'game' && <PlatformerGame profile={profile} updateProfileInFirestore={updateProfileInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
-          {activeTab === 'flashcards' && <FlashcardManager studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} />}
+          {activeTab === 'flashcards' && (
+            isStudying ? 
+            <FlashcardSession studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
+            <FlashcardManager studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onStartStudy={() => setIsStudying(true)} />
+          )}
         </div>
       </div>
     </div>
@@ -4733,20 +4870,13 @@ const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameSta
 
 // --- Sub-components for Study Zone ---
 
-const FlashcardManager = ({ studyZoneState, updateStudyZoneState }) => {
+const FlashcardManager = ({ studyZoneState, updateStudyZoneState, onStartStudy }) => {
   const [text, setText] = useState(studyZoneState.flashcardsText || '');
-  const [parsedCount, setParsedCount] = useState(0);
-  const debouncedText = useDebounce(text, 1000); // Debounce with a 1-second delay
+  const [cardsToReview, setCardsToReview] = useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const isSavingRef = useRef(false);
-
-  // Sync local text area with Firebase state on initial load or external change
-  useEffect(() => {
-    setText(studyZoneState.flashcardsText || '');
-  }, [studyZoneState.flashcardsText]);
-  
   const parseFlashcards = useCallback((rawText) => {
-    const lines = rawText.split('\n').filter(line => line.trim() !== '');
+    const lines = (rawText || '').split('\n').filter(line => line.trim() !== '');
     const separators = ['→', '>>', '-'];
     return lines.map(line => {
       for (const sep of separators) {
@@ -4761,43 +4891,200 @@ const FlashcardManager = ({ studyZoneState, updateStudyZoneState }) => {
     }).filter(Boolean);
   }, []);
 
-  // Update parsed count whenever the text changes
-  useEffect(() => {
-    setParsedCount(parseFlashcards(text).length);
-  }, [text, parseFlashcards]);
+  const calculateReviewableCards = useCallback(() => {
+      const today = new Date().setHours(0, 0, 0, 0);
+      const reviewable = Object.values(studyZoneState.flashcardData || {}).filter(card => 
+          new Date(card.nextReviewDate).getTime() <= today
+      ).length;
+      setCardsToReview(reviewable);
+  }, [studyZoneState.flashcardData]);
 
-  // Effect to auto-save the debounced text
+  // Effect to update the review count when data changes
   useEffect(() => {
-    // Only save if the debounced text is different from what's in Firestore
-    if (debouncedText !== studyZoneState.flashcardsText) {
-      isSavingRef.current = true;
-      updateStudyZoneState({ flashcardsText: debouncedText });
-      setTimeout(() => { isSavingRef.current = false; }, 500); // Simple flag to show saving status
-    }
-  }, [debouncedText, studyZoneState.flashcardsText, updateStudyZoneState]);
+    calculateReviewableCards();
+  }, [calculateReviewableCards]);
+  
+  // Effect to track unsaved changes
+  useEffect(() => {
+    setHasUnsavedChanges(text !== studyZoneState.flashcardsText);
+  }, [text, studyZoneState.flashcardsText]);
+
+  // Update local text when the source of truth from Firebase changes
+  useEffect(() => {
+    setText(studyZoneState.flashcardsText || '');
+  }, [studyZoneState.flashcardsText]);
+
+
+  const handleSave = async () => {
+    const parsedCards = parseFlashcards(text);
+    const oldData = studyZoneState.flashcardData || {};
+    const newData = {};
+    const today = new Date().setHours(0, 0, 0, 0);
+    const frontsFromText = new Set(parsedCards.map(c => c.front));
+
+    // 1. Carry over or update existing cards that are still in the text
+    parsedCards.forEach(card => {
+      const existing = oldData[card.front];
+      newData[card.front] = existing 
+        ? { ...existing, back: card.back } // Update back, keep SRS data
+        : { back: card.back, repetition: 0, easinessFactor: 2.5, interval: 0, nextReviewDate: today }; // New card
+    });
+    
+    // 2. Carry over old cards that were removed from the text (so SRS data isn't lost)
+    Object.keys(oldData).forEach(front => {
+        if (!frontsFromText.has(front)) {
+            newData[front] = oldData[front];
+        }
+    });
+
+    await updateStudyZoneState({ flashcardData: newData, flashcardsText: text });
+    showMessageBox("Flashcards saved!", "info");
+  };
 
   return (
     <div>
-      <h3 className="text-2xl font-semibold text-white mb-2">Manage Your Flashcards</h3>
-      <p className="text-slate-400 mb-4">Enter your flashcards below, one per line. Use "front → back", "front >> back", or "front - back".</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <div>
+          <h3 className="text-2xl font-semibold text-white">Manage Your Flashcards</h3>
+          <p className="text-slate-400">Enter cards as "Front → Back". Click Save to sync.</p>
+        </div>
+        <div className="flex items-center gap-2">
+           <button 
+            onClick={handleSave} 
+            disabled={!hasUnsavedChanges}
+            className="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
+          >
+            {hasUnsavedChanges ? "Save Changes" : "Saved"}
+          </button>
+          <button 
+            onClick={onStartStudy} 
+            disabled={cardsToReview === 0 || hasUnsavedChanges}
+            className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
+            title={hasUnsavedChanges ? "Save changes before studying" : ""}
+          >
+            Study ({cardsToReview} Due)
+          </button>
+        </div>
+      </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg text-slate-300 font-mono focus:ring-2 focus:ring-indigo-500"
         placeholder={"Example:\nCapital of France → Paris\n2 + 2 - 4"}
       />
-      <div className="mt-4 flex justify-between items-center">
-        <p className="text-slate-400">Successfully parsed <span className="font-bold text-white">{parsedCount}</span> cards.</p>
-        <div className="text-right">
-          <p className={`text-sm transition-opacity duration-300 ${isSavingRef.current ? 'opacity-100' : 'opacity-0'} text-slate-400`}>
-            Saving...
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
 
+const FlashcardSession = ({ studyZoneState, updateStudyZoneState, onSessionEnd }) => {
+    const [studyQueue, setStudyQueue] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isFlipped, setIsFlipped] = useState(false);
+
+    useEffect(() => {
+        const today = new Date().setHours(0, 0, 0, 0);
+        const allCards = Object.entries(studyZoneState.flashcardData || {});
+        const reviewable = allCards
+            .filter(([front, data]) => new Date(data.nextReviewDate).getTime() <= today)
+            .map(([front, data]) => ({ front, ...data }));
+
+        // Shuffle the queue
+        for (let i = reviewable.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [reviewable[i], reviewable[j]] = [reviewable[j], reviewable[i]];
+        }
+        setStudyQueue(reviewable);
+    }, [studyZoneState.flashcardData]);
+
+    const calculateSRS = (cardData, quality) => {
+        let { repetition, easinessFactor, interval } = cardData;
+
+        if (quality < 3) {
+            repetition = 0;
+            interval = 1;
+        } else {
+            repetition += 1;
+            easinessFactor = Math.max(1.3, easinessFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+            if (repetition === 1) interval = 1;
+            else if (repetition === 2) interval = 6;
+            else interval = Math.ceil(interval * easinessFactor);
+        }
+
+        const nextReviewDate = new Date();
+        nextReviewDate.setDate(nextReviewDate.getDate() + interval);
+        
+        return { ...cardData, repetition, easinessFactor, interval, nextReviewDate: nextReviewDate.setHours(0,0,0,0) };
+    };
+
+    const handleRating = (quality) => {
+        const cardToUpdate = studyQueue[currentIndex];
+        const updatedSRSData = calculateSRS(cardToUpdate, quality);
+        
+        const { front, back, ...srsData } = updatedSRSData;
+        const newFlashcardData = { ...studyZoneState.flashcardData, [cardToUpdate.front]: srsData };
+        
+        updateStudyZoneState({ flashcardData: newFlashcardData });
+
+        if (currentIndex + 1 >= studyQueue.length) {
+            onSessionEnd();
+        } else {
+            setCurrentIndex(i => i + 1);
+            setIsFlipped(false);
+        }
+    };
+
+    if (studyQueue.length === 0) {
+        return (
+            <div className="text-center">
+                <h3 className="text-2xl font-semibold text-white mb-2">All Done!</h3>
+                <p className="text-slate-400 mb-4">You've reviewed all your due cards for today. Great work!</p>
+                <button onClick={onSessionEnd} className="bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700">Back to Manager</button>
+            </div>
+        );
+    }
+    
+    const currentCard = studyQueue[currentIndex];
+    const progressPercent = ((currentIndex + 1) / studyQueue.length) * 100;
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-semibold text-white">Study Session</h3>
+                <button onClick={onSessionEnd} className="text-sm text-slate-400 hover:text-white">End Session</button>
+            </div>
+            
+            <div className="w-full bg-slate-700 rounded-full h-2.5 mb-6">
+              <div className="bg-indigo-500 h-2.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+            </div>
+
+            <div className="relative w-full h-64 perspective-1000">
+                <div className={`absolute w-full h-full transition-transform duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4">
+                        <p className="text-slate-400 mb-2">FRONT</p>
+                        <p className="text-3xl text-center font-bold text-white">{currentCard.front}</p>
+                    </div>
+                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4 rotate-y-180">
+                        <p className="text-slate-400 mb-2">BACK</p>
+                        <p className="text-3xl text-center font-bold text-white">{currentCard.back}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-6">
+                {!isFlipped ? (
+                    <button onClick={() => setIsFlipped(true)} className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-blue-700">Show Answer</button>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onClick={() => handleRating(0)} className="py-3 bg-red-800 hover:bg-red-700 rounded-lg">Forgot</button>
+                        <button onClick={() => handleRating(3)} className="py-3 bg-orange-700 hover:bg-orange-600 rounded-lg">Hard</button>
+                        <button onClick={() => handleRating(4)} className="py-3 bg-green-700 hover:bg-green-600 rounded-lg">Good</button>
+                        <button onClick={() => handleRating(5)} className="py-3 bg-sky-600 hover:bg-sky-500 rounded-lg">Easy</button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}; 
 const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateProfileInFirestore, showMessageBox, processAchievement }) => {
 
   // --- Core Game Constants ---
@@ -4811,31 +5098,25 @@ const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateP
   const PLAYER_HEIGHT = 38;
   const TILE_SIZE = 40;
   const ENEMY_SPEED = 1;
+  const JUMP_PAD_BOOST = -20;
+  const TURRET_FIRE_RATE = 180; // Every 3 seconds
 
   // --- State Management ---
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [isXpMode, setIsXpMode] = useState(false);
   const [uiGameState, setUiGameState] = useState('menu');
-  const [tick, setTick] = useState(0); // This state will trigger re-renders
+  const [tick, setTick] = useState(0);
   
-  // --- Refs for Game Loop (to prevent re-renders) ---
+  // --- Refs for Game Loop ---
   const gameStateRef = useRef('menu');
-  const gameContainerRef = useRef(null);
-  const levelRef = useRef({ platforms: [], enemies: [], coins: [], flagpole: null });
-  const enemiesRef = useRef([]);
-  const coinsRef = useRef([]);
+  const levelRef = useRef({ platforms: [], enemies: [], coins: [], flagpole: null, projectiles: [] });
   const keysRef = useRef({});
   const cameraXRef = useRef(0);
   const playerState = useRef({
     x: 100, y: GAME_HEIGHT - TILE_SIZE - PLAYER_HEIGHT,
-    vx: 0, vy: 0,
-    onGround: false,
-    canDoubleJump: true,
-    coyoteTime: 0,
-    jumpBuffer: 0,
-    scaleY: 1, // For visual effects
-    invincible: 0, // Invincibility frames after getting hit
+    vx: 0, vy: 0, onGround: false, canDoubleJump: true,
+    coyoteTime: 0, jumpBuffer: 0, scaleY: 1, invincible: 0,
   });
 
   const setGameState = (newState) => {
@@ -4856,27 +5137,44 @@ const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateP
       return null;
     }).filter(Boolean);
   }, [studyZoneState.flashcardsText]);
-// A new, memoized component for rendering the game. It only re-renders when `tick` changes.
-const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, cameraXRef, TILE_SIZE, PLAYER_WIDTH, PLAYER_HEIGHT }) => {
-  // The camera calculation now lives inside the component that uses it.
-  cameraXRef.current = Math.max(0, playerState.current.x - 800 / 3);
+
+const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE, PLAYER_WIDTH, PLAYER_HEIGHT }) => {
+  cameraXRef.current = Math.max(0, playerState.current.x - GAME_WIDTH / 3);
   
   return (
     <>
-      {/* Platforms */}
-      {levelRef.current.platforms.map((p, i) => <div key={`p_${i}`} className="absolute bg-green-800 border-t-4 border-green-500" style={{ width: p.width, height: p.height, transform: `translate(${p.x - cameraXRef.current}px, ${p.y}px)` }}/>)}
+      {/* Level Geometry */}
+      {levelRef.current.platforms.map((p, i) => {
+        let content;
+        switch(p.type) {
+          case 'crumble': content = <div className="w-full h-full bg-yellow-800 border-t-4 border-yellow-600 opacity-80" />; break;
+          case 'jumpPad': content = <div className="w-full h-full bg-emerald-500 border-t-4 border-emerald-300" />; break;
+          case 'spike': content = <div className="w-full h-full text-slate-500"><svg viewBox="0 0 40 40"><path d="M0 40 L20 0 L40 40 Z" fill="currentColor"/></svg></div>; break;
+          default: content = <div className="w-full h-full bg-green-800 border-t-4 border-green-500" />;
+        }
+        return <div key={`p_${i}`} className="absolute" style={{ width: p.width, height: p.height, transform: `translate(${p.x - cameraXRef.current}px, ${p.y}px)` }}>{content}</div>
+      })}
       
-      {/* Enemies */}
-      {enemiesRef.current.map((e) => <div key={e.id} className="absolute" style={{ width: TILE_SIZE, height: TILE_SIZE, transform: `translate(${e.x - cameraXRef.current}px, ${e.y}px)`}}><svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="5" fill="#7e22ce"/><rect x="12" y="15" width="5" height="10" fill="white"/><rect x="23" y="15" width="5" height="10" fill="white"/></svg></div>)}
+      {/* Enemies & Projectiles */}
+      {levelRef.current.enemies.map((e) => {
+        let enemySprite;
+        switch(e.type) {
+          case 'spiky': enemySprite = <svg viewBox="0 0 40 40"><circle cx="20" cy="25" r="15" fill="#f97316"/><path d="M5 25 L20 10 L35 25 Z" fill="#fdba74"/></svg>; break;
+          case 'turret': enemySprite = <svg viewBox="0 0 40 40"><rect x="5" y="15" width="30" height="20" rx="5" fill="#475569"/><circle cx="20" cy="15" r="10" fill="#ef4444"/></svg>; break;
+          default: enemySprite = <svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="5" fill="#7e22ce"/><rect x="12" y="15" width="5" height="10" fill="white"/><rect x="23" y="15" width="5" height="10" fill="white"/></svg>;
+        }
+        return <div key={e.id} className="absolute" style={{ width: TILE_SIZE, height: TILE_SIZE, transform: `translate(${e.x - cameraXRef.current}px, ${e.y}px)`}}>{enemySprite}</div>
+      })}
+      {levelRef.current.projectiles.map(p => <div key={p.id} className="absolute bg-red-500 rounded-full" style={{ width: 10, height: 10, transform: `translate(${p.x - cameraXRef.current}px, ${p.y}px)` }} />)}
+
+      {/* Collectibles */}
+      {levelRef.current.coins.map((c) => <div key={c.id} className="absolute animate-pulse" style={{ width: TILE_SIZE/2, height: TILE_SIZE/2, transform: `translate(${c.x - cameraXRef.current}px, ${c.y}px)`}}><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#facc15"/><circle cx="10" cy="10" r="7" fill="#fde047"/><text x="50%" y="50%" dy=".3em" textAnchor="middle" fill="#ca8a04" fontSize="12" fontWeight="bold">$</text></svg></div>)}
       
-      {/* Coins */}
-      {coinsRef.current.map((c) => <div key={c.id} className="absolute animate-pulse" style={{ width: TILE_SIZE/2, height: TILE_SIZE/2, transform: `translate(${c.x - cameraXRef.current}px, ${c.y}px)`}}><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10" fill="#facc15"/><circle cx="10" cy="10" r="7" fill="#fde047"/><text x="50%" y="50%" dy=".3em" textAnchor="middle" fill="#ca8a04" fontSize="12" fontWeight="bold">$</text></svg></div>)}
-      
-      {/* Flagpole */}
+      {/* Goal */}
       {levelRef.current.flagpole && <div className="absolute bg-gray-500" style={{ width: levelRef.current.flagpole.width, height: levelRef.current.flagpole.height, transform: `translate(${levelRef.current.flagpole.x - cameraXRef.current}px, ${levelRef.current.flagpole.y}px)` }}/>}
       
       {/* Player */}
-      <div className="absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerState.current.x - cameraXRef.current}px, ${playerState.current.y}px) scaleY(${playerState.current.scaleY})`, transition: 'transform 0.1s' }}>
+      <div className={`absolute transition-opacity duration-200 ${playerState.current.invincible > 0 && Math.floor(playerState.current.invincible / 5) % 2 === 0 ? 'opacity-50' : 'opacity-100'}`} style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerState.current.x - cameraXRef.current}px, ${playerState.current.y}px) scaleY(${playerState.current.scaleY})`, transition: 'transform 0.1s' }}>
          <svg viewBox="0 0 28 38" className="w-full h-full">
            <rect x="4" y="0" width="20" height="20" rx="10" fill="#fde047"/>
            <rect x="0" y="18" width="28" height="20" rx="5" fill="#be123c"/>
@@ -4887,56 +5185,66 @@ const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, 
     </>
   );
 });
-  const handleButtonPress = (key, isDown) => {
-    keysRef.current[key] = isDown;
-  };
-  // --- Level Generation ---
+
+  const handleButtonPress = (key, isDown) => { keysRef.current[key] = isDown; };
+
   const generateLevel = useCallback((currentLevel) => {
-    const platforms = [], enemies = [], coins = [];
-    let flagpole = null;
-    const levelLength = 150; // In tiles
+    const levelData = { platforms: [], enemies: [], coins: [], flagpole: null, projectiles: [] };
+    const levelLength = 150 + currentLevel * 10;
     let currentX = 0;
     let lastPlatformY = GAME_HEIGHT - TILE_SIZE;
 
-    // Starting platform
-    for (let i = 0; i < 10; i++) {
-        platforms.push({ x: i * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
-    }
+    for (let i = 0; i < 10; i++) levelData.platforms.push({ x: i * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, type: 'normal' });
     currentX = 10;
 
-    // Procedural generation loop
     while (currentX < levelLength - 15) {
+      const choice = Math.random();
+      if (choice < 0.7) { // Standard platform
         const gap = Math.floor(Math.random() * 3) + 1;
         currentX += gap;
-        const width = (Math.floor(Math.random() * 5) + 3);
+        if (gap > 1) levelData.platforms.push({x: (currentX-1)*TILE_SIZE, y: GAME_HEIGHT-TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, type: 'spike'});
+
+        const width = Math.floor(Math.random() * 5) + 3;
         const heightChange = (Math.floor(Math.random() * 5) - 2) * TILE_SIZE;
-        lastPlatformY = Math.max(GAME_HEIGHT - TILE_SIZE*5, Math.min(GAME_HEIGHT - TILE_SIZE, lastPlatformY + heightChange));
-        
+        lastPlatformY = Math.max(GAME_HEIGHT - TILE_SIZE * 5, Math.min(GAME_HEIGHT - TILE_SIZE, lastPlatformY + heightChange));
+
         for (let i = 0; i < width; i++) {
-            platforms.push({ x: (currentX + i) * TILE_SIZE, y: lastPlatformY, width: TILE_SIZE, height: TILE_SIZE });
-            if (i > 0 && i < width -1 && Math.random() < 0.5) { // Add coins
-                coins.push({ id: `c_${currentX+i}`, x: (currentX + i) * TILE_SIZE + (TILE_SIZE/4), y: lastPlatformY - TILE_SIZE*2 });
-            }
+          const platX = (currentX + i) * TILE_SIZE;
+          const type = Math.random() < 0.15 ? 'crumble' : 'normal';
+          levelData.platforms.push({ x: platX, y: lastPlatformY, width: TILE_SIZE, height: TILE_SIZE, type });
+          if (i > 0 && i < width - 1 && Math.random() < 0.5) {
+            levelData.coins.push({ id: `c_${currentX+i}`, x: platX + (TILE_SIZE/4), y: lastPlatformY - TILE_SIZE*2 });
+          }
         }
-        if (width > 3 && Math.random() < 0.4) { // Add an enemy
-            enemies.push({ id: `e_${currentX}`, x: (currentX + 1) * TILE_SIZE, y: lastPlatformY - TILE_SIZE, dir: -1, startX: (currentX+1)*TILE_SIZE, patrol: (width-2)*TILE_SIZE });
+
+        if (width > 3) {
+          const enemyTypeRoll = Math.random();
+          if (enemyTypeRoll < 0.3) levelData.enemies.push({ id: `e_${currentX}`, x: (currentX + 1) * TILE_SIZE, y: lastPlatformY - TILE_SIZE, dir: -1, type: 'patrol', startX: (currentX+1)*TILE_SIZE, patrol: (width-2)*TILE_SIZE });
+          else if (enemyTypeRoll < 0.5) levelData.enemies.push({ id: `e_${currentX}`, x: (currentX + 1) * TILE_SIZE, y: lastPlatformY - TILE_SIZE, dir: -1, type: 'spiky', startX: (currentX+1)*TILE_SIZE, patrol: (width-2)*TILE_SIZE });
+          else if (enemyTypeRoll < 0.6) levelData.enemies.push({ id: `e_${currentX}`, x: (currentX + 1) * TILE_SIZE, y: lastPlatformY - TILE_SIZE, type: 'turret', fireCooldown: TURRET_FIRE_RATE });
         }
         currentX += width;
+      } else { // Jump Pad challenge
+        const gap = 5;
+        currentX += gap;
+        levelData.platforms.push({ x: (currentX - gap) * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, type: 'jumpPad'});
+        const width = 3;
+        lastPlatformY = Math.max(GAME_HEIGHT - TILE_SIZE * 6, lastPlatformY - TILE_SIZE*3);
+        for (let i = 0; i < width; i++) {
+            levelData.platforms.push({ x: (currentX + i) * TILE_SIZE, y: lastPlatformY, width: TILE_SIZE, height: TILE_SIZE, type: 'normal' });
+            levelData.coins.push({ id: `c_${currentX+i}`, x: (currentX + i) * TILE_SIZE + (TILE_SIZE/4), y: lastPlatformY - TILE_SIZE });
+        }
+        currentX += width;
+      }
     }
-
-    // Ending platform
-    for (let i = 0; i < 15; i++) {
-        platforms.push({ x: (currentX + i) * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
-    }
-    flagpole = { x: (currentX + 5) * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE * 5, width: 20, height: TILE_SIZE * 4 };
     
-    levelRef.current = { platforms, enemies, coins, flagpole };
-    enemiesRef.current = enemies.map(e => ({...e}));
-    coinsRef.current = coins.map(c => ({...c}));
+    for (let i = 0; i < 15; i++) levelData.platforms.push({ x: (currentX + i) * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, type: 'normal' });
+    levelData.flagpole = { x: (currentX + 5) * TILE_SIZE, y: GAME_HEIGHT - TILE_SIZE * 5, width: 20, height: TILE_SIZE * 4 };
+    
+    levelRef.current = levelData;
   }, []);
   
-  // --- Game Start/Reset Logic ---
-  const resetPlayerState = (currentScore) => {
+  const resetPlayerState = useCallback((currentScore) => {
     playerState.current = {
       x: 100, y: GAME_HEIGHT - TILE_SIZE - PLAYER_HEIGHT,
       vx: 0, vy: 0, onGround: false, canDoubleJump: true,
@@ -4944,44 +5252,45 @@ const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, 
     };
     cameraXRef.current = 0;
     setScore(currentScore);
-  };
+  }, []);
   
-  const commonStartLogic = (keepScore = false) => {
+  const commonStartLogic = useCallback((keepScore = false) => {
     const currentScore = keepScore ? score : 0;
     setLevel(1);
     resetPlayerState(currentScore);
     generateLevel(1);
     setGameState('playing');
-  };
+  }, [score, resetPlayerState, generateLevel]);
 
-  const nextLevel = () => {
-    const newLevel = level + 1;
-    setLevel(newLevel);
+  const nextLevel = useCallback(() => {
+    setLevel(l => l + 1);
     resetPlayerState(score);
-    generateLevel(newLevel);
+    generateLevel(level + 1);
     setGameState('playing');
-  };
+  }, [level, score, generateLevel, resetPlayerState]);
 
-  const startGameWithFlashcards = () => { setIsXpMode(false); commonStartLogic(); };
-  const startXpLevel = () => {
+  const startGameWithFlashcards = useCallback(() => { setIsXpMode(false); commonStartLogic(); }, [commonStartLogic]);
+  const startXpLevel = useCallback(() => {
     if (profile.totalXP < 100) { showMessageBox("You need 100 XP to play a single level.", "error"); return; }
     updateProfileInFirestore({ totalXP: profile.totalXP - 100 });
     setIsXpMode(true);
     commonStartLogic();
-  };
+  }, [profile.totalXP, commonStartLogic, updateProfileInFirestore]);
 
-  // --- Main Game Loop ---
   useEffect(() => {
+    if (uiGameState !== 'playing') return;
+
     let lastTime = 0;
     let animationFrameId;
 
     const gameLoop = (timestamp) => {
-      const deltaTime = (timestamp - lastTime) / (1000 / 60); // Normalize to 60 FPS
+      const deltaTime = (timestamp - lastTime) / (1000 / 60);
       lastTime = timestamp;
 
       if (gameStateRef.current === 'playing') {
         const p = playerState.current;
-        const onGround = p.onGround;
+        p.onGround = false;
+        if (p.invincible > 0) p.invincible -= deltaTime;
 
         // --- Input & Movement ---
         let targetVx = 0;
@@ -4990,122 +5299,119 @@ const GameRenderer = React.memo(({ playerState, levelRef, enemiesRef, coinsRef, 
         p.x += targetVx * deltaTime;
         
         p.jumpBuffer = (keysRef.current['ArrowUp'] || keysRef.current['w'] || keysRef.current[' ']) ? 10 : p.jumpBuffer - 1;
-        p.coyoteTime = onGround ? 8 : p.coyoteTime - 1;
+        p.coyoteTime = p.coyoteTime - 1;
         
-        if (p.jumpBuffer > 0 && p.coyoteTime > 0) {
-          p.vy = JUMP_FORCE;
-          p.jumpBuffer = 0;
-          p.coyoteTime = 0;
-          p.scaleY = 1.3;
-        } else if (p.jumpBuffer > 0 && p.canDoubleJump) {
-          p.vy = DOUBLE_JUMP_FORCE;
-          p.canDoubleJump = false;
-          p.jumpBuffer = 0;
-          p.scaleY = 1.3;
+        if (p.jumpBuffer > 0) {
+          if (p.coyoteTime > 0) {
+            p.vy = JUMP_FORCE; p.jumpBuffer = 0; p.coyoteTime = 0; p.scaleY = 1.3;
+          } else if (p.canDoubleJump) {
+            p.vy = DOUBLE_JUMP_FORCE; p.canDoubleJump = false; p.jumpBuffer = 0; p.scaleY = 1.3;
+          }
         }
-
+        
         p.vy += GRAVITY * deltaTime;
         p.y += p.vy * deltaTime;
-        p.onGround = false;
-        
-        if (p.invincible > 0) p.invincible -= deltaTime;
+        p.scaleY += (1 - p.scaleY) * 0.1;
 
-        // --- Collision Detection ---
+        // --- Collision Detection & Resolution ---
         const playerRect = { x: p.x, y: p.y, width: PLAYER_WIDTH, height: PLAYER_HEIGHT };
         levelRef.current.platforms.forEach(platform => {
           if (playerRect.x < platform.x + platform.width && playerRect.x + playerRect.width > platform.x &&
               playerRect.y < platform.y + platform.height && playerRect.y + playerRect.height > platform.y) {
-            // Check vertical collision for landing
-            if (p.vy >= 0 && playerRect.y + playerRect.height - platform.y < p.vy * deltaTime + 1) {
+            if (platform.type === 'spike' && p.invincible <= 0) { setGameState('gameover'); return; }
+            if (platform.type === 'jumpPad') { p.vy = JUMP_PAD_BOOST; p.canDoubleJump = true; return; }
+
+            if (p.vy >= 0 && playerRect.y + playerRect.height - platform.y < p.vy * deltaTime + 5) {
               p.y = platform.y - playerRect.height;
               p.vy = 0;
               p.onGround = true;
+              p.coyoteTime = 8;
               p.canDoubleJump = true;
-              p.scaleY = 0.8; // Squash effect
+              p.scaleY = 0.8;
+              if (platform.type === 'crumble' && !platform.crumbling) platform.crumbling = 30;
             }
           }
         });
-        
-        // --- Visuals Update ---
-        p.scaleY += (1 - p.scaleY) * 0.1; // Return to normal scale
 
-        // --- Enemy Logic ---
-        enemiesRef.current = enemiesRef.current.filter(enemy => {
-          enemy.x += enemy.dir * ENEMY_SPEED * deltaTime;
-          if (enemy.x < enemy.startX || enemy.x > enemy.startX + enemy.patrol) enemy.dir *= -1;
-          
+        levelRef.current.platforms = levelRef.current.platforms.filter(platform => {
+          if (platform.crumbling > 0) platform.crumbling -= deltaTime;
+          return platform.crumbling === undefined || platform.crumbling > 0;
+        });
+
+        // --- Enemy & Coin Logic ---
+        levelRef.current.enemies.forEach(enemy => {
+          if (enemy.type === 'patrol' || enemy.type === 'spiky') {
+            enemy.x += enemy.dir * ENEMY_SPEED * deltaTime;
+            if (enemy.x < enemy.startX || enemy.x > enemy.startX + enemy.patrol) enemy.dir *= -1;
+          }
+          if (enemy.type === 'turret') {
+            enemy.fireCooldown -= deltaTime;
+            if (enemy.fireCooldown <= 0) {
+              levelRef.current.projectiles.push({id: `proj_${Date.now()}`, x: enemy.x, y: enemy.y, vx: -3});
+              enemy.fireCooldown = TURRET_FIRE_RATE;
+            }
+          }
           const enemyRect = { x: enemy.x, y: enemy.y, width: TILE_SIZE, height: TILE_SIZE };
-          if (playerRect.x < enemyRect.x + enemyRect.width && playerRect.x + playerRect.width > enemyRect.x &&
-              playerRect.y < enemyRect.y + enemyRect.height && playerRect.y + playerRect.height > enemyRect.y) {
-            if (p.vy > 0 && (playerRect.y + playerRect.height) - enemyRect.y < 20) { // Stomp
-              p.vy = JUMP_FORCE / 1.5;
-              setScore(s => s + 50);
-              return false; // Remove enemy
-            } else if (p.invincible <= 0) { // Get hit
-              setGameState('gameover');
+          if (p.x < enemyRect.x + enemyRect.width && p.x + PLAYER_WIDTH > enemyRect.x &&
+              p.y < enemyRect.y + enemyRect.height && p.y + PLAYER_HEIGHT > enemyRect.y) {
+            if (enemy.type !== 'spiky' && p.vy > 0 && (p.y + PLAYER_HEIGHT) - enemyRect.y < 20) {
+              p.vy = JUMP_FORCE / 1.5; setScore(s => s + 50);
+              levelRef.current.enemies = levelRef.current.enemies.filter(e => e.id !== enemy.id);
+            } else if (p.invincible <= 0) {
+              p.invincible = 120; // 2 seconds of invincibility
+              setGameState('gameover'); // For now, any hit is game over
             }
           }
-          return true;
         });
 
-        // --- Coin Logic ---
-        coinsRef.current = coinsRef.current.filter(coin => {
-          const coinRect = { x: coin.x, y: coin.y, width: TILE_SIZE/2, height: TILE_SIZE/2 };
-          if (playerRect.x < coinRect.x + coinRect.width && playerRect.x + playerRect.width > coinRect.x &&
-              playerRect.y < coinRect.y + coinRect.height && playerRect.y + playerRect.height > coinRect.y) {
-            setScore(s => s + 10);
-            return false;
+        levelRef.current.projectiles = levelRef.current.projectiles.filter(proj => {
+            proj.x += proj.vx * deltaTime;
+            const projRect = {x: proj.x, y: proj.y, width: 10, height: 10};
+            if (p.x < projRect.x + projRect.width && p.x + PLAYER_WIDTH > projRect.x &&
+                p.y < projRect.y + projRect.height && p.y + PLAYER_HEIGHT > projRect.y) {
+                 if (p.invincible <= 0) setGameState('gameover');
+                 return false;
+            }
+            return proj.x > cameraXRef.current - 20;
+        });
+
+        levelRef.current.coins = levelRef.current.coins.filter(coin => {
+          if (p.x < coin.x + (TILE_SIZE/2) && p.x + PLAYER_WIDTH > coin.x &&
+              p.y < coin.y + (TILE_SIZE/2) && p.y + PLAYER_HEIGHT > coin.y) {
+            setScore(s => s + 10); return false;
           }
           return true;
         });
         
-        // --- Win/Lose Conditions ---
         if (p.y > GAME_HEIGHT + 100) setGameState('gameover');
         const flagpole = levelRef.current.flagpole;
-if (flagpole && playerRect.x < flagpole.x + flagpole.width && playerRect.x + playerRect.width > flagpole.x) {
-      if (isXpMode) {
-        setGameState('levelwon');
-      } else {
-        nextLevel();
+        if (flagpole && playerRect.x < flagpole.x + flagpole.width && playerRect.x + playerRect.width > flagpole.x) {
+            if (isXpMode) setGameState('levelwon'); else nextLevel();
+        }
+        setTick(t => t + 1);
       }
-    }
-    
-    // Force a re-render to update visuals
-    setTick(t => t + 1);
-  }
-  animationFrameId = requestAnimationFrame(gameLoop);
-};
-animationFrameId = requestAnimationFrame(gameLoop);
+      animationFrameId = requestAnimationFrame(gameLoop);
+    };
+    animationFrameId = requestAnimationFrame(gameLoop);
 
     const handleKey = e => { keysRef.current[e.key] = e.type === 'keydown'; };
-    window.addEventListener('keydown', handleKey);
-    window.addEventListener('keyup', handleKey);
+    window.addEventListener('keydown', handleKey); window.addEventListener('keyup', handleKey);
+    return () => { cancelAnimationFrame(animationFrameId); window.removeEventListener('keydown', handleKey); window.removeEventListener('keyup', handleKey); };
+  }, [uiGameState, isXpMode, nextLevel]);
 
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('keydown', handleKey);
-      window.removeEventListener('keyup', handleKey);
-    };
-  }, [generateLevel, isXpMode]);
-
-  // Quiz trigger logic
   useEffect(() => {
     if (uiGameState === 'playing' && parsedFlashcards.length >= 5 && !isXpMode) {
       const timer = setTimeout(() => {
         const checkGroundAndShowQuiz = () => {
-          if (playerState.current.onGround) {
-            setGameState('quiz');
-          } else {
-            setTimeout(checkGroundAndShowQuiz, 100);
-          }
+          if (playerState.current.onGround) setGameState('quiz');
+          else setTimeout(checkGroundAndShowQuiz, 100);
         };
         checkGroundAndShowQuiz();
-      }, 10000); // Trigger every 10 seconds
+      }, 20000 + Math.random() * 10000);
       return () => clearTimeout(timer);
     }
   }, [uiGameState, score, parsedFlashcards, isXpMode]);
   
-  // High score logic
   useEffect(() => {
     if (uiGameState === 'gameover' && !isXpMode) {
       if (score > studyZoneState.platformerHighScore) {
@@ -5113,7 +5419,6 @@ animationFrameId = requestAnimationFrame(gameLoop);
         showMessageBox(`Game Over! New high score: ${score}`, 'info');
         processAchievement('highScore', score);
       } else {
-
         showMessageBox(`Game Over! Your score: ${score}`, 'error');
       }
     }
@@ -5121,7 +5426,7 @@ animationFrameId = requestAnimationFrame(gameLoop);
         updateProfileInFirestore({ totalXP: profile.totalXP + 250 });
         showMessageBox(`Level Complete! You earned 250 XP!`, 'info');
      }
-  }, [uiGameState, score, isXpMode, showMessageBox, profile.totalXP, studyZoneState.platformerHighScore, updateProfileInFirestore, updateStudyZoneState]);
+  }, [uiGameState, score, isXpMode, showMessageBox, profile.totalXP, studyZoneState.platformerHighScore, updateProfileInFirestore, updateStudyZoneState, processAchievement]);
 
   return (
     <div className="flex flex-col items-center">
@@ -5131,7 +5436,6 @@ animationFrameId = requestAnimationFrame(gameLoop);
         <span>Level: {level}</span>
       </div>
       <div className="relative w-[800px] h-[400px] bg-blue-300 overflow-hidden border-4 border-slate-900 rounded-lg">
-        {/* The background is always visible */}
         <div className="absolute inset-0 bg-gradient-to-b from-sky-400 to-sky-600"></div>
         <div className="absolute bottom-0 left-0 w-[2400px] h-48 bg-no-repeat bg-bottom" style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 150"><path d="M0 150 L0 100 C 100 50, 200 120, 300 100 C 400 80, 500 140, 600 120 C 700 100, 800 130, 800 130 L800 150 Z" fill="%23166534"/></svg>')`, transform: `translateX(${-cameraXRef.current * 0.5}px)` }}></div>
         <div className="absolute bottom-0 left-0 w-[2400px] h-32 bg-no-repeat bg-bottom" style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120"><path d="M0 120 L0 90 C 150 110, 250 60, 400 80 C 550 100, 650 70, 800 90 L800 120 Z" fill="%2315803d"/></svg>')`, transform: `translateX(${-cameraXRef.current * 0.8}px)` }}></div>
@@ -5161,14 +5465,10 @@ animationFrameId = requestAnimationFrame(gameLoop);
         )}
         {uiGameState === 'quiz' && <FlashcardQuizModal cards={parsedFlashcards} onComplete={() => setGameState('playing')} />}
         
-        {/* Conditionally render the GameRenderer only when playing */}
         {uiGameState === 'playing' && (
           <GameRenderer 
-            tick={tick}
             playerState={playerState}
             levelRef={levelRef}
-            enemiesRef={enemiesRef}
-            coinsRef={coinsRef}
             cameraXRef={cameraXRef}
             TILE_SIZE={TILE_SIZE}
             PLAYER_WIDTH={PLAYER_WIDTH}
@@ -5178,7 +5478,6 @@ animationFrameId = requestAnimationFrame(gameLoop);
       </div>
        <p className="text-slate-500 mt-2 text-sm hidden md:block">Controls: Arrow keys or A/D to move, Arrow Up, W, or Space to jump/double-jump.</p>
       
-      {/* --- On-Screen Controls for Mobile --- */}
       <div className="md:hidden fixed bottom-5 left-5 right-5 flex justify-between items-center z-20">
         <div className="flex gap-4">
           <button
@@ -5307,6 +5606,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeSheet, setActiveSheet] = useState('Stats + XP Tracker');
+  const dungeonXpRef = useRef(null);
   
   // --- Focus Mode State ---
   const [focusSession, setFocusSession] = useState({ isActive: false });
@@ -5322,11 +5622,10 @@ const App = () => {
     setIsSidebarOpen(!isMobile);
   }, [isMobile]);
   const [assignments, setAssignments] = useState([]);
-  const [trophies, setTrophies] = useState([]);
   const statsRef = useRef({});
 
   // NEW: Split-up state for better performance and stability
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState(() => getCachedData('profileCache', 90) || {
     username: '',
     totalXP: 0,
     currentLevel: 1,
@@ -5335,7 +5634,7 @@ const App = () => {
     guildId: null,
   });
 
-  const [inventory, setInventory] = useState({
+  const [inventory, setInventory] = useState(() => getCachedData('inventoryCache', 300) || {
     ownedItems: [],
     equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} },
     ownedFurniture: [],
@@ -5346,7 +5645,7 @@ const App = () => {
     cosmeticShards: 0,
   });
 
-  const [gameState, setGameState] = useState({
+  const [gameState, setGameState] = useState(() => getCachedData('gameStateCache', 30) || {
     dungeon_state: null,
     dungeon_floor: 0,
     dungeon_gold: 0,
@@ -5363,7 +5662,7 @@ const App = () => {
     studyZone: { flashcardsText: '', platformerHighScore: 0 },
   });
   
-  const [gameProgress, setGameProgress] = useState({
+  const [gameProgress, setGameProgress] = useState(() => getCachedData('gameProgressCache', 900) || {
     achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
     quests: { daily: [], weekly: [], lastUpdated: null },
   });
@@ -5374,6 +5673,7 @@ const App = () => {
     ...gameState,
     ...gameProgress
   }), [profile, inventory, gameState, gameProgress]);
+  const completedAssignments = useMemo(() => assignments.filter(a => a.status === 'Completed'), [assignments]);
 
   useEffect(() => {
     statsRef.current = stats;
@@ -5382,44 +5682,48 @@ const App = () => {
   const updateProfileInFirestore = useCallback(async (dataToUpdate) => {
     if (!db || !user) return;
     const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    console.log('%c[Firestore WRITE - Profile]', 'color: #4ade80; font-weight: bold;', { path: docRef.path, data: dataToUpdate });
-    console.trace('Trace for Profile Write');
+    // Automatically add the global action timestamp to every profile update
+    const finalData = { ...dataToUpdate, lastActionTimestamp: serverTimestamp() };
     try {
-      await setDoc(docRef, dataToUpdate, { merge: true });
+      await setDoc(docRef, finalData, { merge: true });
     } catch (error) { showMessageBox(`Failed to update profile.`, "error"); }
   }, [user, db, appId]);
 
   const updateInventoryInFirestore = useCallback(async (dataToUpdate) => {
     if (!db || !user) return;
     const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
-    console.log('%c[Firestore WRITE - Inventory]', 'color: #4ade80; font-weight: bold;', { path: docRef.path, data: dataToUpdate });
-    console.trace('Trace for Inventory Write');
+    // Also update the profile document with the latest action timestamp in a transaction
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
     try {
-      await setDoc(docRef, dataToUpdate, { merge: true });
+      await runTransaction(db, async (transaction) => {
+        transaction.set(docRef, dataToUpdate, { merge: true });
+        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
+      });
     } catch (error) { showMessageBox(`Failed to update inventory.`, "error"); }
   }, [user, db, appId]);
 
   const updateGameStateInFirestore = useCallback(async (dataToUpdate) => {
-    if (!db || !user || !user.uid) {
-        console.warn("updateGameStateInFirestore called without a user or db connection.");
-        return; // Early exit if user isn't ready
-    }
+    if (!db || !user || !user.uid) return;
     const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
+    // This function now ONLY updates the game state, respecting its own cooldowns.
+    // It is decoupled from the main profile document's global spam check.
     try {
       await setDoc(docRef, dataToUpdate, { merge: true });
-    } catch (error) { 
+    } catch (error) {
         console.error("Firestore Write Error (GameState):", error);
-        showMessageBox(`Failed to update game state.`, "error"); 
+        showMessageBox(`Failed to update game state.`, "error");
     }
   }, [user, db, appId]);
 
-  const updateGameProgressInFirestore = useCallback(async (dataToUpdate) => {
+ const updateGameProgressInFirestore = useCallback(async (dataToUpdate) => {
     if (!db || !user) return;
     const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
-    console.log('%c[Firestore WRITE - GameProgress]', 'color: #4ade80; font-weight: bold;', { path: docRef.path, data: dataToUpdate });
-    console.trace('Trace for GameProgress Write');
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
     try {
-      await setDoc(docRef, dataToUpdate, { merge: true });
+      await runTransaction(db, async (transaction) => {
+        transaction.set(docRef, dataToUpdate, { merge: true });
+        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
+      });
     } catch (error) { showMessageBox(`Failed to update game progress.`, "error"); }
   }, [user, db, appId]);
 
@@ -5537,39 +5841,39 @@ const App = () => {
       setAssignments(fetchedAssignments);
     }, (error) => console.error("Error fetching assignments:", error));
 
-    const trophiesQuery = query(collection(db, `artifacts/${appId}/public/data/trophyWall`), where("userId", "==", userId), orderBy("dateCompleted", "desc"), limit(50));
-    const unsubscribeTrophies = onSnapshot(trophiesQuery, (snapshot) => {
-      const fetchedTrophies = snapshot.docs.map(doc => ({
-        id: doc.id, ...doc.data(),
-        dateCompleted: doc.data().dateCompleted?.toDate(),
-        dueDate: doc.data().dueDate?.toDate(),
-      }));
-      setTrophies(fetchedTrophies);
-    }, (error) => console.error("Error fetching trophies:", error));
 
-    // CORRECTED: Listener for sub-collections
-    const listenToSubCollection = (subCollectionName, stateSetter, defaultState) => {
+
+    // Listener for sub-collections with caching
+    const listenToSubCollection = (subCollectionName, cacheKey, stateSetter, defaultState) => {
       const docRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/${subCollectionName}/doc`);
       return onSnapshot(docRef, (docSnap) => {
-        console.log(`%c[Firestore READ - ${subCollectionName}]`, 'color: #3b82f6; font-weight: bold;', { path: docRef.path, exists: docSnap.exists() });
+        let data;
         if (docSnap.exists()) {
-          stateSetter(docSnap.data());
+          data = docSnap.data();
         } else {
-          console.log(`%c[Firestore WRITE - Creating Default ${subCollectionName}]`, 'color: #f97316; font-weight: bold;', { path: docRef.path });
-          setDoc(docRef, defaultState).catch(e => console.error(`Failed to create ${subCollectionName} doc`, e));
-          stateSetter(defaultState);
+          console.log(`Creating default for ${subCollectionName}`);
+          setDoc(docRef, defaultState);
+          data = defaultState;
         }
+        stateSetter(data);
+        cacheData(cacheKey, data); // Update the cache
       }, (error) => console.error(`Error fetching ${subCollectionName}:`, error));
     };
 
-    const unsubProfile = listenToSubCollection('profile', setProfile, { username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null });
-    const unsubInventory = listenToSubCollection('inventory', setInventory, { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 });
-    const unsubGameState = listenToSubCollection('gameState', setGameState, { dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {}, td_wins: 0, lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, }, studyZone: { flashcardsText: '', platformerHighScore: 0 } });
-    const unsubGameProgress = listenToSubCollection('gameProgress', setGameProgress, { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() });
+    const unsubProfile = listenToSubCollection('profile', 'profileCache', setProfile, { username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null });
+    const unsubInventory = listenToSubCollection('inventory', 'inventoryCache', setInventory, { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 });
+    const unsubGameState = listenToSubCollection('gameState', 'gameStateCache', setGameState, { dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {}, td_wins: 0, lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, }, studyZone: { flashcardsText: '', platformerHighScore: 0 } });
+    const unsubGameProgress = listenToSubCollection('gameProgress', 'gameProgressCache', setGameProgress, { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() });
+
+    // Heartbeat ping (Science Lab - Client Side)
+    if (!getCachedData('heartbeatSent', 300)) { // Only ping every 5 mins
+      const heartbeatDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/heartbeat/doc`);
+      setDoc(heartbeatDocRef, { lastSeen: serverTimestamp() }, { merge: true });
+      cacheData('heartbeatSent', true);
+    }
     
     return () => {
       unsubscribeAssignments();
-      unsubscribeTrophies();
       unsubProfile();
       unsubInventory();
       unsubGameState();
@@ -5655,7 +5959,7 @@ const App = () => {
 
    // Productivity Persona Logic
   const getProductivityPersona = useCallback(() => {
-    if (trophies.length === 0) {
+    if (completedAssignments.length === 0) {
       return {
         name: "The Newbie",
         description: "Start completing assignments to discover your productivity persona!",
@@ -5668,10 +5972,10 @@ const App = () => {
     let totalPointsScore = 0;
     let totalPointsMax = 0;
     let hardAssignmentsCompleted = 0;
-    const totalAssignments = trophies.length;
+    const totalAssignments = completedAssignments.length;
     let onTimeSubmissions = 0;
 
-    trophies.forEach(trophy => {
+    completedAssignments.forEach(trophy => {
       if (trophy.daysEarly !== null) {
         totalDaysEarly += trophy.daysEarly;
       }
@@ -5706,7 +6010,7 @@ const App = () => {
     if (totalAssignments >= 15 && avgScore >= 80 && latePercentage <= 15) return { name: "The All-Rounder", description: "A well-balanced performer, delivering high-quality work on time.", icon: "🏅" };
     if (totalAssignments > 0) return { name: "The Emerging Star", description: "You're building solid habits! Keep going.", icon: "🌟" };
     return { name: "The Newbie", description: "Start completing assignments to discover your persona!", icon: "✨" };
-  }, [trophies]);
+  }, [completedAssignments]);
 
   // Pet Hatching Logic
   const generateNewPet = useCallback(() => {
@@ -5828,6 +6132,7 @@ const App = () => {
   const resetDungeonGame = () => actionLock(async () => {
     if (!db || !user) return;
     const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
     try {
       await runTransaction(db, async (transaction) => {
         const gameStateDoc = await transaction.get(gameStateDocRef);
@@ -5840,6 +6145,8 @@ const App = () => {
           dungeon_gold: 0,
           cooldowns: { ...(serverGameState.cooldowns || {}), resetDungeon: serverTimestamp() }
         });
+        // Also update the profile's global timestamp to satisfy the main security rule
+        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
       });
       showMessageBox("Dungeon has been reset! Choose your class.", "info");
     } catch (error) {
@@ -5851,6 +6158,7 @@ const App = () => {
   const resetTowerDefenseGame = useCallback(() => actionLock(async () => {
     if (!db || !user) return;
     const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
     
     try {
       const petEffects = { dragon: { castleHealth: 1 } };
@@ -5872,6 +6180,8 @@ const App = () => {
           td_towerUpgrades: {},
           cooldowns: { ...(serverGameState.cooldowns || {}), resetTowerDefense: serverTimestamp() }
         });
+        // Also update the profile's global timestamp to satisfy the main security rule
+        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
       });
       showMessageBox("New game started!", "info");
     } catch (error) {
@@ -5998,11 +6308,14 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
               const serverProfile = profileDoc.data();
               const serverInventory = inventoryDoc.data();
               const serverGameProgress = gameProgressDoc.data();
+              
+              // CORE FIX: Check if there's a pending dungeon XP update and use it.
+              const currentXpInProfile = dungeonXpRef.current !== null ? dungeonXpRef.current : serverProfile.totalXP;
+              dungeonXpRef.current = null; // Consume the value so it's only applied once
 
               let calculatedXpBonus = 0, shardBonus = 0;
               let newAchievementsAwarded = [], newlyCompletedQuests = [];
               
-              // Add banked focus XP if it exists on the assignment
               if (completedAssignment.focusXpReward) {
                 calculatedXpBonus += completedAssignment.focusXpReward;
               }
@@ -6054,16 +6367,21 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
               if (completedAssignment.difficulty === 'Hard') checkAchievement('hardAssignmentsCompleted');
               
               const finalXpGained = Math.round(calculatedXpBonus * (1 + petBuff));
-              const newTotalXP = (serverProfile.totalXP || 0) + finalXpGained;
+              const newTotalXP = currentXpInProfile + finalXpGained;
               const newShards = (serverInventory.cosmeticShards || 0) + shardBonus;
               const { level: newLevel } = calculateLevelInfo(newTotalXP);
-
-              transaction.update(profileDocRef, { 
-                totalXP: newTotalXP, 
-                currentLevel: newLevel, 
+              
+              // FIX: This removes the spread operator that was causing the rule violation.
+              // We now update the cooldown with dot notation, which is safer.
+              // This assumes your rules can handle dot notation updates for nested maps.
+              const profileUpdate = {
+                totalXP: newTotalXP,
+                currentLevel: newLevel,
                 assignmentsCompleted: (serverProfile.assignmentsCompleted || 0) + 1,
-                cooldowns: { ...(serverProfile.cooldowns || {}), completeAssignment: serverTimestamp() } // GUARD ADDED
-              });
+                'cooldowns.completeAssignment': serverTimestamp()
+              };
+
+              transaction.update(profileDocRef, profileUpdate);
               transaction.update(inventoryDocRef, { assignmentsToHatch: newAssignmentsToHatch, cosmeticShards: newShards });
               transaction.update(gameProgressDocRef, { quests, achievements });
 
@@ -6146,56 +6464,48 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         console.error(`Achievement processing failed for ${achievementKey}:`, error);
     }
   }, [user, db, appId, calculateLevelInfo]);
-  const handleCompletedToggle = async (e, id, currentAssignment, currentProfile, currentInventory, currentGameProgress) => {
+  const handleCompletedToggle = (e, id, currentAssignment) => actionLock(async () => {
     if (!db || !user?.uid) return;
     const isCompleting = currentAssignment.status !== 'Completed';
-    const trophyCollectionRef = collection(db, `artifacts/${appId}/public/data/trophyWall`);
+
     try {
         if (isCompleting) {
             const completionDate = new Date();
             const daysEarly = calculateDaysEarly(currentAssignment.dueDate, completionDate);
-            const trophyData = { 
-              ...currentAssignment, 
-              userId: user.uid, 
-              status: 'Completed', 
-              dateCompleted: serverTimestamp(), 
-              daysEarly, 
-              sourceAssignmentId: id,
-              // FIX: Explicitly convert potentially undefined dates to null
-              dueDate: currentAssignment.dueDate || null,
-              recurrenceEndDate: currentAssignment.recurrenceEndDate || null,
-            };
-            delete trophyData.id;
-            await addDoc(trophyCollectionRef, trophyData);
+            
+            // The ENTIRE operation is now just one update.
             await updateAssignmentInFirestore(id, { status: 'Completed', dateCompleted: serverTimestamp(), daysEarly });
+
             setShowCompletionAnimation(true);
             if (primeAudioRef.current) { primeAudioRef.current(); setXpAnimationOriginEvent(e.currentTarget); }
+            
+            // Process rewards using the updated assignment data.
             await processCompletionRewards({ ...currentAssignment, dateCompleted: completionDate, daysEarly });
-            if (currentAssignment.recurrenceType && currentAssignment.recurrenceType !== 'none') {
+
+            // Handle recurring assignments.
+            if (currentAssignment.recurrenceType && currentAssignment.recurrenceType !== 'none' && currentAssignment.dueDate) {
               let nextDueDate = new Date(currentAssignment.dueDate);
               if (currentAssignment.recurrenceType === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
               else if (currentAssignment.recurrenceType === 'weekly') nextDueDate.setDate(nextDueDate.getDate() + 7);
               else if (currentAssignment.recurrenceType === 'monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+
               if (!currentAssignment.recurrenceEndDate || nextDueDate <= currentAssignment.recurrenceEndDate) {
                 const newRecurringAssignment = { ...currentAssignment, dueDate: nextDueDate, status: 'To Do', dateCompleted: null, daysEarly: null, subtasks: (currentAssignment.subtasks || []).map(st => ({ ...st, completed: false }))};
-                delete newRecurringAssignment.id;
+                delete newRecurringAssignment.id; // Ensure a new document is created
                 await addAssignmentToFirestore(newRecurringAssignment);
-                showMessageBox(`New instance of "${newRecurringAssignment.assignment}" created.`, "info");
+                showMessageBox(`New recurring task "${newRecurringAssignment.assignment}" created.`, "info");
               }
             }
         } else {
+            // Un-completing is also just one update, and we don't reduce XP.
             await updateAssignmentInFirestore(id, { status: 'To Do', dateCompleted: null, daysEarly: null });
-            const q = query(trophyCollectionRef, where("sourceAssignmentId", "==", id));
-            const querySnapshot = await getDocs(q);
-            await Promise.all(querySnapshot.docs.map(doc => deleteDoc(doc.ref)));
-            await updateProfileInFirestore({ assignmentsCompleted: Math.max(0, currentProfile.assignmentsCompleted - 1) });
-            showMessageBox("Assignment marked as not completed.", "info");
+            showMessageBox("Assignment marked as to-do.", "info");
         }
     } catch (error) {
         console.error("Error toggling completion:", error);
         showMessageBox(`Operation failed: ${error.message}`, "error");
     }
-  };
+  });
 
   const startFocusSession = useCallback(async (assignment, duration) => {
     if (profile.totalXP < 5) {
@@ -6296,8 +6606,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           ::-webkit-scrollbar { width: 8px; }
           ::-webkit-scrollbar-track { background: #1e293b; }
           ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
-          .projectile { position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: #facc15; transform: translate(-50%, -50%); transition: top 0.3s linear, left 0.3s linear; z-index: 20; pointer-events: none; }
-          @keyframes enemy-hit { 0% { filter: brightness(1); } 50% { filter: brightness(3); } 100% { filter: brightness(1); } }
+          .projectile { position: absolute; transform: translate(-50%, -50%); transition: top 0.3s linear, left 0.3s linear; z-index: 20; pointer-events: none; display: flex; align-items: center; justify-content: center; }          @keyframes enemy-hit { 0% { filter: brightness(1); } 50% { filter: brightness(3); } 100% { filter: brightness(1); } }
           .enemy-hit-animation { animation: enemy-hit 0.2s ease-in-out; }
           .xp-bar-container { position: fixed; bottom: 2%; left: 0; width: 100%; display: flex; justify-content: center; pointer-events: none; z-index: 9999; opacity: 0; animation: fade-in-bar 0.5s ease-out forwards; }
           @keyframes fade-in-bar { to { opacity: 1; } }
@@ -6378,16 +6687,17 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
-        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={(e, id, assignment) => handleCompletedToggle(e, id, assignment, profile, inventory, gameProgress)} startFocusSession={startFocusSession} />}        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={gameProgress} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker profile={profile} inventory={inventory} gameProgress={gameProgress} assignments={assignments} trophies={trophies} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
+        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} startFocusSession={startFocusSession} />}
+        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={gameProgress} />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker profile={profile} inventory={inventory} gameProgress={gameProgress} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
         {activeSheet === 'Guild' && <GuildPage />}
-        {activeSheet === 'My Profile' && <MyProfile profile={profile} inventory={inventory} gameState={gameState} user={user} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateInventoryInFirestore={updateInventoryInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} />}
-        {activeSheet === 'Sanctum' && <Sanctum inventory={inventory} trophies={trophies} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
+        {activeSheet === 'My Profile' && <MyProfile profile={profile} inventory={inventory} gameState={gameState} user={user} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateInventoryInFirestore={updateInventoryInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
+        {activeSheet === 'Sanctum' && <Sanctum inventory={inventory} completedAssignments={completedAssignments} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
 
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
-        {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics trophies={trophies}/>}
-        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler profile={profile} inventory={inventory} gameState={gameState} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} />}
+        {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics completedAssignments={completedAssignments}/>}
+{activeSheet === 'Dungeon Crawler' && <DungeonCrawler profile={profile} inventory={inventory} gameState={gameState} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame profile={profile} inventory={inventory} gameState={gameState} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
         {activeSheet === 'Science Lab' && <ScienceLab profile={profile} gameState={gameState} gameProgress={gameProgress} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
         {activeSheet === 'Study Zone' && <StudyZone profile={profile} gameState={gameState} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
