@@ -4172,16 +4172,37 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
   }, [draftState, profile, inventory]);
 
   // --- Handlers for Save/Discard ---
-  const handleSaveChanges = () => actionLock(async () => {
-    const { username, friends } = draftState;
-    const { equippedItems, currentPet } = draftState;
+    const handleSaveChanges = () => actionLock(async () => {
+    if (!db || !user) return;
+    // Get all the data from the local draft state
+    const { username, friends, equippedItems, currentPet } = draftState;
 
-    await Promise.all([
-      updateProfileInFirestore({ username, friends }),
-      updateInventoryInFirestore({ equippedItems, currentPet })
-    ]);
-    
-    showMessageBox("Profile changes saved!", "info");
+    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+
+    try {
+      // Use a single transaction to batch all writes together
+      await runTransaction(db, async (transaction) => {
+        // Update the profile document with profile-specific fields
+        transaction.set(profileDocRef, { 
+          username, 
+          friends,
+          lastActionTimestamp: serverTimestamp() // Also include the global timestamp
+        }, { merge: true });
+
+        // Update the inventory document with inventory-specific fields
+        transaction.set(inventoryDocRef, { 
+          equippedItems, 
+          currentPet 
+        }, { merge: true });
+      });
+      
+      showMessageBox("Profile changes saved!", "info");
+
+    } catch (error) {
+      console.error("Error saving profile changes:", error);
+      showMessageBox("Failed to save changes due to a server error.", "error");
+    }
   });
 
   const handleDiscardChanges = () => {
