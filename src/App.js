@@ -1077,73 +1077,48 @@ const Particle = ({ onComplete }) => {
   );
 };
 
-// REWORKED: Entire Dungeon Crawler Component
-const DungeonCrawler = ({ profile, inventory, gameState, dungeonState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp }) => {
-  // This state holds the entire dungeon object (board, enemies, player location, etc.)
-  const [localDungeonState, setLocalDungeonState] = useState(dungeonState);
+const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
+  const [localDungeonState, setLocalDungeonState] = useState(stats.dungeon_state);
   const [animationState, setAnimationState] = useState({ hits: {}, particles: [] });
   
-  // NEW: These states track resources for the current session to batch updates.
-  const [sessionXp, setSessionXp] = useState(profile.totalXP);
-  const [sessionGold, setSessionGold] = useState(gameState.dungeon_gold || 0);
+  // These states track resources for the current session to batch updates.
+  const [sessionXp, setSessionXp] = useState(stats.totalXP);
+  const [sessionGold, setSessionGold] = useState(stats.dungeon_gold || 0);
 
   const [attackTarget, setAttackTarget] = useState(null); 
   const [abilityTarget, setAbilityTarget] = useState(null);
+
   useEffect(() => {
-    // This effect runs whenever sessionXp changes, updating the parent's ref.
     if (syncDungeonXp) {
       syncDungeonXp(sessionXp);
     }
   }, [sessionXp, syncDungeonXp]);
   
-  // FIX: saveGame is now the primary CHECKPOINT function.
-  // It saves the dungeon layout and gold to gameState, and separately updates profile XP.
-const saveGame = useCallback(async (stateToSave) => {
-    if (!stateToSave || !db || !profile.userId) return;
-
-    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${profile.userId}/gameState/doc`);
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${profile.userId}/profile/doc`);
-    
+  // REFACTORED: saveGame now updates the single stats document.
+  const saveGame = useCallback(async (stateToSave) => {
+    if (!stateToSave) return;
     try {
-      // With the corrected security rule, we can now use a proper transaction
-      // to atomically save both game state and the latest XP total.
-      await runTransaction(db, async (transaction) => {
-        const gameStateDoc = await transaction.get(gameStateDocRef);
-        if (!gameStateDoc.exists()) throw new Error("User data missing.");
-
-        // Update the gameState document
-        transaction.update(gameStateDocRef, {
-          dungeon_state: stateToSave,
-          dungeon_gold: sessionGold,
-          // Use dot notation to be precise, ensuring we only touch the 'saveDungeon' cooldown
-          'cooldowns.saveDungeon': serverTimestamp()
-        });
-        
-        // Also update the profile document with the current session's XP total
-        transaction.update(profileDocRef, {
-          totalXP: sessionXp
-        });
+      await updateStatsInFirestore({
+        dungeon_state: stateToSave,
+        dungeon_gold: sessionGold,
+        totalXP: sessionXp,
+        'cooldowns.saveDungeon': serverTimestamp()
       });
-      // Don't show a message on auto-save, only manual
+      // Don't show a message on auto-save
     } catch (error) {
       if (error.message.includes('permission-denied')) {
         showMessageBox("You're saving too frequently!", "error");
       } else {
-        console.error("Dungeon save transaction failed:", error);
-        showMessageBox("Failed to save progress due to a server error.", "error");
+        console.error("Dungeon save failed:", error);
+        showMessageBox("Failed to save progress.", "error");
       }
     }
-  }, [db, profile.userId, sessionGold, sessionXp, appId, showMessageBox]);
-
+  }, [sessionGold, sessionXp, updateStatsInFirestore, showMessageBox]);
 
   useEffect(() => {
-    // This is the standard, correct way to sync a component's local state
-    // with props received from its parent. When the `dungeonState` from
-    // Firestore changes, this will update the local state to match.
-    setLocalDungeonState(dungeonState);
-  }, [dungeonState]);
+    setLocalDungeonState(stats.dungeon_state);
+  }, [stats.dungeon_state]);
   
-  // NEW: Auto-save interval
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       if (localDungeonState && localDungeonState.phase === 'playing' && !localDungeonState.gameOver) {
@@ -1325,7 +1300,7 @@ const saveGame = useCallback(async (stateToSave) => {
     const allWeapons = [...dungeonDefinitions.weapons, ...dungeonDefinitions.wands, ...dungeonDefinitions.bows, ...dungeonDefinitions.shields];
     const weapon = allWeapons.find(w => w.id === localDungeonState.equippedWeapon);
     const armor = dungeonDefinitions.armors.find(a => a.id === localDungeonState.equippedArmor);
-    const pet = inventory.currentPet ? getFullPetDetails(inventory.currentPet.id) : null;
+    const pet = stats.currentPet ? getFullPetDetails(stats.currentPet.id) : null;
     
     let potionAttackBonus = 0;
     let potionHpBonus = 0;
@@ -1346,7 +1321,7 @@ const saveGame = useCallback(async (stateToSave) => {
     const attack = baseAttack + (weapon?.attack || 0) + (pet?.xpBuff * 50 || 0) + (localDungeonState.boughtStats?.attack || 0) + potionAttackBonus;
 
     return { maxHp, attack };
-  }, [localDungeonState, inventory.currentPet, getFullPetDetails, dungeonDefinitions]);
+  }, [localDungeonState, stats.currentPet, getFullPetDetails, dungeonDefinitions]);
   
   // FIX: This entire useEffect was the source of an infinite render loop and has been removed.
   // The logic is now handled correctly by the `fullPlayerStats` useMemo hook above.
@@ -1455,7 +1430,7 @@ const saveGame = useCallback(async (stateToSave) => {
       player: initialPlayerState,
     };
     setLocalDungeonState(newGameState);
-    updateGameStateInFirestore({
+    updateStatsInFirestore({
       dungeon_state: newGameState
     });
   };
@@ -1481,8 +1456,8 @@ const saveGame = useCallback(async (stateToSave) => {
         log: newLogMessages,
     };
     setLocalDungeonState(nextState);
-    updateGameStateInFirestore({
-        dungeon_floor: Math.max(gameState.dungeon_floor || 1, nextFloor),
+    updateStatsInFirestore({
+        dungeon_floor: Math.max(stats.dungeon_floor || 1, nextFloor),
         dungeon_state: nextState
     }).then(() => {
         // Pass the achievement check function down from App
@@ -1513,7 +1488,7 @@ const saveGame = useCallback(async (stateToSave) => {
     if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
     if (targetTile.type === 'wall') { addLog("You can't move through a wall."); return; }
     const moveCost = localDungeonState.player.moveCost || 5;
-    if (profile.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
+    if (stats.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
 
     let newGold = sessionGold || 0;
     const newBoard = { ...localDungeonState.board };
@@ -1569,7 +1544,7 @@ const saveGame = useCallback(async (stateToSave) => {
     const attackCost = attackId === 'attack_normal' ? localDungeonState.player.attackCost : attackDef.cost;
     const attackRange = attackId === 'attack_normal' ? localDungeonState.player.attackRange : attackDef.range;
     if (localDungeonState.gameOver) return;
-    if (profile.totalXP < attackCost) { addLog(`Not enough XP for ${attackDef.name} (costs ${attackCost}).`, 'text-red-400'); setAttackTarget(null); setAbilityTarget(null); return; }
+    if (stats.totalXP < attackCost) { addLog(`Not enough XP for ${attackDef.name} (costs ${attackCost}).`, 'text-red-400'); setAttackTarget(null); setAbilityTarget(null); return; }
     if (attackId !== 'attack_normal' && (localDungeonState.player.abilityUses[attackId] || 0) <= 0) { addLog(`No uses left for ${attackDef.name}.`, 'text-yellow-400'); return; }
     const distance = Math.hypot(targetEnemy.x - localDungeonState.player.x, targetEnemy.y - localDungeonState.player.y);
     if (distance > attackRange) { addLog("Target is out of range.", 'text-yellow-400'); setAttackTarget(null); setAbilityTarget(null); return; }
@@ -1830,7 +1805,7 @@ const saveGame = useCallback(async (stateToSave) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <div><h2 className="text-3xl font-bold text-white">Dungeon Crawler</h2><p className="text-slate-400">Floor: {localDungeonState.floor} | Highest Floor: {gameState.dungeon_floor || 1}</p></div>
+        <div><h2 className="text-3xl font-bold text-white">Dungeon Crawler</h2><p className="text-slate-400">Floor: {localDungeonState.floor} | Highest Floor: {stats.dungeon_floor || 1}</p></div>
         <div className="flex space-x-2">
             <button onClick={() => saveGame(localDungeonState)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Game</button>
             <button onClick={() => setLocalDungeonState(prev => ({...prev, shopOpen: !prev.shopOpen, bestiaryOpen: false}))} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">{localDungeonState.shopOpen ? 'Shop' : 'Shop'}</button>
@@ -1850,7 +1825,7 @@ const saveGame = useCallback(async (stateToSave) => {
             <p>HP: <span className="text-red-400 font-bold">{localDungeonState.player.hp} / {fullPlayerStats.maxHp}</span></p>
             <div className="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div className="bg-red-600 h-2.5 rounded-full" style={{ width: `${(localDungeonState.player.hp / fullPlayerStats.maxHp) * 100}%` }}></div></div>
             <p>Attack: <span className="text-yellow-400 font-bold">{fullPlayerStats.attack}</span> | Gold: <span className="text-yellow-400 font-bold">{sessionGold || 0}</span></p>            
-            <p>Pet: <span className="font-semibold">{inventory.currentPet?.name || 'None'}</span> {localDungeonState.player.hasKey && <span className="text-yellow-300 font-bold ml-4">🔑 Key</span>}</p>
+            <p>Pet: <span className="font-semibold">{stats.currentPet?.name || 'None'}</span> {localDungeonState.player.hasKey && <span className="text-yellow-300 font-bold ml-4">🔑 Key</span>}</p>
             {localDungeonState.player.activeEffects && localDungeonState.player.activeEffects.length > 0 && (
               <div className="mt-2 border-t border-slate-700 pt-2">
                 <h4 className="text-sm font-bold text-slate-300">Active Effects:</h4>
@@ -1882,26 +1857,26 @@ const saveGame = useCallback(async (stateToSave) => {
                 </button>
                 {dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).map(attack => {
                     const usesLeft = localDungeonState.player.abilityUses?.[attack.id] || 0;
-                    const canAfford = profile.totalXP >= attack.cost;
-                    const isDisabled = usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget;
-                    
-                    const handleAbilityClick = () => {
-                        if (attack.isSelfTarget) {
-                            setLocalDungeonState(prev => {
-                                const newPlayerState = { ...prev.player };
-                                let newLog = [...prev.log];
-                                if (attack.effect.heal) {
-                                    newPlayerState.hp = Math.min(newPlayerState.maxHp, newPlayerState.hp + attack.effect.heal);
-                                    newLog.unshift({ message: `You use ${attack.name}, restoring ${attack.effect.heal} HP.`, style: 'text-green-400' });
-                                }
-                                newPlayerState.abilityUses = { ...newPlayerState.abilityUses, [attack.id]: usesLeft - 1 };
-                                return { ...prev, player: newPlayerState, log: newLog.slice(0, 5) };
-                            });
-                            updateProfileInFirestore({ totalXP: profile.totalXP - attack.cost });
-                        } else {
-                            setAbilityTarget(attack.id);
-                        }
-                    };
+                                const canAfford = stats.totalXP >= attack.cost;
+                                const isDisabled = usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget;
+                                
+                                const handleAbilityClick = () => {
+                                    if (attack.isSelfTarget) {
+                                        setLocalDungeonState(prev => {
+                                            const newPlayerState = { ...prev.player };
+                                            let newLog = [...prev.log];
+                                            if (attack.effect.heal) {
+                                                newPlayerState.hp = Math.min(newPlayerState.maxHp, newPlayerState.hp + attack.effect.heal);
+                                                newLog.unshift({ message: `You use ${attack.name}, restoring ${attack.effect.heal} HP.`, style: 'text-green-400' });
+                                            }
+                                            newPlayerState.abilityUses = { ...newPlayerState.abilityUses, [attack.id]: usesLeft - 1 };
+                                            return { ...prev, player: newPlayerState, log: newLog.slice(0, 5) };
+                                        });
+                                        updateStatsInFirestore({ totalXP: stats.totalXP - attack.cost });
+                                    } else {
+                                        setAbilityTarget(attack.id);
+                                    }
+                                };
 
                     return (
                         <button key={attack.id} onClick={handleAbilityClick} className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 disabled:bg-slate-600/50 disabled:cursor-not-allowed" disabled={isDisabled}>
@@ -1955,7 +1930,7 @@ const saveGame = useCallback(async (stateToSave) => {
                     
                     return availableWeapons.map(w => {
                         const isOwned = localDungeonState.ownedWeapons.includes(w.id);
-                        const canAfford = profile.totalXP >= w.cost;
+                        const canAfford = stats.totalXP >= w.cost;
                         return (<button key={w.id} onClick={() => handleBuyItem(w, 'weapon', 'xp')} disabled={isOwned || !canAfford} className={`w-full p-2 rounded mb-2 font-semibold transition-colors text-center ${isOwned ? 'bg-green-800/60 text-green-400 cursor-default' : canAfford ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>{isOwned ? 'Owned' : `${w.name} (${w.cost} XP)`}</button>);
                     });
                 })()}
@@ -1965,7 +1940,7 @@ const saveGame = useCallback(async (stateToSave) => {
                 <h4 className="font-bold mb-2 text-white">XP Shop (Armor)</h4>
                 {dungeonDefinitions.armors.map(a => { 
                     const isOwned = localDungeonState.ownedArmor.includes(a.id); 
-                    const canAfford = profile.totalXP >= a.cost;
+                    const canAfford = stats.totalXP >= a.cost;
                     return (<button key={a.id} onClick={() => handleBuyItem(a, 'armor', 'xp')} disabled={isOwned || !canAfford} className={`w-full p-2 rounded mb-2 font-semibold transition-colors text-center ${ isOwned ? 'bg-green-800/60 text-green-400 cursor-default' : canAfford ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>{isOwned ? 'Owned' : `${a.name} (${a.cost} XP)`}</button>);
                 })}
             </div>
@@ -1993,9 +1968,9 @@ const saveGame = useCallback(async (stateToSave) => {
   );
 };
 
-const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, actionLock, processAchievement }) => {
+const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, actionLock, processAchievement }) => {
 
-  const { lab_state } = gameState;
+  const { lab_state } = stats;
 
   const [localSciencePoints, setLocalSciencePoints] = useState(lab_state?.sciencePoints || 0);
   const sciencePerSecond = useRef(0);
@@ -2081,7 +2056,7 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
           const newTotalPoints = (lab_state.sciencePoints || 0) + pointsEarned;
           
           // Perform a single, efficient write to save the new total.
-          updateGameStateInFirestore({
+          updateStatsInFirestore({
             lab_state: {
               ...lab_state,
               sciencePoints: newTotalPoints,
@@ -2123,16 +2098,18 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
       const newSciencePoints = localSciencePoints - cost;
       setLocalSciencePoints(newSciencePoints);
       const newEquipmentStats = { ...(lab_state.labEquipment || {}), [key]: currentCount + 1 };
-      updateGameStateInFirestore({ lab_state: { ...lab_state, sciencePoints: newSciencePoints, labEquipment: newEquipmentStats } });
+      updateStatsInFirestore({ lab_state: { ...lab_state, sciencePoints: newSciencePoints, labEquipment: newEquipmentStats } });
     }
   };
 
   const handleBuyXpUpgrade = (key) => {
     const definition = labEquipmentDefinitions[key];
-    if (profile.totalXP >= definition.xpUpgrade.cost && !(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key])) {
+    if (stats.totalXP >= definition.xpUpgrade.cost && !(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key])) {
       const newXpUpgrades = { ...(lab_state.labXpUpgrades || {}), [key]: true };
-      updateProfileInFirestore({ totalXP: profile.totalXP - definition.xpUpgrade.cost });
-      updateGameStateInFirestore({ lab_state: { ...lab_state, labXpUpgrades: newXpUpgrades } });
+      updateStatsInFirestore({ 
+          totalXP: stats.totalXP - definition.xpUpgrade.cost,
+          lab_state: { ...lab_state, labXpUpgrades: newXpUpgrades }
+      });
       showMessageBox(`${definition.name} production doubled!`, 'info');
     }
   };
@@ -2141,17 +2118,15 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
     if (localSciencePoints < PRESTIGE_THRESHOLD) { showMessageBox("Not enough Science Points.", "error"); return; }
     if (!db || !userId) return;
 
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/profile/doc`);
-    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/gameState/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, userId);
 
     try {
       await runTransaction(db, async (transaction) => {
-        const [profileDoc, gameStateDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(gameStateDocRef)]);
-        if (!profileDoc.exists() || !gameStateDoc.exists()) throw new Error("User data missing.");
+        const statsDoc = await transaction.get(statsDocRef);
+        if (!statsDoc.exists()) throw new Error("User data missing.");
 
-        const serverProfile = profileDoc.data();
-        const serverGameState = gameStateDoc.data();
-        const newPrestigeLevel = (serverGameState.lab_state.prestigeLevel || 0) + 1;
+        const serverStats = statsDoc.data();
+        const newPrestigeLevel = (serverStats.lab_state.prestigeLevel || 0) + 1;
         const newLabState = {
           sciencePoints: 0,
           labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
@@ -2159,12 +2134,12 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
           prestigeLevel: newPrestigeLevel,
           lastLogin: serverTimestamp(),
         };
-
-        transaction.update(profileDocRef, { 
-          cooldowns: { ...(serverProfile.cooldowns || {}), prestigeLab: serverTimestamp() },
-          lastActionTimestamp: serverTimestamp()
+        
+        transaction.update(statsDocRef, { 
+          lab_state: newLabState,
+          lastActionTimestamp: serverTimestamp(),
+          cooldowns: { ...(serverStats.cooldowns || {}), prestigeLab: serverTimestamp() }
         });
-        transaction.update(gameStateDocRef, { lab_state: newLabState });
       });
       
       setLocalSciencePoints(0);
@@ -2235,7 +2210,7 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
                             </div>
                             <div className="flex items-center gap-2">
                                 {!(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key]) && (
-                                   <button onClick={() => handleBuyXpUpgrade(key)} disabled={profile.totalXP < item.xpUpgrade.cost} className="text-xs bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
+                                   <button onClick={() => handleBuyXpUpgrade(key)} disabled={stats.totalXP < item.xpUpgrade.cost} className="text-xs bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
                                        2x with {item.xpUpgrade.cost} XP
                                    </button>
                                 )}
@@ -2255,7 +2230,7 @@ const ScienceLab = ({ profile, gameState, userId, updateProfileInFirestore, upda
   );
 };
 
-const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath, processAchievement }) => {
+const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath, processAchievement }) => {
   const [gameSpeed, setGameSpeed] = useState(1);
   // This local state is for transient, in-wave data like enemies, projectiles, and the towers active for the wave
   const [localWaveState, setLocalWaveState] = useState({
@@ -2283,24 +2258,24 @@ const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileI
     td_wins = 0,
     td_unlockedTowers = [],
     td_towerUpgrades = {},
-  } = gameState;
+  } = stats || {}; // FIX: Destructure from stats OR an empty object if stats is null/undefined.
 
   // NEW: This state holds the tower setup between waves, locally,
   // initialized directly from props to ensure saved data is loaded.
-  const [localTowers, setLocalTowers] = useState(gameState.td_towers || []);
+  const [localTowers, setLocalTowers] = useState(stats?.td_towers || []);
 
   // Sync local towers when props change (e.g., after a reset)
   useEffect(() => {
-    setLocalTowers(gameState.td_towers || []);
-  }, [gameState.td_towers]);
+    setLocalTowers(stats?.td_towers || []);
+  }, [stats?.td_towers]);
 
   // NEW: This state holds tower upgrades locally, initialized from props.
-  const [localTowerUpgrades, setLocalTowerUpgrades] = useState(gameState.td_towerUpgrades || {});
+  const [localTowerUpgrades, setLocalTowerUpgrades] = useState(stats?.td_towerUpgrades || {});
 
   // Sync local upgrades when props change
   useEffect(() => {
-    setLocalTowerUpgrades(gameState.td_towerUpgrades || {});
-  }, [gameState.td_towerUpgrades]);
+    setLocalTowerUpgrades(stats?.td_towerUpgrades || {});
+  }, [stats?.td_towerUpgrades]);
 
   // FIX: This hook automatically resets the game if the path is missing,
   // preventing crashes for users with corrupted game states.
@@ -2312,7 +2287,7 @@ const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileI
   }, [td_path, td_wave, td_gameOver, td_gameWon, onResetGame, showMessageBox]);
 
   // Local state for tracking health BETWEEN saves, initialized from props
-  const [sessionHealth, setSessionHealth] = useState(gameState.td_castleHealth);
+  const [sessionHealth, setSessionHealth] = useState(stats?.td_castleHealth);
 
   // Refs for accessing the latest values inside the game loop's interval
   const pathRef = useRef(td_path);
@@ -2333,17 +2308,17 @@ const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileI
   }, [td_wave, td_castleHealth]);
 
   const handlePurchaseShopItem = (item) => {
-    if (profile.totalXP < item.cost || td_wins < item.winsRequired) return;
+    if (stats.totalXP < item.cost || td_wins < item.winsRequired) return;
     
-    updateProfileInFirestore({ totalXP: profile.totalXP - item.cost });
-    updateGameStateInFirestore({
+    updateStatsInFirestore({ 
+      totalXP: stats.totalXP - item.cost,
       td_unlockedTowers: [...td_unlockedTowers, item.unlocks]
     });
     showMessageBox(`Unlocked ${item.name}!`, "info");
   };
 
   const handleUpgradeTower = (towerId, upgrade) => {
-    if (profile.totalXP < upgrade.cost) {
+    if (stats.totalXP < upgrade.cost) {
       showMessageBox("Not enough XP for this upgrade!", "error");
       return;
     }
@@ -2361,7 +2336,7 @@ const TowerDefenseGame = ({ profile, inventory, gameState, stats, updateProfileI
     }));
 
     // The only immediate write is the transactional XP cost
-    updateProfileInFirestore({ totalXP: profile.totalXP - upgrade.cost });
+    updateStatsInFirestore({ totalXP: stats.totalXP - upgrade.cost });
     showMessageBox(`Upgraded tower with ${upgrade.name}!`, "info");
   };
 
@@ -2491,11 +2466,11 @@ const towerUpgrades = {
   };
 
   const handleTowerSelect = (tower) => {
-    if (!localUIState.selectedTile || profile.totalXP < tower.cost) return;
+    if (!localUIState.selectedTile || stats.totalXP < tower.cost) return;
     const newTower = { ...tower, id: `${tower.id}_${Date.now()}`, x: localUIState.selectedTile.x, y: localUIState.selectedTile.y, lastAttack: 0 };
     
     // XP update is immediate and correct.
-    updateProfileInFirestore({ totalXP: profile.totalXP - tower.cost });
+    updateStatsInFirestore({ totalXP: stats.totalXP - tower.cost });
     
     // This updates the local tower array, NOT Firestore.
     setLocalTowers(prev => [...prev, newTower]);
@@ -2510,7 +2485,7 @@ const towerUpgrades = {
     const refund = Math.floor(tower.cost * (petEffects.squirrel?.sellRefund || 0.15));
     
     // XP update is immediate and correct.
-    updateProfileInFirestore({ totalXP: profile.totalXP + refund });
+    updateStatsInFirestore({ totalXP: stats.totalXP + refund });
     
     // This updates the local tower array, NOT Firestore.
     setLocalTowers(prev => prev.filter((_, i) => i !== towerIndex));
@@ -2522,9 +2497,9 @@ const startWave = () => {
     const waveNumber = td_wave + 1;
     const newEnemies = generateWave(waveNumber);
     
-    let updateData = { 
+        let updateData = { 
         td_wave: waveNumber,
-        cooldowns: { ...(gameState.cooldowns || {}), startWave: serverTimestamp() }
+        'cooldowns.startWave': serverTimestamp()
     };
 
     // CHECKPOINT LOGIC: Save tower configuration every 3 waves
@@ -2537,7 +2512,7 @@ const startWave = () => {
         showMessageBox(`Starting Wave ${waveNumber}. Next checkpoint at Wave ${Math.ceil(waveNumber / 3) * 3}.`, 'info', 1500);
     }
 
-    updateGameStateInFirestore(updateData);
+    updateStatsInFirestore(updateData);
     
     // This now fully resets the transient state for the new wave.
     setLocalWaveState(prev => ({ 
@@ -2702,7 +2677,7 @@ const startWave = () => {
           if (isGameWon) { update.td_gameWon = true; update.td_wins = winsRef.current + 1; }
           
           if (Object.keys(update).length > 0) {
-            updateGameStateInFirestore(update).then(() => {
+            updateStatsInFirestore(update).then(() => {
               if (update.td_gameWon) processAchievement('towerDefenseWins');
             });
           }
@@ -2714,14 +2689,14 @@ const startWave = () => {
     }, 100 / gameSpeed);
 
     return () => clearInterval(interval);
-  }, [localWaveState.waveInProgress, gameSpeed, updateGameStateInFirestore, showMessageBox, processAchievement]);
+  }, [localWaveState.waveInProgress, gameSpeed, updateStatsInFirestore, showMessageBox, processAchievement]);
 
 
-  const petEffectsApplied = inventory.currentPet ? (petEffects[inventory.currentPet.id.split('_')[0]] || {}) : {};
+  const petEffectsApplied = stats.currentPet ? (petEffects[stats.currentPet.id.split('_')[0]] || {}) : {};
   
   const getTowerEmoji = (id) => {
     const towerBaseId = id.split('_')[0];
-    const skinId = inventory.equippedItems?.tdSkins?.[towerBaseId];
+    const skinId = stats.equippedItems?.tdSkins?.[towerBaseId];
     if (skinId) {
         const skin = getFullCosmeticDetails(skinId, 'td_skins');
         if (skin) return skin.display;
@@ -2731,7 +2706,7 @@ const startWave = () => {
   };
   const enemyDisplayMap = (enemyId) => {
     const enemyBaseId = enemyId.split('_')[0];
-    const skinId = inventory.equippedItems?.tdSkins?.[enemyBaseId];
+    const skinId = stats.equippedItems?.tdSkins?.[enemyBaseId];
     if (skinId) {
         const skin = getFullCosmeticDetails(skinId, 'td_skins');
         if (skin) return skin.display;
@@ -2829,7 +2804,7 @@ const startWave = () => {
                 <div key={upgrade.id} className="mb-2 p-2 bg-slate-700/50 rounded">
                   <p className="font-medium">{upgrade.name}</p>
                   <p className="text-sm text-slate-400">Cost: {upgrade.cost} XP</p>
-                  <button onClick={() => handleUpgradeTower(towerAtTile.id, upgrade)} disabled={isPurchased || profile.totalXP < upgrade.cost} className={`mt-1 px-2 py-1 text-sm rounded w-full ${isPurchased ? 'bg-green-800' : profile.totalXP >= upgrade.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-600 text-slate-400'}`}>
+                  <button onClick={() => handleUpgradeTower(towerAtTile.id, upgrade)} disabled={isPurchased || stats.totalXP < upgrade.cost} className={`mt-1 px-2 py-1 text-sm rounded w-full ${isPurchased ? 'bg-green-800' : stats.totalXP >= upgrade.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-600 text-slate-400'}`}>
                     {isPurchased ? 'Purchased' : 'Buy Upgrade'}
                   </button>
                 </div>
@@ -2845,14 +2820,14 @@ const startWave = () => {
     const availableTowers = [
         ...towerTypes.free,
         ...td_unlockedTowers.map(id => towerTypes.unlockable.find(t => t.id === id)).filter(Boolean),
-        ...towerTypes.dungeon_unlockable.filter(t => (gameState.dungeon_floor || 0) >= t.floorRequired)
+        ...towerTypes.dungeon_unlockable.filter(t => (stats.dungeon_floor || 0) >= t.floorRequired)
     ];
     return (
       <div className="text-white">
         <h3 className="text-xl font-bold mb-2">Select Tower</h3>
         <div className="grid grid-cols-2 gap-2">
           {availableTowers.map(tower => (
-            <button key={tower.id} onClick={() => handleTowerSelect(tower)} disabled={profile.totalXP < tower.cost} className={`p-2 rounded-md flex flex-col items-center ${profile.totalXP < tower.cost ? 'bg-slate-700 text-slate-500' : 'bg-slate-700 hover:bg-slate-600'}`}>
+            <button key={tower.id} onClick={() => handleTowerSelect(tower)} disabled={stats.totalXP < tower.cost} className={`p-2 rounded-md flex flex-col items-center ${stats.totalXP < tower.cost ? 'bg-slate-700 text-slate-500' : 'bg-slate-700 hover:bg-slate-600'}`}>
               <span className="text-2xl">{getTowerEmoji(tower.id)}</span>
               <span>{tower.name}</span>
               <span className="text-sm text-yellow-400">{tower.cost} XP</span>
@@ -2876,7 +2851,7 @@ const startWave = () => {
         <div className="flex-grow">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">Wave:</span> <span className="font-bold text-white">{td_wave}/50</span></div>
-            <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">Health:</span> <span className="font-bold text-red-400">{sessionHealth}/5</span></div>            <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">XP:</span> <span className="font-bold text-yellow-400">{profile.totalXP}</span></div>
+            <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">Health:</span> <span className="font-bold text-red-400">{sessionHealth}/5</span></div>            <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">XP:</span> <span className="font-bold text-yellow-400">{stats.totalXP}</span></div>
             <div className="bg-slate-800/50 p-3 rounded-lg text-center"><span className="text-slate-400">Wins:</span> <span className="font-bold text-green-400">{td_wins}</span></div>
           </div>
           <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block relative">
@@ -2898,7 +2873,7 @@ const startWave = () => {
       </div>
       {td_gameOver && <div className="mt-4 p-4 bg-red-500/30 text-red-300 border border-red-500 rounded-lg"><p className="font-bold text-lg">Game Over!</p><p>Your castle was destroyed on wave {td_wave}.</p></div>}
       {td_gameWon && <div className="mt-4 p-4 bg-green-500/30 text-green-300 border border-green-500 rounded-lg"><p className="font-bold text-lg">Victory!</p><p>You successfully defended your castle against all 50 waves!</p></div>}
-      {localUIState.shopOpen && (<div className="mt-6"><h3 className="text-2xl font-bold text-white mb-4">Shop</h3><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{shopItems.map(item => (<div key={item.id} className="p-4 bg-slate-800/80 rounded-lg shadow-lg border border-slate-700"><h4 className="font-bold text-white">{item.name}</h4><p className="text-slate-400 text-sm">Cost: {item.cost} XP | Wins Required: {item.winsRequired}</p><button onClick={() => handlePurchaseShopItem(item)} disabled={td_unlockedTowers.includes(item.unlocks) || profile.totalXP < item.cost || td_wins < item.winsRequired} className={`mt-2 w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${td_unlockedTowers.includes(item.unlocks) ? 'bg-green-500/20 text-green-400' : (profile.totalXP < item.cost || td_wins < item.winsRequired) ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{td_unlockedTowers.includes(item.unlocks) ? 'Purchased' : 'Buy'}</button></div>))}</div></div>)}
+      {localUIState.shopOpen && (<div className="mt-6"><h3 className="text-2xl font-bold text-white mb-4">Shop</h3><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{shopItems.map(item => (<div key={item.id} className="p-4 bg-slate-800/80 rounded-lg shadow-lg border border-slate-700"><h4 className="font-bold text-white">{item.name}</h4><p className="text-slate-400 text-sm">Cost: {item.cost} XP | Wins Required: {item.winsRequired}</p><button onClick={() => handlePurchaseShopItem(item)} disabled={td_unlockedTowers.includes(item.unlocks) || stats.totalXP < item.cost || td_wins < item.winsRequired} className={`mt-2 w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${td_unlockedTowers.includes(item.unlocks) ? 'bg-green-500/20 text-green-400' : (stats.totalXP < item.cost || td_wins < item.winsRequired) ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{td_unlockedTowers.includes(item.unlocks) ? 'Purchased' : 'Buy'}</button></div>))}</div></div>)}
     </div>
   );
 };
@@ -3129,9 +3104,8 @@ const FocusMode = ({ session, onEnd, onComplete }) => {
 };
 
 // Component for the Sanctum
-const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {  const [editMode, setEditMode] = useState(false);
-  const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);
-  const [ghostPosition, setGhostPosition] = useState(null);
+const Sanctum = ({ stats, completedAssignments, updateStatsInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {  const [editMode, setEditMode] = useState(false);
+  const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);  const [ghostPosition, setGhostPosition] = useState(null);
   const [selectedPlacedItem, setSelectedPlacedItem] = useState(null);
   const [showTrophyModal, setShowTrophyModal] = useState(false);
   const [showFunFactModal, setShowFunFactModal] = useState(false);
@@ -3151,16 +3125,16 @@ const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, 
     "Well done is better than well said."
   ];
 
-  const equippedWallpaper = getFullCosmeticDetails(inventory.equippedItems.wallpaper, 'wallpapers');
+  const equippedWallpaper = getFullCosmeticDetails(stats?.equippedItems?.wallpaper, 'wallpapers');
   const wallStyle = equippedWallpaper?.style || { background: 'linear-gradient(to bottom, #475569, #334155)' };
 
   const getFurnitureDef = (itemId) => Object.values(furnitureDefinitions).flat().find(f => f.id === itemId);
 
-  const placedItems = inventory.sanctumLayout?.placedItems || [];
+  const placedItems = stats?.sanctumLayout?.placedItems || [];
 
   // Pet Roaming Logic
   useEffect(() => {
-    if (inventory.currentPet && !editMode) {
+    if (stats?.currentPet && !editMode) {
       const isOccupied = (x, y) => {
         return placedItems.some(item => {
           const def = getFurnitureDef(item.id);
@@ -3184,14 +3158,14 @@ const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, 
 
       return () => clearInterval(interval);
     }
-  }, [inventory.currentPet, editMode, placedItems]);
+  }, [stats?.currentPet, editMode, placedItems]);
 
     const ownedFurnitureDetails = useMemo(() => {
-    return inventory.ownedFurniture.map(id => getFurnitureDef(id)).filter(Boolean);
-  }, [inventory.ownedFurniture]);
+    return (stats?.ownedFurniture || []).map(id => getFurnitureDef(id)).filter(Boolean);
+  }, [stats?.ownedFurniture]);
 
   const updateLayout = (newPlacedItems) => {
-    updateInventoryInFirestore({ sanctumLayout: { ...(inventory.sanctumLayout || { placedItems: [] }), placedItems: newPlacedItems } });
+    updateStatsInFirestore({ sanctumLayout: { ...(stats?.sanctumLayout || { placedItems: [] }), placedItems: newPlacedItems } });
   };
 
 
@@ -3328,11 +3302,11 @@ const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, 
                     ))
                 }
 
-{/* Roaming Pet */}
-                {inventory.currentPet && !editMode && (
+                {/* Roaming Pet */}
+                {stats?.currentPet && !editMode && (
                   <div className="absolute transition-all duration-1000 ease-in-out" style={{ left: `${(petPosition.x / GRID_COLS) * 100}%`, top: `${(petPosition.y / GRID_ROWS) * 100}%`, width: `${(1 / GRID_COLS) * 100}%`, height: `${(1 / GRID_ROWS) * 100}%`, transform: 'translateZ(10px)', zIndex: 50 }}>
                     <div className="w-full h-full text-2xl" style={{ transform: 'rotateX(-60deg) scale(1.5)', transformOrigin: 'bottom center' }}>
-                      {inventory.currentPet.display}
+                      {stats.currentPet.display}
                     </div>
                   </div>
                 )}
@@ -3406,7 +3380,7 @@ const Sanctum = ({ inventory, completedAssignments, updateInventoryInFirestore, 
   );
 };
 // Component for the XP Gain Animation
-const XpBarAnimation = ({ xpGained, profile, inventory, calculateLevelInfo, onAnimationComplete, onAudioReady, originEvent }) => {
+const XpBarAnimation = ({ xpGained, stats, calculateLevelInfo, onAnimationComplete, onAudioReady, originEvent }) => {
   const [visible, setVisible] = useState(false);
   const [orbs, setOrbs] = useState([]);
   const [barFillWidth, setBarFillWidth] = useState('0%');
@@ -3415,7 +3389,7 @@ const XpBarAnimation = ({ xpGained, profile, inventory, calculateLevelInfo, onAn
   const audioRef = useRef(null);
   const currentLevelRef = useRef(1);
   
-  const initialXp = useMemo(() => profile.totalXP - xpGained, [profile.totalXP, xpGained]);
+  const initialXp = useMemo(() => (stats?.totalXP || 0) - xpGained, [stats?.totalXP, xpGained]);
   const initialLevelInfo = useMemo(() => calculateLevelInfo(initialXp), [initialXp, calculateLevelInfo]);
 
   useEffect(() => {
@@ -3447,8 +3421,8 @@ const XpBarAnimation = ({ xpGained, profile, inventory, calculateLevelInfo, onAn
     } catch(e) { /* Fail silently */ }
   }, []);
     useEffect(() => {
-    if (!inventory || !inventory.equippedItems) return; // Guard against initial undefined state
-    const bannerId = inventory.equippedItems.banner || 'banner_default';
+    if (!stats || !stats.equippedItems) return; // Guard against initial undefined state
+    const bannerId = stats.equippedItems.banner || 'banner_default';
     const banner = cosmeticItems.banners.find(b => b.id === bannerId) 
                   || cosmeticItems.banners.find(b => b.id === 'banner_default'); // Fallback to default
     
@@ -3458,7 +3432,7 @@ const XpBarAnimation = ({ xpGained, profile, inventory, calculateLevelInfo, onAn
       root.style.setProperty('--accent-color', banner.themeColors.accent);
       root.style.setProperty('--text-color', banner.themeColors.text);
     }
-  }, [inventory?.equippedItems?.banner]); // Depend on the specific property
+  }, [stats?.equippedItems?.banner]); // Depend on the specific property
   useEffect(() => {
     if (xpGained > 0) {
       setVisible(true);
@@ -3750,21 +3724,12 @@ const AuthComponent = () => {
 
           // If user creation is successful, create their data documents
           if (user) {
-            const defaultProfile = { username: email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null };
-            const defaultInventory = { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 };
-            const defaultGameState = {
-              dungeon_state: generateInitialDungeonState(),
-              dungeon_floor: 0,
-              dungeon_gold: 0,
-              td_wins: 0,
-              td_wave: 0,
-              td_castleHealth: 5,
-              td_towers: [],
-              td_path: generatePath(),
-              td_gameOver: false,
-              td_gameWon: false,
-              td_unlockedTowers: [],
-              td_towerUpgrades: {},
+            // REFACTORED: Create a single default stats object
+            const defaultStats = {
+              username: email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
+              ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+              dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
+              td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
               lab_state: {
                 sciencePoints: 0,
                 lastLogin: serverTimestamp(),
@@ -3772,22 +3737,14 @@ const AuthComponent = () => {
                 labXpUpgrades: {},
                 prestigeLevel: 0,
               },
-              studyZone: { flashcardsText: '', platformerHighScore: 0 }
+              studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
+              achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
+              quests: generateQuests()
             };
-            const defaultGameProgress = { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() };
 
-            const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-            const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
-            const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
-            const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
-
-            // Use Promise.all to create all documents efficiently
-            await Promise.all([
-              setDoc(profileDocRef, defaultProfile),
-              setDoc(inventoryDocRef, defaultInventory),
-              setDoc(gameStateDocRef, defaultGameState),
-              setDoc(gameProgressDocRef, defaultGameProgress)
-            ]);
+            // REFACTORED: Set the single stats document
+            const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
+            await setDoc(statsDocRef, defaultStats);
           }
         }
       } catch (err) {
@@ -4142,13 +4099,13 @@ const AuthComponent = () => {
   };
     
 // Component for My Profile Sheet
-const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileInFirestore, updateInventoryInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement }) => {
+const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement }) => {
   // Create a unified draft state from the incoming props
-  const [draftState, setDraftState] = useState({ ...profile, ...inventory });
+  const [draftState, setDraftState] = useState({ ...stats });
   const [activeTab, setActiveTab] = useState('collections');
   const [friendIdInput, setFriendIdInput] = useState('');
   
-  const [usernameInput, setUsernameInput] = useState(profile.username || '');
+  const [usernameInput, setUsernameInput] = useState(stats.username || '');
 
   const craftingCosts = {
     common: 20, rare: 60, epic: 200, legendary: 500,
@@ -4156,8 +4113,8 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
 
   // Sync draft with external changes from props
   useEffect(() => {
-    setDraftState({ ...profile, ...inventory });
-  }, [profile, inventory]);
+    setDraftState({ ...stats });
+  }, [stats]);
   
   // Sync username input only when the source of truth in the draft changes
   useEffect(() => {
@@ -4166,47 +4123,42 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
   
   // Check for unsaved changes by comparing the draft to the original props
   const hasUnsavedChanges = useMemo(() => {
-    const profileChanged = JSON.stringify({ username: draftState.username, friends: draftState.friends }) !== JSON.stringify({ username: profile.username, friends: profile.friends });
-    const inventoryChanged = JSON.stringify({ equippedItems: draftState.equippedItems, currentPet: draftState.currentPet }) !== JSON.stringify({ equippedItems: inventory.equippedItems, currentPet: inventory.currentPet });
-    return profileChanged || inventoryChanged;
-  }, [draftState, profile, inventory]);
+    // Only compare the fields that can be changed in this component
+    const editableFields = {
+        username: draftState.username,
+        friends: draftState.friends,
+        equippedItems: draftState.equippedItems,
+        currentPet: draftState.currentPet,
+    };
+    const originalFields = {
+        username: stats.username,
+        friends: stats.friends,
+        equippedItems: stats.equippedItems,
+        currentPet: stats.currentPet,
+    };
+    // Normalize to prevent false positives from timestamp differences or undefined properties
+    return JSON.stringify(normalizeTimestamps(editableFields)) !== JSON.stringify(normalizeTimestamps(originalFields));
+  }, [draftState, stats]);
+
 
   // --- Handlers for Save/Discard ---
-    const handleSaveChanges = () => actionLock(async () => {
+  const handleSaveChanges = () => actionLock(async () => {
     if (!db || !user) return;
-    // Get all the data from the local draft state
     const { username, friends, equippedItems, currentPet } = draftState;
 
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    await updateStatsInFirestore({
+      username,
+      friends,
+      equippedItems,
+      currentPet
+    });
 
-    try {
-      // Use a single transaction to batch all writes together
-      await runTransaction(db, async (transaction) => {
-        // Update the profile document with profile-specific fields
-        transaction.set(profileDocRef, { 
-          username, 
-          friends,
-          lastActionTimestamp: serverTimestamp() // Also include the global timestamp
-        }, { merge: true });
-
-        // Update the inventory document with inventory-specific fields
-        transaction.set(inventoryDocRef, { 
-          equippedItems, 
-          currentPet 
-        }, { merge: true });
-      });
-      
-      showMessageBox("Profile changes saved!", "info");
-
-    } catch (error) {
-      console.error("Error saving profile changes:", error);
-      showMessageBox("Failed to save changes due to a server error.", "error");
-    }
+    showMessageBox("Profile changes saved!", "info");
   });
 
+
   const handleDiscardChanges = () => {
-    setDraftState({ ...profile, ...inventory }); // Revert all local changes
+    setDraftState({ ...stats }); // Revert all local changes
     showMessageBox("Changes discarded.", "info");
   };
   
@@ -4215,29 +4167,27 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
     if (!db || !user) return;
     const cost = craftingCosts[itemToCraft.rarity];
     if (!cost) { showMessageBox("This item cannot be crafted.", "error"); return; }
-    
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
 
     try {
         await runTransaction(db, async (transaction) => {
-            const [profileDoc, inventoryDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(inventoryDocRef)]);
-            if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data not found.");
+            const statsDoc = await transaction.get(statsDocRef);
+            if (!statsDoc.exists()) throw new Error("User data not found.");
             
-            const serverInventory = inventoryDoc.data();
-            if ((serverInventory.cosmeticShards || 0) < cost) throw new Error("INSUFFICIENT_SHARDS");
-            if ((serverInventory.ownedItems || []).includes(itemToCraft.id)) throw new Error("ALREADY_OWNED");
+            const serverStats = statsDoc.data();
+            if ((serverStats.cosmeticShards || 0) < cost) throw new Error("INSUFFICIENT_SHARDS");
+            if ((serverStats.ownedItems || []).includes(itemToCraft.id)) throw new Error("ALREADY_OWNED");
 
-            transaction.update(profileDocRef, { cooldowns: { ...profileDoc.data().cooldowns, craftShopItem: serverTimestamp() } });
-            transaction.update(inventoryDocRef, {
-                cosmeticShards: serverInventory.cosmeticShards - cost,
-                ownedItems: [...serverInventory.ownedItems, itemToCraft.id],
+            transaction.update(statsDocRef, {
+                cosmeticShards: serverStats.cosmeticShards - cost,
+                ownedItems: [...serverStats.ownedItems, itemToCraft.id],
+                cooldowns: { ...(serverStats.cooldowns || {}), craftShopItem: serverTimestamp() }
             });
         });
         showMessageBox(`Successfully crafted ${itemToCraft.name}!`, "info");
         processAchievement('cosmeticsCrafted');
     } catch (e) {
-
         const errorMsg = e.message.includes('permission-denied') ? "You're crafting too fast!" :
                          e.message === "INSUFFICIENT_SHARDS" ? "You don't have enough shards." :
                          e.message === "ALREADY_OWNED" ? "You already own this item." : "A server error occurred.";
@@ -4248,29 +4198,27 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
   const handleBuyItem = async (item) => actionLock(async () => {
     if (!db || !user) return;
     
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     
     try {
       await runTransaction(db, async (transaction) => {
-        const [profileDoc, inventoryDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(inventoryDocRef)]);
-        if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing.");
+        const statsDoc = await transaction.get(statsDocRef);
+        if (!statsDoc.exists()) throw new Error("User data missing.");
         
-        const serverProfile = profileDoc.data();
-        const serverInventory = inventoryDoc.data();
+        const serverStats = statsDoc.data();
 
-        if (serverProfile.totalXP < item.cost) throw new Error("Not enough XP.");
-        if (serverInventory.ownedItems.includes(item.id) || serverInventory.ownedFurniture.includes(item.id)) throw new Error("Already owned.");
+        if (serverStats.totalXP < item.cost) throw new Error("Not enough XP.");
+        if (serverStats.ownedItems.includes(item.id) || serverStats.ownedFurniture.includes(item.id)) throw new Error("Already owned.");
 
         const isFurniture = item.type === 'furniture';
-        transaction.update(profileDocRef, { 
-          totalXP: serverProfile.totalXP - item.cost,
-          cooldowns: { ...serverProfile.cooldowns, buyShopItem: serverTimestamp() }
-        });
-        transaction.update(inventoryDocRef, {
-          ownedItems: !isFurniture ? [...serverInventory.ownedItems, item.id] : serverInventory.ownedItems,
-          ownedFurniture: isFurniture ? [...serverInventory.ownedFurniture, item.id] : serverInventory.ownedFurniture,
-        });
+        
+        const updateData = {
+            totalXP: serverStats.totalXP - item.cost,
+            cooldowns: { ...(serverStats.cooldowns || {}), buyShopItem: serverTimestamp() },
+            ownedItems: !isFurniture ? [...serverStats.ownedItems, item.id] : serverStats.ownedItems,
+            ownedFurniture: isFurniture ? [...serverStats.ownedFurniture, item.id] : serverStats.ownedFurniture,
+        };
+        transaction.update(statsDocRef, updateData);
       });
       showMessageBox(`Purchased ${item.name}!`, 'info');
       processAchievement('xpSpentInShop', item.cost); // We send the cost as progress
@@ -4286,7 +4234,7 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
     const trimmedUsername = usernameInput.trim();
     if (trimmedUsername.length < 3 || trimmedUsername.length > 15) { showMessageBox("Username must be 3-15 characters.", "error"); return; }
     if (/\s/.test(trimmedUsername)) { showMessageBox("Username cannot contain spaces.", "error"); return; }
-    if (trimmedUsername === profile.username) { showMessageBox("This is already your username.", "info"); return; }
+    if (trimmedUsername === stats.username) { showMessageBox("This is already your username.", "info"); return; }
 
     const newUsernameLower = trimmedUsername.toLowerCase();
     const usernameDocRef = doc(db, `usernames/${newUsernameLower}`);
@@ -4301,7 +4249,7 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
         }
 
         // If the user is changing from an old username, prepare to delete the old entry
-        const oldUsernameLower = profile.username?.toLowerCase();
+        const oldUsernameLower = stats.username?.toLowerCase();
         if (oldUsernameLower && oldUsernameLower !== newUsernameLower) {
           const oldUsernameDocRef = doc(db, `usernames/${oldUsernameLower}`);
           transaction.delete(oldUsernameDocRef);
@@ -4362,13 +4310,13 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
     </button>
   );
 
-  // Read from the `inventory` prop for things the user owns.
-  const ownedAvatars = inventory.ownedItems.map(id => getFullCosmeticDetails(id, 'avatars')).filter(Boolean);
-  const ownedBanners = inventory.ownedItems.map(id => getFullCosmeticDetails(id, 'banners')).filter(Boolean);
-  const ownedWallpapers = inventory.ownedItems.map(id => getFullCosmeticDetails(id, 'wallpapers')).filter(Boolean);
-  const ownedPetsFullDetails = inventory.ownedPets.map(pet => getFullPetDetails(pet.id)).filter(Boolean);
-  const ownedTdSkins = inventory.ownedItems.map(id => getFullCosmeticDetails(id, 'td_skins')).filter(Boolean);
-  const ownedDungeonEmojis = inventory.ownedItems.map(id => getFullCosmeticDetails(id, 'dungeon_emojis')).filter(Boolean);
+  // Read from the `stats` prop for things the user owns.
+  const ownedAvatars = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'avatars')).filter(Boolean);
+  const ownedBanners = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'banners')).filter(Boolean);
+  const ownedWallpapers = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'wallpapers')).filter(Boolean);
+  const ownedPetsFullDetails = stats.ownedPets.map(pet => getFullPetDetails(pet.id)).filter(Boolean);
+  const ownedTdSkins = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'td_skins')).filter(Boolean);
+  const ownedDungeonEmojis = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'dungeon_emojis')).filter(Boolean);
 
   return (
     <div>
@@ -4413,7 +4361,7 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
                   {ownedPetsFullDetails.map(pet => {
                     const basePetDef = Object.values(petDefinitions).flat().find(p => p.id === pet.id || p.evolutions?.some(e => e.id === pet.id));
                     const nextEvolutionStage = basePetDef?.evolutions?.[basePetDef.evolutions.findIndex(e => e.id === pet.id) + 1];
-                    const canEvolve = nextEvolutionStage && profile.currentLevel >= nextEvolutionStage.levelRequired && profile.totalXP >= nextEvolutionStage.xpCost;
+                    const canEvolve = nextEvolutionStage && stats.currentLevel >= nextEvolutionStage.levelRequired && stats.totalXP >= nextEvolutionStage.xpCost;
                     return (<div key={pet.id} className={`p-4 bg-slate-800/70 rounded-lg flex flex-col items-center text-center transition-colors ${draftState.currentPet?.id === pet.id ? 'ring-2 ring-green-500' : ''}`}><span className="text-5xl mb-2 cursor-pointer" onClick={() => handleEquipPet(pet)}>{pet.display}</span><p className="text-sm font-medium text-white">{pet.name}</p><p className={`text-xs font-bold capitalize ${pet.rarity}`}>{pet.rarity}</p>{nextEvolutionStage && (<div className="mt-2 w-full"><button onClick={(e) => { e.stopPropagation(); handleEvolvePet(pet); }} disabled={!canEvolve} className={`w-full text-xs px-2 py-1.5 rounded transition-colors ${canEvolve ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}> Evolve </button>{!canEvolve && <p className="text-xs text-slate-500 mt-1">Lvl {nextEvolutionStage.levelRequired} & {nextEvolutionStage.xpCost} XP</p>}</div>)}</div>);
                   })}
                 </div>
@@ -4438,32 +4386,60 @@ const MyProfile = ({ profile, inventory, gameState, user, userId, updateProfileI
                 <h3 className="text-2xl font-semibold text-white mb-3">Wallpaper Shop</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {cosmeticItems.wallpapers.map(item => {
-                    const isOwned = inventory.ownedItems.includes(item.id);
-                    const canAfford = profile.totalXP >= item.cost;
+                    const isOwned = stats.ownedItems.includes(item.id);
+                    const canAfford = stats.totalXP >= item.cost;
                     return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col text-center"><div className="w-full h-20 mb-3 rounded" style={item.style}></div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);
                   })}
                 </div>
               </div>
               <div>
                 <h3 className="text-2xl font-semibold text-white mb-3">Furniture Shop</h3>
-                {Object.entries(furnitureDefinitions).map(([category, items]) => (<div key={category}><h4 className="text-xl font-semibold text-indigo-300 capitalize mb-3">{category}</h4><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{items.map(item => { const isOwned = inventory.ownedFurniture.includes(item.id); const canAfford = profile.totalXP >= item.cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-24 h-24 mb-2 flex items-center justify-center text-slate-300"><div className="w-16 h-16" dangerouslySetInnerHTML={{ __html: item.display }} /></div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);})}</div></div>))}
+                {Object.entries(furnitureDefinitions).map(([category, items]) => (<div key={category}><h4 className="text-xl font-semibold text-indigo-300 capitalize mb-3">{category}</h4><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{items.map(item => { const isOwned = stats.ownedFurniture.includes(item.id); const canAfford = stats.totalXP >= item.cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-24 h-24 mb-2 flex items-center justify-center text-slate-300"><div className="w-16 h-16" dangerouslySetInnerHTML={{ __html: item.display }} /></div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);})}</div></div>))}
               </div>
               <div>
                 <h3 className="text-2xl font-semibold text-white mb-3">Tower Defense Skins</h3>
                 <p className="text-sm text-slate-400 mb-4">Unlock skins by reaching higher floors in the Dungeon Crawler.</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{cosmeticItems.td_skins.map(item => { const isOwned = inventory.ownedItems.includes(item.id); const canAfford = profile.totalXP >= item.cost; const meetsRequirement = (gameState.dungeon_floor || 0) >= item.floorRequired; const isLocked = !meetsRequirement; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-16 h-16 mb-2 flex items-center justify-center text-4xl bg-slate-700 rounded-lg">{item.display}</div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-1">For: {item.for}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford || isLocked} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : isLocked ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : isLocked ? `Requires Floor ${item.floorRequired}` : `${item.cost} XP`}</button></div>);})}</div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{cosmeticItems.td_skins.map(item => { const isOwned = stats.ownedItems.includes(item.id); const canAfford = stats.totalXP >= item.cost; const meetsRequirement = (stats.dungeon_floor || 0) >= item.floorRequired; const isLocked = !meetsRequirement; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-16 h-16 mb-2 flex items-center justify-center text-4xl bg-slate-700 rounded-lg">{item.display}</div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-1">For: {item.for}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford || isLocked} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : isLocked ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : isLocked ? `Requires Floor ${item.floorRequired}` : `${item.cost} XP`}</button></div>);})}</div>
               </div>
               <div>
                 <h3 className="text-2xl font-semibold text-white mb-3">Dungeon Emoji Shop</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{cosmeticItems.dungeon_emojis.map(item => { const isOwned = inventory.ownedItems.includes(item.id); const canAfford = profile.totalXP >= item.cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-16 h-16 mb-2 flex items-center justify-center text-4xl bg-slate-700 rounded-lg">{item.display}</div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-1">For: {item.for}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);})}</div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{cosmeticItems.dungeon_emojis.map(item => { const isOwned = stats.ownedItems.includes(item.id); const canAfford = stats.totalXP >= item.cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-16 h-16 mb-2 flex items-center justify-center text-4xl bg-slate-700 rounded-lg">{item.display}</div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-1">For: {item.for}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);})}</div>
               </div>
             </div>
           )}
           {activeTab === 'crafting' && (
             <div>
-              <div className="flex justify-between items-center mb-4"><h3 className="text-2xl font-semibold text-white">Item Crafting</h3><div className="bg-slate-900/50 px-4 py-2 rounded-lg font-bold text-lg">💎 <span className="text-cyan-400">{inventory.cosmeticShards || 0}</span></div></div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-semibold text-white">Item Crafting</h3>
+                <div className="bg-slate-900/50 px-4 py-2 rounded-lg font-bold text-lg">
+                  💎 <span className="text-cyan-400">{stats.cosmeticShards || 0}</span>
+                </div>
+              </div>
               <p className="text-slate-400 mb-6">Use Cosmetic Shards, earned from duplicate slot machine wins, to craft items you're missing.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">{allRollableItems.filter(item => !inventory.ownedItems.includes(item.id) && craftingCosts[item.rarity]).map(item => { const cost = craftingCosts[item.rarity]; const canAfford = (inventory.cosmeticShards || 0) >= cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col text-center"><div className={`w-full h-20 mb-3 rounded flex items-center justify-center text-4xl ${item.style || ''}`} style={getItemStyle(item)}>{item.display && !item.placeholder ? item.display : ''}</div><p className="font-semibold text-white flex-grow text-sm">{item.name}</p><p className={`text-xs capitalize mb-3 font-bold ${item.rarity}`}>{item.rarity}</p><button onClick={() => handleCraftItem(item)} disabled={!canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${!canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}>Craft (💎 {cost})</button></div>);})}</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {allRollableItems
+                  .filter(item => !stats.ownedItems.includes(item.id) && craftingCosts[item.rarity])
+                  .map(item => {
+                    const cost = craftingCosts[item.rarity];
+                    const canAfford = (stats.cosmeticShards || 0) >= cost;
+                    return (
+                      <div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col text-center">
+                        <div className={`w-full h-20 mb-3 rounded flex items-center justify-center text-4xl ${item.style || ''}`} style={getItemStyle(item)}>
+                          {item.display && !item.placeholder ? item.display : ''}
+                        </div>
+                        <p className="font-semibold text-white flex-grow text-sm">{item.name}</p>
+                        <p className={`text-xs capitalize mb-3 font-bold ${item.rarity}`}>{item.rarity}</p>
+                        <button 
+                          onClick={() => handleCraftItem(item)} 
+                          disabled={!canAfford} 
+                          className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${!canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}
+                        >
+                          Craft (💎 {cost})
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           )}
           {activeTab === 'friends' && (
@@ -4561,10 +4537,10 @@ const QuestsComponent = ({ quests }) => {
 };
 // Component for Stats + XP Tracker Sheet
 
-  const StatsXPTracker = ({ profile, inventory, gameProgress, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
+  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
     const persona = getProductivityPersona();
-    const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => profile.currentLevel >= t.level) || { title: 'Novice Learner' };
-    const currentTitle = inventory.equippedItems.title ? cosmeticItems.titles.find(t => t.id === inventory.equippedItems.title)?.name : currentLevelBasedTitle.title;
+    const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => stats.currentLevel >= t.level) || { title: 'Novice Learner' };
+    const currentTitle = stats?.equippedItems?.title ? cosmeticItems.titles.find(t => t.id === stats.equippedItems.title)?.name : currentLevelBasedTitle.title;
 
     const calculateStressRisk = useCallback(() => {
       let totalStressScore = 0;
@@ -4669,20 +4645,20 @@ const QuestsComponent = ({ quests }) => {
 
         {/* Top Stat Cards */}
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
+                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
             <p className="text-slate-400">Total XP</p>
-            <p className="text-4xl font-bold text-white mt-2">{profile.totalXP}</p>
+            <p className="text-4xl font-bold text-white mt-2">{stats.totalXP}</p>
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
             <div className="flex justify-between items-baseline">
                 <p className="text-slate-400">Current Level</p>
                 <p className="text-sm text-slate-400">
-                    {calculateLevelInfo(profile.totalXP).xpProgressInLevel.toLocaleString()} / {calculateLevelInfo(profile.totalXP).xpNeededForLevelUp.toLocaleString()} XP
+                    {calculateLevelInfo(stats.totalXP).xpProgressInLevel.toLocaleString()} / {calculateLevelInfo(stats.totalXP).xpNeededForLevelUp.toLocaleString()} XP
                 </p>
             </div>
-            <p className="text-4xl font-bold text-white mt-1">{profile.currentLevel}</p>
+            <p className="text-4xl font-bold text-white mt-1">{stats.currentLevel}</p>
             <div className="w-full bg-slate-700 rounded-full h-2.5 mt-4">
-                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(calculateLevelInfo(profile.totalXP).xpProgressInLevel / calculateLevelInfo(profile.totalXP).xpNeededForLevelUp) * 100}%` }}></div>
+                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(calculateLevelInfo(stats.totalXP).xpProgressInLevel / calculateLevelInfo(stats.totalXP).xpNeededForLevelUp) * 100}%` }}></div>
             </div>
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
@@ -4742,7 +4718,7 @@ const QuestsComponent = ({ quests }) => {
 
                         {/* Right Column (Widgets) */}
             <div className="flex flex-col gap-6">
-                <QuestsComponent quests={gameProgress.quests} />
+                <QuestsComponent quests={stats.quests} />
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
                     <h3 className="text-xl font-semibold text-white mb-3">Your Work Style</h3>
                     <div className="flex items-center space-x-4">
@@ -4755,26 +4731,26 @@ const QuestsComponent = ({ quests }) => {
                 </div>
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
                     <h3 className="text-xl font-semibold text-white mb-3">Productivity Pet</h3>
-                      {inventory.petStatus === 'none' ? (
+                      {stats.petStatus === 'none' ? (
                         <button onClick={collectFirstEgg} className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 w-full">Get First Egg</button>
-                      ) : inventory.petStatus === 'egg' ? (
+                      ) : stats.petStatus === 'egg' ? (
                         <>
                           <div className="text-center text-5xl mb-2">🥚</div>
                           <p className="text-slate-400 mb-2 text-center">
-                            {inventory.assignmentsToHatch > 0 ? `${inventory.assignmentsToHatch} more to hatch!` : "Ready to hatch!"}
+                            {stats.assignmentsToHatch > 0 ? `${stats.assignmentsToHatch} more to hatch!` : "Ready to hatch!"}
                           </p>
                           <div className="w-full bg-slate-700 rounded-full h-4 mb-2">
-                            <div className="bg-purple-500 h-4 rounded-full" style={{ width: `${((EGG_REQUIREMENT - inventory.assignmentsToHatch) / EGG_REQUIREMENT) * 100}%` }}/>
+                            <div className="bg-purple-500 h-4 rounded-full" style={{ width: `${((EGG_REQUIREMENT - stats.assignmentsToHatch) / EGG_REQUIREMENT) * 100}%` }}/>
                           </div>
-                          {inventory.assignmentsToHatch <= 0 && <button onClick={hatchEgg} className="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Hatch Now!</button>}
+                          {stats.assignmentsToHatch <= 0 && <button onClick={hatchEgg} className="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Hatch Now!</button>}
                         </>
                       ) : (
                         <>
                           <div className="flex items-center space-x-4 mb-2">
-                            <span className="text-6xl">{inventory.currentPet.display}</span>
+                            <span className="text-6xl">{stats.currentPet?.display}</span>
                             <div>
-                              <p className="text-lg font-semibold text-white">{inventory.currentPet.name}</p>
-                              <p className="text-sm text-green-400">+{(inventory.currentPet.xpBuff * 100).toFixed(0)}% XP</p>
+                              <p className="text-lg font-semibold text-white">{stats.currentPet?.name}</p>
+                              <p className="text-sm text-green-400">+{(stats.currentPet?.xpBuff * 100).toFixed(0)}% XP</p>
                             </div>
                           </div>
                           <button onClick={collectNewEgg} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">Find New Egg</button>
@@ -5015,14 +4991,14 @@ const QuestsComponent = ({ quests }) => {
     );
   };
 // NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
-const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameStateInFirestore, showMessageBox, processAchievement }) => {
+const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement }) => {
     const [activeTab, setActiveTab] = useState('game');
     const [isStudying, setIsStudying] = useState(false);
-    const studyZoneState = gameState.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
+    const studyZoneState = stats?.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
     
     const updateStudyZoneState = useCallback((newState) => {
-        updateGameStateInFirestore({ studyZone: { ...studyZoneState, ...newState } });
-    }, [studyZoneState, updateGameStateInFirestore]);
+        updateStatsInFirestore({ studyZone: { ...studyZoneState, ...newState } });
+    }, [studyZoneState, updateStatsInFirestore]);
 
     const StudyZoneTabButton = ({ tabName, children }) => (
       <button onClick={() => setActiveTab(tabName)} className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === tabName ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>
@@ -5044,7 +5020,7 @@ const StudyZone = ({ profile, gameState, updateProfileInFirestore, updateGameSta
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
         </div>
         <div className="p-6">
-          {activeTab === 'game' && <PlatformerGame profile={profile} updateProfileInFirestore={updateProfileInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
+          {activeTab === 'game' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
           {activeTab === 'flashcards' && (
             isStudying ? 
             <FlashcardSession studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
@@ -5274,8 +5250,7 @@ const FlashcardSession = ({ studyZoneState, updateStudyZoneState, onSessionEnd }
         </div>
     );
 }; 
-const PlatformerGame = ({ profile, studyZoneState, updateStudyZoneState, updateProfileInFirestore, showMessageBox, processAchievement }) => {
-
+const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateStatsInFirestore, showMessageBox, processAchievement }) => {
   // --- Core Game Constants ---
   const GAME_WIDTH = 800;
   const GAME_HEIGHT = 400;
@@ -5461,11 +5436,11 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
 
   const startGameWithFlashcards = useCallback(() => { setIsXpMode(false); commonStartLogic(); }, [commonStartLogic]);
   const startXpLevel = useCallback(() => {
-    if (profile.totalXP < 100) { showMessageBox("You need 100 XP to play a single level.", "error"); return; }
-    updateProfileInFirestore({ totalXP: profile.totalXP - 100 });
+    if (stats?.totalXP < 100) { showMessageBox("You need 100 XP to play a single level.", "error"); return; }
+    updateStatsInFirestore({ totalXP: stats.totalXP - 100 });
     setIsXpMode(true);
     commonStartLogic();
-  }, [profile.totalXP, commonStartLogic, updateProfileInFirestore]);
+  }, [stats?.totalXP, commonStartLogic, updateStatsInFirestore]);
 
   useEffect(() => {
     // If the game is not in the 'playing' state, ensure the timer ref is reset and do nothing.
@@ -5627,10 +5602,10 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
         }
       }
     } else if (uiGameState === 'levelwon' && isXpMode) {
-      updateProfileInFirestore({ totalXP: profile.totalXP + 250 });
+      updateStatsInFirestore({ totalXP: (stats?.totalXP || 0) + 250 });
       showMessageBox(`Level Complete! You earned 250 XP!`, 'info');
     }
-  }, [uiGameState, score, isXpMode, showMessageBox, profile.totalXP, studyZoneState.platformerHighScore, updateProfileInFirestore, updateStudyZoneState, processAchievement]);
+  }, [uiGameState, score, isXpMode, showMessageBox, stats?.totalXP, studyZoneState.platformerHighScore, updateStatsInFirestore, updateStudyZoneState, processAchievement]);
 
   return (
     <div className="flex flex-col items-center">
@@ -5654,7 +5629,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
             ) : (
               <div className="bg-slate-800/50 p-4 rounded-lg">
                 <p className="text-slate-300">Add at least 5 flashcards in the other tab to play the full game.</p>
-                <button onClick={startXpLevel} className="mt-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg text-xl hover:bg-indigo-700 disabled:bg-slate-600 disabled:cursor-not-allowed" disabled={profile.totalXP < 100}>
+                <button onClick={startXpLevel} className="mt-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg text-xl hover:bg-indigo-700 disabled:bg-slate-600 disabled:cursor-not-allowed" disabled={(stats?.totalXP || 0) < 100}>
                   Play for XP (Costs 100)
                 </button>
               </div>
@@ -5807,6 +5782,27 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
   };
 
 
+const normalizeTimestamps = (data) => {
+  if (!data) return data;
+  if (Array.isArray(data)) {
+    return data.map(normalizeTimestamps);
+  }
+  if (typeof data === 'object' && data !== null) {
+    // Check for Firestore Timestamp
+    if (typeof data.toDate === 'function') {
+      return data.toDate().toISOString(); // Convert to a standard, comparable string
+    }
+    // Recurse for nested objects
+    const newObj = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        newObj[key] = normalizeTimestamps(data[key]);
+      }
+    }
+    return newObj;
+  }
+  return data;
+};
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -5830,17 +5826,14 @@ const App = () => {
   const [assignments, setAssignments] = useState([]);
   const statsRef = useRef({});
 
-  // NEW: Split-up state for better performance and stability
-  const [profile, setProfile] = useState(() => getCachedData('profileCache', 90) || {
+  // REFACTORED: Single state object for all user data
+  const [stats, setStats] = useState(() => getCachedData('statsCache', 60) || {
     username: '',
     totalXP: 0,
     currentLevel: 1,
     assignmentsCompleted: 0,
     friends: [],
     guildId: null,
-  });
-
-  const [inventory, setInventory] = useState(() => getCachedData('inventoryCache', 300) || {
     ownedItems: [],
     equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} },
     ownedFurniture: [],
@@ -5849,9 +5842,6 @@ const App = () => {
     petStatus: 'none',
     assignmentsToHatch: 0,
     cosmeticShards: 0,
-  });
-
-  const [gameState, setGameState] = useState(() => getCachedData('gameStateCache', 30) || {
     dungeon_state: null,
     dungeon_floor: 0,
     dungeon_gold: 0,
@@ -5865,72 +5855,29 @@ const App = () => {
     td_unlockedTowers: [],
     td_towerUpgrades: {},
     lab_state: null,
-    studyZone: { flashcardsText: '', platformerHighScore: 0 },
-  });
-  
-  const [gameProgress, setGameProgress] = useState(() => getCachedData('gameProgressCache', 900) || {
+    studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
     achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
     quests: { daily: [], weekly: [], lastUpdated: null },
   });
 
-  const stats = useMemo(() => ({
-    ...profile,
-    ...inventory,
-    ...gameState,
-    ...gameProgress
-  }), [profile, inventory, gameState, gameProgress]);
   const completedAssignments = useMemo(() => assignments.filter(a => a.status === 'Completed'), [assignments]);
 
   useEffect(() => {
     statsRef.current = stats;
   }, [stats]);
 
-  const updateProfileInFirestore = useCallback(async (dataToUpdate) => {
+  // REFACTORED: Single update function for the consolidated stats document
+  const updateStatsInFirestore = useCallback(async (dataToUpdate) => {
     if (!db || !user) return;
-    const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    // Automatically add the global action timestamp to every profile update
+    const docRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     const finalData = { ...dataToUpdate, lastActionTimestamp: serverTimestamp() };
     try {
+      // Use set with merge to create or update the single stats document
       await setDoc(docRef, finalData, { merge: true });
-    } catch (error) { showMessageBox(`Failed to update profile.`, "error"); }
-  }, [user, db, appId]);
-
-  const updateInventoryInFirestore = useCallback(async (dataToUpdate) => {
-    if (!db || !user) return;
-    const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
-    // Also update the profile document with the latest action timestamp in a transaction
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    try {
-      await runTransaction(db, async (transaction) => {
-        transaction.set(docRef, dataToUpdate, { merge: true });
-        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
-      });
-    } catch (error) { showMessageBox(`Failed to update inventory.`, "error"); }
-  }, [user, db, appId]);
-
-  const updateGameStateInFirestore = useCallback(async (dataToUpdate) => {
-    if (!db || !user || !user.uid) return;
-    const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
-    // This function now ONLY updates the game state, respecting its own cooldowns.
-    // It is decoupled from the main profile document's global spam check.
-    try {
-      await setDoc(docRef, dataToUpdate, { merge: true });
     } catch (error) {
-        console.error("Firestore Write Error (GameState):", error);
-        showMessageBox(`Failed to update game state.`, "error");
+      console.error("Firestore Write Error (Stats):", error);
+      showMessageBox(`Failed to update stats.`, "error");
     }
-  }, [user, db, appId]);
-
- const updateGameProgressInFirestore = useCallback(async (dataToUpdate) => {
-    if (!db || !user) return;
-    const docRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    try {
-      await runTransaction(db, async (transaction) => {
-        transaction.set(docRef, dataToUpdate, { merge: true });
-        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
-      });
-    } catch (error) { showMessageBox(`Failed to update game progress.`, "error"); }
   }, [user, db, appId]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -5947,6 +5894,8 @@ const App = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      // Clear cache on sign out
+      sessionStorage.removeItem('statsCache');
     } catch (error) {
       console.error("Error signing out:", error);
       showMessageBox("Failed to sign out.", "error");
@@ -5957,9 +5906,11 @@ const App = () => {
   const handleRefreshAllData = () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
+    // Clear cache and force a re-render which triggers the listener useEffect
+    sessionStorage.removeItem('statsCache');
     setAppKey(prevKey => prevKey + 1);
     showMessageBox('Force refreshing all data...', 'info');
-    setTimeout(() => setIsRefreshing(false), 5000);
+    setTimeout(() => setIsRefreshing(false), 2000);
   };
 
   const getFullPetDetails = useCallback((petId) => {
@@ -5989,10 +5940,13 @@ const App = () => {
     return item.style && typeof item.style === 'object' ? item.style : {};
   }, []);
 
-  const equippedFont = getFullCosmeticDetails(inventory.equippedItems.font, 'fonts');
+  // REFACTORED: Derive from single `stats` object
+  // REFACTORED: Derive from single `stats` object
+  // FIX: Use optional chaining (?.) to prevent crash if `equippedItems` is undefined during data load.
+  const equippedFont = getFullCosmeticDetails(stats?.equippedItems?.font, 'fonts');
   const equippedFontStyle = equippedFont ? equippedFont.style : 'font-inter';
   
-  const equippedAvatar = getFullCosmeticDetails(inventory.equippedItems.avatar, 'avatars');
+  const equippedAvatar = getFullCosmeticDetails(stats?.equippedItems?.avatar, 'avatars');
   const equippedAvatarDisplay = equippedAvatar ? equippedAvatar.display : '👤';
 
   const userId = user?.uid;
@@ -6029,75 +5983,68 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
+  // REFACTORED: useEffect for a single data listener
   useEffect(() => {
     if (!isAuthReady || !user) return;
     const userId = user.uid;
 
-    const assignmentsQuery = query(collection(db, `artifacts/${appId}/public/data/assignmentTracker`), where("userId", "==", userId), orderBy("dueDate", "asc"), limit(50));
-    const unsubscribeAssignments = onSnapshot(assignmentsQuery, (snapshot) => {
-      const fetchedAssignments = snapshot.docs.map(doc => ({
-        id: doc.id, ...doc.data(),
-        dueDate: doc.data().dueDate?.toDate(),
-        dateCompleted: doc.data().dateCompleted?.toDate(),
-        subtasks: doc.data().subtasks || [],
-        recurrenceType: doc.data().recurrenceType || 'none',
-        recurrenceEndDate: doc.data().recurrenceEndDate?.toDate(),
-        tags: doc.data().tags || [],
-      }));
-      setAssignments(fetchedAssignments);
-    }, (error) => console.error("Error fetching assignments:", error));
-
-
-
-    // Listener for sub-collections with caching
-    const listenToSubCollection = (subCollectionName, cacheKey, stateSetter, defaultState) => {
-      const docRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/${subCollectionName}/doc`);
-      return onSnapshot(docRef, (docSnap) => {
-        let data;
-        if (docSnap.exists()) {
-          data = docSnap.data();
-        } else {
-          console.log(`Creating default for ${subCollectionName}`);
-          setDoc(docRef, defaultState);
-          data = defaultState;
-        }
-        stateSetter(data);
-        cacheData(cacheKey, data); // Update the cache
-      }, (error) => console.error(`Error fetching ${subCollectionName}:`, error));
+    const defaultStats = {
+        username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
+        ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+        dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0, td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
+        lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, },
+        studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
+        achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
+        quests: { daily: [], weekly: [], lastUpdated: null },
     };
 
-    const unsubProfile = listenToSubCollection('profile', 'profileCache', setProfile, { username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null });
-    const unsubInventory = listenToSubCollection('inventory', 'inventoryCache', setInventory, { ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0 });
-    const unsubGameState = listenToSubCollection('gameState', 'gameStateCache', setGameState, { dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {}, td_wins: 0, lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, }, studyZone: { flashcardsText: '', platformerHighScore: 0 } });
-    const unsubGameProgress = listenToSubCollection('gameProgress', 'gameProgressCache', setGameProgress, { achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } }, quests: generateQuests() });
-
-    // Heartbeat ping (Science Lab - Client Side)
-    if (!getCachedData('heartbeatSent', 300)) { // Only ping every 5 mins
-      const heartbeatDocRef = doc(db, `artifacts/${appId}/public/data/stats/${userId}/heartbeat/doc`);
-      setDoc(heartbeatDocRef, { lastSeen: serverTimestamp() }, { merge: true });
-      cacheData('heartbeatSent', true);
+    const cached = getCachedData('statsCache', 60);
+    if (cached) {
+      setStats(cached);
     }
+
+    // --- Single Listener for all stats ---
+    const docRef = doc(db, `artifacts/${appId}/public/data/stats`, userId);
+    const unsubStats = onSnapshot(docRef, (docSnap) => {
+      // MERGE Firestore data with a complete default structure.
+      // This prevents crashes if a user's document is missing a newer field.
+      const data = docSnap.exists() ? { ...defaultStats, ...docSnap.data() } : defaultStats;
+      setStats(data);
+      cacheData('statsCache', data);
+    }, (error) => console.error(`Error listening to stats:`, error));
     
+    // --- Listener for assignments (separate collection) ---
+    const assignmentsQuery = query(collection(db, `artifacts/${appId}/public/data/assignmentTracker`), where("userId", "==", userId), orderBy("dueDate", "asc"), limit(50));
+    const unsubAssignments = onSnapshot(assignmentsQuery, (snapshot) => {
+        const fetchedAssignments = snapshot.docs.map(doc => ({
+            id: doc.id, ...doc.data(),
+            dueDate: doc.data().dueDate?.toDate(),
+            dateCompleted: doc.data().dateCompleted?.toDate(),
+            subtasks: doc.data().subtasks || [],
+            recurrenceType: doc.data().recurrenceType || 'none',
+            recurrenceEndDate: doc.data().recurrenceEndDate?.toDate(),
+            tags: doc.data().tags || [],
+        }));
+        setAssignments(fetchedAssignments);
+    });
+
     return () => {
-      unsubscribeAssignments();
-      unsubProfile();
-      unsubInventory();
-      unsubGameState();
-      unsubGameProgress();
+      unsubStats();
+      unsubAssignments();
     };
-  }, [user, isAuthReady]);
+  }, [user, isAuthReady, appKey]);
 
   // NEW: Effect to check for and generate new daily/weekly quests on load
-  useEffect(() => {
-    if (user && gameProgress.quests && gameProgress.quests.lastUpdated) {
-      if (shouldGenerateQuests(gameProgress.quests.lastUpdated)) {
+    useEffect(() => {
+    if (user && stats.quests && stats.quests.lastUpdated) {
+      if (shouldGenerateQuests(stats.quests.lastUpdated)) {
         console.log("Generating new daily/weekly quests...");
         const newQuests = generateQuests();
-        updateGameProgressInFirestore({ quests: newQuests });
+        updateStatsInFirestore({ quests: newQuests });
         showMessageBox("Your daily and weekly quests have been refreshed!", "info");
       }
     }
-  }, [user, gameProgress.quests, updateGameProgressInFirestore]);
+  }, [user, stats.quests, updateStatsInFirestore]);
 
 
   // Function to calculate days early
@@ -6234,16 +6181,14 @@ const App = () => {
     return availablePetsOfRarity[Math.floor(Math.random() * availablePetsOfRarity.length)];
   }, []);
   
-  const collectFirstEgg = useCallback(async () => actionLock(async () => {
+    const collectFirstEgg = useCallback(async () => actionLock(async () => {
     if (!db || !user) return;
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     try {
-      await runTransaction(db, async (transaction) => {
-        const [profileDoc, inventoryDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(inventoryDocRef)]);
-        if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing.");
-        transaction.update(profileDocRef, { cooldowns: { ...profileDoc.data().cooldowns, collectEgg: serverTimestamp() } });
-        transaction.update(inventoryDocRef, { petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
+      await updateDoc(statsDocRef, {
+        petStatus: 'egg',
+        assignmentsToHatch: EGG_REQUIREMENT,
+        'cooldowns.collectEgg': serverTimestamp()
       });
       showMessageBox(`You found your first egg! Complete ${EGG_REQUIREMENT} assignments to hatch it.`, "info", 3000);
     } catch (error) {
@@ -6254,22 +6199,24 @@ const App = () => {
 
   const collectNewEgg = useCallback(async () => actionLock(async () => {
     if (!db || !user) return;
-    if (inventory.petStatus !== 'hatched' && inventory.petStatus !== 'none') return;
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    if (stats.petStatus !== 'hatched' && stats.petStatus !== 'none') return;
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     try {
       await runTransaction(db, async (transaction) => {
-        const [profileDoc, inventoryDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(inventoryDocRef)]);
-        if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing.");
-        transaction.update(profileDocRef, { cooldowns: { ...profileDoc.data().cooldowns, collectEgg: serverTimestamp() } });
-        transaction.update(inventoryDocRef, { petStatus: 'egg', assignmentsToHatch: EGG_REQUIREMENT });
+        const statsDoc = await transaction.get(statsDocRef);
+        if (!statsDoc.exists()) throw new Error("User data missing.");
+        transaction.update(statsDocRef, { 
+            petStatus: 'egg', 
+            assignmentsToHatch: EGG_REQUIREMENT,
+            'cooldowns.collectEgg': serverTimestamp() // Use dot notation
+        });
       });
       showMessageBox(`You found a new egg! Complete ${EGG_REQUIREMENT} assignments to hatch it.`, "info", 3000);
     } catch (error) {
       const errorMsg = error.message.includes('permission-denied') ? "You're acting too quickly!" : "Server error.";
       showMessageBox(errorMsg, "error");
     }
-  }), [db, user, appId, inventory.petStatus, actionLock, showMessageBox]);
+  }), [db, user, appId, stats.petStatus, actionLock, showMessageBox]);
 
   
   const handleEvolvePet = useCallback(async (petToEvolve) => {
@@ -6293,36 +6240,31 @@ const App = () => {
 
       if (!nextEvolution) { showMessageBox("This pet has reached its final evolution!", "info"); return; }
 
-      const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-      const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
 
       try {
         await runTransaction(db, async (transaction) => {
-          const [profileDoc, inventoryDoc] = await Promise.all([
-            transaction.get(profileDocRef),
-            transaction.get(inventoryDocRef)
-          ]);
+          const statsDoc = await transaction.get(statsDocRef);
+          if (!statsDoc.exists()) throw new Error("User data missing!");
 
-          if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing!");
-
-          const serverProfile = profileDoc.data();
-          const serverInventory = inventoryDoc.data();
+          const serverStats = statsDoc.data();
           
-          if (serverProfile.currentLevel < nextEvolution.levelRequired) throw new Error(`Level ${nextEvolution.levelRequired} required.`);
-          if (serverProfile.totalXP < nextEvolution.xpCost) throw new Error(`You need ${nextEvolution.xpCost} XP to evolve.`);
+          if (serverStats.currentLevel < nextEvolution.levelRequired) throw new Error(`Level ${nextEvolution.levelRequired} required.`);
+          if (serverStats.totalXP < nextEvolution.xpCost) throw new Error(`You need ${nextEvolution.xpCost} XP to evolve.`);
 
-          const newTotalXP = serverProfile.totalXP - nextEvolution.xpCost;
+          const newTotalXP = serverStats.totalXP - nextEvolution.xpCost;
           const { level: newLevel } = calculateLevelInfo(newTotalXP);
           
-          const updatedOwnedPets = serverInventory.ownedPets.map(p => p.id === basePetOfCurrent.id ? nextEvolution : p);
-          const newCurrentPet = serverInventory.currentPet.id === petToEvolve.id ? nextEvolution : serverInventory.currentPet;
+          const updatedOwnedPets = serverStats.ownedPets.map(p => p.id === petToEvolve.id ? nextEvolution : p);
+          const newCurrentPet = serverStats.currentPet.id === petToEvolve.id ? nextEvolution : serverStats.currentPet;
           
-          transaction.update(profileDocRef, {
+          transaction.update(statsDocRef, {
             totalXP: newTotalXP,
             currentLevel: newLevel,
-            cooldowns: { ...serverProfile.cooldowns, evolvePet: serverTimestamp() }
+            currentPet: newCurrentPet,
+            ownedPets: updatedOwnedPets,
+            'cooldowns.evolvePet': serverTimestamp()
           });
-          transaction.update(inventoryDocRef, { currentPet: newCurrentPet, ownedPets: updatedOwnedPets });
         });
 
         showMessageBox(`Your ${petToEvolve.name} evolved into a ${nextEvolution.name}!`, "info", 5000);
@@ -6339,22 +6281,14 @@ const App = () => {
   
   const resetDungeonGame = () => actionLock(async () => {
     if (!db || !user) return;
-    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     try {
-      await runTransaction(db, async (transaction) => {
-        const gameStateDoc = await transaction.get(gameStateDocRef);
-        if (!gameStateDoc.exists()) throw new Error("Game state not found.");
-        const serverGameState = gameStateDoc.data();
-        
-        transaction.update(gameStateDocRef, {
-          dungeon_state: generateInitialDungeonState(),
-          dungeon_floor: 0,
-          dungeon_gold: 0,
-          cooldowns: { ...(serverGameState.cooldowns || {}), resetDungeon: serverTimestamp() }
-        });
-        // Also update the profile's global timestamp to satisfy the main security rule
-        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
+      await updateDoc(statsDocRef, {
+        dungeon_state: generateInitialDungeonState(),
+        dungeon_floor: 0,
+        dungeon_gold: 0,
+        'cooldowns.resetDungeon': serverTimestamp(),
+        lastActionTimestamp: serverTimestamp()
       });
       showMessageBox("Dungeon has been reset! Choose your class.", "info");
     } catch (error) {
@@ -6365,20 +6299,18 @@ const App = () => {
 
   const resetTowerDefenseGame = useCallback(() => actionLock(async () => {
     if (!db || !user) return;
-    const gameStateDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameState/doc`);
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     
     try {
       const petEffects = { dragon: { castleHealth: 1 } };
-      const petId = inventory.currentPet?.id.split('_')[0];
+      const petId = stats.currentPet?.id.split('_')[0];
       const petEffectsApplied = petEffects[petId] || {};
 
       await runTransaction(db, async (transaction) => {
-        const gameStateDoc = await transaction.get(gameStateDocRef);
-        if (!gameStateDoc.exists()) throw new Error("Game state not found.");
-        const serverGameState = gameStateDoc.data();
+        const statsDoc = await transaction.get(statsDocRef);
+        if (!statsDoc.exists()) throw new Error("Game state not found.");
         
-        transaction.update(gameStateDocRef, {
+        transaction.update(statsDocRef, {
           td_wave: 0,
           td_castleHealth: 5 + (petEffectsApplied.castleHealth || 0),
           td_towers: [],
@@ -6386,17 +6318,16 @@ const App = () => {
           td_gameOver: false,
           td_gameWon: false,
           td_towerUpgrades: {},
-          cooldowns: { ...(serverGameState.cooldowns || {}), resetTowerDefense: serverTimestamp() }
+          'cooldowns.resetTowerDefense': serverTimestamp(), // Use dot notation
+          lastActionTimestamp: serverTimestamp()
         });
-        // Also update the profile's global timestamp to satisfy the main security rule
-        transaction.update(profileDocRef, { lastActionTimestamp: serverTimestamp() });
       });
       showMessageBox("New game started!", "info");
     } catch (error) {
       const errorMsg = error.message.includes('permission-denied') ? "You're resetting too quickly!" : "Game reset failed.";
       showMessageBox(errorMsg, "error");
     }
-  }), [db, user, appId, inventory.currentPet, actionLock, showMessageBox]);
+  }), [db, user, appId, stats.currentPet, actionLock, showMessageBox]);
 
 const spinProductivitySlotMachine = useCallback(() => {
     if (statsRef.current.totalXP < 50) {
@@ -6408,27 +6339,20 @@ const spinProductivitySlotMachine = useCallback(() => {
 
 const handleSlotAnimationComplete = useCallback(async (reward) => {
     setIsSlotAnimationOpen(false);
-    if (!db || !user) return; // Note: using `user` from App scope
-
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    if (!db || !user) return;
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
 
     try {
         const messageToShow = await runTransaction(db, async (transaction) => {
-            const [profileDoc, inventoryDoc] = await Promise.all([
-                transaction.get(profileDocRef),
-                transaction.get(inventoryDocRef)
-            ]);
-
-            if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data is missing.");
+            const statsDoc = await transaction.get(statsDocRef);
+            if (!statsDoc.exists()) throw new Error("User data is missing.");
             
-            const serverProfile = profileDoc.data();
-            const serverInventory = inventoryDoc.data();
+            const serverStats = statsDoc.data();
             
-            if (serverProfile.totalXP < 50) throw new Error("INSUFFICIENT_XP");
+            if (serverStats.totalXP < 50) throw new Error("INSUFFICIENT_XP");
 
             let xpChange = 0, shardChange = 0, message = "";
-            let newOwnedItems = [...(serverInventory.ownedItems || [])];
+            let newOwnedItems = [...(serverStats.ownedItems || [])];
             let isNewItem = false;
 
             if (reward.type === 'xp_gain') xpChange = reward.amount;
@@ -6442,8 +6366,8 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
                 }
             }
 
-            const finalTotalXP = serverProfile.totalXP - 50 + xpChange;
-            const newShards = (serverInventory.cosmeticShards || 0) + shardChange;
+            const finalTotalXP = serverStats.totalXP - 50 + xpChange;
+            const newShards = (serverStats.cosmeticShards || 0) + shardChange;
             const { level: newLevel } = calculateLevelInfo(finalTotalXP);
             
             if (isNewItem) message = `You won: ${reward.name}!`;
@@ -6452,16 +6376,12 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             else if (xpChange < 0) message = `You lost ${Math.abs(xpChange)} XP.`;
             else message = `Spin resulted in no change.`;
 
-            // Update profile with new XP and the cooldown timestamp
-            transaction.update(profileDocRef, {
+            transaction.update(statsDocRef, {
                 totalXP: finalTotalXP,
                 currentLevel: newLevel,
-                cooldowns: { ...serverProfile.cooldowns, spinSlotMachine: serverTimestamp() }
-            });
-            // Update inventory with new items/shards
-            transaction.update(inventoryDocRef, {
                 ownedItems: newOwnedItems,
-                cosmeticShards: newShards
+                cosmeticShards: newShards,
+                'cooldowns.spinSlotMachine': serverTimestamp()
             });
             
             return message;
@@ -6475,66 +6395,58 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
 
   const hatchEgg = useCallback(async () => actionLock(async () => {
     if (!db || !user) return;
-    if (inventory.petStatus !== 'egg' || inventory.assignmentsToHatch > 0) return;
+    if (stats.petStatus !== 'egg' || stats.assignmentsToHatch > 0) return;
     const newPet = generateNewPet();
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     try {
       await runTransaction(db, async (transaction) => {
-        const [profileDoc, inventoryDoc] = await Promise.all([transaction.get(profileDocRef), transaction.get(inventoryDocRef)]);
-        if (!profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing.");
+        const statsDoc = await transaction.get(statsDocRef);
+        if (!statsDoc.exists()) throw new Error("User data missing.");
         
-        const serverInventory = inventoryDoc.data();
-        const updatedOwnedPets = [...serverInventory.ownedPets, newPet];
+        const serverStats = statsDoc.data();
+        const updatedOwnedPets = [...serverStats.ownedPets, newPet];
 
-        transaction.update(profileDocRef, { cooldowns: { ...profileDoc.data().cooldowns, hatchPet: serverTimestamp() } });
-        transaction.update(inventoryDocRef, { petStatus: 'hatched', currentPet: newPet, ownedPets: updatedOwnedPets, assignmentsToHatch: EGG_REQUIREMENT });
+        transaction.update(statsDocRef, { 
+            petStatus: 'hatched', 
+            currentPet: newPet, 
+            ownedPets: updatedOwnedPets, 
+            assignmentsToHatch: EGG_REQUIREMENT,
+            'cooldowns.hatchPet': serverTimestamp() // Use dot notation
+        });
       });
       showMessageBox(`Your egg hatched! You got a ${newPet.rarity.toUpperCase()} ${newPet.name}!`, "info", 5000);
     } catch (error) {
       const errorMsg = error.message.includes('permission-denied') ? "You're acting too quickly!" : "Server error.";
       showMessageBox(errorMsg, "error");
     }
-  }), [db, user, appId, inventory, generateNewPet, actionLock, showMessageBox]);
+  }), [db, user, appId, stats, generateNewPet, actionLock, showMessageBox]);
 
   const processCompletionRewards = useCallback(async (completedAssignment) => {
       if (!db || !user) return;
-      const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-      const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
-      const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
+      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
 
       try {
           const { xpBonus, newAchievements, completedQuests, assignmentsToHatch } = await runTransaction(db, async (transaction) => {
-              const profileDoc = await transaction.get(profileDocRef);
-              const inventoryDoc = await transaction.get(inventoryDocRef);
-              const gameProgressDoc = await transaction.get(gameProgressDocRef);
+              const statsDoc = await transaction.get(statsDocRef);
+              if (!statsDoc.exists()) throw new Error("User document is missing!");
 
-              if (!profileDoc.exists() || !inventoryDoc.exists() || !gameProgressDoc.exists()) {
-                  throw new Error("One or more user documents are missing!");
-              }
-
-              const serverProfile = profileDoc.data();
-              const serverInventory = inventoryDoc.data();
-              const serverGameProgress = gameProgressDoc.data();
+              const serverStats = statsDoc.data();
               
-              // CORE FIX: Check if there's a pending dungeon XP update and use it.
-              const currentXpInProfile = dungeonXpRef.current !== null ? dungeonXpRef.current : serverProfile.totalXP;
-              dungeonXpRef.current = null; // Consume the value so it's only applied once
+              const currentXp = dungeonXpRef.current !== null ? dungeonXpRef.current : serverStats.totalXP;
+              dungeonXpRef.current = null;
 
               let calculatedXpBonus = 0, shardBonus = 0;
               let newAchievementsAwarded = [], newlyCompletedQuests = [];
               
-              if (completedAssignment.focusXpReward) {
-                calculatedXpBonus += completedAssignment.focusXpReward;
-              }
+              if (completedAssignment.focusXpReward) calculatedXpBonus += completedAssignment.focusXpReward;
 
               const difficultyXpMap = { 'Easy': 10, 'Medium': 15, 'Hard': 20 };
               const baseXpForTask = difficultyXpMap[completedAssignment.difficulty] || 10;
               calculatedXpBonus += baseXpForTask;
-              const petBuff = serverInventory.currentPet?.xpBuff || 0;
-              const newAssignmentsToHatch = serverInventory.petStatus === 'egg' ? Math.max(0, (serverInventory.assignmentsToHatch || 0) - 1) : serverInventory.assignmentsToHatch;
+              const petBuff = serverStats.currentPet?.xpBuff || 0;
+              const newAssignmentsToHatch = serverStats.petStatus === 'egg' ? Math.max(0, (serverStats.assignmentsToHatch || 0) - 1) : serverStats.assignmentsToHatch;
               
-              let quests = JSON.parse(JSON.stringify(serverGameProgress.quests || { daily: [], weekly: [] }));
+              let quests = JSON.parse(JSON.stringify(serverStats.quests || { daily: [], weekly: [] }));
               const processQuestList = (list) => {
                   list.forEach(q => {
                       if (q.completed) return;
@@ -6544,7 +6456,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
                       else if (q.type === 'xp') { q.progress = (q.progress || 0) + baseXpForTask; progressMade = true; }
                       else if (!q.type) progressMade = true;
                       
-                      if(progressMade && !q.type?.includes('xp')) q.progress = (q.progress || 0) + 1;
+                      if (progressMade && !q.type?.includes('xp')) q.progress = (q.progress || 0) + 1;
 
                       if (q.progress >= q.goal) {
                           q.completed = true;
@@ -6557,7 +6469,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
               processQuestList(quests.daily);
               processQuestList(quests.weekly);
 
-              let achievements = serverGameProgress.achievements || {};
+              let achievements = serverStats.achievements || {};
               const checkAchievement = (key) => {
                 const def = achievementDefinitions[key];
                 let current = achievements[key] || { tier: 0, progress: 0 };
@@ -6575,23 +6487,22 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
               if (completedAssignment.difficulty === 'Hard') checkAchievement('hardAssignmentsCompleted');
               
               const finalXpGained = Math.round(calculatedXpBonus * (1 + petBuff));
-              const newTotalXP = currentXpInProfile + finalXpGained;
-              const newShards = (serverInventory.cosmeticShards || 0) + shardBonus;
+              const newTotalXP = currentXp + finalXpGained;
+              const newShards = (serverStats.cosmeticShards || 0) + shardBonus;
               const { level: newLevel } = calculateLevelInfo(newTotalXP);
               
-              // FIX: This removes the spread operator that was causing the rule violation.
-              // We now update the cooldown with dot notation, which is safer.
-              // This assumes your rules can handle dot notation updates for nested maps.
-              const profileUpdate = {
+              const statsUpdate = {
                 totalXP: newTotalXP,
                 currentLevel: newLevel,
-                assignmentsCompleted: (serverProfile.assignmentsCompleted || 0) + 1,
+                assignmentsCompleted: (serverStats.assignmentsCompleted || 0) + 1,
+                assignmentsToHatch: newAssignmentsToHatch,
+                cosmeticShards: newShards,
+                quests,
+                achievements,
                 'cooldowns.completeAssignment': serverTimestamp()
               };
 
-              transaction.update(profileDocRef, profileUpdate);
-              transaction.update(inventoryDocRef, { assignmentsToHatch: newAssignmentsToHatch, cosmeticShards: newShards });
-              transaction.update(gameProgressDocRef, { quests, achievements });
+              transaction.update(statsDocRef, statsUpdate);
 
               return { xpBonus: finalXpGained, newAchievements: newAchievementsAwarded, completedQuests: newlyCompletedQuests, assignmentsToHatch: newAssignmentsToHatch };
           });
@@ -6602,70 +6513,60 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           newAchievements.forEach(a => showMessageBox(`Achievement Unlocked: ${a.name}!`, 'info', 4000));
           completedQuests.forEach(q => showMessageBox(`Quest Complete: ${q.name}!`, 'info', 4000));
 
-          if (inventory.petStatus === 'egg' && assignmentsToHatch <= 0) {
+          if (stats.petStatus === 'egg' && assignmentsToHatch <= 0) {
             await hatchEgg();
           }
       } catch (error) {
           console.error("Reward processing transaction failed: ", error);
           showMessageBox("Failed to award XP due to a server error.", "error");
       }
-  }, [user, db, appId, calculateLevelInfo, hatchEgg, inventory.petStatus]);
-  const processAchievement = useCallback(async (achievementKey, progressValue = null) => {
+  }, [user, db, appId, calculateLevelInfo, hatchEgg, stats.petStatus]);
+    const processAchievement = useCallback(async (achievementKey, progressValue = null) => {
     if (!db || !user) return;
-    const gameProgressDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/gameProgress/doc`);
-    const profileDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/profile/doc`);
-    const inventoryDocRef = doc(db, `artifacts/${appId}/public/data/stats/${user.uid}/inventory/doc`);
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     
     try {
         await runTransaction(db, async (transaction) => {
-            const [progressDoc, profileDoc, inventoryDoc] = await Promise.all([
-                transaction.get(gameProgressDocRef),
-                transaction.get(profileDocRef),
-                transaction.get(inventoryDocRef)
-            ]);
-            if (!progressDoc.exists() || !profileDoc.exists() || !inventoryDoc.exists()) throw new Error("User data missing for achievement.");
+            const statsDoc = await transaction.get(statsDocRef);
+            if (!statsDoc.exists()) throw new Error("User data missing for achievement.");
 
-            const serverProgress = progressDoc.data();
-            const serverProfile = profileDoc.data();
-            const serverInventory = inventoryDoc.data();
+            const serverStats = statsDoc.data();
             
-            const achievements = serverProgress.achievements || {};
+            const achievements = serverStats.achievements || {};
             const achievement = achievements[achievementKey] || { tier: 0, progress: 0 };
             const definition = achievementDefinitions[achievementKey];
             const nextTier = definition.tiers[achievement.tier];
             
-            // If there's no next tier, the achievement is maxed out.
             if (!nextTier) return;
 
-            // If a specific progress value is provided (like dungeon floor), update to it if it's higher.
-            // Otherwise, just increment by 1.
             const newProgress = progressValue ? Math.max(achievement.progress, progressValue) : achievement.progress + 1;
+            achievement.progress = newProgress;
             
             if (newProgress >= nextTier.goal) {
                 achievement.tier += 1;
-                achievement.progress = newProgress; // Update progress for categories that aren't just counters
                 
                 const { xp, shards } = nextTier.reward;
-                const petBuff = serverInventory.currentPet?.xpBuff || 0;
+                const petBuff = serverStats.currentPet?.xpBuff || 0;
                 const finalXp = Math.round(xp * (1 + petBuff));
                 
-                const newTotalXP = serverProfile.totalXP + finalXp;
+                const newTotalXP = serverStats.totalXP + finalXp;
                 const { level: newLevel } = calculateLevelInfo(newTotalXP);
                 
-                transaction.update(profileDocRef, { totalXP: newTotalXP, currentLevel: newLevel });
+                const updateData = {
+                    totalXP: newTotalXP,
+                    currentLevel: newLevel,
+                    achievements: achievements
+                };
                 if (shards) {
-                    transaction.update(inventoryDocRef, { cosmeticShards: (serverInventory.cosmeticShards || 0) + shards });
+                    updateData.cosmeticShards = (serverStats.cosmeticShards || 0) + shards;
                 }
-                transaction.update(gameProgressDocRef, { achievements });
+                transaction.update(statsDocRef, updateData);
 
-                // Use a timeout to show the message after the transaction commits
                 setTimeout(() => {
                     showMessageBox(`Achievement Unlocked: ${nextTier.name}!`, 'info', 4000);
                 }, 500);
             } else {
-                // If the goal isn't met, just update the progress.
-                achievement.progress = newProgress;
-                transaction.update(gameProgressDocRef, { achievements });
+                transaction.update(statsDocRef, { achievements });
             }
         });
     } catch (error) {
@@ -6736,12 +6637,12 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
   });
 
 
-  const startFocusSession = useCallback(async (assignment, duration) => {
-    if (profile.totalXP < 5) {
+    const startFocusSession = useCallback(async (assignment, duration) => {
+    if (stats.totalXP < 5) {
       showMessageBox("You need at least 5 XP to start a focus session.", "error");
       return;
     }
-    await updateProfileInFirestore({ totalXP: profile.totalXP - 5 });
+    await updateStatsInFirestore({ totalXP: stats.totalXP - 5 });
     setFocusSession({
       isActive: true,
       assignmentId: assignment.id,
@@ -6752,7 +6653,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
       isFailed: false,
       xpReward: Math.floor(duration / 20) * 20,
     });
-  }, [profile.totalXP, updateProfileInFirestore]);
+  }, [stats.totalXP, updateStatsInFirestore]);
 
   const endFocusSession = (didFail = false) => {
     if (didFail) {
@@ -6881,13 +6782,11 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         <p id="messageText" className="text-white"></p>
       </div>
 
-      <TaskCompletionAnimation show={showCompletionAnimation} onAnimationEnd={() => setShowCompletionAnimation(false)} equippedAnimationEffect={inventory.equippedItems.animation ? cosmeticItems.animations.find(a => a.id === inventory.equippedItems.animation)?.effect : null}/>
-      <SlotMachineAnimationModal isOpen={isSlotAnimationOpen} onClose={() => setIsSlotAnimationOpen(false)} onAnimationComplete={handleSlotAnimationComplete} />
+      <TaskCompletionAnimation show={showCompletionAnimation} onAnimationEnd={() => setShowCompletionAnimation(false)} equippedAnimationEffect={stats?.equippedItems?.animation ? cosmeticItems.animations.find(a => a.id === stats.equippedItems.animation)?.effect : null}/>      <SlotMachineAnimationModal isOpen={isSlotAnimationOpen} onClose={() => setIsSlotAnimationOpen(false)} onAnimationComplete={handleSlotAnimationComplete} />
       <XpBarAnimation
         key={xpAnimationKey}
         xpGained={xpGainToShow}
-        profile={profile}
-        inventory={inventory}
+        stats={stats}
         calculateLevelInfo={calculateLevelInfo}
         onAnimationComplete={() => {
           setXpGainToShow(0);
@@ -6939,21 +6838,19 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           </svg>
         </button>
         {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} startFocusSession={startFocusSession} />}
-        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={gameProgress} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker profile={profile} inventory={inventory} gameProgress={gameProgress} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
+        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
         {activeSheet === 'Guild' && <GuildPage />}
-        {activeSheet === 'My Profile' && <MyProfile profile={profile} inventory={inventory} gameState={gameState} user={user} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateInventoryInFirestore={updateInventoryInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
-        {activeSheet === 'Sanctum' && <Sanctum inventory={inventory} completedAssignments={completedAssignments} updateInventoryInFirestore={updateInventoryInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
+        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
+        {activeSheet === 'Sanctum' && <Sanctum stats={stats} completedAssignments={completedAssignments} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
 
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics completedAssignments={completedAssignments}/>}
-{activeSheet === 'Dungeon Crawler' && <DungeonCrawler profile={profile} inventory={inventory} gameState={gameState} dungeonState={gameState.dungeon_state} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} />}
-        {activeSheet === 'Tower Defense' && <TowerDefenseGame profile={profile} inventory={inventory} gameState={gameState} updateGameStateInFirestore={updateGameStateInFirestore} updateProfileInFirestore={updateProfileInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
-        {activeSheet === 'Science Lab' && <ScienceLab profile={profile} gameState={gameState} gameProgress={gameProgress} userId={user?.uid} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
-        {activeSheet === 'Study Zone' && <StudyZone profile={profile} gameState={gameState} updateProfileInFirestore={updateProfileInFirestore} updateGameStateInFirestore={updateGameStateInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
-
-      </main>
+        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} />}
+        {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
+        {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
+        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} />}      </main>
     </div>
     </>
   );
