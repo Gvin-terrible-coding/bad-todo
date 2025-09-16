@@ -10,6 +10,25 @@ import {
 } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Asset Imports for Focus Navigator
+import cockpitImage from './assets/images/Space_Focus_Timer/Cockpit_View.png';
+import starmapImage from './assets/images/Space_Focus_Timer/Starmap_Select_Background.png';
+import planet1 from './assets/images/Space_Focus_Timer/planet_1.png';
+import planet2 from './assets/images/Space_Focus_Timer/planet_2.png';
+import planet3 from './assets/images/Space_Focus_Timer/planet_3.png';
+import planet4 from './assets/images/Space_Focus_Timer/planet_4.png';
+import planet5 from './assets/images/Space_Focus_Timer/planet_5.png';
+import planet6 from './assets/images/Space_Focus_Timer/planet_6.png';
+import planet7 from './assets/images/Space_Focus_Timer/planet_7.png';
+import planet8 from './assets/images/Space_Focus_Timer/planet_8.png';
+import planet9 from './assets/images/Space_Focus_Timer/planet_9.png';
+import planet10 from './assets/images/Space_Focus_Timer/planet_10.png';
+import starfieldVideo from './assets/videos/Space Focus Timer/Animated_Starfield.mp4';
+import hologramScreen from './assets/images/Space_Focus_Timer/hologram_screen_2.png';
+import spaceshipIcon from './assets/images/Space_Focus_Timer/spaceship.png';
+import hologramButton from './assets/images/Space_Focus_Timer/hologram_button.png';
+
+
 // --- Firestore Logging Wrappers ---
 const getDoc = (ref) => {
   console.log('%c[Firestore READ]', 'color: #34d399; font-weight: bold;', { path: ref.path });
@@ -426,6 +445,8 @@ const achievementDefinitions = {
       { id: 'ac2', name: "Task Journeyman", goal: 50, reward: { xp: 150, shards: 5 } },
       { id: 'ac3', name: "Task Expert", goal: 100, reward: { xp: 300, shards: 15 } },
       { id: 'ac4', name: "Task Master", goal: 250, reward: { xp: 500, shards: 30 } },
+      { id: 'ac5', name: "Task Grandmaster", goal: 500, reward: { xp: 1000, shards: 50 } },
+      { id: 'ac6', name: "Productivity Paragon", goal: 1000, reward: { xp: 2500, shards: 100 } },
     ]
   },
   hardAssignmentsCompleted: {
@@ -434,6 +455,8 @@ const achievementDefinitions = {
       { id: 'hc1', name: "Hill Climber", goal: 5, reward: { xp: 100 } },
       { id: 'hc2', name: "Mountain Goat", goal: 20, reward: { xp: 250, shards: 10 } },
       { id: 'hc3', name: "Peak Bagger", goal: 50, reward: { xp: 500, shards: 25 } },
+      { id: 'hc4', name: "Everest Scaler", goal: 100, reward: { xp: 1200, shards: 60 } },
+      { id: 'hc5', name: "Olympian", goal: 200, reward: { xp: 3000, shards: 150 } },
     ]
   },
   towerDefenseWins: {
@@ -442,6 +465,8 @@ const achievementDefinitions = {
       { id: 'tdw1', name: "Castle Defender", goal: 1, reward: { xp: 100 } },
       { id: 'tdw2', name: "Strategic Mind", goal: 5, reward: { xp: 250, shards: 10 } },
       { id: 'tdw3', name: "Grand Tactician", goal: 10, reward: { xp: 500, shards: 25 } },
+      { id: 'tdw4', name: "War Master", goal: 25, reward: { xp: 1000, shards: 50 } },
+      { id: 'tdw5', name: "Legendary Commander", goal: 50, reward: { xp: 2000, shards: 100 } },
     ]
   },
   dungeonFloors: {
@@ -450,6 +475,8 @@ const achievementDefinitions = {
       { id: 'df1', name: "Spelunker", goal: 10, reward: { xp: 100 } },
       { id: 'df2', name: "Explorer", goal: 25, reward: { xp: 250, shards: 10 } },
       { id: 'df3', name: "Abyss Walker", goal: 50, reward: { xp: 500, shards: 25 } },
+      { id: 'df4', name: "Treasure Hunter", goal: 100, reward: { xp: 1200, shards: 60 } },
+      { id: 'df5', name: "Core Reacher", goal: 200, reward: { xp: 3000, shards: 150 } },
     ]
   },
   petsEvolved: {
@@ -457,6 +484,8 @@ const achievementDefinitions = {
     tiers: [
         { id: 'pe1', name: "Evolver", goal: 1, reward: { xp: 50 } },
         { id: 'pe2', name: "Beast Master", goal: 5, reward: { xp: 200, shards: 15 } },
+        { id: 'pe3', name: "Creature Collector", goal: 10, reward: { xp: 500, shards: 40 } },
+        { id: 'pe4', name: "Evolution Expert", goal: 20, reward: { xp: 1000, shards: 80 } },
     ]
   },
   sciencePoints: {
@@ -464,7 +493,9 @@ const achievementDefinitions = {
     tiers: [
       { id: 'sp1', name: "Researcher", goal: 1000000, reward: { xp: 100 } }, // 1 Million
       { id: 'sp2', name: "Lead Scientist", goal: 1000000000, reward: { xp: 500, shards: 20 } }, // 1 Billion
-      { id: 'sp3', name: "Nobel Laureate", goal: 1000000000000, reward: { xp: 1000, shards: 50 } }, // 1 Trillion
+      { id: 'sp3', name: "Innovator", goal: 25000000000, reward: { xp: 750, shards: 35 } }, // 25 Billion
+      { id: 'sp4', name: "Nobel Laureate", goal: 1000000000000, reward: { xp: 1000, shards: 50 } }, // 1 Trillion
+      { id: 'sp5', name: "World Changer", goal: 50000000000000, reward: { xp: 5000, shards: 250 } }, // 50 Trillion
     ]
   },
   cosmeticsCrafted: {
@@ -473,6 +504,7 @@ const achievementDefinitions = {
       { id: 'cc1', name: "Tinkerer", goal: 1, reward: { xp: 50 } },
       { id: 'cc2', name: "Crafter", goal: 5, reward: { xp: 150, shards: 10 } },
       { id: 'cc3', name: "Master Artisan", goal: 10, reward: { xp: 300, shards: 25 } },
+      { id: 'cc4', name: "Shard-Smith", goal: 25, reward: { xp: 750, shards: 60 } },
     ]
   },
   xpSpentInShop: {
@@ -481,6 +513,8 @@ const achievementDefinitions = {
       { id: 'xs1', name: "Window Shopper", goal: 1000, reward: { xp: 50 } },
       { id: 'xs2', name: "Valued Customer", goal: 5000, reward: { xp: 200, shards: 10 } },
       { id: 'xs3', name: "High Roller", goal: 10000, reward: { xp: 400, shards: 20 } },
+      { id: 'xs4', name: "Big Spender", goal: 25000, reward: { xp: 1000, shards: 50 } },
+      { id: 'xs5', name: "Patron of the Arts", goal: 50000, reward: { xp: 2500, shards: 125 } },
     ]
   },
   highScore: {
@@ -488,6 +522,8 @@ const achievementDefinitions = {
     tiers: [
       { id: 'hs1', name: "Gamer", goal: 1000, reward: { xp: 50 } },
       { id: 'hs2', name: "Pro Gamer", goal: 2500, reward: { xp: 150, shards: 10 } },
+      { id: 'hs3', name: "Record Setter", goal: 5000, reward: { xp: 400, shards: 25 } },
+      { id: 'hs4', name: "World Champion", goal: 10000, reward: { xp: 1000, shards: 50 } },
     ]
   },
   furniturePlaced: {
@@ -496,6 +532,7 @@ const achievementDefinitions = {
       { id: 'fp1', name: "Decorator", goal: 1, reward: { xp: 25 } },
       { id: 'fp2', name: "Home Maker", goal: 5, reward: { xp: 100, shards: 5 } },
       { id: 'fp3', name: "Sanctum Architect", goal: 10, reward: { xp: 200, shards: 15 } },
+      { id: 'fp4', name: "Master Designer", goal: 25, reward: { xp: 500, shards: 40 } },
     ]
   }
 };
@@ -503,15 +540,29 @@ const achievementDefinitions = {
 // NEW: Quest Definitions
 const questDefinitions = {
   daily: [
-    { id: 'complete_3_tasks', name: "Daily Dedication", description: "Complete 3 assignments.", goal: 3, reward: { xp: 50, shards: 2 } },
-    { id: 'complete_1_hard', name: "Challenge Accepted", description: "Complete a 'Hard' assignment.", goal: 1, reward: { xp: 75, shards: 3 }, type: 'difficulty' },
-    { id: 'complete_math_task', name: "Number Cruncher", description: "Complete a 'Math' assignment.", goal: 1, reward: { xp: 40, shards: 1 }, type: 'tag', tag: 'Math' },
+    { id: 'daily_complete_3_tasks', name: "Daily Dedication", description: "Complete 3 assignments.", goal: 3, reward: { xp: 50, shards: 2 }, type: 'completion' },
+    { id: 'daily_complete_1_hard', name: "Challenge Accepted", description: "Complete a 'Hard' assignment.", goal: 1, reward: { xp: 75, shards: 3 }, type: 'difficulty' },
+    { id: 'daily_focus_60_min', name: "Focused Hour", description: "Focus for a total of 60 minutes.", goal: 60, reward: { xp: 60, shards: 5 }, type: 'focusTime' },
+    { id: 'daily_clear_dungeon', name: "Dungeon Dabbler", description: "Clear 1 floor in the Dungeon Crawler.", goal: 1, reward: { xp: 50 }, type: 'dungeon' },
+    { id: 'daily_td_win', name: "Castle Defender", description: "Win 1 game of Tower Defense.", goal: 1, reward: { xp: 100 }, type: 'td_win' },
+    { id: 'daily_earn_sp', name: "Lab Assistant", description: "Earn 100,000 Science Points.", goal: 100000, reward: { xp: 40, shards: 2 }, type: 'sciencePoints' },
   ],
   weekly: [
-    { id: 'complete_15_tasks', name: "Weekly Warrior", description: "Complete 15 assignments in a week.", goal: 15, reward: { xp: 250, shards: 15 } },
-    { id: 'earn_500_xp', name: "XP Farmer", description: "Earn 500 XP in a week.", goal: 500, reward: { xp: 100, shards: 10 }, type: 'xp' },
+    { id: 'weekly_complete_15_tasks', name: "Weekly Warrior", description: "Complete 15 assignments in a week.", goal: 15, reward: { xp: 250, shards: 15 }, type: 'completion' },
+    { id: 'weekly_earn_500_xp', name: "XP Farmer", description: "Earn 500 base XP from assignments.", goal: 500, reward: { xp: 100, shards: 10 }, type: 'xp' },
+    { id: 'weekly_focus_300_min', name: "Deep Work", description: "Focus for a total of 300 minutes in a week.", goal: 300, reward: { xp: 300, shards: 20 }, type: 'focusTime' },
+    { id: 'weekly_clear_5_dungeon', name: "Dungeon Delver", description: "Clear 5 total floors in the Dungeon Crawler.", goal: 5, reward: { xp: 200, shards: 10 }, type: 'dungeon' },
+    { id: 'weekly_td_wave_25', name: "Strategist", description: "Reach wave 25 in a Tower Defense game.", goal: 25, reward: { xp: 250, shards: 15 }, type: 'td_wave' },
+    { id: 'weekly_complete_5_hard', name: "Grit", description: "Complete 5 'Hard' assignments in a week.", goal: 5, reward: { xp: 400, shards: 25 }, type: 'difficulty' },
   ]
 };
+
+const cosmicEvents = [
+  { id: 'asteroid_field', name: 'Asteroid Field', description: 'You successfully navigated a dense asteroid field!', weight: 10, reward: { type: 'shards', amount: 15 } },
+  { id: 'solar_wind', name: 'Solar Wind', description: 'You caught a solar wind! Your next assignment completion will award bonus XP.', weight: 8, reward: { type: 'xp_boost', multiplier: 1.5, duration: 1 } },
+  { id: 'comet_sighting', name: 'Comet Sighting', description: 'A rare comet passes by, granting you a burst of insight!', weight: 6, reward: { type: 'xp', amount: 200 } },
+  { id: 'ancient_signal', name: 'Ancient Signal', description: 'A strange signal leads you to a forgotten relic!', weight: 1, reward: { type: 'cosmetic', cosmeticId: 'avatar_dragon' } },
+];
 
 
 // Modal Component for adding new assignments
@@ -1077,7 +1128,7 @@ const Particle = ({ onComplete }) => {
   );
 };
 
-const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
+const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp, isMobile }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
   const [localDungeonState, setLocalDungeonState] = useState(stats.dungeon_state);
   const [animationState, setAnimationState] = useState({ hits: {}, particles: [] });
   
@@ -1485,8 +1536,10 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       return;
     }
 
-    if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
+        if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
     if (targetTile.type === 'wall') { addLog("You can't move through a wall."); return; }
+    if (targetTile.type === 'enemy') { addLog("You cannot move onto an enemy's tile."); return; }
+    if (targetTile.type === 'hatch' && !localDungeonState.player.hasKey) { addLog("The hatch is locked. You need a key."); return; }
     const moveCost = localDungeonState.player.moveCost || 5;
     if (stats.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
 
@@ -1790,8 +1843,8 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         
         const particlesOnTile = animationState.particles.filter(p => p.x === x && p.y === y);
 
-        row.push(
-          <div key={`${x}-${y}`} onClick={() => handleTileClick(x, y)} style={tileStyle} className={`w-12 h-12 border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} cursor-pointer hover:bg-slate-600/50`}>
+                row.push(
+          <div key={`${x}-${y}`} onClick={() => handleTileClick(x, y)} style={tileStyle} className={`border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} cursor-pointer hover:bg-slate-600/50 ${isMobile ? 'w-8 h-8' : 'w-12 h-12'}`}>
             {tileContent}
             {particlesOnTile.map(p => <Particle key={p.id} onComplete={() => {}} />)}
           </div>
@@ -1814,7 +1867,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         </div>
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-grow">
+        <div className="flex-grow flex justify-center lg:justify-start">
           <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block">
             {renderBoard()}
           </div>
@@ -2978,129 +3031,32 @@ const WhyTab = () => {
     </div>
   );
 };
-// Component for the Focus Session Modal
-const FocusSessionModal = ({ assignment, onStart, onClose }) => {
-  const [duration, setDuration] = useState(25); // Default to 25 minutes
+// --- FOCUS NAVIGATOR SYSTEM ---
 
-  const handleStart = () => {
-    onStart(assignment, duration);
-    onClose();
-  };
-
-  const reward = 5 + (Math.floor(duration / 20) * 20);
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 w-full max-w-md text-white" onClick={e => e.stopPropagation()}>
-        <h3 className="text-2xl font-bold mb-2 text-center">Start Focus Session</h3>
-        <p className="text-center text-slate-400 mb-4">Focus on: <strong className="text-indigo-300">{assignment.assignment}</strong></p>
-        
-        <div className="my-6">
-          <label htmlFor="duration-slider" className="block text-center text-4xl font-bold mb-2 text-cyan-400">{duration} min</label>
-          <input
-            id="duration-slider"
-            type="range"
-            min="25"
-            max="120"
-            step="20"
-            value={duration}
-            onChange={(e) => setDuration(parseInt(e.target.value, 10))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
-
-        <div className="text-center bg-slate-900/50 p-4 rounded-lg">
-          <p className="font-semibold">Potential Reward:</p>
-          <p className="text-xl font-bold text-yellow-400">{reward} XP</p>
-          <p className="text-xs text-slate-500">(+5 XP for starting, +{reward - 5} XP banked for completion)</p>
-        </div>
-
-        <div className="flex justify-end space-x-4 mt-6">
-          <button type="button" onClick={onClose} className="bg-slate-600 text-slate-300 px-5 py-2 rounded-md hover:bg-slate-500">Cancel</button>
-          <button type="button" onClick={handleStart} className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700">Start Focusing</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Component for the Full-Screen Focus Mode
-const FocusMode = ({ session, onEnd, onComplete }) => {
-  const [remainingTime, setRemainingTime] = useState(session.duration * 60);
-  const [graceTimeLeft, setGraceTimeLeft] = useState(15);
-
-  const plantGrowth = (session.duration * 60 - remainingTime) / (session.duration * 60);
-  
-  let plantSvg;
-  if (session.isFailed) {
-    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" stroke="#f87171" />'; // Withered
-  } else if (plantGrowth > 0.8) {
-    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75l.165-.165c.243-.243.49-.483.744-.718.51-.48 1.03-.953 1.564-1.393a23.172 23.172 0 011.606-1.31c.264-.203.538-.401.82-.592.28-.19.57-.37.86-.54l.288-.168c.28-.163.56-.32.84-.468.28-.15.56-.29.84-.42a21 21 0 014.242-1.92c.32-.12.64-.23.96-.33a21 21 0 014.242 1.92c.28.13.56.27.84.42.28.148.56.305.84.468l.288.168c.29.17.58.35.86.54.282.19.556.39.82.592a23.172 23.172 0 011.606 1.31c.534.44 1.054.913 1.564 1.393.254.235.5.475.744.718l.165.165M2.25 12.75a23.172 23.172 0 001.606 1.31c.534.44 1.054.913 1.564 1.393.254.235.5.475.744.718l.165.165M12 12.75a23.172 23.172 0 011.606-1.31c.534-.44 1.054-.913 1.564-1.393.254-.235.5-.475.744-.718l.165-.165M12 12.75v9M12 12.75a23.172 23.172 0 00-1.606 1.31c-.534.44-1.054.913-1.564 1.393-.254.235-.5.475-.744.718l-.165.165" stroke="#86efac" />'; // Full
-  } else if (plantGrowth > 0.3) {
-    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#a7f3d0" />'; // Medium
-  } else {
-    plantSvg = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke="#dcfce7" />'; // Seedling
-  }
-
-  // Main Timer
-  useEffect(() => {
-    if (session.isFailed) return;
-    const timer = setInterval(() => {
-      setRemainingTime(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [onComplete, session.isFailed]);
-
-  // Grace Period Timer
-  useEffect(() => {
-    if (session.isGracePeriod && !session.isFailed) {
-      const graceTimer = setInterval(() => {
-        setGraceTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(graceTimer);
-            onEnd(true); // Signal that it failed
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(graceTimer);
-    }
-  }, [session.isGracePeriod, session.isFailed, onEnd]);
-  
-  const formatTime = (seconds) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
-
-  return (
-    <div className="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-4 text-white">
-      <div className="text-center">
-        <p className="text-slate-400">Focusing on:</p>
-        <h2 className="text-3xl font-bold mb-8 text-indigo-300">{session.assignmentName}</h2>
-      </div>
-      <div className={`w-64 h-64 transition-all duration-1000 ${session.isFailed ? 'grayscale opacity-50' : ''}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">{plantSvg}</svg>
-      </div>
-      <p className="text-8xl font-mono font-bold my-8">{formatTime(remainingTime)}</p>
-      <p className="text-slate-500 text-sm mb-4">This feature is designed for mobile. Stay on this tab to succeed.</p>
-      <button onClick={() => onEnd(true)} className="bg-red-800/80 px-8 py-3 rounded-lg hover:bg-red-700">Give Up</button>
-      
-      {/* Grace Period Overlay */}
-      {session.isGracePeriod && !session.isFailed && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
-          <h3 className="text-4xl font-bold text-yellow-400">Are you still there?</h3>
-          <p className="text-6xl font-mono my-4">{graceTimeLeft}</p>
-          <p className="text-slate-400 mb-6">Your session will fail if you don't return.</p>
-          <button onClick={() => onEnd(false)} className="bg-green-600 px-6 py-3 rounded-lg text-xl hover:bg-green-700">I'm still here!</button>
-        </div>
-      )}
-    </div>
-  );
+// Data definition for the star chart
+const starChartData = {
+  locations: [
+    { id: 'genesis_prime', name: 'Genesis Prime', type: 'planet', iconAsset: planet1, position: { top: '50%', left: '10%' }, description: "A lush, green terrestrial world. The perfect starting point for any academic journey." },
+    { id: 'luna_minor', name: 'Luna Minor', type: 'moon', iconAsset: planet6, position: { top: '35%', left: '20%' }, description: "The small, rocky moon of Genesis Prime." },
+    { id: 'ryzen_outpost', name: 'Ryzen Outpost', type: 'station', iconAsset: planet7, position: { top: '65%', left: '22%' }, description: "A bustling trade hub in the asteroid belt." },
+    { id: 'planet_pyro', name: 'Planet Pyro', type: 'planet', iconAsset: planet4, position: { top: '50%', left: '35%' }, description: "A volcanic world with intense heat and pressure." },
+    { id: 'helios_nebula', name: 'Helios Nebula', type: 'nebula', iconAsset: planet10, position: { top: '20%', left: '45%' }, description: "A beautiful but treacherous gas cloud." },
+    { id: 'planet_cryo', name: 'Planet Cryo', type: 'planet', iconAsset: planet8, position: { top: '80%', left: '45%' }, description: "An ice-covered planet with a mysterious sub-surface ocean." },
+    { id: 'aetheria', name: 'Aetheria', type: 'planet', iconAsset: planet2, position: { top: '50%', left: '65%' }, description: "A gas giant with swirling, colorful clouds." },
+    { id: 'eris_moon', name: 'Eris Moon', type: 'moon', iconAsset: planet9, position: { top: '65%', left: '78%' }, description: "The chaotic, tidally-locked moon of Aetheria." },
+    { id: 'terminus', name: 'Terminus', type: 'planet', iconAsset: planet5, position: { top: '30%', left: '85%' }, description: "A dark, foreboding world at the edge of the system." },
+  ],
+  routes: [
+    { id: 'r1', from: 'genesis_prime', to: 'luna_minor', duration: 25, xpReward: 100 },
+    { id: 'r2', from: 'genesis_prime', to: 'ryzen_outpost', duration: 45, xpReward: 180 },
+    { id: 'r3', from: 'ryzen_outpost', to: 'planet_pyro', duration: 60, xpReward: 250 },
+    { id: 'r4', from: 'planet_pyro', to: 'helios_nebula', duration: 80, xpReward: 350 },
+    { id: 'r5', from: 'planet_pyro', to: 'planet_cryo', duration: 80, xpReward: 350 },
+    { id: 'r6', from: 'helios_nebula', to: 'aetheria', duration: 100, xpReward: 450 },
+    { id: 'r7', from: 'planet_cryo', to: 'aetheria', duration: 100, xpReward: 450 },
+    { id: 'r8', from: 'aetheria', to: 'eris_moon', duration: 45, xpReward: 200 },
+    { id: 'r9', from: 'aetheria', to: 'terminus', duration: 120, xpReward: 600 },
+  ]
 };
 
 // Component for the Sanctum
@@ -3374,6 +3330,268 @@ const Sanctum = ({ stats, completedAssignments, updateStatsInFirestore, showMess
             <p className="text-lg text-slate-300 mb-6">"{currentFunFact}"</p>
             <button onClick={() => setShowFunFactModal(false)} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">Close</button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+// NEW: Component for the "Mission Control" Modal
+const MissionControlModal = ({ isOpen, onClose, assignment, unlockedLocations, onLaunchMission }) => {
+  const [departure, setDeparture] = useState(null);
+  const [destination, setDestination] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
+  useEffect(() => {
+    // Reset state when the modal is opened/closed
+    setDeparture(null);
+    setDestination(null);
+    setSelectedRoute(null);
+  }, [isOpen]);
+
+  const handleLocationSelect = (location) => {
+    // If we haven't selected a start point yet...
+    if (!departure) {
+      // We can only depart from an unlocked location.
+      if (!unlockedLocations.includes(location.id)) {
+        showMessageBox("You must depart from an unlocked location.", "error");
+        return;
+      }
+      setDeparture(location);
+      setDestination(null);
+      setSelectedRoute(null);
+    } else {
+      // If we click the departure point again, deselect everything.
+      if (location.id === departure.id) {
+        setDeparture(null);
+        setDestination(null);
+        setSelectedRoute(null);
+        return;
+      }
+      
+      // Check if a route exists from our departure point to the selected location.
+      const route = starChartData.routes.find(r => 
+        (r.from === departure.id && r.to === location.id) || 
+        (r.from === location.id && r.to === departure.id)
+      );
+
+      if (route) {
+        setDestination(location);
+        setSelectedRoute(route);
+      } else {
+        showMessageBox("No direct route to that location.", "error");
+      }
+    }
+  };
+  
+  const getPosition = (locationId) => {
+    const loc = starChartData.locations.find(l => l.id === locationId);
+    return loc ? loc.position : { top: 0, left: 0 };
+  }
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-xl w-full max-w-6xl h-[90vh] flex flex-col text-white" onClick={e => e.stopPropagation()}>
+        <h3 className="text-3xl font-bold p-6 text-center border-b border-slate-700">Mission Control</h3>
+        <div className="flex-grow flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 p-6 border-r border-slate-700 flex flex-col">
+            <h4 className="text-xl font-semibold text-indigo-300">Mission Briefing</h4>
+            <p className="text-sm text-slate-400 mt-1">Focusing on:</p>
+            <p className="text-lg font-bold text-white mb-4">{assignment.assignment}</p>
+            
+            <div className="mt-4">
+              <p className="text-sm text-slate-400">Departure:</p>
+              <p className={`text-lg font-semibold ${departure ? 'text-green-400' : 'text-slate-500'}`}>{departure ? departure.name : 'Select a starting point'}</p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-slate-400">Destination:</p>
+              <p className={`text-lg font-semibold ${destination ? 'text-blue-400' : 'text-slate-500'}`}>{destination ? destination.name : 'Select a destination'}</p>
+            </div>
+            
+            {selectedRoute && (
+              <div className="mt-auto bg-slate-800/50 p-4 rounded-lg">
+                <p className="font-semibold">Route Details:</p>
+                <p>Duration: <span className="font-bold text-cyan-400">{selectedRoute.duration} minutes</span></p>
+                <p>Reward: <span className="font-bold text-yellow-400">{selectedRoute.xpReward} XP</span> (Banked on completion)</p>
+              </div>
+            )}
+            <div className="mt-4 text-center text-xs text-yellow-400/80 p-2 bg-yellow-900/20 rounded-md border border-yellow-700/30">
+              <p><strong>Heads Up:</strong> The mission will fail if you leave or switch tabs. Stay focused, pilot!</p>
+            </div>
+
+            <button onClick={() => onLaunchMission(selectedRoute)} disabled={!selectedRoute} className="mt-4 w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed transition-colors">
+              LAUNCH MISSION
+            </button>
+          </div>
+
+          <div className="flex-grow relative bg-cover bg-center" style={{ backgroundImage: `url(${starmapImage})` }}>
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              {starChartData.routes.map(route => {
+                const pos1 = getPosition(route.from);
+                const pos2 = getPosition(route.to);
+                const isAvailable = unlockedLocations.includes(route.from) || unlockedLocations.includes(route.to);
+                const isSelected = selectedRoute && selectedRoute.id === route.id;
+                return (
+                  <line 
+                    key={route.id} 
+                    x1={pos1.left} y1={pos1.top} 
+                    x2={pos2.left} y2={pos2.top} 
+                    stroke={isSelected ? '#34d399' : isAvailable ? 'rgba(100, 116, 139, 0.5)' : 'rgba(71, 85, 105, 0.2)'} 
+                    strokeWidth="2" 
+                    strokeDasharray={isSelected ? "0" : "5, 5"}
+                  />
+                )
+              })}
+            </svg>
+            {starChartData.locations.map(loc => {
+              const isUnlocked = unlockedLocations.includes(loc.id);
+              const isDeparture = departure?.id === loc.id;
+              const isDestination = destination?.id === loc.id;
+              return (
+                <div key={loc.id} onClick={() => handleLocationSelect(loc)} className="absolute transform -translate-x-1/2 -translate-y-1/2 group" style={{...loc.position}}>
+                  <img 
+                    src={loc.iconAsset} 
+                    alt={loc.name} 
+                    className={`w-16 h-16 transition-all duration-200 ${isUnlocked ? 'cursor-pointer hover:scale-110' : 'filter grayscale opacity-50'} ${isDeparture ? 'ring-4 ring-green-500 rounded-full' : ''} ${isDestination ? 'ring-4 ring-blue-500 rounded-full' : ''}`}
+                  />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-slate-800 text-white text-sm px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <p className="font-bold">{loc.name}</p>
+                    <p className="text-xs text-slate-400">{loc.description}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// NEW: Component for the Cockpit Focus View (Revised Styling)
+const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
+  const [remainingTime, setRemainingTime] = useState(mission.route.duration * 60);
+  const [isGracePeriod, setIsGracePeriod] = useState(false);
+  const [graceTimeLeft, setGraceTimeLeft] = useState(15);
+  const gracePeriodTimer = useRef(null);
+  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    window.addEventListener('resize', checkOrientation);
+    checkOrientation();
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, [isMobile]);
+
+  const formatTime = (seconds) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+  const rawProgress = ((mission.route.duration * 60 - remainingTime) / (mission.route.duration * 60));
+  
+  const mainViewProgressPercent = 5 + (rawProgress * 90);
+  const verticalArc = -40 * Math.sin(rawProgress * Math.PI);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRemainingTime(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onMissionComplete(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [onMissionComplete]);
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsGracePeriod(true);
+        gracePeriodTimer.current = setInterval(() => {
+          setGraceTimeLeft(prev => {
+            if (prev <= 1) {
+              clearInterval(gracePeriodTimer.current);
+              onMissionComplete(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setIsGracePeriod(false);
+        setGraceTimeLeft(15);
+        clearInterval(gracePeriodTimer.current);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(gracePeriodTimer.current);
+    };
+  }, [onMissionComplete]);
+
+  return (
+    <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center">
+      {isMobile && isPortrait && (
+        <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-[100] text-white text-center p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          <h3 className="text-2xl font-bold">Please Rotate Your Device</h3>
+          <p className="text-slate-400 mt-2">For the best experience, please use landscape mode.</p>
+        </div>
+      )}
+
+      {/* MASTER CONTAINER */}
+      <div className={`relative w-full max-w-[1920px] ${isMobile && isPortrait ? 'invisible' : ''}`} style={{ aspectRatio: '1920 / 1080' }}>
+        <video src={starfieldVideo} autoPlay loop muted playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
+        <img src={cockpitImage} alt="Cockpit View" className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-10" />
+
+        {/* --- DIEGETIC UI ELEMENTS (Positioned relative to the master container) --- */}
+        <div className="absolute z-0 pointer-events-none" style={{ top: '23%', left: '33%', width: '34%', height: '40%' }}>
+            <div className="absolute top-1/2" style={{ left: `${mainViewProgressPercent}%`, transform: `translate(-50%, -50%) translateY(${verticalArc}px)` }}>
+                <img src={spaceshipIcon} alt="Scholar Ship" className="w-10 h-10" />
+            </div>
+        </div>
+        
+        <div className="absolute z-20" style={{ top: '68.2%', left: '33.8%', width: '14%', height: '14%' }}>
+            <div className="relative w-full h-full p-2 flex flex-col justify-center font-mono bg-black/20 rounded-md">
+                <div style={{ textShadow: '0 0 8px rgba(0, 255, 255, 0.9)' }}>
+                    <p className="text-cyan-300 text-[10px] leading-tight">MISSION OBJECTIVE</p>
+                    <p className="text-white text-xs leading-tight truncate">{mission.assignmentName}</p>
+                    <p className="text-cyan-300 text-[10px] mt-1 leading-tight">TIME REMAINING</p>
+                    <p className="text-white text-3xl font-bold leading-none">{formatTime(remainingTime)}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div className="absolute z-20 flex items-center justify-center" style={{ top: '68%', left: '50%', width: '13%', height: '12%', transform: 'translateX(-50%)' }}>
+             <button 
+               onClick={() => onMissionComplete(false)} 
+               className="w-[95%] h-[95%] bg-red-900/80 text-white font-bold flex flex-col items-center justify-center rounded-md border-2 border-red-700/80 hover:bg-red-800 transition-colors"
+             >
+               <span className="text-xl leading-none font-mono">ABANDON</span>
+               <span className="text-lg leading-none font-mono">MISSION</span>
+             </button>
+        </div>
+
+        <div className="absolute z-20 flex items-center font-mono" style={{ top: '84.5%', left: '50%', width: '16%', height: '1.5%', transform: 'translateX(-50%)' }}>
+            <div className="w-full h-full bg-black/50 border border-cyan-700/50 rounded-sm p-0.5">
+                <div className="h-full bg-cyan-400 rounded-sm" style={{ width: `${rawProgress * 100}%`, transition: 'width 1s linear' }}></div>
+            </div>
+        </div>
+      </div>
+
+      {isGracePeriod && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+          <h3 className="text-4xl font-bold text-yellow-400">MISSION PAUSED</h3>
+          <p className="text-6xl font-mono my-4">{graceTimeLeft}</p>
+          <p className="text-slate-400 mb-6">Return to this tab before the timer runs out!</p>
         </div>
       )}
     </div>
@@ -3725,9 +3943,11 @@ const AuthComponent = () => {
           // If user creation is successful, create their data documents
           if (user) {
             // REFACTORED: Create a single default stats object
-            const defaultStats = {
+const defaultStats = {
               username: email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
               ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+              focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
+              activeBoosts: [],
               dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
               td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
               lab_state: {
@@ -3787,11 +4007,10 @@ const AuthComponent = () => {
   };
 
 // Component for Assignment Tracker Sheet
-  const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, startFocusSession }) => {
+const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, promptMissionStart, isMobile }) => {
     const [expandedAssignmentId, setExpandedAssignmentId] = useState(null);
     const [editingAssignmentData, setEditingAssignmentData] = useState(null);
     const [newSubtaskName, setNewSubtaskName] = useState('');
-    const [focusModalState, setFocusModalState] = useState({ isOpen: false, assignment: null });
 
     const handleAddAssignment = async (newAssignmentData) => {
       if (!newAssignmentData.assignment) {
@@ -3927,13 +4146,6 @@ const AuthComponent = () => {
           onSubmit={handleAddAssignment}
         />
 
-        {focusModalState.isOpen && (
-          <FocusSessionModal 
-            assignment={focusModalState.assignment} 
-            onStart={startFocusSession} 
-            onClose={() => setFocusModalState({ isOpen: false, assignment: null })}
-          />
-        )}
         <AddAssignmentModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
@@ -3945,13 +4157,13 @@ const AuthComponent = () => {
             <table className="min-w-full text-white">
               <thead>
                 <tr className="text-slate-400 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">Class</th>
-                  <th className="py-3 px-6 text-left">Assignment</th>
-                  <th className="py-3 px-6 text-left">Due Date</th>
-                  <th className="py-3 px-6 text-center">Status</th>
-                  <th className="py-3 px-6 text-left">Difficulty</th>
-                  <th className="py-3 px-6 text-left">Tags</th>
-                  <th className="py-3 px-6 text-center">Actions</th>
+                  <th className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>Class</th>
+                  <th className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>Assignment</th>
+                  <th className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>Due Date</th>
+                  {!isMobile && <th className="py-3 px-6 text-center">Status</th>}
+                  {!isMobile && <th className="py-3 px-6 text-left">Difficulty</th>}
+                  {!isMobile && <th className="py-3 px-6 text-left">Tags</th>}
+                  <th className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-center`}>Actions</th>
                 </tr>
               </thead>
               <tbody className="text-slate-300 text-sm font-light">
@@ -3962,10 +4174,10 @@ const AuthComponent = () => {
                   return (
                     <React.Fragment key={assignment.id}>
                       <tr className="border-b border-slate-700 hover:bg-slate-800/70">
-                        <td className="py-3 px-6 text-left whitespace-nowrap">{assignment.class || '⚠️'}</td>
-                        <td className="py-3 px-6 text-left">{assignment.assignment}</td>
-                        <td className="py-3 px-6 text-left">{assignment.dueDate ? assignment.dueDate.toLocaleDateString() : '⚠️'}</td>
-                        <td className="py-3 px-6 text-center">
+                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left whitespace-nowrap`}>{assignment.class || '⚠️'}</td>
+                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>{assignment.assignment}</td>
+                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>{assignment.dueDate ? assignment.dueDate.toLocaleDateString() : '⚠️'}</td>
+                        {!isMobile && <td className="py-3 px-6 text-center">
                           <input
                             type="checkbox"
                             checked={assignment.status === 'Completed'}
@@ -3987,20 +4199,20 @@ const AuthComponent = () => {
                             className="form-checkbox h-5 w-5 text-indigo-500 rounded bg-slate-700 border-slate-600 focus:ring-indigo-500"
                           />
                           {(isCurrentlyLate || wasCompletedLate) && (<span className="ml-2 text-red-500 font-semibold text-xs">Late!</span>)}
-                        </td>
-                        <td className="py-3 px-6 text-left">{assignment.difficulty}</td>
-                        <td className="py-3 px-6 text-left">
+                        </td>}
+                        {!isMobile && <td className="py-3 px-6 text-left">{assignment.difficulty}</td>}
+                        {!isMobile && <td className="py-3 px-6 text-left">
                           <div className="flex flex-wrap gap-1">
                             {assignment.tags && assignment.tags.map(tag => (
                               <span key={tag} className="bg-slate-700 text-slate-300 text-xs px-2 py-1 rounded-full">{tag}</span>
                             ))}
                           </div>
-                        </td>
-                        <td className="py-3 px-6 text-center">
+                        </td>}
+                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-center`}>
                           <div className="flex items-center justify-center gap-2">
                             {assignment.status !== 'Completed' && (
-                              <button onClick={() => setFocusModalState({ isOpen: true, assignment })} className="text-green-400 hover:text-green-300 p-1" title="Start Focus Session">
-                                🌱
+                              <button onClick={() => promptMissionStart(assignment)} className="text-cyan-400 hover:text-cyan-300 p-1 text-xl" title="Start Focus Mission">
+                                🚀
                               </button>
                             )}
                             <button onClick={() => handleToggleDetails(assignment)} className="text-indigo-400 hover:text-indigo-300 p-1" title="Details">
@@ -4181,7 +4393,7 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
 
             transaction.update(statsDocRef, {
                 cosmeticShards: serverStats.cosmeticShards - cost,
-                ownedItems: [...serverStats.ownedItems, itemToCraft.id],
+                ownedItems: [...(serverStats.ownedItems || []), itemToCraft.id],
                 cooldowns: { ...(serverStats.cooldowns || {}), craftShopItem: serverTimestamp() }
             });
         });
@@ -4195,7 +4407,7 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
     }
   }), [user, db, appId, showMessageBox, actionLock, processAchievement]);
 
-  const handleBuyItem = async (item) => actionLock(async () => {
+    const handleBuyItem = async (item) => actionLock(async () => {
     if (!db || !user) return;
     
     const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
@@ -4208,15 +4420,17 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
         const serverStats = statsDoc.data();
 
         if (serverStats.totalXP < item.cost) throw new Error("Not enough XP.");
-        if (serverStats.ownedItems.includes(item.id) || serverStats.ownedFurniture.includes(item.id)) throw new Error("Already owned.");
+        // FIX: Provide a fallback empty array to prevent .includes() on undefined
+        if ((serverStats.ownedItems || []).includes(item.id) || (serverStats.ownedFurniture || []).includes(item.id)) throw new Error("Already owned.");
 
         const isFurniture = item.type === 'furniture';
         
         const updateData = {
             totalXP: serverStats.totalXP - item.cost,
             cooldowns: { ...(serverStats.cooldowns || {}), buyShopItem: serverTimestamp() },
-            ownedItems: !isFurniture ? [...serverStats.ownedItems, item.id] : serverStats.ownedItems,
-            ownedFurniture: isFurniture ? [...serverStats.ownedFurniture, item.id] : serverStats.ownedFurniture,
+            // FIX: Use fallback arrays here as well to safely add the new item
+            ownedItems: !isFurniture ? [...(serverStats.ownedItems || []), item.id] : (serverStats.ownedItems || []),
+            ownedFurniture: isFurniture ? [...(serverStats.ownedFurniture || []), item.id] : (serverStats.ownedFurniture || []),
         };
         transaction.update(statsDocRef, updateData);
       });
@@ -4720,6 +4934,24 @@ const QuestsComponent = ({ quests }) => {
             <div className="flex flex-col gap-6">
                 <QuestsComponent quests={stats.quests} />
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
+                  <h3 className="text-xl font-semibold text-white mb-3 flex items-center space-x-2">
+                    <span>🔥</span>
+                    <span>Explorer's Streak</span>
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-4xl font-bold text-orange-400">{stats.focusNavigator?.explorerStreak || 0} Days</p>
+                    <p className="text-slate-400 text-sm font-semibold">
+                      Today: {(stats.focusNavigator?.dailyFocusMinutes || 0)} / 45 min
+                    </p>
+                  </div>
+                  <div className="w-full bg-slate-700 rounded-full h-2.5 mt-3">
+                    <div 
+                      className="bg-orange-500 h-2.5 rounded-full" 
+                      style={{ width: `${Math.min(100, ((stats.focusNavigator?.dailyFocusMinutes || 0) / 45) * 100)}%` }}>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
                     <h3 className="text-xl font-semibold text-white mb-3">Your Work Style</h3>
                     <div className="flex items-center space-x-4">
                         <span className="text-5xl">{persona.icon}</span>
@@ -4837,6 +5069,7 @@ const QuestsComponent = ({ quests }) => {
       for (let day = 1; day <= numDays; day++) {
         const date = new Date(year, month, day);
         const assignmentsOnDay = assignments.filter(a =>
+          a.status !== 'Completed' && // This will remove completed tasks from the calendar
           a.dueDate &&
           a.dueDate.getFullYear() === year &&
           a.dueDate.getMonth() === month &&
@@ -4991,7 +5224,7 @@ const QuestsComponent = ({ quests }) => {
     );
   };
 // NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
-const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement }) => {
+const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
     const [activeTab, setActiveTab] = useState('game');
     const [isStudying, setIsStudying] = useState(false);
     const studyZoneState = stats?.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
@@ -5020,7 +5253,7 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchie
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
         </div>
         <div className="p-6">
-          {activeTab === 'game' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
+          {activeTab === 'game' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
           {activeTab === 'flashcards' && (
             isStudying ? 
             <FlashcardSession studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
@@ -5250,7 +5483,7 @@ const FlashcardSession = ({ studyZoneState, updateStudyZoneState, onSessionEnd }
         </div>
     );
 }; 
-const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateStatsInFirestore, showMessageBox, processAchievement }) => {
+const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
   // --- Core Game Constants ---
   const GAME_WIDTH = 800;
   const GAME_HEIGHT = 400;
@@ -5657,39 +5890,41 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
           />
         )}
       </div>
-       <p className="text-slate-500 mt-2 text-sm hidden md:block">Controls: Arrow keys or A/D to move, Arrow Up, W, or Space to jump/double-jump.</p>
+      <p className="text-slate-500 mt-2 text-sm hidden md:block">Controls: Arrow keys or A/D to move, Arrow Up, W, or Space to jump/double-jump.</p>
       
-      <div className="md:hidden fixed bottom-5 left-5 right-5 flex justify-between items-center z-20">
-        <div className="flex gap-4">
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 right-4 flex justify-between items-center z-20">
+          <div className="flex gap-3">
+            <button
+              onTouchStart={() => handleButtonPress('ArrowLeft', true)}
+              onTouchEnd={() => handleButtonPress('ArrowLeft', false)}
+              onMouseDown={() => handleButtonPress('ArrowLeft', true)}
+              onMouseUp={() => handleButtonPress('ArrowLeft', false)}
+              className="w-16 h-16 bg-slate-800/50 text-white text-3xl rounded-full active:bg-indigo-600"
+            >
+              ←
+            </button>
+            <button
+              onTouchStart={() => handleButtonPress('ArrowRight', true)}
+              onTouchEnd={() => handleButtonPress('ArrowRight', false)}
+              onMouseDown={() => handleButtonPress('ArrowRight', true)}
+              onMouseUp={() => handleButtonPress('ArrowRight', false)}
+              className="w-16 h-16 bg-slate-800/50 text-white text-3xl rounded-full active:bg-indigo-600"
+            >
+              →
+            </button>
+          </div>
           <button
-            onTouchStart={() => handleButtonPress('ArrowLeft', true)}
-            onTouchEnd={() => handleButtonPress('ArrowLeft', false)}
-            onMouseDown={() => handleButtonPress('ArrowLeft', true)}
-            onMouseUp={() => handleButtonPress('ArrowLeft', false)}
-            className="w-20 h-20 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
+            onTouchStart={() => handleButtonPress(' ', true)}
+            onTouchEnd={() => handleButtonPress(' ', false)}
+            onMouseDown={() => handleButtonPress(' ', true)}
+            onMouseUp={() => handleButtonPress(' ', false)}
+            className="w-20 h-20 bg-slate-800/50 text-white text-4xl rounded-full active:bg-indigo-600"
           >
-            ←
-          </button>
-          <button
-            onTouchStart={() => handleButtonPress('ArrowRight', true)}
-            onTouchEnd={() => handleButtonPress('ArrowRight', false)}
-            onMouseDown={() => handleButtonPress('ArrowRight', true)}
-            onMouseUp={() => handleButtonPress('ArrowRight', false)}
-            className="w-20 h-20 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
-          >
-            →
+            ↑
           </button>
         </div>
-        <button
-          onTouchStart={() => handleButtonPress(' ', true)}
-          onTouchEnd={() => handleButtonPress(' ', false)}
-          onMouseDown={() => handleButtonPress(' ', true)}
-          onMouseUp={() => handleButtonPress(' ', false)}
-          className="w-24 h-24 bg-slate-800/70 text-white text-4xl rounded-full active:bg-indigo-600"
-        >
-          ↑
-        </button>
-      </div>
+      )}
     </div>
   );
 };
@@ -5809,11 +6044,11 @@ const App = () => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeSheet, setActiveSheet] = useState('Stats + XP Tracker');
   const dungeonXpRef = useRef(null);
-  
-  // --- Focus Mode State ---
-  const [focusSession, setFocusSession] = useState({ isActive: false });
-  const offPageCheckTimeout = useRef(null);
 
+  // --- NEW: Focus Navigator State ---
+  const [missionControlState, setMissionControlState] = useState({ isOpen: false, assignment: null });
+  const [activeMissionState, setActiveMissionState] = useState({ isActive: false, route: null, assignmentName: null });
+  
   // --- Mobile Responsiveness State ---
   const { width } = useWindowSize();
   const isMobile = width < 768; // Tailwind's `md` breakpoint
@@ -5842,6 +6077,7 @@ const App = () => {
     petStatus: 'none',
     assignmentsToHatch: 0,
     cosmeticShards: 0,
+    focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
     dungeon_state: null,
     dungeon_floor: 0,
     dungeon_gold: 0,
@@ -5988,9 +6224,10 @@ const App = () => {
     if (!isAuthReady || !user) return;
     const userId = user.uid;
 
-    const defaultStats = {
+        const defaultStats = {
         username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
         ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+        focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
         dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0, td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
         lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, },
         studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
@@ -6255,8 +6492,8 @@ const App = () => {
           const newTotalXP = serverStats.totalXP - nextEvolution.xpCost;
           const { level: newLevel } = calculateLevelInfo(newTotalXP);
           
-          const updatedOwnedPets = serverStats.ownedPets.map(p => p.id === petToEvolve.id ? nextEvolution : p);
-          const newCurrentPet = serverStats.currentPet.id === petToEvolve.id ? nextEvolution : serverStats.currentPet;
+          const updatedOwnedPets = (serverStats.ownedPets || []).map(p => p.id === petToEvolve.id ? nextEvolution : p);
+          const newCurrentPet = serverStats.currentPet?.id === petToEvolve.id ? nextEvolution : serverStats.currentPet;
           
           transaction.update(statsDocRef, {
             totalXP: newTotalXP,
@@ -6404,10 +6641,10 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         if (!statsDoc.exists()) throw new Error("User data missing.");
         
         const serverStats = statsDoc.data();
-        const updatedOwnedPets = [...serverStats.ownedPets, newPet];
+        const updatedOwnedPets = [...(serverStats.ownedPets || []), newPet];
 
-        transaction.update(statsDocRef, { 
-            petStatus: 'hatched', 
+        transaction.update(statsDocRef, {
+            petStatus: 'hatched',
             currentPet: newPet, 
             ownedPets: updatedOwnedPets, 
             assignmentsToHatch: EGG_REQUIREMENT,
@@ -6437,6 +6674,19 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
 
               let calculatedXpBonus = 0, shardBonus = 0;
               let newAchievementsAwarded = [], newlyCompletedQuests = [];
+              let activeBoosts = serverStats.activeBoosts || [];
+
+              // Apply and update XP boosts
+              const xpBoostIndex = activeBoosts.findIndex(b => b.type === 'xp');
+              if (xpBoostIndex > -1) {
+                const boost = activeBoosts[xpBoostIndex];
+                calculatedXpBonus *= boost.multiplier;
+                showMessageBox(`XP Boost applied! (+${((boost.multiplier - 1) * 100).toFixed(0)}%)`, 'info');
+                boost.remaining -= 1;
+                if (boost.remaining <= 0) {
+                  activeBoosts.splice(xpBoostIndex, 1);
+                }
+              }
               
               if (completedAssignment.focusXpReward) calculatedXpBonus += completedAssignment.focusXpReward;
 
@@ -6451,12 +6701,12 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
                   list.forEach(q => {
                       if (q.completed) return;
                       let progressMade = false;
-                      if (q.type === 'difficulty' && completedAssignment.difficulty === 'Hard') progressMade = true;
+                      if (q.type === 'completion') progressMade = true;
+                      else if (q.type === 'difficulty' && completedAssignment.difficulty === 'Hard') progressMade = true;
                       else if (q.type === 'tag' && completedAssignment.tags?.includes(q.tag)) progressMade = true;
                       else if (q.type === 'xp') { q.progress = (q.progress || 0) + baseXpForTask; progressMade = true; }
-                      else if (!q.type) progressMade = true;
                       
-                      if (progressMade && !q.type?.includes('xp')) q.progress = (q.progress || 0) + 1;
+                      if (progressMade && q.type !== 'xp') q.progress = (q.progress || 0) + 1;
 
                       if (q.progress >= q.goal) {
                           q.completed = true;
@@ -6499,6 +6749,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
                 cosmeticShards: newShards,
                 quests,
                 achievements,
+                activeBoosts, // Save the updated boosts array
                 'cooldowns.completeAssignment': serverTimestamp()
               };
 
@@ -6637,68 +6888,150 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
   });
 
 
-    const startFocusSession = useCallback(async (assignment, duration) => {
+  const promptMissionStart = useCallback((assignment) => {
     if (stats.totalXP < 5) {
-      showMessageBox("You need at least 5 XP to start a focus session.", "error");
+      showMessageBox("You need 5 XP to start a mission.", "error");
       return;
     }
+    setMissionControlState({ isOpen: true, assignment: assignment });
+  }, [stats.totalXP]);
+
+  const launchMission = useCallback(async (route) => {
+    if (!route) return;
+    setMissionControlState({ isOpen: false, assignment: null });
+    // Deduct cost immediately for launching
     await updateStatsInFirestore({ totalXP: stats.totalXP - 5 });
-    setFocusSession({
+    setActiveMissionState({
       isActive: true,
-      assignmentId: assignment.id,
-      assignmentName: assignment.assignment,
-      duration: duration,
-      startTime: Date.now(),
-      isGracePeriod: false,
-      isFailed: false,
-      xpReward: Math.floor(duration / 20) * 20,
+      route: route,
+      assignmentId: missionControlState.assignment.id,
+      assignmentName: missionControlState.assignment.assignment,
     });
-  }, [stats.totalXP, updateStatsInFirestore]);
+  }, [missionControlState.assignment, stats.totalXP, updateStatsInFirestore]);
 
-  const endFocusSession = (didFail = false) => {
-    if (didFail) {
-      setFocusSession(prev => ({ ...prev, isFailed: true, isGracePeriod: false }));
-      showMessageBox("Focus session failed. Try again!", "error");
-      setTimeout(() => setFocusSession({ isActive: false }), 2000);
-    } else {
-      setFocusSession({ isActive: false });
-    }
-  };
+  const handleMissionComplete = useCallback(async (isSuccess) => {
+    const mission = activeMissionState;
+    setActiveMissionState({ isActive: false, route: null, assignmentName: null });
 
-  const completeFocusSession = async () => {
-    await updateAssignmentInFirestore(focusSession.assignmentId, {
-      focusXpReward: focusSession.xpReward
-    });
-    showMessageBox(`Focus session complete! +${focusSession.xpReward} XP is banked. Mark the assignment as complete to claim it.`, "info", 6000);
-    endFocusSession(false);
-  };
-  
-  // Page Visibility API Logic
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      clearTimeout(offPageCheckTimeout.current);
-      if (document.hidden || !document.hasFocus()) {
-        offPageCheckTimeout.current = setTimeout(() => {
-          if (focusSession.isActive && !focusSession.isGracePeriod && (document.hidden || !document.hasFocus())) {
-            setFocusSession(prev => ({ ...prev, isGracePeriod: true }));
-          }
-        }, 500); // Small delay to confirm user is truly off-page
+    if (isSuccess) {
+      showMessageBox(`Mission Success! Arrived at ${starChartData.locations.find(l => l.id === mission.route.to).name}.`, 'info');
+      
+      await updateAssignmentInFirestore(mission.assignmentId, { focusXpReward: mission.route.xpReward });
+
+      const missionDuration = mission.route.duration;
+      const focusNavigator = stats.focusNavigator || { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 };
+      const newUnlocked = [...new Set([...focusNavigator.unlockedLocations, mission.route.to, mission.route.from])];
+
+      const today = new Date();
+      const lastSessionDate = focusNavigator.lastStreakDay ? focusNavigator.lastStreakDay.toDate() : null;
+      const isSameDay = lastSessionDate ? getStartOfDay(today).getTime() === getStartOfDay(lastSessionDate).getTime() : false;
+
+      let newStreak = focusNavigator.explorerStreak || 0;
+      let newDailyMinutes = focusNavigator.dailyFocusMinutes || 0;
+      
+      if (isSameDay) {
+        newDailyMinutes += missionDuration;
       } else {
-        if (focusSession.isActive && focusSession.isGracePeriod) {
-          setFocusSession(prev => ({ ...prev, isGracePeriod: false }));
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const wasYesterday = lastSessionDate ? getStartOfDay(lastSessionDate).getTime() === getStartOfDay(yesterday).getTime() : false;
+        
+        if (wasYesterday && newDailyMinutes >= 45) {
+          newStreak += 1;
+          showMessageBox(`Explorer's Streak extended to ${newStreak} days!`, 'info', 4000);
+        } else if (lastSessionDate) { // Avoid resetting streak for the very first session ever
+          if (newStreak > 0) showMessageBox(`Daily focus goal missed. Streak reset.`, 'error', 4000);
+          newStreak = 0;
+        }
+        newDailyMinutes = missionDuration;
+      }
+
+      if (newDailyMinutes >= 45 && (!focusNavigator.dailyFocusMinutes || focusNavigator.dailyFocusMinutes < 45 || !isSameDay)) {
+        showMessageBox(`Daily focus goal of 45 minutes reached!`, 'info', 4000);
+        if (newStreak === 0) newStreak = 1;
+      }
+
+      // Quest progress for focus time
+      // This part doesn't need a transaction as it's not a currency.
+      // We will read the latest stats and then update.
+      const currentQuests = stats.quests || { daily: [], weekly: [] };
+      let questsUpdated = false;
+      const updateQuestProgress = (list) => {
+        list.forEach(q => {
+          if (!q.completed && q.type === 'focusTime') {
+            q.progress = (q.progress || 0) + missionDuration;
+            questsUpdated = true;
+            if (q.progress >= q.goal) {
+              // Note: The reward for focus quests is given immediately, not on task completion.
+              q.completed = true;
+              const rewardXp = q.reward.xp || 0;
+              const rewardShards = q.reward.shards || 0;
+              updateStatsInFirestore({
+                totalXP: stats.totalXP + rewardXp,
+                cosmeticShards: (stats.cosmeticShards || 0) + rewardShards,
+              });
+              showMessageBox(`Quest Complete: ${q.name}!`, 'info', 4000);
+            }
+          }
+        });
+      };
+      updateQuestProgress(currentQuests.daily);
+      updateQuestProgress(currentQuests.weekly);
+
+      const newFocusNavigatorState = {
+        ...focusNavigator,
+        unlockedLocations: newUnlocked,
+        explorerStreak: newStreak,
+        dailyFocusMinutes: newDailyMinutes,
+        lastStreakDay: serverTimestamp(),
+      };
+      
+      // --- Cosmic Event Logic ---
+      const didExtendStreak = newStreak > (focusNavigator.explorerStreak || 0);
+      if (didExtendStreak && Math.random() < 0.33) { // 33% chance on streak extension
+        const totalWeight = cosmicEvents.reduce((sum, event) => sum + event.weight, 0);
+        let roll = Math.random() * totalWeight;
+        const chosenEvent = cosmicEvents.find(event => {
+          roll -= event.weight;
+          return roll <= 0;
+        });
+
+        if (chosenEvent) {
+          setTimeout(() => { // Delay message to show after "Mission Success"
+            showMessageBox(`✨ Cosmic Event: ${chosenEvent.description}`, 'info', 6000);
+            
+            const eventUpdate = {};
+            switch (chosenEvent.reward.type) {
+              case 'shards':
+                eventUpdate.cosmeticShards = (stats.cosmeticShards || 0) + chosenEvent.reward.amount;
+                break;
+              case 'xp':
+                eventUpdate.totalXP = (stats.totalXP || 0) + chosenEvent.reward.amount;
+                break;
+              case 'xp_boost':
+                eventUpdate.activeBoosts = [...(stats.activeBoosts || []), { type: 'xp', multiplier: chosenEvent.reward.multiplier, remaining: chosenEvent.reward.duration }];
+                break;
+              case 'cosmetic':
+                if (!stats.ownedItems.includes(chosenEvent.reward.cosmeticId)) {
+                  eventUpdate.ownedItems = [...(stats.ownedItems || []), chosenEvent.reward.cosmeticId];
+                }
+                break;
+              default: break;
+            }
+            if (Object.keys(eventUpdate).length > 0) {
+              updateStatsInFirestore(eventUpdate);
+            }
+          }, 1500);
         }
       }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleVisibilityChange);
-    window.addEventListener("blur", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleVisibilityChange);
-      window.removeEventListener("blur", handleVisibilityChange);
-      clearTimeout(offPageCheckTimeout.current);
-    };
-  }, [focusSession]);
+
+      await updateStatsInFirestore({ focusNavigator: newFocusNavigatorState });
+
+    } else {
+      showMessageBox("Mission Failed. No reward gained.", "error");
+    }
+  }, [activeMissionState, stats.focusNavigator, updateStatsInFirestore]);
+  
   if (!isAuthReady) {
     return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Loading...</div>;
   }
@@ -6708,8 +7041,15 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
   }
   return (
     <>
-      {focusSession.isActive && <FocusMode session={focusSession} onEnd={endFocusSession} onComplete={completeFocusSession} />}
-      <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 relative ${equippedFontStyle || 'font-inter'} ${focusSession.isActive ? 'pointer-events-none' : ''}`}>
+            {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
+      <MissionControlModal 
+        isOpen={missionControlState.isOpen}
+        onClose={() => setMissionControlState({ isOpen: false, assignment: null })}
+        assignment={missionControlState.assignment}
+        unlockedLocations={stats.focusNavigator?.unlockedLocations || ['genesis_prime']}
+        onLaunchMission={launchMission}
+      />
+      <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 relative ${equippedFontStyle || 'font-inter'} ${activeMissionState.isActive ? 'pointer-events-none' : ''}`}>
       <style>{`
           /* All your @import and CSS variables... */
           @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Inter:wght@400;700&family=Oswald&family=Permanent+Marker&family=Playfair+Display&family=Press+Start+2P&family=Roboto+Slab&family=Space+Mono&family=Cinzel+Decorative&family=Comic+Neue&family=Libre+Baskerville&family=Lato&family=Merriweather&family=Raleway&family=Ubuntu&display=swap');
@@ -6821,7 +7161,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             <li><button onClick={() => {setActiveSheet('Why'); if(isMobile) setIsSidebarOpen(false);}} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === 'Why' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1'}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg><span>Why I Built This</span></button></li>
         </ul>
 
-        <div className="mt-auto pt-4 space-y-2">
+        <div className={`pt-4 space-y-2 ${isMobile ? '' : 'mt-auto'}`}>
             <button onClick={() => {setActiveSheet('My Profile'); if(isMobile) setIsSidebarOpen(false);}} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-all duration-200 hover:translate-x-1">
                 <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl border-2 border-slate-600">{equippedAvatarDisplay}</div>
                 <div className="flex-1 text-left"><p className="text-sm font-semibold text-white">My Profile</p><p className="text-xs text-slate-400 truncate">ID: {user?.uid}</p></div>
@@ -6837,7 +7177,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
-        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} startFocusSession={startFocusSession} />}
+        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} promptMissionStart={promptMissionStart} isMobile={isMobile} />}
         {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
         {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
         {activeSheet === 'Guild' && <GuildPage />}
@@ -6847,10 +7187,10 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics completedAssignments={completedAssignments}/>}
-        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} />}
+        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
         {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
-        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} />}      </main>
+        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}      </main>
     </div>
     </>
   );
