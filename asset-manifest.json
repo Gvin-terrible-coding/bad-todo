@@ -1,15 +1,31 @@
 {
   "files": {
-    "main.css": "/bad-todo/static/css/main.1206a0f1.css",
-    "main.js": "/bad-todo/static/js/main.f8828b77.js",
+    "main.css": "/bad-todo/static/css/main.f1d25e74.css",
+    "main.js": "/bad-todo/static/js/main.9512ea30.js",
     "static/js/453.d8e2a990.chunk.js": "/bad-todo/static/js/453.d8e2a990.chunk.js",
+    "static/media/Animated_Starfield.mp4": "/bad-todo/static/media/Animated_Starfield.54df6273ed1fa74e10ff.mp4",
+    "static/media/Starmap_Select_Background.png": "/bad-todo/static/media/Starmap_Select_Background.553728c6d5e2cb8cc1d2.png",
+    "static/media/planet_5.png": "/bad-todo/static/media/planet_5.4af4c00eb4888baa06e0.png",
+    "static/media/planet_2.png": "/bad-todo/static/media/planet_2.519ec87b9662bc976c0a.png",
+    "static/media/planet_7.png": "/bad-todo/static/media/planet_7.1fae756979ccafca4d3d.png",
+    "static/media/planet_6.png": "/bad-todo/static/media/planet_6.73ceaa54a7b8506fedf7.png",
+    "static/media/planet_8.png": "/bad-todo/static/media/planet_8.d8cea8a2467870e44707.png",
+    "static/media/planet_9.png": "/bad-todo/static/media/planet_9.9b60f350be03bb11f738.png",
+    "static/media/planet_4.png": "/bad-todo/static/media/planet_4.c115be88b73a9f413790.png",
+    "static/media/planet_1.png": "/bad-todo/static/media/planet_1.6130d658fa08519167dc.png",
+    "static/media/planet_3.png": "/bad-todo/static/media/planet_3.d95f12b71fe3884ffb67.png",
+    "static/media/planet_10.png": "/bad-todo/static/media/planet_10.7175b844a6681bf4d662.png",
+    "static/media/Cockpit_View.png": "/bad-todo/static/media/Cockpit_View.dfadb0351a894773f593.png",
+    "static/media/hologram_button.png": "/bad-todo/static/media/hologram_button.ec16fffeedc0c4ba38ac.png",
+    "static/media/spaceship.png": "/bad-todo/static/media/spaceship.b4050948d737d6f1a2a9.png",
+    "static/media/hologram_screen_2.png": "/bad-todo/static/media/hologram_screen_2.15b6ebd47cf4074bb07e.png",
     "index.html": "/bad-todo/index.html",
-    "main.1206a0f1.css.map": "/bad-todo/static/css/main.1206a0f1.css.map",
-    "main.f8828b77.js.map": "/bad-todo/static/js/main.f8828b77.js.map",
+    "main.f1d25e74.css.map": "/bad-todo/static/css/main.f1d25e74.css.map",
+    "main.9512ea30.js.map": "/bad-todo/static/js/main.9512ea30.js.map",
     "453.d8e2a990.chunk.js.map": "/bad-todo/static/js/453.d8e2a990.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1206a0f1.css",
-    "static/js/main.f8828b77.js"
+    "static/css/main.f1d25e74.css",
+    "static/js/main.9512ea30.js"
   ]
 }
