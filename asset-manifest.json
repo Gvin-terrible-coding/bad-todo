@@ -1,13 +1,14 @@
 {
   "files": {
-    "main.css": "/bad-todo/static/css/main.f1d25e74.css",
-    "main.js": "/bad-todo/static/js/main.9512ea30.js",
+    "main.css": "/bad-todo/static/css/main.6afb4e42.css",
+    "main.js": "/bad-todo/static/js/main.511fa48b.js",
     "static/js/453.d8e2a990.chunk.js": "/bad-todo/static/js/453.d8e2a990.chunk.js",
     "static/media/Animated_Starfield.mp4": "/bad-todo/static/media/Animated_Starfield.54df6273ed1fa74e10ff.mp4",
     "static/media/Starmap_Select_Background.png": "/bad-todo/static/media/Starmap_Select_Background.553728c6d5e2cb8cc1d2.png",
     "static/media/planet_5.png": "/bad-todo/static/media/planet_5.4af4c00eb4888baa06e0.png",
     "static/media/planet_2.png": "/bad-todo/static/media/planet_2.519ec87b9662bc976c0a.png",
     "static/media/planet_7.png": "/bad-todo/static/media/planet_7.1fae756979ccafca4d3d.png",
+    "static/media/AlchemyLabIndoors.png": "/bad-todo/static/media/AlchemyLabIndoors.a9e13d7c216ec43457a2.png",
     "static/media/planet_6.png": "/bad-todo/static/media/planet_6.73ceaa54a7b8506fedf7.png",
     "static/media/planet_8.png": "/bad-todo/static/media/planet_8.d8cea8a2467870e44707.png",
     "static/media/planet_9.png": "/bad-todo/static/media/planet_9.9b60f350be03bb11f738.png",
@@ -18,14 +19,26 @@
     "static/media/Cockpit_View.png": "/bad-todo/static/media/Cockpit_View.dfadb0351a894773f593.png",
     "static/media/hologram_button.png": "/bad-todo/static/media/hologram_button.ec16fffeedc0c4ba38ac.png",
     "static/media/spaceship.png": "/bad-todo/static/media/spaceship.b4050948d737d6f1a2a9.png",
+    "static/media/cauldron.png": "/bad-todo/static/media/cauldron.bb5a07b27ef496c3bde2.png",
     "static/media/hologram_screen_2.png": "/bad-todo/static/media/hologram_screen_2.15b6ebd47cf4074bb07e.png",
+    "static/media/Sunflowericon.png": "/bad-todo/static/media/Sunflowericon.98a6c219e08de1d79956.png",
+    "static/media/Carroticon.png": "/bad-todo/static/media/Carroticon.b491340a4cdfbf84f524.png",
+    "static/media/ChamomileLeavesicon.png": "/bad-todo/static/media/ChamomileLeavesicon.d892e324f26ebdc70449.png",
+    "static/media/spinachicon.png": "/bad-todo/static/media/spinachicon.d3c74be153db516300ac.png",
+    "static/media/AlchemyLabOutdoors.png": "/bad-todo/static/media/AlchemyLabOutdoors.724566ea7ab4f37a0a51.png",
+    "static/media/Turnipicon.png": "/bad-todo/static/media/Turnipicon.1c5a39a04e9f28ceeb60.png",
+    "static/media/Potatoicon.png": "/bad-todo/static/media/Potatoicon.ae4723e582d735ea96b1.png",
+    "static/media/driedroseicon.png": "/bad-todo/static/media/driedroseicon.742c0ccb51e2fe2d2f95.png",
+    "static/media/Radishicon.png": "/bad-todo/static/media/Radishicon.99bc8c5fa933728e39e9.png",
+    "static/media/Onionicon.png": "/bad-todo/static/media/Onionicon.10845321c2c5c74f65e1.png",
+    "static/media/OysterMushroomicon.png": "/bad-todo/static/media/OysterMushroomicon.6d93d10a1961f453e5d5.png",
     "index.html": "/bad-todo/index.html",
-    "main.f1d25e74.css.map": "/bad-todo/static/css/main.f1d25e74.css.map",
-    "main.9512ea30.js.map": "/bad-todo/static/js/main.9512ea30.js.map",
+    "main.6afb4e42.css.map": "/bad-todo/static/css/main.6afb4e42.css.map",
+    "main.511fa48b.js.map": "/bad-todo/static/js/main.511fa48b.js.map",
     "453.d8e2a990.chunk.js.map": "/bad-todo/static/js/453.d8e2a990.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f1d25e74.css",
-    "static/js/main.9512ea30.js"
+    "static/css/main.6afb4e42.css",
+    "static/js/main.511fa48b.js"
   ]
 }
