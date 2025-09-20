@@ -6,7 +6,7 @@ import {
   getFirestore, doc, getDoc as originalGetDoc, addDoc as originalAddDoc, setDoc as originalSetDoc, 
   updateDoc as originalUpdateDoc, deleteDoc as originalDeleteDoc, onSnapshot as originalOnSnapshot, 
   collection, serverTimestamp, runTransaction as originalRunTransaction, query, where, 
-  getDocs as originalGetDocs, orderBy, limit 
+  getDocs as originalGetDocs, orderBy, limit, increment
 } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -27,6 +27,81 @@ import starfieldVideo from './assets/videos/Space Focus Timer/Animated_Starfield
 import hologramScreen from './assets/images/Space_Focus_Timer/hologram_screen_2.png';
 import spaceshipIcon from './assets/images/Space_Focus_Timer/spaceship.png';
 import hologramButton from './assets/images/Space_Focus_Timer/hologram_button.png';
+
+// --- NEW: Asset Imports for Alchemist's Workshop ---
+import alchemyLabIndoorBg from './assets/Maps/AlchemyLabIndoors.png';
+import alchemyBenchImage from './assets/images/Alchemy Lab/Indoors_assets/bench.png';
+import alchemyCauldronImage from './assets/images/Alchemy Lab/Indoors_assets/cauldron.png';
+import alchemyGardenBg from './assets/Maps/AlchemyLabOutdoors.png';
+
+// Loot Ingredients
+import ingredientBeak from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Beak.png';
+import ingredientBone from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Bone.png';
+import ingredientBrain from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Brain.png';
+import ingredientCrown from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Crown.png';
+import ingredientCultishSkull from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Cultish Skull.png';
+import ingredientCursedSkull from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/CursedSkull.png';
+import ingredientDemonicBook from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/DemonicSpellBook.png';
+import ingredientEyeballs from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Eyes.png';
+import ingredientHand from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Hand.png';
+import ingredientHeart from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Heart.png';
+import ingredientJaw from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Jaw.png';
+import ingredientJawV2 from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/JawV2.png';
+import ingredientJaggedTooth from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/JaggedTooth.png';
+import ingredientMysteriousRing from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/MysteriousRing.png';
+import ingredientPoisoniousPoultice from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/PoisoniousPoultice.png';
+import ingredientSeveredFoot from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Severed Foot.png';
+import ingredientSeveredHand from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Severed Hand.png';
+import ingredientSkull from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Skull.png';
+import ingredientTeeth from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Tooth.png';
+import ingredientVoodooDoll from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Voodoodoll.png';
+import ingredientWarriorsFist from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/WarriorsFist.png';
+
+// Plant Ingredients
+import plantCarrotIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Carroticon.png';
+import plantChamomileLeavesIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/ChamomileLeavesicon.png';
+import plantDriedRoseIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/driedroseicon.png';
+import plantOnionIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Onionicon.png';
+import plantOysterMushroomIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/OysterMushroomicon.png';
+import plantPotatoIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Potatoicon.png';
+import plantRadishIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Radishicon.png';
+import plantSpinachIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/spinachicon.png';
+import plantSunflowerIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Sunflowericon.png';
+import plantTurnipIcon from './assets/images/Alchemy Lab/Plant_Icons_in_Inventory/Turnipicon.png';
+
+// Crop Spritesheets
+import cropCarrotSheet from './assets/images/Alchemy Lab/Outdoors_assets/carrot.png';
+import cropChamomileSheet from './assets/images/Alchemy Lab/Outdoors_assets/chamomile.png';
+import cropOnionSheet from './assets/images/Alchemy Lab/Outdoors_assets/onion.png';
+import cropPotatoSheet from './assets/images/Alchemy Lab/Outdoors_assets/potato.png';
+import cropRadishSheet from './assets/images/Alchemy Lab/Outdoors_assets/radish.png';
+import cropRoseSheet from './assets/images/Alchemy Lab/Outdoors_assets/rose.png';
+import cropSpinachSheet from './assets/images/Alchemy Lab/Outdoors_assets/spinach.png';
+import cropSunflowerSheet from './assets/images/Alchemy Lab/Outdoors_assets/sunflower.png';
+import cropTurnipSheet from './assets/images/Alchemy Lab/Outdoors_assets/turnip.png';
+import cropOysterSheet from './assets/images/Alchemy Lab/Outdoors_assets/oyster.png';
+
+// Potion Icons
+import potionIcon1 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon1.png';
+import potionIcon2 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon2.png';
+import potionIcon3 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon3.png';
+import potionIcon4 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon4.png';
+import potionIcon5 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon5.png';
+import potionIcon6 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon6.png';
+import potionIcon7 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon7.png';
+import potionIcon8 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon8.png';
+import potionIcon9 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon9.png';
+import potionIcon10 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon10.png';
+import potionIcon11 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon11.png';
+import potionIcon12 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon12.png';
+import potionIcon13 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon13.png';
+import potionIcon14 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon14.png';
+import potionIcon15 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon15.png';
+import potionIcon16 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon16.png';
+import potionIcon17 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon17.png';
+import potionIcon18 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon18.png';
+import potionIcon19 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon19.png';
+import potionIcon20 from './assets/images/Alchemy Lab/Potions_Icons_in_Inventory/Icon20.png';
 
 
 // --- Firestore Logging Wrappers ---
@@ -563,6 +638,202 @@ const cosmicEvents = [
   { id: 'comet_sighting', name: 'Comet Sighting', description: 'A rare comet passes by, granting you a burst of insight!', weight: 6, reward: { type: 'xp', amount: 200 } },
   { id: 'ancient_signal', name: 'Ancient Signal', description: 'A strange signal leads you to a forgotten relic!', weight: 1, reward: { type: 'cosmetic', cosmeticId: 'avatar_dragon' } },
 ];
+
+// --- NEW: ALCHEMY DEFINITIONS ---
+
+const alchemyIngredients = {
+  // Common Plants
+  'focuroot': { id: 'focuroot', name: 'Focuroot', type: 'plant', rarity: 'common', description: 'A common root that aids concentration.', icon: plantCarrotIcon, seedId: 'seed_focuroot' },
+  'swiftblossom': { id: 'swiftblossom', name: 'Swiftblossom', type: 'plant', rarity: 'common', description: 'A leafy green that seems to quicken the senses.', icon: plantSpinachIcon, seedId: 'seed_swiftblossom' },
+  'stillpetal': { id: 'stillpetal', name: 'Stillpetal', type: 'plant', rarity: 'common', description: 'A calm, aromatic flower.', icon: plantDriedRoseIcon, seedId: 'seed_stillpetal'},
+  'oyster_mushroom': { id: 'oyster_mushroom', name: 'Oyster Mushroom', type: 'plant', rarity: 'common', description: 'An earthy, hearty mushroom.', icon: plantOysterMushroomIcon, seedId: 'seed_oyster_mushroom' },
+
+  // Rare Plants
+  'sunfruit': { id: 'sunfruit', name: 'Sunfruit', type: 'plant', rarity: 'rare', description: 'A bright, radiant fruit that glows with inner warmth.', icon: plantSunflowerIcon, seedId: 'seed_sunfruit' },
+  'luckleaf': { id: 'luckleaf', name: 'Luckleaf Chamomile', type: 'plant', rarity: 'rare', description: 'A rare five-petaled flower, said to bring minor fortune.', icon: plantChamomileLeavesIcon, seedId: 'seed_luckleaf'},
+
+  // Dungeon Drops
+  'goblin_ear': { id: 'goblin_ear', name: 'Goblin Ear', type: 'loot', rarity: 'common', description: 'Surprisingly waxy. Dropped by Goblins.', icon: ingredientJaggedTooth },
+  'skeleton_bone': { id: 'skeleton_bone', name: 'Skeleton Bone', type: 'loot', rarity: 'common', description: 'A dry, brittle bone from a reanimated skeleton.', icon: ingredientBone },
+  'shadow_essence': { id: 'shadow_essence', name: 'Shadow Essence', type: 'loot', rarity: 'rare', description: 'A swirling globule of pure darkness. Dropped by Shadows.', icon: ingredientPoisoniousPoultice },
+  'golem_heart': { id: 'golem_heart', name: 'Golem Heart', type: 'loot', rarity: 'epic', description: 'The magical stone that animates a Stone Golem.', icon: ingredientHeart },
+
+  // Tower Defense Drops
+  'pristine_crystal': { id: 'pristine_crystal', name: 'Pristine Crystal', type: 'loot', rarity: 'rare', description: 'Thrums with contained energy. Awarded for fending off many foes.', icon: ingredientMysteriousRing },
+  'dragon_scale': { id: 'dragon_scale', name: 'Dragon Scale', type: 'loot', rarity: 'epic', description: 'An iridescent scale from a powerful dragon.', icon: ingredientCrown },
+
+  // Platformer Drops
+  'stardust_phial': { id: 'stardust_phial', name: 'Stardust Phial', type: 'loot', rarity: 'legendary', description: 'A vial of shimmering, cosmic dust. Awarded for incredible platforming skill.', icon: potionIcon11 },
+};
+
+const alchemyPlants = {
+  'seed_focuroot': { id: 'seed_focuroot', name: 'Focuroot Seed', yields: 'focuroot', growthTimeSeconds: 60 * 30, spritesheet: cropCarrotSheet },
+  'seed_swiftblossom': { id: 'seed_swiftblossom', name: 'Swiftblossom Seed', yields: 'swiftblossom', growthTimeSeconds: 60 * 45, spritesheet: cropSpinachSheet },
+  'seed_stillpetal': { id: 'seed_stillpetal', name: 'Stillpetal Seed', yields: 'stillpetal', growthTimeSeconds: 60 * 60, spritesheet: cropRoseSheet },
+  'seed_oyster_mushroom': { id: 'seed_oyster_mushroom', name: 'Mushroom Spores', yields: 'oyster_mushroom', growthTimeSeconds: 60 * 75, spritesheet: cropOysterSheet },
+  'seed_sunfruit': { id: 'seed_sunfruit', name: 'Sunfruit Seed', yields: 'sunfruit', growthTimeSeconds: 60 * 120, spritesheet: cropSunflowerSheet },
+  'seed_luckleaf': { id: 'seed_luckleaf', name: 'Chamomile Seed', yields: 'luckleaf', growthTimeSeconds: 60 * 240, spritesheet: cropChamomileSheet },
+};
+
+const alchemyPotions = {
+  // Dungeon Crawler Potions
+  'potion_minor_strength': { id: 'potion_minor_strength', name: 'Minor Strength', goldValue: 50, icon: potionIcon1,
+    recipe: ['focuroot', 'goblin_ear'],
+    buff: { target: 'dungeon', type: 'temp_stat', effect: { attack: 10 }, durationFloors: 3, description: 'Grants +10 Attack for 3 floors.' }
+  },
+  'potion_stonehide': { id: 'potion_stonehide', name: 'Stonehide Draught', goldValue: 150, icon: potionIcon2,
+    recipe: ['focuroot', 'skeleton_bone', 'golem_heart'],
+    buff: { target: 'dungeon', type: 'temp_stat', effect: { hp: 50 }, durationFloors: 3, description: 'Grants +50 Max HP for 3 floors.' }
+  },
+
+  // Tower Defense Potions
+  'potion_tower_power': { id: 'potion_tower_power', name: 'Elixir of Power', goldValue: 100, icon: potionIcon7,
+    recipe: ['swiftblossom', 'pristine_crystal'],
+    buff: { target: 'tower_defense', type: 'start_boost', effect: { startingXP: 200 }, description: 'Start your next TD game with an extra 200 XP.' }
+  },
+  'potion_castle_health': { id: 'potion_castle_health', name: 'Castle Fortification', goldValue: 200, icon: potionIcon15,
+    recipe: ['stillpetal', 'dragon_scale', 'pristine_crystal'],
+    buff: { target: 'tower_defense', type: 'start_boost', effect: { startingHealth: 2 }, description: 'Start your next TD game with +2 Castle Health.' }
+  },
+
+  // General / XP Potions
+  'potion_xp_boost': { id: 'potion_xp_boost', name: 'Potion of Enlightenment', goldValue: 250, icon: potionIcon20,
+    recipe: ['sunfruit', 'shadow_essence', 'stardust_phial'],
+    buff: { target: 'global', type: 'xp_multiplier', effect: { multiplier: 1.25 }, durationTasks: 3, description: 'Gain 25% more XP from the next 3 completed assignments.' }
+  },
+  'potion_luck': { id: 'potion_luck', name: 'Brewer\'s Luck Elixir', goldValue: 180, icon: potionIcon13,
+    recipe: ['luckleaf', 'ingredientEyeballs', 'ingredientVoodooDoll'],
+    buff: { target: 'global', type: 'slot_machine', effect: { bonus: 'better_odds' }, durationSpins: 5, description: 'Slightly increases your odds of a good result at the Slot Machine for 5 spins.' }
+  },
+};
+
+// --- END ALCHEMY DEFINITIONS ---
+
+const generatePath = () => {
+    const boardSize = 10;
+    const newPath = [{ x: 0, y: 0 }];
+    const visited = new Set(['0,0']);
+    let current = { x: 0, y: 0 };
+
+    while (current.x < boardSize - 1 || current.y < boardSize - 1) {
+        const moves = [];
+        if (current.x < boardSize - 1) moves.push({ x: current.x + 1, y: current.y });
+        if (current.y < boardSize - 1) moves.push({ x: current.x, y: current.y + 1 });
+        
+        const validMoves = moves.filter(m => !visited.has(`${m.x},${m.y}`));
+
+        if (validMoves.length > 0) {
+            const nextMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+            current = nextMove;
+            newPath.push(current);
+            visited.add(`${current.x},${current.y}`);
+        } else {
+            const allNeighbors = [
+                { x: current.x + 1, y: current.y }, { x: current.x, y: current.y + 1 },
+                { x: current.x - 1, y: current.y }, { x: current.x, y: current.y - 1 }
+            ].filter(n => n.x >= 0 && n.x < boardSize && n.y >= 0 && n.y < boardSize && !visited.has(`${n.x},${n.y}`));
+            
+            if (allNeighbors.length > 0) {
+                current = allNeighbors[0];
+                newPath.push(current);
+                visited.add(`${current.x},${current.y}`);
+            } else {
+                break;
+            }
+        }
+    }
+    return newPath;
+};
+
+const getStartOfDay = (date) => {
+  const newDate = new Date(date);
+  newDate.setHours(0, 0, 0, 0);
+  return newDate;
+};
+
+const shouldGenerateQuests = (lastUpdatedTimestamp) => {
+  if (!lastUpdatedTimestamp || typeof lastUpdatedTimestamp.toDate !== 'function') {
+    // If it's null, or not a Firestore Timestamp, don't generate.
+    return false;
+  }
+  const lastDate = lastUpdatedTimestamp.toDate();
+  const now = new Date();
+  return getStartOfDay(now) > getStartOfDay(lastDate);
+};
+
+const generateQuests = () => {
+  const daily = [];
+  const weekly = [];
+  const dailyPool = [...questDefinitions.daily];
+  const weeklyPool = [...questDefinitions.weekly];
+
+  // Select 2 random daily quests
+  for (let i = 0; i < 2; i++) {
+    if (dailyPool.length === 0) break;
+    const randomIndex = Math.floor(Math.random() * dailyPool.length);
+    daily.push({ ...dailyPool[randomIndex], progress: 0, completed: false });
+    dailyPool.splice(randomIndex, 1);
+  }
+
+  // Select 1 random weekly quest
+  if (weeklyPool.length > 0) {
+    const randomIndex = Math.floor(Math.random() * weeklyPool.length);
+    weekly.push({ ...weeklyPool[randomIndex], progress: 0, completed: false });
+  }
+
+  return { daily, weekly, lastUpdated: serverTimestamp() };
+};
+
+// Moved this function to the top-level scope to make it accessible by all components in this file.
+const generateInitialDungeonState = () => {
+  return {
+    phase: 'class_selection', // Start at class selection
+    playerClass: null,
+    floor: 1,
+    board: {},
+    player: { x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, hasKey: false, activeEffects: [] },
+    enemies: [],
+    enemyMovePaths: {}, 
+    lastMoveTrails: [], // NEW: To track only the last turn's movement
+    turnCount: 1,
+    log: ['Choose your class to begin your adventure.'],
+    gameOver: false,
+    shopOpen: false,
+    ownedWeapons: [],
+    ownedArmor: [],
+    potions: 0,
+    boughtStats: { hp: 0, attack: 0 },
+  };
+};
+
+// A single, authoritative default structure for a user's stats.
+const defaultStats = {
+  username: '', totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [],
+  ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+  focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
+  activeBoosts: [],
+  dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
+  td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
+  lab_state: {
+    sciencePoints: 0,
+    lastLogin: serverTimestamp(),
+    labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
+    labXpUpgrades: {},
+    prestigeLevel: 0,
+  },
+  alchemy_state: {
+    gold: 100,
+    inventory: { 'seed_focuroot': 3 },
+    unlockedRecipes: ['potion_minor_strength'],
+    upgrades: { garden_plots: 1 },
+    gardenPlots: [
+      { plantId: null, plantedAt: null, stage: 0 }
+    ],
+  },
+  studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
+  achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
+  quests: generateQuests()
+};
 
 
 // Modal Component for adding new assignments
@@ -1128,16 +1399,31 @@ const Particle = ({ onComplete }) => {
   );
 };
 
-const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp, isMobile }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
+const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp, isMobile, addIngredientToInventory }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
   const [localDungeonState, setLocalDungeonState] = useState(stats.dungeon_state);
-  const [animationState, setAnimationState] = useState({ hits: {}, particles: [] });
-  
+  // REFACTORED: movingEnemies is no longer needed as the animation is now driven by state updates.
+  const [animationState, setAnimationState] = useState({ hits: {}, particles: [], enemyPaths: {} });
+  const [isEnemyTurn, setIsEnemyTurn] = useState(false);
+  const [dangerZone, setDangerZone] = useState({ tiles: [], forEnemy: null });
+
   // These states track resources for the current session to batch updates.
   const [sessionXp, setSessionXp] = useState(stats.totalXP);
   const [sessionGold, setSessionGold] = useState(stats.dungeon_gold || 0);
+  
+  // NEW: Ref to hold the latest state for use in closures like the game loop.
+  const dungeonStateRef = useRef(localDungeonState);
+  useEffect(() => {
+    dungeonStateRef.current = localDungeonState;
+  }, [localDungeonState]);
 
   const [attackTarget, setAttackTarget] = useState(null); 
   const [abilityTarget, setAbilityTarget] = useState(null);
+  
+  const addLog = useCallback((message, style = 'text-slate-300') => {
+    // Add a unique ID to each log entry
+    const newLogEntry = { id: Date.now() + Math.random(), message, style };
+    setLocalDungeonState(prevState => ({ ...prevState, log: [newLogEntry, ...(prevState.log || []).slice(0, 4)] }));
+  }, []);
 
   useEffect(() => {
     if (syncDungeonXp) {
@@ -1166,9 +1452,8 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     }
   }, [sessionGold, sessionXp, updateStatsInFirestore, showMessageBox]);
 
-  useEffect(() => {
-    setLocalDungeonState(stats.dungeon_state);
-  }, [stats.dungeon_state]);
+  // FIX: This useEffect was the source of the state reset bug and has been removed.
+  // The component now correctly manages its own state after initialization.
   
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
@@ -1245,14 +1530,15 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       { id: 'potion_wealth', name: 'Potion of Wealth', cost: 100, effect: { goldBonus: 0.1 }, duration: 3, type: 'temp_potion' },
     ],
     enemies: [
-      { id: 'goblin', name: 'Goblin', hp: 20, atk: 5, minFloor: 1 },
-      { id: 'skeleton', name: 'Skeleton', hp: 35, atk: 8, minFloor: 1 },
-      { id: 'bat', name: 'Giant Bat', hp: 15, atk: 6, minFloor: 2, dodgeChance: 0.33 },
-      { id: 'slime', name: 'Slime', hp: 40, atk: 7, minFloor: 3, onDefeat: { type: 'split', into: 'ooze', count: 2 } },
-      { id: 'ooze', name: 'Ooze', hp: 20, atk: 5, minFloor: 3 },
-      { id: 'skeleton_archer', name: 'Skeleton Archer', hp: 25, atk: 10, minFloor: 4, isRanged: true },
-      { id: 'shadow', name: 'Shadow', hp: 50, atk: 12, minFloor: 6, abilities: [{ type: 'invisible', chance: 0.25, duration: 1 }] },
-      { id: 'golem', name: 'Stone Golem', hp: 80, atk: 15, minFloor: 8, armor: 5 },
+      { id: 'goblin', name: 'Goblin', hp: 20, atk: 5, minFloor: 1, loot: { id: 'goblin_ear', chance: 0.1 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'skeleton', name: 'Skeleton', hp: 35, atk: 8, minFloor: 1, loot: { id: 'skeleton_bone', chance: 0.15 }, rareLoot: { id: 'ingredientSkull', chance: 0.05 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'bat', name: 'Giant Bat', hp: 15, atk: 6, minFloor: 2, dodgeChance: 0.33, loot: { id: 'ingredientBeak', chance: 0.2 }, moveRange: 2, attackRange: 1.5, ai: 'standard' },
+      { id: 'slime', name: 'Slime', hp: 40, atk: 7, minFloor: 3, onDefeat: { type: 'split', into: 'ooze', count: 2 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.5 },
+      { id: 'ooze', name: 'Ooze', hp: 20, atk: 5, minFloor: 3, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'skeleton_archer', name: 'Skeleton Archer', hp: 25, atk: 10, minFloor: 4, isRanged: true, moveRange: 1, attackRange: 5, ai: 'ranged' },
+      { id: 'shadow', name: 'Shadow', hp: 50, atk: 12, minFloor: 6, abilities: [{ type: 'invisible', chance: 0.25, duration: 1 }], loot: { id: 'shadow_essence', chance: 0.25 }, moveRange: 1, attackRange: 1.5, ai: 'cowardly' },
+      { id: 'golem', name: 'Stone Golem', hp: 80, atk: 15, minFloor: 8, armor: 5, loot: { id: 'golem_heart', chance: 0.5 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.33 },
+      { id: 'keyholder_orc', name: 'Orc Keywarden', hp: 50, atk: 12, minFloor: 1, loot: { id: 'ingredientCrown', chance: 1.0 }, moveRange: 1, attackRange: 1.5, ai: 'standard' }
     ],
     bestiary: [
       { 
@@ -1374,16 +1660,266 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     return { maxHp, attack };
   }, [localDungeonState, stats.currentPet, getFullPetDetails, dungeonDefinitions]);
   
-  // FIX: This entire useEffect was the source of an infinite render loop and has been removed.
-  // The logic is now handled correctly by the `fullPlayerStats` useMemo hook above.
+  // --- NEW: Pathfinding, AI, and Turn Logic ---
+
+  // Finds all tiles a unit can move to within its range.
+  const getReachableTiles = useCallback((start, range, board, allEntities) => {
+    const reachable = new Map(); // Stores {pos, dist}
+    const queue = [{ pos: start, dist: 0 }];
+    const visited = new Set([`${start.x},${start.y}`]);
+    reachable.set(`${start.x},${start.y}`, { pos: start, dist: 0 });
+
+    const entityPositions = new Set(allEntities.map(e => `${e.x},${e.y}`));
+
+    while (queue.length > 0) {
+      const { pos, dist } = queue.shift();
+      if (dist >= range) continue;
+
+        const neighbors = [
+          {x: 0, y: 1}, {x: 0, y: -1}, {x: 1, y: 0}, {x: -1, y: 0}, // Cardinal
+          {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}  // Diagonal
+        ];
+        for (const n of neighbors) {
+            const nextPos = { x: pos.x + n.x, y: pos.y + n.y };
+            const key = `${nextPos.x},${nextPos.y}`;
+
+            if (nextPos.x < 0 || nextPos.x >= 10 || nextPos.y < 0 || nextPos.y >= 10 || visited.has(key)) continue;
+            
+            // CORNER CUTTING FIX: Prevent diagonal movement through walls.
+            if (n.x !== 0 && n.y !== 0) {
+                const corner1Key = `${pos.x + n.x},${pos.y}`;
+                const corner2Key = `${pos.x},${pos.y + n.y}`;
+                if (board[corner1Key]?.type === 'wall' || board[corner2Key]?.type === 'wall') {
+                    continue;
+                }
+            }
+
+           const tile = board[key];
+        // Units can't move through walls, other units, hatches, or unopened chests
+        if (tile && tile.type !== 'wall' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
+          visited.add(key);
+          reachable.set(key, { pos: nextPos, dist: dist + 1 });
+          queue.push({ pos: nextPos, dist: dist + 1 });
+        }
+      }
+    }
+    return Array.from(reachable.values()).map(r => r.pos);
+  }, []);
+
+  // Finds the shortest path from start to end using Breadth-First Search.
+  const findPathBFS = useCallback((start, end, board, allEntities) => {
+    const queue = [[start]];
+    const visited = new Set([`${start.x},${start.y}`]);
+    const entityPositions = new Set(allEntities.map(e => `${e.x},${e.y}`));
+    entityPositions.delete(`${start.x},${start.y}`); // The moving unit isn't an obstacle to itself.
+    entityPositions.delete(`${end.x},${end.y}`);   // FIX: The target tile must be a valid destination for the algorithm to find a path.
+    
+    while(queue.length > 0) {
+        const path = queue.shift();
+        const pos = path[path.length - 1];
+        
+        if(pos.x === end.x && pos.y === end.y) return path;
+        
+        const neighbors = [
+          {x: 0, y: 1}, {x: 0, y: -1}, {x: 1, y: 0}, {x: -1, y: 0}, // Cardinal
+          {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}  // Diagonal
+        ];
+        for (const n of neighbors) {
+            const nextPos = { x: pos.x + n.x, y: pos.y + n.y };
+            const key = `${nextPos.x},${nextPos.y}`;
+
+            if (nextPos.x < 0 || nextPos.x >= 10 || nextPos.y < 0 || nextPos.y >= 10 || visited.has(key)) continue;
+            
+            // CORNER CUTTING FIX: Prevent diagonal movement through walls.
+            if (n.x !== 0 && n.y !== 0) {
+                const corner1Key = `${pos.x + n.x},${pos.y}`;
+                const corner2Key = `${pos.x},${pos.y + n.y}`;
+                if (board[corner1Key]?.type === 'wall' || board[corner2Key]?.type === 'wall') {
+                    continue;
+                }
+            }
+
+           const tile = board[key];
+            // Units can't move through walls, other units, hatches, or unopened chests
+            if (tile && tile.type !== 'wall' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
+                const newPath = [...path, nextPos];
+                queue.push(newPath);
+                visited.add(key);
+            }
+        }
+    }
+    return null; // No path found
+  }, []);
+
+  // REFACTORED: This now triggers the enemy turn sequence.
+  const processEnemyTurns = useCallback(() => {
+    if (isEnemyTurn) return;
+    addLog("Enemy turn...", 'text-gray-400 italic');
+    // Clear old paths at the start of the enemy turn
+    setLocalDungeonState(prev => ({ ...prev, enemyMovePaths: {} }));
+    setIsEnemyTurn(true); // This state change triggers the useEffect below
+  }, [isEnemyTurn, addLog]);
+
+  // NEW: React-friendly useEffect for handling sequential enemy turns
+  useEffect(() => {
+    if (!isEnemyTurn || dungeonStateRef.current.gameOver) return;
+
+    const enemiesToProcess = [...dungeonStateRef.current.enemies];
+    let currentEnemyIndex = 0;
+
+    const processNextEnemy = () => {
+      // Use the ref for all state reads to prevent stale data
+      const currentState = dungeonStateRef.current;
+      if (currentEnemyIndex >= enemiesToProcess.length || currentState.player.hp <= 0) {
+        setLocalDungeonState(prev => ({...prev, turnCount: (prev.turnCount || 1) + 1}));
+        setIsEnemyTurn(false);
+        setDangerZone({ tiles: [], forEnemy: null });
+        if (currentState.player.hp > 0) {
+            addLog("Your turn.", 'text-gray-400 italic');
+        } else {
+            handleGameOver();
+        }
+        return;
+      }
+
+      const enemy = enemiesToProcess[currentEnemyIndex];
+      
+      if (enemy.moveFrequency && currentState.turnCount % enemy.moveFrequency !== 0) {
+          currentEnemyIndex++;
+          setTimeout(processNextEnemy, 50);
+          return;
+      }
+
+      // NEW: Chance-based movement. If the roll fails, the enemy does not move.
+      if (enemy.moveChance && Math.random() > enemy.moveChance) {
+          addLog(`${enemy.name} hesitates...`, 'text-slate-400 italic');
+          // Still check for an attack if the player is adjacent
+          const distanceToPlayer = Math.hypot(enemy.x - currentState.player.x, enemy.y - currentState.player.y);
+          if (distanceToPlayer <= enemy.attackRange) {
+              setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
+              addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
+              setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
+          }
+          currentEnemyIndex++;
+          setTimeout(processNextEnemy, 200);
+          return; // Skip the rest of the movement logic for this enemy
+      }
+
+      let action = { type: 'wait' };
+      const allEntities = [...currentState.enemies, currentState.player];
+      const path = findPathBFS({ x: enemy.x, y: enemy.y }, { x: currentState.player.x, y: currentState.player.y }, currentState.board, allEntities);
+
+      if (enemy.ai === 'cowardly' && enemy.hp < enemy.maxHp * 0.25) {
+        const reachable = getReachableTiles({ x: enemy.x, y: enemy.y }, enemy.moveRange, currentState.board, allEntities.filter(e => e.id !== enemy.id));
+        if (reachable.length > 0) {
+            const furthestTile = reachable.reduce((best, curr) => Math.hypot(curr.x - currentState.player.x, curr.y - currentState.player.y) > Math.hypot(best.x - currentState.player.x, best.y - currentState.player.y) ? curr : best);
+            const fleePath = findPathBFS({ x: enemy.x, y: enemy.y }, furthestTile, currentState.board, allEntities.filter(e => e.id !== enemy.id));
+            if (fleePath) action = { type: 'move', path: fleePath.slice(1, enemy.moveRange + 1) };
+        }
+      } else if (path && path.length > 1) {
+        // ROBUST FIX: This logic is much clearer. It takes the full path, removes the start and end points,
+        // and then takes a number of steps equal to the enemy's move range. This prevents any overshooting.
+        const movePath = path.slice(1, -1).slice(0, enemy.moveRange);
+        const finalPos = movePath.length > 0 ? movePath[movePath.length - 1] : {x: enemy.x, y: enemy.y};
+        action = { type: 'move', path: movePath };
+        if (Math.hypot(finalPos.x - currentState.player.x, finalPos.y - currentState.player.y) <= enemy.attackRange) {
+            action.then = { type: 'attack', target: 'player' };
+        }
+      }
+      
+      // REFACTORED: Simplified animation logic.
+      if (action.type === 'move' && action.path.length > 0) {
+        const endPos = action.path[action.path.length - 1];
+        const moveDuration = 250; // A fixed, smooth duration for the slide.
+
+        // Update the state immediately. The CSS transition will handle the animation.
+        setLocalDungeonState(prev => {
+          const startPos = { x: enemy.x, y: enemy.y };
+          const newBoard = { ...prev.board };
+          const fullPath = [startPos, ...action.path];
+          newBoard[`${startPos.y},${startPos.x}`] = { type: 'empty' };
+          newBoard[`${endPos.y},${endPos.x}`] = { type: 'enemy', enemyId: enemy.id };
+          const newPaths = { ...(prev.enemyMovePaths || {}), [enemy.id]: fullPath };
+          const newTrails = [...(prev.lastMoveTrails || []), startPos];
+          return { ...prev, board: newBoard, enemies: prev.enemies.map(e => e.id === enemy.id ? {...e, x: endPos.x, y: endPos.y} : e), enemyMovePaths: newPaths, lastMoveTrails: newTrails };
+        });
+        
+        // After the animation duration, check for an attack and then process the next enemy.
+        setTimeout(() => {
+          if (action.then?.type === 'attack') {
+              setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
+              addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
+              setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
+          }
+          currentEnemyIndex++;
+          setTimeout(processNextEnemy, 50); // Small delay before next enemy moves
+        }, moveDuration);
+
+      } else {
+        if (action.type === 'attack' || (path && path.length <= 2 && Math.hypot(enemy.x - currentState.player.x, enemy.y - currentState.player.y) <= enemy.attackRange)) {
+            setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
+            addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
+            setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
+        }
+        currentEnemyIndex++;
+        setTimeout(processNextEnemy, 200);
+      }
+    };
+
+    processNextEnemy();
+  }, [isEnemyTurn]);
+
+
+  // --- NEW: Danger Zone Logic ---
+  const handleEnemyClick = (e, enemy) => {
+    e.stopPropagation(); // Prevent tile click from firing
+
+    // If we're in targeting mode, an enemy click should be an attack, not a danger zone display.
+    if (attackTarget) {
+      handleAttack(enemy, 'attack_normal');
+      return;
+    }
+    if (abilityTarget) {
+      handleAttack(enemy, abilityTarget);
+      return;
+    }
+
+    // --- Danger Zone Logic (if not in targeting mode) ---
+    if (dangerZone.forEnemy === enemy.id) {
+      setDangerZone({ tiles: [], forEnemy: null });
+      return;
+    }
+    
+    // ACCURACY FIX: The danger zone shows what an enemy can do on its upcoming turn.
+    // We check the game's current turn count to see if slow enemies (like Golems) will be able to act.
+    const enemyWillMove = !enemy.moveFrequency || (localDungeonState.turnCount % enemy.moveFrequency === 0);
+    const moveRange = enemyWillMove ? enemy.moveRange : 0;
+
+    const allEntities = [...localDungeonState.enemies, localDungeonState.player];
+    const moveTiles = getReachableTiles({ x: enemy.x, y: enemy.y }, moveRange, localDungeonState.board, allEntities);
+    const attackTiles = new Set();
+    
+    const combinedTiles = [...moveTiles, { x: enemy.x, y: enemy.y }];
+
+    combinedTiles.forEach(movePos => {
+      for(let y = -enemy.attackRange; y <= enemy.attackRange; y++) {
+        for(let x = -enemy.attackRange; x <= enemy.attackRange; x++) {
+          if (Math.hypot(x, y) <= enemy.attackRange) {
+            const atkX = movePos.x + x;
+            const atkY = movePos.y + y;
+            if(atkX >= 0 && atkX < 10 && atkY >= 0 && atkY < 10) {
+              attackTiles.add(`${atkX},${atkY}`);
+            }
+          }
+        }
+      }
+    });
+
+    setDangerZone({ tiles: Array.from(attackTiles).map(s => ({x: parseInt(s.split(',')[0]), y: parseInt(s.split(',')[1])})), forEnemy: enemy.id });
+  };
+
 
   const classDef = localDungeonState ? dungeonDefinitions.classes[localDungeonState.playerClass] : null;
-
-  const addLog = (message, style = 'text-slate-300') => {
-    // Add a unique ID to each log entry
-    const newLogEntry = { id: Date.now() + Math.random(), message, style };
-    setLocalDungeonState(prevState => ({ ...prevState, log: [newLogEntry, ...(prevState.log || []).slice(0, 4)] }));
-  };
 
   // NEW: Now saves the game over state to Firebase.
   const handleGameOver = () => {
@@ -1398,7 +1934,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     let newEnemies = [];
     
     // Initialize board
-    for (let y = 0; y < size; y++) { for (let x = 0; x < size; x++) { newBoard[`${y},${x}`] = { type: 'empty', visited: false }; } }
+    for (let y = 0; y < size; y++) { for (let x = 0; x < size; x++) { newBoard[`${y},${x}`] = { type: 'empty' }; } }
 
     // Place walls
     for (let i = 0; i < 15 + Math.floor(Math.random() * 5); i++) {
@@ -1408,7 +1944,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     }
 
     // Determine available enemies for this floor
-    const availableEnemies = dungeonDefinitions.enemies.filter(e => floorNum >= e.minFloor && e.id !== 'ooze');
+    const availableEnemies = dungeonDefinitions.enemies.filter(e => floorNum >= e.minFloor && e.id !== 'ooze' && e.id !== 'keyholder_orc');
     const enemyCount = 6 + Math.floor(floorNum / 2);
     
     // Spawn enemies
@@ -1435,9 +1971,19 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     // Spawn keyholder
     let kx, ky;
     do { kx = Math.floor(Math.random() * size); ky = Math.floor(Math.random() * size); } while (newBoard[`${ky},${kx}`].type !== 'empty');
+    const keyholderDef = dungeonDefinitions.enemies.find(e => e.id === 'keyholder_orc');
     const keyholderFloorMultiplier = 1 + (Math.floor(floorNum / 3) * 0.5);
-    newEnemies.push({ id: 'keyholder', baseId: 'keyholder', name: 'Keyholder Orc', hp: 50 * keyholderFloorMultiplier, maxHp: 50 * keyholderFloorMultiplier, atk: 12 * keyholderFloorMultiplier, isKeyholder: true, x: kx, y: ky });
-    newBoard[`${ky},${kx}`] = { type: 'enemy', enemyId: 'keyholder' };
+    const keyholderInstance = {
+      ...keyholderDef,
+      id: 'keyholder_instance',
+      baseId: keyholderDef.id,
+      hp: Math.round(keyholderDef.hp * keyholderFloorMultiplier),
+      maxHp: Math.round(keyholderDef.hp * keyholderFloorMultiplier),
+      atk: Math.round(keyholderDef.atk * keyholderFloorMultiplier),
+      x: kx, y: ky
+    };
+    newEnemies.push(keyholderInstance);
+    newBoard[`${ky},${kx}`] = { type: 'enemy', enemyId: keyholderInstance.id };
 
     // Place hatch and chests
     let hx, hy;
@@ -1449,7 +1995,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         newBoard[`${cy},${cx}`] = { type: 'chest', opened: false };
     }
     
-    newBoard['1,1'] = {type: 'player', visited: true};
+    newBoard['1,1'] = {type: 'player'};
     return { newBoard, newEnemies };
   };
 
@@ -1474,6 +2020,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     const newGameState = {
       ...generateInitialDungeonState(),
       phase: 'playing',
+      turnCount: 1,
       playerClass: className,
       board: newBoard,
       enemies: newEnemies,
@@ -1517,7 +2064,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   };
 
   const handleTileClick = (x, y) => {
-    if (localDungeonState.gameOver || !localDungeonState.playerClass) return;
+    if (isEnemyTurn || localDungeonState.gameOver || !localDungeonState.playerClass) return;
     const targetTile = localDungeonState.board[`${y},${x}`];
     if (abilityTarget) {
       if (targetTile.type === 'enemy') {
@@ -1536,7 +2083,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       return;
     }
 
-        if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
+    if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
     if (targetTile.type === 'wall') { addLog("You can't move through a wall."); return; }
     if (targetTile.type === 'enemy') { addLog("You cannot move onto an enemy's tile."); return; }
     if (targetTile.type === 'hatch' && !localDungeonState.player.hasKey) { addLog("The hatch is locked. You need a key."); return; }
@@ -1544,52 +2091,40 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     if (stats.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
 
     let newGold = sessionGold || 0;
+    const playerStartPos = { x: localDungeonState.player.x, y: localDungeonState.player.y };
     const newBoard = { ...localDungeonState.board };
-    newBoard[`${localDungeonState.player.y},${localDungeonState.player.x}`] = { type: 'empty', visited: true };
-    newBoard[`${y},${x}`] = { type: 'player', visited: true };
-    let playerHp = localDungeonState.player.hp;
-    const newLogMessages = [];
-    let updatedEnemies = JSON.parse(JSON.stringify(localDungeonState.enemies));
-    updatedEnemies.forEach(enemy => {
-      let canAct = true;
-      if (enemy.statusEffects) {
-        enemy.statusEffects = enemy.statusEffects.map(effect => ({ ...effect, duration: effect.duration - 1 })).filter(e => e.duration > 0);
-        if (enemy.statusEffects.some(e => e.type === 'stunned' || e.type === 'crippled')) canAct = false;
-      }
-      if (canAct && Math.hypot(enemy.x - x, enemy.y - y) <= (enemy.isRanged ? 5 : 1.5)) {
-        playerHp -= enemy.atk;
-        newLogMessages.push({ message: `The ${enemy.name} hit you for ${enemy.atk} damage.`, style: 'text-orange-400' });
-      }
-    });
+    newBoard[`${playerStartPos.y},${playerStartPos.x}`] = { type: 'empty' };
+    newBoard[`${y},${x}`] = { type: 'player' };
+    
+    let newState = { 
+        ...localDungeonState, 
+        player: { ...localDungeonState.player, x, y }, 
+        board: newBoard,
+        lastMoveTrails: [playerStartPos] // Start new trails for this turn
+    };
 
-      if (playerHp <= 0) {
-        setAnimationState(prev => ({ ...prev, hits: { ...prev.hits, player: Date.now() } }));
-        handleGameOver();
-        return;
-      }
-    let newState = { ...localDungeonState, player: { ...localDungeonState.player, x, y, hp: playerHp }, board: newBoard, enemies: updatedEnemies, log: [...newLogMessages, ...localDungeonState.log].slice(0, 5) };
-    if (newLogMessages.length > 0) {
-      setAnimationState(prev => ({...prev, hits: {...prev.hits, player: Date.now()}}));
-    }
     if (targetTile.type === 'key') {
       newState.player.hasKey = true;
-      newState.log.unshift({ message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
+      newState.log.unshift({ id: Date.now(), message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
     }
     if (targetTile.type === 'chest' && !targetTile.opened) {
       let goldFound = Math.floor(Math.random() * (20 + localDungeonState.floor * 5)) + 10;
       newGold += goldFound;
-      newState.log.unshift({ message: `You opened a chest and found ${goldFound} gold!`, style: 'text-yellow-400 font-bold' });
+      newState.log.unshift({ id: Date.now(), message: `You opened a chest and found ${goldFound} gold!`, style: 'text-yellow-400 font-bold' });
       newBoard[`${y},${x}`].opened = true;
     }
     if (targetTile.type === 'hatch') {
       if (localDungeonState.player.hasKey) { goToNextFloor(); return; }
-      else { newState.log.unshift({ message: "The hatch is locked. You need a key.", style: 'text-yellow-400' }); }
+      else { newState.log.unshift({ id: Date.now(), message: "The hatch is locked. You need a key.", style: 'text-yellow-400' }); }
     }
+    
     setLocalDungeonState(newState);
     setSessionXp(prevXp => prevXp - moveCost);
     setSessionGold(newGold);
+    
+    // Trigger enemy turn after player moves
+    setTimeout(() => processEnemyTurns(), 100);
   };
-
 
   const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
     const attackDef = dungeonDefinitions.attacks.find(a => a.id === attackId);
@@ -1603,40 +2138,48 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     if (distance > attackRange) { addLog("Target is out of range.", 'text-yellow-400'); setAttackTarget(null); setAbilityTarget(null); return; }
 
     let isGameOver = false;
+    let turnEnded = false;
+
     setLocalDungeonState(prevState => {
       let newState = JSON.parse(JSON.stringify(prevState));
       let { enemies, board, player, log } = newState;
       if (attackId !== 'attack_normal') player.abilityUses[attackId]--;
       const baseAttackPower = fullPlayerStats.attack + (attackDef.power || 0);
-      const mainTargetIndex = enemies.findIndex(e => e.id === targetEnemy.id);
+      let mainTargetIndex = enemies.findIndex(e => e.id === targetEnemy.id);
       if (mainTargetIndex === -1) return prevState;
-      let mainTarget = enemies[mainTargetIndex];
+      
       const damageMultiplier = attackDef.effect?.damageMultiplier || 1;
-      let finalDamage = Math.round(baseAttackPower * damageMultiplier);
-      if (mainTarget.armor) finalDamage = Math.max(1, finalDamage - mainTarget.armor);
-      mainTarget.hp -= finalDamage;
-      log.unshift({ message: `You hit ${mainTarget.name} with ${attackDef.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
+      
+      let enemiesHit = [enemies[mainTargetIndex]];
       if (attackDef.effect?.aoe) {
-        enemies.forEach((enemy, index) => {
-          if (enemy.id === mainTarget.id) return;
-          const aoeDist = Math.hypot(enemy.x - mainTarget.x, enemy.y - mainTarget.y);
+        enemies.forEach(enemy => {
+          if (enemy.id === targetEnemy.id) return;
+          const aoeDist = Math.hypot(enemy.x - targetEnemy.x, enemy.y - targetEnemy.y);
           if (aoeDist <= attackDef.effect.aoe) {
-            let aoeDamage = Math.round(baseAttackPower * damageMultiplier);
-            if (enemy.armor) aoeDamage = Math.max(1, aoeDamage - enemy.armor);
-            enemies[index].hp -= aoeDamage;
-            log.unshift({ message: `${enemy.name} is hit by the blast for ${aoeDamage} damage!`, style: 'text-orange-300' });
+            enemiesHit.push(enemy);
           }
         });
       }
+
+      enemiesHit.forEach(target => {
+        let finalDamage = Math.round(baseAttackPower * damageMultiplier);
+        if (target.armor) finalDamage = Math.max(1, finalDamage - target.armor);
+        target.hp -= finalDamage;
+        log.unshift({ id: Date.now() + Math.random(), message: `You hit ${target.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
+      });
+
       let enemiesToRemove = [];
       let newEnemiesToAdd = [];
+      let newPaths = { ...(newState.enemyMovePaths || {}) }; 
+
       enemies.forEach(enemy => {
         if (enemy.hp <= 0) {
           enemiesToRemove.push(enemy.id);
-          log.unshift({ message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
-          board[`${enemy.y},${enemy.x}`] = { type: enemy.isKeyholder ? 'key' : 'empty', visited: true };
-          
-          // Slime splitting logic
+          delete newPaths[enemy.id]; 
+          log.unshift({ id: Date.now() + Math.random(), message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
+          board[`${enemy.y},${enemy.x}`] = { type: enemy.baseId === 'keyholder_orc' ? 'key' : 'empty' };
+          if (enemy.loot && Math.random() < enemy.loot.chance) addIngredientToInventory(enemy.loot.id);
+          if (enemy.rareLoot && Math.random() < enemy.rareLoot.chance) addIngredientToInventory(enemy.rareLoot.id);
           if (enemy.onDefeat?.type === 'split') {
             const oozeDef = dungeonDefinitions.enemies.find(e => e.id === enemy.onDefeat.into);
             if (oozeDef) {
@@ -1661,35 +2204,33 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
           }
         }
       });
+      
       newState.enemies = [...enemies.filter(e => !enemiesToRemove.includes(e.id)), ...newEnemiesToAdd];
-      mainTarget = newState.enemies.find(e => e.id === targetEnemy.id);
-      let newHitEffects = {};
-      if (mainTarget) {
-        const retaliates = mainTarget.isRanged || distance <= 1.5;
-        const isStunned = mainTarget.statusEffects?.some(e => e.type === 'stunned' || e.type === 'crippled');
-        if (retaliates && !isStunned) {
-          const counterDamage = Math.max(1, Math.round(mainTarget.atk / 2));
-          player.hp -= counterDamage;
-          log.unshift({ message: `The ${mainTarget.name} retaliates for ${counterDamage} damage.`, style: 'text-orange-400' });
-          newHitEffects['player'] = Date.now();
-          if (player.hp <= 0) { player.hp = 0; isGameOver = true; }
-        }
-      }
       
       const particleId = Date.now();
       setAnimationState(prev => ({
-        hits: { ...prev.hits, [targetEnemy.id]: Date.now(), ...newHitEffects },
+        ...prev,
+        hits: { ...prev.hits, ...Object.fromEntries(enemiesHit.map(e => [e.id, Date.now()])) },
         particles: [...prev.particles, { id: particleId, x: targetEnemy.x, y: targetEnemy.y }]
       }));
       setTimeout(() => setAnimationState(prev => ({...prev, particles: prev.particles.filter(p => p.id !== particleId)})), 500);
 
       newState.log = log.slice(0, 5);
+      newState.enemyMovePaths = newPaths;
+      newState.lastMoveTrails = []; // Clear trails on attack
+      
+      if (player.hp <= 0) isGameOver = true;
+      else turnEnded = true;
+
       return newState;
     });
+
     setAttackTarget(null);
     setAbilityTarget(null);
     setSessionXp(prevXp => prevXp - attackCost);
+    
     if (isGameOver) handleGameOver();
+    else if (turnEnded) setTimeout(() => processEnemyTurns(), 100);
   };
 
 
@@ -1801,18 +2342,20 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       skeleton_archer: (id) => <div className={`w-10 h-10 text-slate-400 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill="currentColor"><g><path d='M57.8,35.1c3.9,0,7.1-3.2,7.1-7.1s-3.2-7.1-7.1-7.1s-7.1,3.2-7.1,7.1S53.9,35.1,57.8,35.1z M57.8,23.9 c2.3,0,4.1,1.8,4.1,4.1s-1.8,4.1-4.1,4.1s-4.1-1.8-4.1-4.1S55.5,23.9,57.8,23.9z'/><path d='M45.1,58.6c0.1,0,0.1,0,0.2,0c0.8,0,1.4-0.6,1.5-1.3c0.4-3.7,2.1-13.9,4.7-17.4c0.3-0.4,0.4-0.9,0.2-1.3 c-0.1-0.5-0.5-0.8-1-1l-22.3-7.6c0.4-1,0.9-2,1.4-2.9c6.2-10.7,18-13.6,18.1-13.6c0.8-0.2,1.3-1,1.1-1.8c-0.2-0.8-1-1.3-1.8-1.1 c-0.5,0.1-13.2,3.2-20,15c-5,8.7-5.5,19.7-1.5,32.8c0.2,0.6,0.8,1.1,1.4,1.1c0.1,0,0.3,0,0.4-0.1c0.8-0.2,1.2-1.1,1-1.9 c-2.9-9.4-3.3-17.7-1.3-24.6l20.6,7c-2.9,5.7-4.2,16.7-4.3,17.2C43.7,57.8,44.3,58.5,45.1,58.6z'/><path d='M63.1,41c-0.1-0.1-0.2-0.1-0.3-0.1c-0.1,0-0.2,0-0.3-0.1h0c0,0,0,0,0,0c-0.7-0.2-1.4,0.2-1.7,0.9 c-0.1,0.3-0.1,0.5,0,0.8c-0.3,1.4-2.9,7.9-3.4,9.2c-2.2,5.1-5.3,8.8-9.6,11.5c-1,0.6-2,1.2-3.1,1.8c-3.4,2-6.8,4-9.7,7.1 c-4.3,4.7-6,11.2-6.6,15.9c-0.1,0.8,0.5,1.6,1.3,1.7c0.1,0,0.1,0,0.2,0c0.7,0,1.4-0.5,1.5-1.3c0.6-4.2,2.1-10.1,5.9-14.3 c2.5-2.7,5.7-4.6,9-6.5c1-0.6,2.1-1.2,3.1-1.9c4.8-3,8.2-7.1,10.7-12.8c1.7-4,2.7-6.6,3.2-8.3c3.3,2,10.3,7.3,10.6,16.4 c0,0.8,0.7,1.5,1.5,1.4c0.8,0,1.5-0.7,1.4-1.5C76.4,48.1,65.1,41.9,63.1,41z'/><path d='M59.6,89.6c0.3,0,0.7-0.1,1-0.3c0.6-0.5,0.7-1.5,0.2-2.1c-7.5-9.1-9-17.6-9-17.7c-0.1-0.8-0.9-1.4-1.7-1.2 c-0.8,0.1-1.4,0.9-1.2,1.7c0.1,0.4,1.6,9.4,9.6,19.2C58.7,89.4,59.1,89.6,59.6,89.6z'/></g></svg></div>,
       shadow: (id) => <div className={`w-10 h-10 text-violet-400 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='-5.0 -10.0 110.0 135.0' fill="currentColor"> <path d='m45.883 0.10938c-0.43359 0.039063-2.043 0.16797-3.5742 0.28906-2.8359 0.22656-4.3086 0.55469-9.2109 2.043-4.3789 1.332-6.5977 2.3906-12.281 5.8594-2.0859 1.2734-5.9336 4.6797-8.5391 7.5586-1.6484 1.8242-3.7891 4.957-5.8398 8.5391-2.1953 3.8438-4.2539 9.3008-5.7383 15.242-0.69141 2.7617-0.70703 2.918-0.69922 8.0352 0.011719 6.0273 0.085938 6.6211 1.5977 12.637 1.2539 4.9961 2.6367 8.4727 5.0312 12.688 2.1797 3.8398 6.2891 9.0781 9.1992 11.734 1.457 1.3281 6.2812 4.8164 8.9375 6.4609 6.8125 4.2109 13.883 6.918 21.582 8.2578 3.3438 0.58203 8.707 0.72266 12.07 0.3125 5.0703-0.61328 12.66-3.2773 19.535-6.8477l3.5469-2.418 3.4492-3.1914c5.168-5.2695 8.7227-10.152 11.594-15.914 3.7344-7.4922 4.5547-19.875 1.918-28.938-1.793-6.1562-4.7109-10.922-9.5234-15.555-2.5156-2.418-5.1953-5.1836-9.3008-7.3047-1.3789-0.71094-2.2109-0.98047-3.6367-1.5977-1.8984-0.82031-2.918-0.90625-4.875-2.0664-2.2773-1.3516-2.6562-1.7109-2.6562-2.5156 0-0.80859 0.6875-1.5117 2.6211-2.668 5.5508-3.3242 7.8867-4.7578 8.2578-5.0664 0.32422-0.27344 0.39453-0.51562 0.28125-1-0.33203-1.4023-1.4531-1.3125-4.6758 0.375-4.5117 2.3633-12.566 6.2227-16.055 7.6992-1.8711 0.78906-3.5156 1.5234-3.6484 1.625-0.13672 0.10547-2.3594 1.0352-4.9414 2.0703-6.4805 2.5938-9.1367 4.1914-13.539 8.1367-5.0742 4.5547-7.4805 7.9297-9.1797 12.895-1.0742 3.1328-1.3867 5.2305-1.1211 7.4766 0.37109 3.1367 0.89062 5.1445 1.5664 6.0547 0.33984 0.46094 0.79297 1.3984 1.0078 2.0898 0.43359 1.3867 1.0664 2.1914 2.1289 2.6992 0.43359 0.20703 0.75391 0.55078 0.83984 0.90625 0.28516 1.1914 0.37891 1.332 1.0898 1.6445 0.56641 0.25 0.78906 0.52734 0.99219 1.2383 0.35156 1.2109 1.4648 1.9141 3.3281 2.0938l1.3477 0.12891 0.91797-1.0156c2.0195-2.2266 4.293-6.3359 4.7539-8.5898 0.097656-0.49219 0.33984-0.78125 0.84766-1.0195 0.38672-0.18359 1.2227-0.71875 1.8555-1.1914 0.99219-0.74609 1.1953-1.0312 1.5117-2.1133 0.19922-0.69141 0.41016-1.7227 0.46875-2.2969 0.09375-0.95703 0.21094-1.1328 1.4219-2.1562 1.4609-1.2344 4.0547-2.4805 5.5508-2.6719 0.53125-0.066407 1.3984-0.015625 1.9258 0.11719 1.0195 0.25391-0.64453 1.6523-0.14453 3.2031 0.41016 1.2695 1.168 1.9492 2.5391 2.2734l3.1953-0.71875 0.18359 1.125c0.21875 1.3516 0.085937 2.7812-0.29688 3.2109-0.15625 0.17188-0.57812 0.3125-0.94531 0.3125-0.53906 0-0.71875 0.13281-0.98828 0.72656l-0.77734 2.0469-0.45312 1.457c0 0.87109 0.097656 1.0156 1.6602 2.4727 0.91406 0.84766 2.3789 2.1641 3.2578 2.918 1.3242 1.1445 1.6562 1.5664 1.9609 2.5078 1.1328 3.4844 0.98828 9.2773-0.30078 12.062-1.5391 3.3398-4.9883 6.6953-8.6094 8.3789-2.8594 1.332-5.7383 2.0898-8.4688 2.2227-4.3281 0.21484-7.7695-0.43359-14.617-2.7539-6.9922-2.3672-14.957-8.832-19.02-15.434-4.7383-7.707-6.6797-13.961-6.6797-21.539 0-4.2148 0.25391-6.457 1.2422-11.035 0.84375-3.9023 1.4961-5.4883 4.4336-10.754 1.2539-2.2422 2.1641-3.5 4.4609-6.1562 1.5859-1.8398 3.7422-4.0547 4.7891-4.9258 4.8594-4.043 11.695-7.2852 18.387-8.7148 3.8008-0.80859 7.2773-1.2969 9.2617-1.293 2.0234 0 2.6875-0.29688 2.7852-1.2422 0.12109-1.1719-0.21094-1.2617-4.4648-1.2227-2.0586 0.015625-4.0977 0.0625-4.5312 0.10156z' fill-rule='evenodd'/></svg></div>,
       golem: (id) => <div className={`w-10 h-10 text-stone-500 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill="currentColor"><path d='M316.18 22.05c-28.8.16-57.27 6.13-85.46 17.92-2.34 12.94-6.77 28.27-16.64 41.56-10.4 13.07-26.07 23.34-50.12 23.3-22.8 26.9-33.58 56.57-32.8 87.37-10.23 9.27-21.48 18.86-33.32 26.92-13.04 9.1-27.1 16.65-42.52 20.65-7.57 14.78-13.3 30.26-16.97 46.21 14.6 2.65 28.5 9.86 38.72 22.05 6.18 7.4 10.32 15.53 12.94 24.03 14.84 1.52 28.74 7.07 40.26 18.1 6.1 5.84 10.88 12.43 14.33 19.56 12.12-1.12 23.28 2.37 33.06 7.7 4.06 2.2 7.82 4.75 11.34 7.56 12.1-5.58 26.28-8.6 43.3-6.62 24.52-25.6 54.84-45.2 88.3-58.82 5.52-26.03 6.95-51.65 4.97-76.22-13.38-6.4-26.7-16.23-39.06-30.26-20.67-23.53-35.57-54.06-46.97-86.33-1.47-2.1-2.8-4.2-4.04-6.27 17.1-2.06 34.08-5.86 50.82-11.5-2.7-4.93-5.3-10.16-7.77-15.7 26.8 2.48 54.08-1.15 81.36-9.9 3.38-4.6 6.7-9.38 9.88-14.36-8.6-14.87-11.64-31.55-10.36-49.63-7.26-.22-14.56-.42-21.84-.36zm106.06 39.16c-6.66 1.1-13.18 3.1-19.26 6.05-17.2 8.45-29.14 24.22-35.73 42.06-1.68 4.6-2.93 9.28-3.73 13.96 10.23 16.84 23.38 31.73 38.66 44.28 3.16 2.65 6.43 5.14 9.78 7.48 16.57-2.8 32.92-10.03 46.14-22.4 9.46-8.87 16.64-19.42 21.5-30.83-7.72-12.96-18.55-23.92-31.5-31.7-7.87-4.73-16.4-8.04-25.28-9.86-1.71-.35-3.44-.66-5.16-.88-1.05-.13-2.1-.25-3.16-.32-.1-.02-.2-.02-.3-.02-.98-.06-1.96-.08-2.94-.08zm64.3 121.74c-14.64 6.57-28.38 13.45-41.62 20.6-10.98 5.96-21.5 12.05-31.56 18.3 5.3 9.13 8.6 18.9 9.6 28.67 13.18 1.22 27.5 4.76 41.64 11.58 4.8-10.1 11.66-19.1 19.94-26.5-1.35-16.44.26-33.18 2-52.65zm-94.02 55.07c-2.38 10.5-6.62 20.57-12.78 29.3-5.94 8.42-13.47 15.3-22.07 20.43.9 24.07-.1 48.8-5.4 74.72 12.27 3.76 24.28 8.45 35.92 14.1 6.06-6.9 13.8-12.23 22.3-15.84-1.52-17.35-.77-36.27 5.9-53.77 6.63-17.36 18.4-33.42 37.22-44.5-4.58-9.5-8.26-19.06-10.22-28.67-16.63 3.02-33.4 3.4-50.87 4.23zm-100.57 76.6c-9.55 7.43-19.12 15.46-28.22 24.12 7.27-.1 13.37 1.4 18.6 3.73 3.5-4.1 6.58-8.56 9.1-13.36 3.68-6.85 5.78-9.94.52-14.5zM44.1 390.67c-4.62 12.43-7.65 25.52-8.73 39.05 8.93 2.14 17.66 5.85 25.42 11.35 11.5-7.5 24.53-10.7 37.1-10.5-2.6-9.05-7.14-17.66-13.97-23.72-7.8-6.84-17.4-10.42-26.8-11.38-4.65-.47-9.17-.3-13.05.2zm97.78 34.36c-3.7 6.05-6.4 12.8-7.6 20-1.53 9.05-.26 17.88 3.12 25.67 8.6-1.5 17.47-1.4 26.32.93 7.22 1.88 13.73 5.23 19.26 9.62 6.6-6.82 14.72-11.5 23.26-13.97-1.94-2.92-4.1-5.63-6.6-8-8.26-7.9-19.4-11.78-30.14-10.57-.3.04-.6.08-.9.1-6.94-7.66-16.25-12.73-26.72-13.78zm94.07 34.77c-6.17 5.46-11.35 11.96-14.7 19.35-2.44 5.28-3.75 10.82-4.13 16.3 9.97 2.77 20.37 7.64 29.22 15.55 4.84-1.82 9.62-3.05 14.38-3.57-1.73-10.5-.72-21.1 2.73-31.3-11.9-1.8-20.97-7.04-27.5-16.33z'/></svg></div>,
-      keyholder: (id) => <div className={`w-10 h-10 text-emerald-500 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor"><g><path d="M55.4,63.3c-0.1,0.2-0.3,0.4-0.4,0.6c0.2,0.7,0.6,1.9,1.5,3c1,1.1,2.1,1.7,2.6,1.9c0,0.5,0.1,1.5-0.4,2.6 c-0.7,1.7-1.9,2.6-2.4,2.8c0.7,1.2,1.7,3.2,2.2,5.7c0.7,4.1-0.2,7.4-0.8,8.9h19.3v-1.7c-1.8-0.4-4-1-6.4-2.1 c-1.5-0.7-2.8-1.4-3.9-2.1c1.5-1.6,3.7-4.6,5.1-8.7c0.8-2.4,1-4.5,1.1-6.2c-2.5-6.5-4.9-10-6.9-12c-0.3-0.3-0.7-0.7-1.2-1.4 c-1.8,1.1-3.6,2.4-5.2,3.9C58.1,59.9,56.6,61.5,55.4,63.3z"/><path d="M61.5,41.5c-0.4-1-0.6-2.1-0.7-3.2c-0.1-1.1,0.1-2.2,0.3-3.3c0.2-1.1,0.6-2.1,0.9-3.1c0.3-1,0.6-2,0.9-3.1 c0.3-1,0.6-2.1,0.9-3.1l1.6-6.2c-1.4,0-2.5,0.2-3.5,0.3c-0.3,1.8-0.8,3.5-1.3,5.2c-0.5,1.7-1.1,3.4-1.8,5.1 c-0.7,1.7-1.5,3.3-2.4,4.8c-0.9,1.6-1.8,3.1-2.8,4.6c-1,1.5-2.2,2.9-3.5,4.2c-1.3,1.3-2.6,2.5-4.1,3.5c-2.9,2.1-6.2,3.7-9.6,4.9 c-0.4,1-1,1.8-1.4,2.4c-0.5,0.6-0.9,1.1-1.2,1.4c-1.9,2-4.4,5.5-6.9,12c0.1,1.7,0.3,3.8,1.1,6.2c1.3,4.2,3.6,7.1,5.1,8.7 c-1.1,0.7-2.4,1.4-3.9,2.1c-2.4,1.1-4.5,1.7-6.4,2.1v1.7h19.3c-0.6-1.6-1.5-4.9-0.8-8.9c0.5-2.5,1.4-4.4,2.2-5.7 c-0.5-0.3-1.7-1.2-2.4-2.8c-0.4-1.1-0.4-2-0.4-2.6c0.6-0.3,1.7-0.8,2.6-1.9c0.9-1,1.3-2.2,1.5-3c-0.1-0.2-0.3-0.4-0.4-0.6 c-1.2-1.8-2.7-3.4-4.3-4.8c-1.6-1.5-3.4-2.7-5.2-3.9c0.5,0.3,1,0.5,1.4,0.8c0.5,0.3,0.9,0.6,1.4,0.9c0.9,0.6,1.8,1.2,2.6,1.9 c1.7,1.4,3.2,3,4.5,4.7c0.1,0.2,0.3,0.4,0.4,0.5c0.5,0.7,1,1.5,1.4,2.2c0.5,1,1,1.9,1.4,3c0.7,1.6,1.2,3.2,1.7,4.9 c0.5-1.7,1-3.3,1.7-4.9c0.4-1,0.9-2,1.4-3c0.4-0.8,0.9-1.5,1.4-2.2c0.1-0.2,0.3-0.4,0.4-0.5c1.3-1.8,2.8-3.3,4.5-4.7 c0.8-0.7,1.7-1.3,2.6-1.9c0.5-0.3,0.9-0.6,1.4-0.9c0.5-0.3,0.9-0.5,1.4-0.8c-0.7-0.9-1.4-2-1.9-3.6c-0.2-0.7-0.7-2.5-0.5-4.7 c0.1-0.7,0.2-1.3,0.4-1.9c-0.3-0.4-0.6-0.9-0.8-1.4C61.9,42.5,61.7,42,61.5,41.5z"/><path d="M97.6,69c-3.7-5.5-5-10.2-5.5-13.5c-0.5-3.3-0.4-6.2-2.5-9.1c-1.8-2.6-4.5-3.8-6.4-4.5c-0.2-1.4-0.7-3.5-1.9-5.6 c-0.8-1.5-1.7-2.7-2.5-3.6c0.1-0.9,0.7-5.7-2.5-9.3c-2.2-2.4-5.1-3-7.2-3.4c-1.3-0.3-2.5-0.4-3.6-0.4c-0.3,2.1-0.6,4.2-1.1,6.3 c-0.4,2.1-1,4.2-1.6,6.2c-0.3,1-0.7,2-0.9,3.1c-0.1,0.5-0.2,1-0.3,1.5c-0.1,0.5-0.1,1-0.1,1.6c0,2.1,0.7,4.2,1.6,6.1 c1.2-3.7,4.3-5.9,5-6.3c0.8,1.5,1.9,3.2,3.2,5c1.3,1.8,2.7,3.2,3.9,4.4c1.1,2.8,2.9,6.3,5.7,10c1.5,1.9,3,3.6,4.5,4.9 c-0.6,0.4-2.9,2.3-3.6,5.6c-0.8,4,1.4,7.1,1.7,7.6c0.1-1,0.5-2.8,1.7-4.7c0.9-1.4,1.9-2.3,2.7-2.9c0.5,1.2,1.1,2.5,1.7,3.8 c0.8,1.7,1.7,3.2,2.6,4.5c-0.4,0.2-0.9,0.6-1.4,1.2c-0.9,1-1.1,2.1-1.2,2.7c0.7,0.1,1.7,0.4,2.9,1.2c1,0.6,1.6,1.4,2,1.9 c0.9-0.9,2.2-2.5,3.1-4.8C99,74,98,70.3,97.6,69z"/><path d="M45.8,46.9c2.8-2.1,5.3-4.7,7.3-7.6c1-1.4,1.9-3,2.8-4.5c0.9-1.5,1.7-3.1,2.4-4.7c1.5-3.2,2.7-6.6,3.6-10.1 c-0.3,0.1-0.6,0.1-0.8,0.2c-0.2-0.4-0.6-1-1.3-1.6c-0.5-0.5-1.1-0.8-1.5-1c0.4-0.4,0.9-0.9,1.3-1.5c0.9-1.3,1.3-2.6,1.4-3.4 c-0.6,0-2.4-0.1-3.9,1.1c-0.6,0.5-1.1,1-1.3,1.4c-0.3-0.6-1-1.7-2.3-2.7c-1.4-1-2.9-1.2-3.5-1.3c-0.6,0.1-2.1,0.3-3.5,1.3 c-1.3,0.9-2,2.1-2.3,2.7c-0.3-0.4-0.7-1-1.3-1.4c-1.6-1.2-3.4-1.2-3.9-1.1c0.2,0.8,0.5,2.1,1.4,3.4c0.4,0.6,0.9,1.1,1.3,1.5 c-0.4,0.2-0.9,0.5-1.5,1c-0.6,0.6-1,1.2-1.3,1.6c-1.6-0.4-4.5-0.8-7.9-0.2c-2.2,0.4-5.1,1-7.3,3.4c-3.2,3.5-2.6,8.4-2.5,9.3 c-0.8,0.9-1.7,2.1-2.5,3.6c-1.1,2.2-1.6,4.2-1.9,5.6c-2,0.7-4.6,2-6.4,4.5c-2.1,2.9-2,5.8-2.5,9.1c-0.5,3.3-1.9,8-5.5,13.5 C2,70.3,1,74,2.5,78.3c0.9,2.3,2.2,3.9,3.1,4.8c0.4-0.5,1-1.2,2-1.9c1.1-0.7,2.2-1,2.9-1.2c-0.1-0.5-0.3-1.6-1.2-2.7 c-0.5-0.6-1-0.9-1.4-1.2c0.9-1.3,1.7-2.8,2.6-4.5c0.7-1.3,1.2-2.6,1.7-3.8c0.7,0.6,1.8,1.5,2.7,2.9c1.2,1.9,1.6,3.6,1.7,4.7 c0.4-0.5,2.6-3.5,1.7-7.6c-0.7-3.3-3-5.1-3.6-5.6c1.4-1.3,3-3,4.5-4.9c2.8-3.6,4.6-7.1,5.7-10c1.2-1.2,2.5-2.6,3.9-4.4 c1.4-1.8,2.4-3.5,3.2-5c0.8,0.5,4.8,3.3,5.4,8.2c0.3,2.2-0.2,4.1-0.5,4.7c-0.1,0.4-0.3,0.8-0.4,1.1c1.6-0.7,3.2-1.5,4.8-2.4 C42.9,48.9,44.4,47.9,45.8,46.9z M54.2,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8s-0.8-0.3-0.8-0.8 C53.4,16.7,53.7,16.3,54.2,16.3z M45.8,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8c-0.4,0-0.8-0.3-0.8-0.8 C45.1,16.7,45.4,16.3,45.8,16.3z M44.6,23c0.1-0.2,0.2-0.3,0.3-0.5c0.2-0.3,0.4-0.7,0.6-1c0.2-0.4,0.3-0.7,0.5-1.1 c0.1-0.4,0.2-0.7,0.3-1.1l0.1-0.7l0.3,0.6c0.3,0.6,0.5,1.2,0.4,1.9c0,0.3-0.1,0.6-0.2,0.9c-0.1,0.2-0.2,0.5-0.3,0.7 c0.1,0,0.3-0.1,0.4-0.1c1-0.2,2-0.3,3-0.3c1,0,2,0.1,3,0.3c0.1,0,0.3,0.1,0.4,0.1c-0.1-0.2-0.2-0.4-0.3-0.6 c-0.1-0.3-0.2-0.6-0.2-0.9c-0.1-0.6,0.1-1.3,0.4-1.9l0.3-0.6l0.1,0.7c0.1,0.4,0.2,0.8,0.3,1.1c0.1,0.4,0.3,0.7,0.5,1.1 c0.2,0.4,0.4,0.7,0.6,1c0.1,0.2,0.2,0.3,0.3,0.5c0.1,0.2,0.2,0.3,0.4,0.5c-1-0.2-1.9-0.4-2.9-0.6c-1-0.1-1.9-0.2-2.9-0.1 c-1,0-1.9,0.1-2.9,0.2c-1,0.1-1.9,0.3-2.9,0.5C44.4,23.3,44.5,23.1,44.6,23z"/></g></svg></div>,
+      keyholder_orc: (id) => <div className={`w-8 h-8 text-emerald-500 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor"><g><path d="M55.4,63.3c-0.1,0.2-0.3,0.4-0.4,0.6c0.2,0.7,0.6,1.9,1.5,3c1,1.1,2.1,1.7,2.6,1.9c0,0.5,0.1,1.5-0.4,2.6 c-0.7,1.7-1.9,2.6-2.4,2.8c0.7,1.2,1.7,3.2,2.2,5.7c0.7,4.1-0.2,7.4-0.8,8.9h19.3v-1.7c-1.8-0.4-4-1-6.4-2.1 c-1.5-0.7-2.8-1.4-3.9-2.1c1.5-1.6,3.7-4.6,5.1-8.7c0.8-2.4,1-4.5,1.1-6.2c-2.5-6.5-4.9-10-6.9-12c-0.3-0.3-0.7-0.7-1.2-1.4 c-1.8,1.1-3.6,2.4-5.2,3.9C58.1,59.9,56.6,61.5,55.4,63.3z"/><path d="M61.5,41.5c-0.4-1-0.6-2.1-0.7-3.2c-0.1-1.1,0.1-2.2,0.3-3.3c0.2-1.1,0.6-2.1,0.9-3.1c0.3-1,0.6-2,0.9-3.1 c0.3-1,0.6-2.1,0.9-3.1l1.6-6.2c-1.4,0-2.5,0.2-3.5,0.3c-0.3,1.8-0.8,3.5-1.3,5.2c-0.5,1.7-1.1,3.4-1.8,5.1 c-0.7,1.7-1.5,3.3-2.4,4.8c-0.9,1.6-1.8,3.1-2.8,4.6c-1,1.5-2.2,2.9-3.5,4.2c-1.3,1.3-2.6,2.5-4.1,3.5c-2.9,2.1-6.2,3.7-9.6,4.9 c-0.4,1-1,1.8-1.4,2.4c-0.5,0.6-0.9,1.1-1.2,1.4c-1.9,2-4.4,5.5-6.9,12c0.1,1.7,0.3,3.8,1.1,6.2c1.3,4.2,3.6,7.1,5.1,8.7 c-1.1,0.7-2.4,1.4-3.9,2.1c-2.4,1.1-4.5,1.7-6.4,2.1v1.7h19.3c-0.6-1.6-1.5-4.9-0.8-8.9c0.5-2.5,1.4-4.4,2.2-5.7 c-0.5-0.3-1.7-1.2-2.4-2.8c-0.4-1.1-0.4-2-0.4-2.6c0.6-0.3,1.7-0.8,2.6-1.9c0.9-1,1.3-2.2,1.5-3c-0.1-0.2-0.3-0.4-0.4-0.6 c-1.2-1.8-2.7-3.4-4.3-4.8c-1.6-1.5-3.4-2.7-5.2-3.9c0.5,0.3,1,0.5,1.4,0.8c0.5,0.3,0.9,0.6,1.4,0.9c0.9,0.6,1.8,1.2,2.6,1.9 c1.7,1.4,3.2,3,4.5,4.7c0.1,0.2,0.3,0.4,0.4,0.5c0.5,0.7,1,1.5,1.4,2.2c0.5,1,1,1.9,1.4,3c0.7,1.6,1.2,3.2,1.7,4.9 c0.5-1.7,1-3.3,1.7-4.9c0.4-1,0.9-2,1.4-3c0.4-0.8,0.9-1.5,1.4-2.2c0.1-0.2,0.3-0.4,0.4-0.5c1.3-1.8,2.8-3.3,4.5-4.7 c0.8-0.7,1.7-1.3,2.6-1.9c0.5-0.3,0.9-0.6,1.4-0.9c0.5-0.3,0.9-0.5,1.4-0.8c-0.7-0.9-1.4-2-1.9-3.6c-0.2-0.7-0.7-2.5-0.5-4.7 c0.1-0.7,0.2-1.3,0.4-1.9c-0.3-0.4-0.6-0.9-0.8-1.4C61.9,42.5,61.7,42,61.5,41.5z"/><path d="M97.6,69c-3.7-5.5-5-10.2-5.5-13.5c-0.5-3.3-0.4-6.2-2.5-9.1c-1.8-2.6-4.5-3.8-6.4-4.5c-0.2-1.4-0.7-3.5-1.9-5.6 c-0.8-1.5-1.7-2.7-2.5-3.6c0.1-0.9,0.7-5.7-2.5-9.3c-2.2-2.4-5.1-3-7.2-3.4c-1.3-0.3-2.5-0.4-3.6-0.4c-0.3,2.1-0.6,4.2-1.1,6.3 c-0.4,2.1-1,4.2-1.6,6.2c-0.3,1-0.7,2-0.9,3.1c-0.1,0.5-0.2,1-0.3,1.5c-0.1,0.5-0.1,1-0.1,1.6c0,2.1,0.7,4.2,1.6,6.1 c1.2-3.7,4.3-5.9,5-6.3c0.8,1.5,1.9,3.2,3.2,5c1.3,1.8,2.7,3.2,3.9,4.4c1.1,2.8,2.9,6.3,5.7,10c1.5,1.9,3,3.6,4.5,4.9 c-0.6,0.4-2.9,2.3-3.6,5.6c-0.8,4,1.4,7.1,1.7,7.6c0.1-1,0.5-2.8,1.7-4.7c0.9-1.4,1.9-2.3,2.7-2.9c0.5,1.2,1.1,2.5,1.7,3.8 c0.8,1.7,1.7,3.2,2.6,4.5c-0.4,0.2-0.9,0.6-1.4,1.2c-0.9,1-1.1,2.1-1.2,2.7c0.7,0.1,1.7,0.4,2.9,1.2c1,0.6,1.6,1.4,2,1.9 c0.9-0.9,2.2-2.5,3.1-4.8C99,74,98,70.3,97.6,69z"/><path d="M45.8,46.9c2.8-2.1,5.3-4.7,7.3-7.6c1-1.4,1.9-3,2.8-4.5c0.9-1.5,1.7-3.1,2.4-4.7c1.5-3.2,2.7-6.6,3.6-10.1 c-0.3,0.1-0.6,0.1-0.8,0.2c-0.2-0.4-0.6-1-1.3-1.6c-0.5-0.5-1.1-0.8-1.5-1c0.4-0.4,0.9-0.9,1.3-1.5c0.9-1.3,1.3-2.6,1.4-3.4 c-0.6,0-2.4-0.1-3.9,1.1c-0.6,0.5-1.1,1-1.3,1.4c-0.3-0.6-1-1.7-2.3-2.7c-1.4-1-2.9-1.2-3.5-1.3c-0.6,0.1-2.1,0.3-3.5,1.3 c-1.3,0.9-2,2.1-2.3,2.7c-0.3-0.4-0.7-1-1.3-1.4c-1.6-1.2-3.4-1.2-3.9-1.1c0.2,0.8,0.5,2.1,1.4,3.4c0.4,0.6,0.9,1.1,1.3,1.5 c-0.4,0.2-0.9,0.5-1.5,1c-0.6,0.6-1,1.2-1.3,1.6c-1.6-0.4-4.5-0.8-7.9-0.2c-2.2,0.4-5.1,1-7.3,3.4c-3.2,3.5-2.6,8.4-2.5,9.3 c-0.8,0.9-1.7,2.1-2.5,3.6c-1.1,2.2-1.6,4.2-1.9,5.6c-2,0.7-4.6,2-6.4,4.5c-2.1,2.9-2,5.8-2.5,9.1c-0.5,3.3-1.9,8-5.5,13.5 C2,70.3,1,74,2.5,78.3c0.9,2.3,2.2,3.9,3.1,4.8c0.4-0.5,1-1.2,2-1.9c1.1-0.7,2.2-1,2.9-1.2c-0.1-0.5-0.3-1.6-1.2-2.7 c-0.5-0.6-1-0.9-1.4-1.2c0.9-1.3,1.7-2.8,2.6-4.5c0.7-1.3,1.2-2.6,1.7-3.8c0.7,0.6,1.8,1.5,2.7,2.9c1.2,1.9,1.6,3.6,1.7,4.7 c0.4-0.5,2.6-3.5,1.7-7.6c-0.7-3.3-3-5.1-3.6-5.6c1.4-1.3,3-3,4.5-4.9c2.8-3.6,4.6-7.1,5.7-10c1.2-1.2,2.5-2.6,3.9-4.4 c1.4-1.8,2.4-3.5,3.2-5c0.8,0.5,4.8,3.3,5.4,8.2c0.3,2.2-0.2,4.1-0.5,4.7c-0.1,0.4-0.3,0.8-0.4,1.1c1.6-0.7,3.2-1.5,4.8-2.4 C42.9,48.9,44.4,47.9,45.8,46.9z M54.2,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8s-0.8-0.3-0.8-0.8 C53.4,16.7,53.7,16.3,54.2,16.3z M45.8,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8c-0.4,0-0.8-0.3-0.8-0.8 C45.1,16.7,45.4,16.3,45.8,16.3z M44.6,23c0.1-0.2,0.2-0.3,0.3-0.5c0.2-0.3,0.4-0.7,0.6-1c0.2-0.4,0.3-0.7,0.5-1.1 c0.1-0.4,0.2-0.7,0.3-1.1l0.1-0.7l0.3,0.6c0.3,0.6,0.5,1.2,0.4,1.9c0,0.3-0.1,0.6-0.2,0.9c-0.1,0.2-0.2,0.5-0.3,0.7 c0.1,0,0.3-0.1,0.4-0.1c1-0.2,2-0.3,3-0.3c1,0,2,0.1,3,0.3c0.1,0,0.3,0.1,0.4,0.1c-0.1-0.2-0.2-0.4-0.3-0.6 c-0.1-0.3-0.2-0.6-0.2-0.9c-0.1-0.6,0.1-1.3,0.4-1.9l0.3-0.6l0.1,0.7c0.1,0.4,0.2,0.8,0.3,1.1c0.1,0.4,0.3,0.7,0.5,1.1 c0.2,0.4,0.4,0.7,0.6,1c0.1,0.2,0.2,0.3,0.3,0.5c0.1,0.2,0.2,0.3,0.4,0.5c-1-0.2-1.9-0.4-2.9-0.6c-1-0.1-1.9-0.2-2.9-0.1 c-1,0-1.9,0.1-2.9,0.2c-1,0.1-1.9,0.3-2.9,0.5C44.4,23.3,44.5,23.1,44.6,23z"/></g></svg></div>,
     };
     
     for (let y = 0; y < size; y++) {
       const row = [];
       for (let x = 0; x < size; x++) {
-        const tile = localDungeonState.board[`${y},${x}`] || { type: 'empty' };
+        const key = `${y},${x}`;
+        const tile = localDungeonState.board[key] || { type: 'empty' };
         let tileContent = null;
         let tileStyle = {};
-        let tileClass = 'relative '; // Base class
-        
-        if (tile.visited) {
+        let tileClass = 'relative ';
+        const isTrailTile = localDungeonState.lastMoveTrails?.some(t => t.x === x && t.y === y);
+
+        if (isTrailTile) {
             tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/concrete-wall.png')`, backgroundColor: '#334155' };
             tileClass += 'bg-slate-700/50';
         } else {
@@ -1821,9 +2364,8 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         }
 
         switch(tile.type) {
-            case 'player': tileContent = SVGIcons.player('player'); break;
             case 'wall': 
-              tileClass = 'bg-slate-900 shadow-inner'; 
+              tileClass = 'bg-black/80 shadow-inner'; 
               tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/brick-wall-dark.png')`};
               break;
             case 'hatch':
@@ -1832,27 +2374,92 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
                 break;
             case 'key': tileContent = SVGIcons.key(); break;
             case 'chest': tileContent = tile.opened ? SVGIcons.chest_opened() : SVGIcons.chest_closed(); break;
-            case 'enemy':
-                const enemy = localDungeonState.enemies.find(e => e.id === tile.enemyId);
-                if (enemy) {
-                    tileContent = SVGIcons[enemy.baseId] ? SVGIcons[enemy.baseId](enemy.id) : <div className="w-8 h-8 rounded-full bg-red-600" />;
-                }
-                break;
+            // Player and Enemy cases are removed; they will be rendered in a separate layer.
             default: break;
         }
         
         const particlesOnTile = animationState.particles.filter(p => p.x === x && p.y === y);
+        const isDangerTile = dangerZone.tiles.some(t => t.x === x && t.y === y);
+        const enemyPositions = new Set(localDungeonState.enemies.map(e => `${e.y},${e.x}`));
+        
+        const ArrowIcon = () => <svg viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 text-white opacity-60"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" /></svg>;
 
-                row.push(
-          <div key={`${x}-${y}`} onClick={() => handleTileClick(x, y)} style={tileStyle} className={`border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} cursor-pointer hover:bg-slate-600/50 ${isMobile ? 'w-8 h-8' : 'w-12 h-12'}`}>
+        let pathArrowData = null;
+        if (!enemyPositions.has(key)) {
+            Object.values(localDungeonState.enemyMovePaths || {}).forEach(path => {
+                const index = path.findIndex(p => p && p.x === x && p.y === y);
+                if (index > 0) {
+                    const prev = path[index-1];
+                    const curr = path[index];
+                    const dx = curr.x - prev.x;
+                    const dy = curr.y - prev.y;
+                    
+                    // Use Math.atan2 to get the precise angle in radians, then convert to degrees.
+                    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                    
+                    pathArrowData = { rotation: angle };
+                }
+            });
+        }
+
+        row.push(
+          <div key={key} onClick={() => handleTileClick(x, y)} style={tileStyle} className={`border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} ${!isEnemyTurn ? 'cursor-pointer hover:bg-slate-600/50' : 'cursor-wait'} ${isMobile ? 'w-8 h-8' : 'w-12 h-12'}`}>
             {tileContent}
+            {isDangerTile && tile.type !== 'wall' && (
+              <div className="absolute inset-0 pointer-events-none bg-red-500/20 animate-pulse"></div>
+            )}
             {particlesOnTile.map(p => <Particle key={p.id} onComplete={() => {}} />)}
+            {pathArrowData && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-fade-in" style={{ transform: `rotate(${pathArrowData.rotation}deg)`}}>
+                <ArrowIcon />
+              </div>
+            )}
           </div>
         );
       }
       boardGrid.push(<div key={y} className="flex">{row}</div>);
     }
-    return boardGrid;
+    
+    const TILE_SIZE = isMobile ? 32 : 48;
+    const entities = [
+        ...localDungeonState.enemies.map(e => ({...e, entityType: 'enemy'})),
+        {...localDungeonState.player, id: 'player', entityType: 'player'}
+    ];
+
+    const entityElements = entities.map(entity => {
+      // The position is now directly from the main state.
+      const top = entity.y * TILE_SIZE + (TILE_SIZE / 2 - 16);
+      const left = entity.x * TILE_SIZE + (TILE_SIZE / 2 - 16);
+
+      const Icon = entity.entityType === 'player'
+        ? SVGIcons.player('player')
+        : (SVGIcons[entity.baseId] ? SVGIcons[entity.baseId](entity.id) : <div className="w-8 h-8 rounded-full bg-red-600" />);
+
+      return (
+        <div 
+          key={entity.id} 
+          onClick={entity.entityType === 'enemy' ? (e) => handleEnemyClick(e, entity) : undefined}
+          className="absolute z-10" 
+          style={{ 
+            width: 32, height: 32,
+            top: top,
+            left: left,
+            // The browser will now automatically animate any changes to top and left.
+            transition: 'top 0.25s linear, left 0.25s linear',
+            cursor: entity.entityType === 'enemy' && !isEnemyTurn ? 'pointer' : 'default'
+          }}
+        >
+          {Icon}
+        </div>
+      );
+    });
+
+    return (
+      <div className="relative">
+        {boardGrid}
+        {entityElements}
+      </div>
+    );
   };
 
   return (
@@ -1868,7 +2475,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-grow flex justify-center lg:justify-start">
-          <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block">
+          <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block relative">
             {renderBoard()}
           </div>
         </div>
@@ -1900,10 +2507,10 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
             <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => setAttackTarget(true)} 
-                  className="bg-red-600 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600"
-                  disabled={!!attackTarget || !!abilityTarget}
+                  className="bg-red-600 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-wait"
+                  disabled={isEnemyTurn || !!attackTarget || !!abilityTarget}
                 >
-                  {attackTarget || abilityTarget ? "Select Target..." : `Attack (${localDungeonState.player.attackCost} XP)`}
+                  {isEnemyTurn ? "Enemy Turn..." : attackTarget || abilityTarget ? "Select Target..." : `Attack (${localDungeonState.player.attackCost} XP)`}
                 </button>
                 <button onClick={usePotion} className="bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:bg-slate-600" disabled={(localDungeonState.potions || 0) <= 0}>
                     Use Potion ({localDungeonState.potions || 0})
@@ -1911,7 +2518,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
                 {dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).map(attack => {
                     const usesLeft = localDungeonState.player.abilityUses?.[attack.id] || 0;
                                 const canAfford = stats.totalXP >= attack.cost;
-                                const isDisabled = usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget;
+                                const isDisabled = isEnemyTurn || usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget;
                                 
                                 const handleAbilityClick = () => {
                                     if (attack.isSelfTarget) {
@@ -2034,11 +2641,11 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
   const localSciencePointsRef = useRef(localSciencePoints);
   const labStateRef = useRef(lab_state);
 
-  // This effect keeps our refs synchronized with the latest state from props and local state.
-  useEffect(() => {
-    localSciencePointsRef.current = localSciencePoints;
-    labStateRef.current = lab_state;
-  }, [localSciencePoints, lab_state]);
+    // This effect keeps our refs synchronized with the latest state from props and local state.
+    useEffect(() => {
+      localSciencePointsRef.current = localSciencePoints;
+      labStateRef.current = lab_state;
+    }, [localSciencePoints, lab_state]);
 
   const formatNumber = (num) => {
 
@@ -2094,7 +2701,10 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
   // EFFICIENT OFFLINE & SAVE LOGIC: This single effect runs only once when the
   // component mounts. It calculates offline progress and saves it immediately.
   useEffect(() => {
-    if (lab_state && lab_state.lastLogin && !hasRunOfflineCalc.current) {
+    // FIX: Add a type check to ensure lastLogin is a valid Firestore Timestamp
+    // before calling .toDate(). This prevents crashes for new users where the
+    // serverTimestamp() might not be resolved on the initial data snapshot.
+    if (lab_state && lab_state.lastLogin && typeof lab_state.lastLogin.toDate === 'function' && !hasRunOfflineCalc.current) {
       hasRunOfflineCalc.current = true; // Prevent re-running
 
       const lastLoginTime = lab_state.lastLogin.toDate();
@@ -2283,7 +2893,7 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
   );
 };
 
-const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath, processAchievement }) => {
+const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onResetGame, getFullCosmeticDetails, generatePath, processAchievement, addIngredientToInventory }) => {
   const [gameSpeed, setGameSpeed] = useState(1);
   // This local state is for transient, in-wave data like enemies, projectiles, and the towers active for the wave
   const [localWaveState, setLocalWaveState] = useState({
@@ -2495,10 +3105,10 @@ const towerUpgrades = {
       { id: 'flyer', name: 'Flyer', health: 12, speed: 0.4, flying: true },
     ],
     juggernaut: [
-      { id: 'ogre', name: 'Ogre', health: 100, speed: 0.08 },
+      { id: 'ogre', name: 'Ogre', health: 100, speed: 0.08, loot: { id: 'ingredientEyeballs', chance: 0.3 } },
       { id: 'siege_engine', name: 'Siege Engine', health: 150, speed: 0.01 },
-      { id: 'necromancer', name: 'Necromancer', health: 80, speed: 0.2, spawn: 2 },
-      { id: 'dragon', name: 'Dragon', health: 200, speed: 0.08, flying: true },
+      { id: 'necromancer', name: 'Necromancer', health: 80, speed: 0.2, spawn: 2, loot: { id: 'ingredientDemonicBook', chance: 0.4 } },
+      { id: 'dragon', name: 'Dragon', health: 200, speed: 0.08, flying: true, loot: { id: 'dragon_scale', chance: 0.5 } },
     ],
   };
 
@@ -2708,6 +3318,14 @@ const startWave = () => {
         });
 
         // --- 6. Cleanup & State Updates ---
+        const defeatedEnemies = prev.enemies.filter(e => !newEnemies.some(ne => ne.id === e.id));
+        if (defeatedEnemies.length > 0) {
+            defeatedEnemies.forEach(enemy => {
+                if (enemy.loot && Math.random() < enemy.loot.chance) {
+                    addIngredientToInventory(enemy.loot.id);
+                }
+            });
+        }
         const remainingEnemies = newEnemies.filter(e => e.health > 0);
         
         // CORE FIX: Add this tick's damage to the wave's total accumulator
@@ -2729,6 +3347,18 @@ const startWave = () => {
           if (isGameOver) update.td_gameOver = true;
           if (isGameWon) { update.td_gameWon = true; update.td_wins = winsRef.current + 1; }
           
+          // NEW: Loot Drop on Boss Wave & Victory
+          if (isWaveOver && waveRef.current > 0 && waveRef.current % 10 === 0) {
+             const key = 'alchemy_state.inventory.pristine_crystal';
+             update[key] = increment(1);
+             showMessageBox('You earned a Pristine Crystal for surviving the boss wave!', 'info');
+          }
+          if (isGameWon) {
+             const key = 'alchemy_state.inventory.dragon_scale';
+             update[key] = increment(1);
+             showMessageBox('You earned a Dragon Scale for your victory!', 'info');
+          }
+
           if (Object.keys(update).length > 0) {
             updateStatsInFirestore(update).then(() => {
               if (update.td_gameWon) processAchievement('towerDefenseWins');
@@ -2986,6 +3616,158 @@ const AchievementsComponent = ({ gameProgress }) => {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+// In App.js, right after the closing of the Sanctum component definition
+
+};
+
+// NEW: Component for the Weekly Triage Ritual
+const WeeklyTriageModal = ({ isOpen, onClose, assignments, triageSettings, onCompleteTriage, onSaveSettings }) => {
+  const [view, setView] = useState(triageSettings ? 'triage' : 'setup');
+  const [selectedDay, setSelectedDay] = useState(triageSettings?.triageDay ?? 1); // Default to Monday
+  
+  const initialQuadrants = {
+    urgent_important: [],
+    not_urgent_important: [],
+    urgent_not_important: [],
+    not_urgent_not_important: [],
+    unassigned: assignments,
+  };
+
+  const [quadrants, setQuadrants] = useState(initialQuadrants);
+  const [draggedItem, setDraggedItem] = useState(null);
+
+  useEffect(() => {
+    // Reset when modal is opened
+    if (isOpen) {
+      setView(triageSettings ? 'triage' : 'setup');
+      setQuadrants({
+        urgent_important: [],
+        not_urgent_important: [],
+        urgent_not_important: [],
+        not_urgent_not_important: [],
+        unassigned: assignments,
+      });
+    }
+  }, [isOpen, assignments, triageSettings]);
+
+  const handleDragStart = (item, sourceQuadrant) => {
+    setDraggedItem({ item, sourceQuadrant });
+  };
+
+  const handleDrop = (targetQuadrant) => {
+    if (!draggedItem) return;
+    
+    const { item, sourceQuadrant } = draggedItem;
+
+    // Remove from source
+    const newSourceItems = quadrants[sourceQuadrant].filter(i => i.id !== item.id);
+    
+    // Add to target
+    const newTargetItems = [...quadrants[targetQuadrant], item];
+
+    setQuadrants(prev => ({
+      ...prev,
+      [sourceQuadrant]: newSourceItems,
+      [targetQuadrant]: newTargetItems,
+    }));
+    
+    setDraggedItem(null);
+  };
+
+  const handleSaveSetup = () => {
+    onSaveSettings({ triageDay: selectedDay });
+    setView('triage');
+  };
+  
+  const handleFinalize = () => {
+    const assignmentsWithPriority = [];
+    for (const quadrantName in quadrants) {
+      if (quadrantName !== 'unassigned') {
+        quadrants[quadrantName].forEach(assignment => {
+          assignmentsWithPriority.push({
+            id: assignment.id,
+            priorityQuadrant: quadrantName,
+          });
+        });
+      }
+    }
+    onCompleteTriage(assignmentsWithPriority);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-xl w-full max-w-7xl h-[90vh] flex flex-col text-white" onClick={e => e.stopPropagation()}>
+        <h3 className="text-3xl font-bold p-6 text-center border-b border-slate-700">
+          {view === 'setup' ? 'Setup Your Weekly Triage' : 'Weekly Triage'}
+        </h3>
+        
+        {view === 'setup' ? (
+          <div className="flex-grow flex flex-col items-center justify-center p-8 text-center">
+            <h4 className="text-2xl font-semibold text-indigo-300">Choose Your Planning Day</h4>
+            <p className="text-slate-400 max-w-lg mx-auto my-4">Select one day each week to plan your assignments. Completing this ritual grants the week-long "Clarity" buff.</p>
+            <div className="flex flex-wrap justify-center gap-3 my-6">
+              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => (
+                <button key={day} onClick={() => setSelectedDay(index)} className={`px-5 py-3 rounded-lg font-semibold transition-colors ${selectedDay === index ? 'bg-indigo-600 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}>
+                  {day}
+                </button>
+              ))}
+            </div>
+            <button onClick={handleSaveSetup} className="px-10 py-4 bg-green-600 text-white font-bold rounded-lg text-xl hover:bg-green-700">
+              Save & Start First Triage
+            </button>
+          </div>
+        ) : (
+          <div className="flex-grow flex flex-col md:flex-row p-4 gap-4 overflow-hidden">
+            {/* Unassigned Column */}
+            <div className="w-full md:w-1/4 flex flex-col bg-slate-800/50 rounded-lg p-4">
+              <h4 className="text-xl font-semibold text-center mb-4">Upcoming Assignments ({quadrants.unassigned.length})</h4>
+              <div onDragOver={(e) => e.preventDefault()} onDrop={() => handleDrop('unassigned')} className="flex-grow overflow-y-auto space-y-2 pr-2">
+                {quadrants.unassigned.map(item => (
+                  <div key={item.id} draggable onDragStart={() => handleDragStart(item, 'unassigned')} className="p-3 bg-slate-700 rounded-md cursor-grab active:cursor-grabbing">
+                    <p className="font-semibold">{item.assignment}</p>
+                    <p className="text-xs text-slate-400">{item.class} - Due: {item.dueDate?.toLocaleDateString()}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Eisenhower Matrix */}
+            <div className="flex-grow grid grid-cols-2 grid-rows-2 gap-4">
+              {Object.entries({
+                urgent_important: { title: 'Urgent & Important', color: 'border-red-500' },
+                not_urgent_important: { title: 'Important, Not Urgent', color: 'border-blue-500' },
+                urgent_not_important: { title: 'Urgent, Not Important', color: 'border-yellow-500' },
+                not_urgent_not_important: { title: 'Not Urgent or Important', color: 'border-slate-500' }
+              }).map(([key, { title, color }]) => (
+                <div key={key} onDragOver={(e) => e.preventDefault()} onDrop={() => handleDrop(key)} className={`bg-slate-800/50 rounded-lg p-4 flex flex-col border-t-4 ${color}`}>
+                  <h5 className="font-bold text-center mb-2">{title}</h5>
+                  <div className="flex-grow overflow-y-auto space-y-2 pr-2">
+                    {quadrants[key].map(item => (
+                       <div key={item.id} draggable onDragStart={() => handleDragStart(item, key)} className="p-3 bg-slate-700 rounded-md cursor-grab active:cursor-grabbing">
+                         <p className="font-semibold">{item.assignment}</p>
+                         <p className="text-xs text-slate-400">{item.class}</p>
+                       </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {view === 'triage' && (
+          <div className="p-4 border-t border-slate-700 text-right">
+            <button onClick={handleFinalize} disabled={quadrants.unassigned.length > 0} className="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
+              Finalize Plan & Get Buff
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -3570,7 +4352,7 @@ const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
             </div>
         </div>
         
-        <div className="absolute z-20 flex items-center justify-center" style={{ top: '68%', left: '50%', width: '13%', height: '12%', transform: 'translateX(-50%)' }}>
+        <div className="absolute z-20 flex items-center justify-center" style={{ top: '68%', left: '50%', width: '8%', height: '12%', transform: 'translateX(-50%)' }}>
              <button 
                onClick={() => onMissionComplete(false)} 
                className="w-[95%] h-[95%] bg-red-900/80 text-white font-bold flex flex-col items-center justify-center rounded-md border-2 border-red-700/80 hover:bg-red-800 transition-colors"
@@ -3580,7 +4362,7 @@ const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
              </button>
         </div>
 
-        <div className="absolute z-20 flex items-center font-mono" style={{ top: '84.5%', left: '50%', width: '16%', height: '1.5%', transform: 'translateX(-50%)' }}>
+        <div className="absolute z-20 flex items-center font-mono" style={{ top: '89%', left: '50%', width: '16%', height: '1.5%', transform: 'translateX(-50%)' }}>
             <div className="w-full h-full bg-black/50 border border-cyan-700/50 rounded-sm p-0.5">
                 <div className="h-full bg-cyan-400 rounded-sm" style={{ width: `${rawProgress * 100}%`, transition: 'width 1s linear' }}></div>
             </div>
@@ -3596,6 +4378,305 @@ const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
       )}
     </div>
   );
+};
+
+// --- REVISED: Alchemist's Workshop Component ---
+const AlchemistsWorkshop = ({ stats, updateStatsInFirestore }) => {
+  const [activeModal, setActiveModal] = useState(null);
+
+  const alchemyState = stats?.alchemy_state;
+  if (!alchemyState) {
+    return <div>Loading Alchemist's Workshop...</div>;
+  }
+
+  const closeModal = () => setActiveModal(null);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-3xl font-bold text-white font-['Cinzel_Decorative']">Alchemist's Workshop</h2>
+          <p className="text-slate-400">Brew potions to sell or use as powerful buffs in other games.</p>
+        </div>
+        <div className="bg-slate-800/50 border border-slate-700 px-4 py-2 rounded-lg">
+          <span className="text-yellow-400 font-bold text-lg">💰 {alchemyState.gold || 0} Gold</span>
+        </div>
+      </div>
+
+      <div 
+        className="relative w-full max-w-5xl mx-auto aspect-[3/2] bg-slate-900 rounded-2xl shadow-xl border border-slate-700 overflow-hidden"
+      >
+        {/* Layer 1: Background Image */}
+        <div className="absolute inset-0 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${alchemyLabIndoorBg})` }} />
+
+        {/* Layer 2: Placed Objects (Bench & Cauldron) */}
+        <div 
+          className="absolute pointer-events-none"
+          style={{ 
+            top: '75%', left: '85%', 
+            width: '15%', height: '15%',
+            backgroundImage: `url(${alchemyBenchImage})`,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            transform: 'translate(-50%, -50%)'
+          }}
+        />
+        <div 
+          className="absolute pointer-events-none"
+          style={{ 
+            top: '80%', left: '30%', 
+            width: '15%', height: '15%',
+            backgroundImage: `url(${alchemyCauldronImage})`,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            transform: 'translate(-50%, -50%)'
+          }}
+        />
+
+        {/* Layer 3: Invisible Clickable Hotspots */}
+        {/* Hotspot for Shop Counter (Left side) */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '42%', left: '13%', width: '10%', height: '50%' }}
+          onClick={() => setActiveModal('shop')}
+        >
+          <div className="absolute inset-0 bg-yellow-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Open Shop"></div>
+        </div>
+
+        {/* Hotspot for Cauldron (SEPARATE) */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '75%', left: '25%', width: '10%', height: '15%' }}
+          onClick={() => setActiveModal('cauldron')}
+        >
+           <div className="absolute inset-0 bg-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" title="Use Cauldron"></div>
+        </div>
+
+        {/* Hotspot for Alchemy Bench (SEPARATE) */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '70%', left: '81%', width: '9%', height: '12%' }}
+          onClick={() => setActiveModal('bench')}
+        >
+           <div className="absolute inset-0 bg-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Use Alchemy Bench"></div>
+        </div>
+        
+        {/* Hotspot for Garden Door (Right side) */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '36%', left: '91%', width: '8%', height: '20%' }}
+          onClick={() => setActiveModal('garden')}
+        >
+          <div className="absolute inset-0 bg-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Go to Garden"></div>
+        </div>
+
+        {/* Hotspot for Left Bookshelf */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '60%', left: '10%', width: '10%', height: '25%' }}
+          onClick={() => setActiveModal('bookshelf_left')}
+        >
+          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Check Bookshelf"></div>
+        </div>
+
+        {/* Hotspot for Right Bookshelf */}
+        <div 
+          className="absolute cursor-pointer group" 
+          style={{ top: '40%', left: '72%', width: '12%', height: '25%' }}
+          onClick={() => setActiveModal('bookshelf_right')}
+        >
+          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Check Bookshelf"></div>
+        </div>
+      </div>
+
+      {/* Modal Rendering */}
+      {activeModal === 'garden' && 
+        <GardenModal 
+          stats={stats} 
+          updateStatsInFirestore={updateStatsInFirestore} 
+          onClose={closeModal} 
+        />
+      }
+      {activeModal === 'cauldron' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Cauldron Modal Coming Soon (For Brewing)</div></div>}
+      {activeModal === 'bench' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Bench Modal Coming Soon (For Prep)</div></div>}
+      {activeModal === 'shop' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Shop Modal Coming Soon</div></div>}
+      {activeModal === 'bookshelf_left' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Left Bookshelf (Coming Soon)</div></div>}
+      {activeModal === 'bookshelf_right' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Right Bookshelf (Coming Soon)</div></div>}
+    </div>
+  );
+};
+
+// --- NEW: Garden Modal Component ---
+const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
+  const [seedModalState, setSeedModalState] = useState({ isOpen: false, plotIndex: null });
+  const alchemyState = stats.alchemy_state;
+
+  const handlePlant = (seedId, plotIndex) => {
+    const newInventory = { ...alchemyState.inventory };
+    newInventory[seedId] = (newInventory[seedId] || 0) - 1;
+    if (newInventory[seedId] <= 0) {
+      delete newInventory[seedId];
+    }
+    
+    const newGardenPlots = [...alchemyState.gardenPlots];
+    newGardenPlots[plotIndex] = {
+      plantId: alchemyPlants[seedId].yields,
+      plantedAt: new Date(),
+      stage: 0
+    };
+
+    updateStatsInFirestore({
+      'alchemy_state.inventory': newInventory,
+      'alchemy_state.gardenPlots': newGardenPlots
+    });
+    setSeedModalState({ isOpen: false, plotIndex: null });
+  };
+
+  const handleHarvest = (plotIndex) => {
+    const plot = alchemyState.gardenPlots[plotIndex];
+    if (!plot || !plot.plantId) return;
+
+    const ingredientId = plot.plantId;
+    const newInventory = { ...alchemyState.inventory };
+    newInventory[ingredientId] = (newInventory[ingredientId] || 0) + 1;
+
+    const newGardenPlots = [...alchemyState.gardenPlots];
+    newGardenPlots[plotIndex] = { plantId: null, plantedAt: null, stage: 0 };
+    
+    updateStatsInFirestore({
+      'alchemy_state.inventory': newInventory,
+      'alchemy_state.gardenPlots': newGardenPlots
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={onClose}>
+      <div 
+        className="w-full max-w-4xl h-[80vh] bg-yellow-50/10 border-4 border-amber-800/80 rounded-lg p-6 flex flex-col"
+        style={{ backgroundColor: '#F3EADF', boxShadow: 'inset 0 0 20px #00000080' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <h2 className="text-4xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">The Garden</h2>
+        <div 
+          className="flex-grow bg-cover bg-center rounded-md p-4 grid grid-cols-4 gap-4"
+          style={{ backgroundImage: `url(${alchemyGardenBg})` }}
+        >
+          {alchemyState.gardenPlots.map((plot, index) => (
+            <PlantPlot 
+              key={index}
+              plotData={plot}
+              onHarvest={() => handleHarvest(index)}
+              onPlant={() => setSeedModalState({ isOpen: true, plotIndex: index })}
+            />
+          ))}
+        </div>
+      </div>
+      {seedModalState.isOpen && 
+        <SeedSelectionModal 
+          stats={stats} 
+          onClose={() => setSeedModalState({ isOpen: false, plotIndex: null })} 
+          onSelectSeed={(seedId) => handlePlant(seedId, seedModalState.plotIndex)}
+        />}
+    </div>
+  );
+};
+
+// --- NEW: Plant Plot Component ---
+const PlantPlot = ({ plotData, onHarvest, onPlant }) => {
+  const [growthPercent, setGrowthPercent] = useState(0);
+  const [isGrown, setIsGrown] = useState(false);
+  
+  useEffect(() => {
+    if (plotData?.plantId && plotData.plantedAt) {
+      const interval = setInterval(() => {
+        const plantDef = Object.values(alchemyPlants).find(p => p.yields === plotData.plantId);
+        if (!plantDef) return;
+        
+        const plantedAtMs = plotData.plantedAt.toDate().getTime();
+        const nowMs = new Date().getTime();
+        const secondsElapsed = (nowMs - plantedAtMs) / 1000;
+        const percent = Math.min(100, (secondsElapsed / plantDef.growthTimeSeconds) * 100);
+        setGrowthPercent(percent);
+        setIsGrown(percent >= 100);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [plotData]);
+
+  if (!plotData?.plantId) {
+    return (
+      <button 
+        onClick={onPlant}
+        className="bg-amber-900/50 border-2 border-dashed border-amber-800/70 rounded-lg flex items-center justify-center text-amber-200/80 hover:bg-amber-900/70 transition-colors"
+      >
+        <span className="text-3xl">+</span>
+      </button>
+    );
+  }
+
+  const plantDef = Object.values(alchemyPlants).find(p => p.yields === plotData.plantId);
+  const ingredientDef = alchemyIngredients[plotData.plantId];
+  const stage = Math.min(3, Math.floor(growthPercent / 25)); // 4 stages (0-3)
+
+  return (
+    <div className="bg-black/20 rounded-lg flex flex-col items-center justify-center p-2 relative">
+      <div 
+        className="w-16 h-16 bg-no-repeat bg-center" 
+        style={{ 
+          backgroundImage: `url(${plantDef.spritesheet})`,
+          backgroundPosition: `-${stage * 16}px 0px`, // Assuming 16x16 sprites
+          width: '16px', height: '16px',
+          transform: 'scale(4)',
+          imageRendering: 'pixelated',
+        }}
+      />
+      <p className="text-white text-sm font-bold mt-2 text-center" style={{ textShadow: '1px 1px 2px #000' }}>{ingredientDef.name}</p>
+      
+      {isGrown ? (
+        <button onClick={onHarvest} className="absolute inset-0 bg-green-500/70 text-white font-bold text-2xl flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+          HARVEST
+        </button>
+      ) : (
+         <div className="absolute bottom-2 left-2 right-2 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 rounded-full" style={{ width: `${growthPercent}%` }}></div>
+         </div>
+      )}
+    </div>
+  );
+};
+
+// --- NEW: Seed Selection Modal ---
+const SeedSelectionModal = ({ stats, onClose, onSelectSeed }) => {
+    const availableSeeds = Object.entries(stats.alchemy_state.inventory)
+        .map(([key, count]) => ({
+            id: key,
+            count: count,
+            def: alchemyPlants[key]
+        }))
+        .filter(item => item.def);
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-60 flex items-center justify-center" onClick={onClose}>
+            <div className="bg-amber-100 border-2 border-amber-800 p-4 rounded-lg text-amber-900" onClick={e => e.stopPropagation()}>
+                <h3 className="font-['Cinzel_Decorative'] text-xl mb-4 text-center">Plant a Seed</h3>
+                <div className="grid grid-cols-3 gap-2">
+                    {availableSeeds.length > 0 ? availableSeeds.map(seed => (
+                        <button 
+                            key={seed.id} 
+                            onClick={() => onSelectSeed(seed.id)}
+                            className="p-2 bg-amber-200/50 rounded-md hover:bg-amber-300/80 transition-colors"
+                        >
+                            <img src={alchemyIngredients[seed.def.yields].icon} alt={seed.def.name} className="w-12 h-12 mx-auto" />
+                            <p className="text-xs font-bold mt-1">{seed.def.name}</p>
+                            <p className="text-xs">x{seed.count}</p>
+                        </button>
+                    )) : <p className="col-span-3 text-center text-slate-500">You have no seeds!</p>}
+                </div>
+            </div>
+        </div>
+    );
 };
 // Component for the XP Gain Animation
 const XpBarAnimation = ({ xpGained, stats, calculateLevelInfo, onAnimationComplete, onAudioReady, originEvent }) => {
@@ -3747,25 +4828,6 @@ const XpBarAnimation = ({ xpGained, stats, calculateLevelInfo, onAnimationComple
 
 };
 
-// FIX: Moved this function to the top-level scope to make it accessible by all components in this file.
-const generateInitialDungeonState = () => {
-  return {
-    phase: 'class_selection', // Start at class selection
-    playerClass: null,
-    floor: 1,
-    board: {},
-    player: { x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, hasKey: false, activeEffects: [] },
-    enemies: [],
-    log: ['Choose your class to begin your adventure.'],
-    gameOver: false,
-    shopOpen: false,
-    ownedWeapons: [],
-    ownedArmor: [],
-    potions: 0,
-    boughtStats: { hp: 0, attack: 0 },
-  };
-};
-
 // Helper hook for preventing button spam on async operations
 const useActionLock = () => {
   const isLocked = useRef(false);
@@ -3791,81 +4853,56 @@ const useActionLock = () => {
   return withLock;
 };
 
+// NEW: Friend Profile Modal
+const FriendProfileModal = ({ profile, onClose, getFullCosmeticDetails, getItemStyle, calculateLevelInfo }) => {
+  if (!profile) return null;
+
+  const levelInfo = calculateLevelInfo(profile.totalXP);
+  
+  const equippedAvatar = getFullCosmeticDetails(profile.equippedItems?.avatar, 'avatars');
+  const equippedBanner = getFullCosmeticDetails(profile.equippedItems?.banner, 'banners');
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl w-full max-w-md text-white" onClick={e => e.stopPropagation()}>
+        <div 
+          className="h-32 rounded-t-2xl flex items-end p-4 relative" 
+          style={getItemStyle(equippedBanner) || {backgroundColor: '#475569'}}
+        >
+          <div className="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-5xl border-4 border-slate-800" style={getItemStyle(equippedAvatar)}>
+            {(!equippedAvatar?.placeholder || equippedAvatar.placeholder === 'URL_PLACEHOLDER') && (equippedAvatar?.display || '👤')}
+          </div>
+          <h3 className="ml-4 text-3xl font-bold text-white" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.7)'}}>{profile.username}</h3>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-sm text-slate-400">Level</p>
+              <p className="text-2xl font-bold">{levelInfo.level}</p>
+            </div>
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-sm text-slate-400">Total XP</p>
+              <p className="text-2xl font-bold">{profile.totalXP}</p>
+            </div>
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-sm text-slate-400">Tasks Completed</p>
+              <p className="text-2xl font-bold">{profile.assignmentsCompleted}</p>
+            </div>
+            <div className="bg-slate-700/50 p-3 rounded-lg">
+              <p className="text-sm text-slate-400">Highest Dungeon Floor</p>
+              <p className="text-2xl font-bold">{profile.dungeon_floor || 0}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main App Component
-const generatePath = () => {
-    const boardSize = 10;
-    const newPath = [{ x: 0, y: 0 }];
-    const visited = new Set(['0,0']);
-    let current = { x: 0, y: 0 };
-
-    while (current.x < boardSize - 1 || current.y < boardSize - 1) {
-        const moves = [];
-        if (current.x < boardSize - 1) moves.push({ x: current.x + 1, y: current.y });
-        if (current.y < boardSize - 1) moves.push({ x: current.x, y: current.y + 1 });
-        
-        const validMoves = moves.filter(m => !visited.has(`${m.x},${m.y}`));
-
-        if (validMoves.length > 0) {
-            const nextMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-            current = nextMove;
-            newPath.push(current);
-            visited.add(`${current.x},${current.y}`);
-        } else {
-            const allNeighbors = [
-                { x: current.x + 1, y: current.y }, { x: current.x, y: current.y + 1 },
-                { x: current.x - 1, y: current.y }, { x: current.x, y: current.y - 1 }
-            ].filter(n => n.x >= 0 && n.x < boardSize && n.y >= 0 && n.y < boardSize && !visited.has(`${n.x},${n.y}`));
-            
-            if (allNeighbors.length > 0) {
-                current = allNeighbors[0];
-                newPath.push(current);
-                visited.add(`${current.x},${current.y}`);
-            } else {
-                break;
-            }
-        }
-    }
-    return newPath;
-};
-
-const getStartOfDay = (date) => {
-  const newDate = new Date(date);
-  newDate.setHours(0, 0, 0, 0);
-  return newDate;
-};
-
-const shouldGenerateQuests = (lastUpdatedTimestamp) => {
-  if (!lastUpdatedTimestamp || typeof lastUpdatedTimestamp.toDate !== 'function') {
-    // If it's null, or not a Firestore Timestamp, don't generate.
-    return false;
-  }
-  const lastDate = lastUpdatedTimestamp.toDate();
-  const now = new Date();
-  return getStartOfDay(now) > getStartOfDay(lastDate);
-};
-
-const generateQuests = () => {
-  const daily = [];
-  const weekly = [];
-  const dailyPool = [...questDefinitions.daily];
-  const weeklyPool = [...questDefinitions.weekly];
-
-  // Select 2 random daily quests
-  for (let i = 0; i < 2; i++) {
-    if (dailyPool.length === 0) break;
-    const randomIndex = Math.floor(Math.random() * dailyPool.length);
-    daily.push({ ...dailyPool[randomIndex], progress: 0, completed: false });
-    dailyPool.splice(randomIndex, 1);
-  }
-
-  // Select 1 random weekly quest
-  if (weeklyPool.length > 0) {
-    const randomIndex = Math.floor(Math.random() * weeklyPool.length);
-    weekly.push({ ...weeklyPool[randomIndex], progress: 0, completed: false });
-  }
-
-  return { daily, weekly, lastUpdated: serverTimestamp() };
-};
 const useDebounce = (value, delay) => {
 
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -3928,47 +4965,49 @@ const AuthComponent = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       setError('');
-      if (!auth || !db) { // Also check for db
+      if (!auth || !db) {
           setError("Firebase is not configured correctly.");
           return;
       }
       try {
         if (isLogin) {
           await signInWithEmailAndPassword(auth, email, password);
-        } else {
-          // Create the user first
+                } else {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
 
-          // If user creation is successful, create their data documents
           if (user) {
-            // REFACTORED: Create a single default stats object
-const defaultStats = {
-              username: email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
-              ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
-              focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
-              activeBoosts: [],
-              dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
-              td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
+            const defaultUsername = email.split('@')[0];
+            const newUserData = {
+              ...defaultStats,
+              username: defaultUsername, 
+              quests: generateQuests(),
+              dungeon_state: generateInitialDungeonState(),
+              td_path: generatePath(),
               lab_state: {
-                sciencePoints: 0,
-                lastLogin: serverTimestamp(),
-                labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1 },
-                labXpUpgrades: {},
-                prestigeLevel: 0,
+                ...defaultStats.lab_state,
+                lastLogin: serverTimestamp()
               },
-              studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
-              achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
-              quests: generateQuests()
             };
 
-            // REFACTORED: Set the single stats document
             const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
-            await setDoc(statsDocRef, defaultStats);
+            const usernameDocRef = doc(db, `usernames/${defaultUsername.toLowerCase()}`);
+            
+            try {
+              // Create the private stats document
+              await setDoc(statsDocRef, newUserData);
+              // Create the public username document so the user is searchable immediately
+              await setDoc(usernameDocRef, { userId: user.uid });
+            } catch (dbError) {
+              console.error("Firestore document creation failed after user signup:", dbError);
+              setError("Account was created, but failed to save initial user data. Please contact support.");
+            }
           }
         }
-      } catch (err) {
-        setError(err.message.replace('Firebase: ', ''));
+
+      } catch (authError) {
+        console.error("Authentication error:", authError);
+        setError(authError.message.replace('Firebase: ', ''));
       }
     };
 
@@ -4311,11 +5350,13 @@ const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedTogg
   };
     
 // Component for My Profile Sheet
-const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement }) => {
+const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement, calculateLevelInfo }) => {
   // Create a unified draft state from the incoming props
   const [draftState, setDraftState] = useState({ ...stats });
   const [activeTab, setActiveTab] = useState('collections');
-  const [friendIdInput, setFriendIdInput] = useState('');
+  const [friendUsernameInput, setFriendUsernameInput] = useState('');
+  const [friendProfiles, setFriendProfiles] = useState({});
+  const [viewingFriendProfile, setViewingFriendProfile] = useState(null);
   
   const [usernameInput, setUsernameInput] = useState(stats.username || '');
 
@@ -4332,6 +5373,69 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
   useEffect(() => {
     setUsernameInput(draftState.username || '');
   }, [draftState.username]);
+  
+    useEffect(() => {
+    // FIX: This effect ensures that a public username entry exists for the current user.
+    // It runs once when the profile page loads, creating the document if it's missing.
+    // This makes existing users (who signed up before this feature) searchable.
+    const ensureUsernameEntry = async () => {
+      if (!db || !user || !stats.username) return;
+
+      try {
+        const usernameLower = stats.username.toLowerCase();
+        const usernameDocRef = doc(db, `usernames/${usernameLower}`);
+        const docSnap = await getDoc(usernameDocRef);
+
+        if (!docSnap.exists()) {
+          // The public record doesn't exist, so we create it.
+          await setDoc(usernameDocRef, { userId: user.uid });
+          console.log(`Created missing public username entry for: ${stats.username}`);
+        }
+      } catch (error) {
+        console.error("Error ensuring username entry exists:", error);
+      }
+    };
+
+    ensureUsernameEntry();
+  }, [db, user, stats.username]); // Depends on user and their username being loaded.
+
+  useEffect(() => {
+    if (!db || !stats.friends || stats.friends.length === 0) {
+      setFriendProfiles({}); // Clear profiles if no friends
+      return;
+    }
+
+    const fetchFriendProfiles = async () => {
+      try {
+        const statsCollectionRef = collection(db, `artifacts/${appId}/public/data/stats`);
+        const friendIds = stats.friends;
+        const profiles = {};
+        const batches = [];
+
+        // Firestore 'in' query is limited to 30 items, so we batch requests
+        for (let i = 0; i < friendIds.length; i += 30) {
+          const batchIds = friendIds.slice(i, i + 30);
+          if (batchIds.length > 0) {
+            batches.push(getDocs(query(statsCollectionRef, where(document.Id, 'in', batchIds))));
+          }
+        }
+        
+        const querySnapshotsArray = await Promise.all(batches);
+
+        querySnapshotsArray.forEach(snapshot => {
+          snapshot.forEach(doc => {
+            profiles[doc.id] = { id: doc.id, ...doc.data() };
+          });
+        });
+
+        setFriendProfiles(profiles);
+      } catch (error) {
+        console.error("Error fetching friend profiles:", error);
+      }
+    };
+
+    fetchFriendProfiles();
+  }, [db, stats.friends, appId]);
   
   // Check for unsaved changes by comparing the draft to the original props
   const hasUnsavedChanges = useMemo(() => {
@@ -4444,44 +5548,42 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
   });
   
   // --- Handlers Refactored for Draft State ---
-  const handleSaveUsername = () => actionLock(async () => {
-    const trimmedUsername = usernameInput.trim();
-    if (trimmedUsername.length < 3 || trimmedUsername.length > 15) { showMessageBox("Username must be 3-15 characters.", "error"); return; }
-    if (/\s/.test(trimmedUsername)) { showMessageBox("Username cannot contain spaces.", "error"); return; }
-    if (trimmedUsername === stats.username) { showMessageBox("This is already your username.", "info"); return; }
+  const handleSaveUsername = () => {
+    actionLock(async () => {
+      const trimmedUsername = usernameInput.trim();
+      if (trimmedUsername.length < 3 || trimmedUsername.length > 15) { showMessageBox("Username must be 3-15 characters.", "error"); return; }
+      if (/\s/.test(trimmedUsername)) { showMessageBox("Username cannot contain spaces.", "error"); return; }
+      if (trimmedUsername === stats.username) { showMessageBox("This is already your username.", "info"); return; }
 
-    const newUsernameLower = trimmedUsername.toLowerCase();
-    const usernameDocRef = doc(db, `usernames/${newUsernameLower}`);
+      const newUsernameLower = trimmedUsername.toLowerCase();
+      const usernameDocRef = doc(db, `usernames/${newUsernameLower}`);
 
-    try {
-      await runTransaction(db, async (transaction) => {
-        const usernameDoc = await transaction.get(usernameDocRef);
-        
-        // Check if the username is taken by someone else
-        if (usernameDoc.exists() && usernameDoc.data().userId !== user.uid) {
-          throw new Error("This username is already taken.");
-        }
+      try {
+        await runTransaction(db, async (transaction) => {
+          const usernameDoc = await transaction.get(usernameDocRef);
+          
+          if (usernameDoc.exists() && usernameDoc.data().userId !== user.uid) {
+            throw new Error("This username is already taken.");
+          }
 
-        // If the user is changing from an old username, prepare to delete the old entry
-        const oldUsernameLower = stats.username?.toLowerCase();
-        if (oldUsernameLower && oldUsernameLower !== newUsernameLower) {
-          const oldUsernameDocRef = doc(db, `usernames/${oldUsernameLower}`);
-          transaction.delete(oldUsernameDocRef);
-        }
+          const oldUsernameLower = stats.username?.toLowerCase();
+          if (oldUsernameLower && oldUsernameLower !== newUsernameLower) {
+            const oldUsernameDocRef = doc(db, `usernames/${oldUsernameLower}`);
+            transaction.delete(oldUsernameDocRef);
+          }
+          
+          transaction.set(usernameDocRef, { userId: user.uid });
+          
+          setDraftState(prev => ({ ...prev, username: trimmedUsername }));
+        });
         
-        // Create the new username entry
-        transaction.set(usernameDocRef, { userId: user.uid });
-        
-        // Update the draft state in the UI
-        setDraftState(prev => ({ ...prev, username: trimmedUsername }));
-      });
-      
-      showMessageBox(`Username set to "${trimmedUsername}"! Remember to save your profile changes.`, "info");
-    } catch (error) {
-      console.error("Username validation failed:", error);
-      showMessageBox(error.message, "error");
-    }
-  });
+        showMessageBox(`Username set to "${trimmedUsername}"! Remember to save your profile changes.`, "info");
+      } catch (error) {
+        console.error("Username validation failed:", error);
+        showMessageBox(error.message, "error");
+      }
+    });
+  };
 
 
   const handleEquipItem = (item) => {
@@ -4501,13 +5603,38 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
     setDraftState(prev => ({ ...prev, currentPet: pet }));
   };
   
-  const handleAddFriend = () => {
-    const friendId = friendIdInput.trim();
-    if (!friendId) { showMessageBox('Friend ID cannot be empty.', 'error'); return; }
-    if (friendId === userId) { showMessageBox("You can't add yourself.", 'error'); return; }
-    if (draftState.friends.includes(friendId)) { showMessageBox('Already a friend.', 'error'); return; }
-    setDraftState(prev => ({ ...prev, friends: [...prev.friends, friendId] }));
-    setFriendIdInput('');
+     const handleAddFriendByUsername = () => {
+    actionLock(async () => {
+      const username = friendUsernameInput.trim();
+      if (!username) { showMessageBox('Username cannot be empty.', 'error'); return; }
+      if (username.toLowerCase() === (stats.username || '').toLowerCase()) { showMessageBox("You can't add yourself.", 'error'); return; }
+
+      try {
+        const usernameLower = username.toLowerCase();
+        const usernameDocRef = doc(db, `usernames/${usernameLower}`);
+        const usernameDoc = await getDoc(usernameDocRef);
+
+        if (!usernameDoc.exists()) {
+          showMessageBox(`User "${username}" not found. Usernames are case-insensitive.`, "error");
+          return;
+        }
+        
+        const friendId = usernameDoc.data().userId;
+
+        if (draftState.friends.includes(friendId)) {
+          showMessageBox(`"${username}" is already your friend.`, 'error');
+          return;
+        }
+        
+        setDraftState(prev => ({ ...prev, friends: [...prev.friends, friendId] }));
+        setFriendUsernameInput('');
+        showMessageBox(`Added ${username} as a friend! Remember to save changes.`, 'info');
+
+      } catch (error) {
+        console.error("Error adding friend by username:", error);
+        showMessageBox("An error occurred while trying to add friend.", "error");
+      }
+    });
   };
 
   const handleRemoveFriend = (friendId) => {
@@ -4668,10 +5795,10 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
                 <p className="text-xs text-slate-500 mt-2">This will appear on leaderboards. Changes are not saved until you hit "Save Changes" at the bottom.</p>
               </div>
               <h4 className="text-lg font-semibold text-white mb-2">Friend Management</h4>
-              <div className="flex flex-col md:flex-row gap-4"><div className="flex-grow"><label className="text-sm text-slate-400 block mb-1">Your User ID (for sharing)</label><div onClick={copyUserIdToClipboard} className="p-3 bg-slate-700 border border-slate-600 rounded-md cursor-pointer truncate">{userId}</div></div><div className="flex-grow"><label htmlFor="friendId" className="text-sm text-slate-400 block mb-1">Add Friend by ID</label><div className="flex gap-2"><input id="friendId" type="text" value={friendIdInput} onChange={(e) => setFriendIdInput(e.target.value)} placeholder="Paste friend's User ID here" className="flex-grow p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"/><button onClick={handleAddFriend} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">Add</button></div></div></div>
+              <div className="flex flex-col md:flex-row gap-4"><div className="flex-grow"><label className="text-sm text-slate-400 block mb-1">Your User ID (for sharing)</label><div onClick={copyUserIdToClipboard} className="p-3 bg-slate-700 border border-slate-600 rounded-md cursor-pointer truncate">{userId}</div></div><div className="flex-grow"><label htmlFor="friendUsername" className="text-sm text-slate-400 block mb-1">Add Friend by Username</label><div className="flex gap-2"><input id="friendUsername" type="text" value={friendUsernameInput} onChange={(e) => setFriendUsernameInput(e.target.value)} placeholder="Enter friend's username" className="flex-grow p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"/><button onClick={handleAddFriendByUsername} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">Add</button></div></div></div>
               <div className="mt-6">
                   <h4 className="text-lg font-semibold text-white mb-2">Friend List</h4>
-                  {draftState.friends && draftState.friends.length > 0 ? (<ul className="space-y-2 max-h-48 overflow-y-auto pr-2">{draftState.friends.map(friendId => (<li key={friendId} className="flex items-center justify-between bg-slate-700/50 p-3 rounded-lg"><span className="font-mono text-sm text-slate-300 truncate">{friendId}</span><button onClick={() => handleRemoveFriend(friendId)} className="text-red-400 hover:text-red-600 text-sm font-semibold">Remove</button></li>))}</ul>) : (<p className="text-slate-500">You haven't added any friends yet.</p>)}
+                  {draftState.friends && draftState.friends.length > 0 ? (<ul className="space-y-2 max-h-48 overflow-y-auto pr-2">{draftState.friends.map(friendId => (<li key={friendId} className="flex items-center justify-between bg-slate-700/50 p-3 rounded-lg"><span className="font-semibold text-sm text-slate-300 truncate">{friendProfiles[friendId]?.username || 'Loading...'}</span><div className="flex items-center gap-2"><button onClick={() => setViewingFriendProfile(friendProfiles[friendId])} className="text-cyan-400 hover:text-cyan-300 text-sm font-semibold" disabled={!friendProfiles[friendId]}>View</button><button onClick={() => handleRemoveFriend(friendId)} className="text-red-400 hover:text-red-600 text-sm font-semibold">Remove</button></div></li>))}</ul>) : (<p className="text-slate-500">You haven't added any friends yet.</p>)}
               </div>
             </div>
           )}
@@ -4689,6 +5816,15 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
                 Save Changes
             </button>
         </div>
+      )}
+      {viewingFriendProfile && (
+        <FriendProfileModal 
+          profile={viewingFriendProfile} 
+          onClose={() => setViewingFriendProfile(null)}
+          getFullCosmeticDetails={getFullCosmeticDetails}
+          getItemStyle={getItemStyle}
+          calculateLevelInfo={calculateLevelInfo}
+        />
       )}
     </div>
   );
@@ -4751,7 +5887,7 @@ const QuestsComponent = ({ quests }) => {
 };
 // Component for Stats + XP Tracker Sheet
 
-  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine }) => {
+  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine, shouldPromptForTriage, onStartTriage }) => {
     const persona = getProductivityPersona();
     const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => stats.currentLevel >= t.level) || { title: 'Novice Learner' };
     const currentTitle = stats?.equippedItems?.title ? cosmeticItems.titles.find(t => t.id === stats.equippedItems.title)?.name : currentLevelBasedTitle.title;
@@ -4856,6 +5992,17 @@ const QuestsComponent = ({ quests }) => {
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
         </div>
+                {shouldPromptForTriage && (
+          <div className="mb-8 p-6 bg-indigo-900/50 border-2 border-indigo-700 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white">✨ It's Time for Your Weekly Triage!</h3>
+              <p className="text-indigo-300">Plan your week in 5 minutes to earn the powerful 'Clarity' buff.</p>
+            </div>
+            <button onClick={onStartTriage} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg flex-shrink-0">
+              Start Planning
+            </button>
+          </div>
+        )}
 
         {/* Top Stat Cards */}
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -5812,15 +6959,26 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
     if (uiGameState === 'playing' && parsedFlashcards.length >= 5 && !isXpMode) {
       const timer = setTimeout(() => {
         const checkGroundAndShowQuiz = () => {
-          if (playerState.current.onGround) setGameState('quiz');
-          else setTimeout(checkGroundAndShowQuiz, 100);
+          // Ensure the game is still active before showing the quiz
+          if (gameStateRef.current === 'playing' && playerState.current.onGround) {
+            setGameState('quiz');
+          } else if (gameStateRef.current === 'playing') {
+            // If airborne, wait a moment and check again
+            setTimeout(checkGroundAndShowQuiz, 100);
+          }
         };
         checkGroundAndShowQuiz();
-      }, 20000 + Math.random() * 10000);
+      }, 5000 + Math.random() * 5000); // Quiz appears after 5-10 seconds
       return () => clearTimeout(timer);
     }
-  }, [uiGameState, score, parsedFlashcards, isXpMode]);
+    // FIX: Removed `score` from dependencies to prevent the timer from resetting every time the score changes.
+    // Also using parsedFlashcards.length to avoid re-renders from the array object itself changing.
+  }, [uiGameState, parsedFlashcards.length, isXpMode]);
   
+  const handleQuizComplete = useCallback(() => {
+    setGameState('playing');
+  }, []);
+
   useEffect(() => {
     // FIX: Only run this logic when the game state is explicitly 'gameover' or 'levelwon'.
     // This prevents the check from running prematurely when the game starts.
@@ -5830,6 +6988,14 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
           updateStudyZoneState({ platformerHighScore: score });
           showMessageBox(`Game Over! New high score: ${score}`, 'info');
           processAchievement('highScore', score);
+          
+          // NEW: Loot Drop for high score
+          if (score > 1000) { // Require a score of at least 1000 for the rare drop
+             const key = 'alchemy_state.inventory.stardust_phial';
+             updateStatsInFirestore({ [key]: increment(1) });
+             showMessageBox('Your skill has attracted a Stardust Phial!', 'info');
+          }
+
         } else {
           showMessageBox(`Game Over! Your score: ${score}`, 'error');
         }
@@ -5877,7 +7043,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
             <button onClick={() => setGameState('menu')} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-2xl hover:bg-blue-600 shadow-xl">Main Menu</button>
           </div>
         )}
-        {uiGameState === 'quiz' && <FlashcardQuizModal cards={parsedFlashcards} onComplete={() => setGameState('playing')} />}
+        {uiGameState === 'quiz' && <FlashcardQuizModal cards={parsedFlashcards} onComplete={handleQuizComplete} />}
         
         {uiGameState === 'playing' && (
           <GameRenderer 
@@ -5937,14 +7103,20 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState(''); // 'correct', 'incorrect', ''
 
-  const getRandomCard = () => {
-    setCurrentCard(cards[Math.floor(Math.random() * cards.length)]);
-  };
+  const getRandomCard = useCallback(() => {
+    // The parent component (`PlatformerGame`) is responsible for ensuring cards exist.
+    // This function will now only act if it has valid cards, preventing an immediate exit.
+    if (cards && cards.length > 0) {
+      setCurrentCard(cards[Math.floor(Math.random() * cards.length)]);
+    }
+    // We REMOVE the `else { onComplete() }` block that was causing the modal to close instantly.
+  }, [cards]); // onComplete is no longer a dependency here.
 
   useEffect(() => {
+    // This effect runs on mount and whenever the `cards` prop changes.
     getRandomCard();
-  }, []);
-  
+  }, [getRandomCard]); // getRandomCard is now stable unless `cards` changes.
+
   useEffect(() => {
     if (streak >= 3) {
       onComplete();
@@ -5953,6 +7125,9 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Guard against submission when there's no card
+    if (!currentCard || feedback) return;
+
     if (userAnswer.toLowerCase().trim() === currentCard.back.toLowerCase().trim()) {
       setFeedback('correct');
       setStreak(s => s + 1);
@@ -5967,7 +7142,7 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
     }, 1500);
   };
   
-  if (!currentCard) return null;
+  // No longer returning null here. The JSX will handle the loading state.
 
   return (
     <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 text-white p-8">
@@ -5977,7 +7152,7 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
 
       <div className={`p-8 rounded-lg w-full max-w-lg text-center transition-colors ${feedback === 'correct' ? 'bg-green-800' : feedback === 'incorrect' ? 'bg-red-800' : 'bg-slate-700'}`}>
         <p className="text-slate-400 mb-2">FRONT</p>
-        <p className="text-3xl font-bold mb-6">{currentCard.front}</p>
+        <p className="text-3xl font-bold mb-6 h-10">{currentCard ? currentCard.front : "..."}</p>
         
         <form onSubmit={handleSubmit}>
           <input
@@ -5986,35 +7161,17 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
             onChange={(e) => setUserAnswer(e.target.value)}
             className="w-full p-3 bg-slate-800 border border-slate-600 rounded-md text-center text-xl"
             placeholder="Type the back of the card..."
-            disabled={feedback !== ''}
+            disabled={feedback !== '' || !currentCard}
           />
         </form>
-        {feedback === 'incorrect' && <p className="mt-4 text-lg">Correct answer: <span className="font-bold">{currentCard.back}</span></p>}
+        {feedback === 'incorrect' && <p className="mt-4 text-lg">Correct answer: <span className="font-bold">{currentCard?.back}</span></p>}
       </div>
     </div>
   );
 };
 
   
-  // NEW: Component for Guild Page (Placeholder)
-  const GuildPage = () => {
-    return (
-      <div>
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-white">My Guild</h2>
-            <p className="text-slate-400">Collaborate with your friends and conquer weekly goals together.</p>
-          </div>
-        </div>
-        <div className="bg-slate-800/50 p-8 rounded-2xl text-center">
-          <h3 className="text-2xl text-white font-semibold mb-2">Guild System Coming Soon!</h3>
-          <p className="text-slate-400 max-w-md mx-auto">
-            This is where you'll be able to create or join a study group, chat with members, and work together on massive weekly objectives for exclusive rewards.
-          </p>
-        </div>
-      </div>
-    );
-  };
+
 
 
 const normalizeTimestamps = (data) => {
@@ -6045,6 +7202,11 @@ const App = () => {
   const [activeSheet, setActiveSheet] = useState('Stats + XP Tracker');
   const dungeonXpRef = useRef(null);
 
+  // --- NEW: Triage State ---
+  // NEW: Triage State ---
+  const [triageState, setTriageState] = useState({ isOpen: false, needsSetup: false });
+  const [dungeonResetKey, setDungeonResetKey] = useState(0); // NEW: Key to force dungeon remount
+
   // --- NEW: Focus Navigator State ---
   const [missionControlState, setMissionControlState] = useState({ isOpen: false, assignment: null });
   const [activeMissionState, setActiveMissionState] = useState({ isActive: false, route: null, assignmentName: null });
@@ -6062,13 +7224,12 @@ const App = () => {
   const statsRef = useRef({});
 
   // REFACTORED: Single state object for all user data
-  const [stats, setStats] = useState(() => getCachedData('statsCache', 60) || {
+    const [stats, setStats] = useState(() => getCachedData('statsCache', 60) || {
     username: '',
     totalXP: 0,
     currentLevel: 1,
     assignmentsCompleted: 0,
     friends: [],
-    guildId: null,
     ownedItems: [],
     equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} },
     ownedFurniture: [],
@@ -6137,6 +7298,20 @@ const App = () => {
       showMessageBox("Failed to sign out.", "error");
     }
   };
+
+  const addIngredientToInventory = useCallback(async (ingredientId, amount = 1) => {
+    if (!db || !user) return;
+    const key = `alchemy_state.inventory.${ingredientId}`;
+    try {
+        await updateStatsInFirestore({ [key]: increment(amount) });
+        const ingredientName = alchemyIngredients[ingredientId]?.name || 'an ingredient';
+        showMessageBox(`You found: ${amount}x ${ingredientName}!`, 'info');
+    } catch (error) {
+        console.error("Error adding ingredient:", error);
+        showMessageBox("Failed to add ingredient to inventory.", "error");
+    }
+  }, [user, db, updateStatsInFirestore, showMessageBox]);
+
   const actionLock = useActionLock();
 
   const handleRefreshAllData = () => {
@@ -6224,17 +7399,6 @@ const App = () => {
     if (!isAuthReady || !user) return;
     const userId = user.uid;
 
-        const defaultStats = {
-        username: user.email.split('@')[0], totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [], guildId: null,
-        ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
-        focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
-        dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0, td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
-        lab_state: { sciencePoints: 0, lastLogin: null, labEquipment: { beaker: 0, microscope: 0, bunsen_burner: 0, computer: 0, particle_accelerator: 0, quantum_computer: 0, manual_clicker: 1, }, labXpUpgrades: {}, prestigeLevel: 0, },
-        studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
-        achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
-        quests: { daily: [], weekly: [], lastUpdated: null },
-    };
-
     const cached = getCachedData('statsCache', 60);
     if (cached) {
       setStats(cached);
@@ -6245,7 +7409,10 @@ const App = () => {
     const unsubStats = onSnapshot(docRef, (docSnap) => {
       // MERGE Firestore data with a complete default structure.
       // This prevents crashes if a user's document is missing a newer field.
-      const data = docSnap.exists() ? { ...defaultStats, ...docSnap.data() } : defaultStats;
+      // It now correctly uses the globally defined `defaultStats`.
+      const data = docSnap.exists() 
+        ? { ...defaultStats, ...docSnap.data(), username: docSnap.data().username || user.email.split('@')[0] } 
+        : { ...defaultStats, username: user.email.split('@')[0] };
       setStats(data);
       cacheData('statsCache', data);
     }, (error) => console.error(`Error listening to stats:`, error));
@@ -6271,7 +7438,7 @@ const App = () => {
     };
   }, [user, isAuthReady, appKey]);
 
-  // NEW: Effect to check for and generate new daily/weekly quests on load
+    // NEW: Effect to check for and generate new daily/weekly quests on load
     useEffect(() => {
     if (user && stats.quests && stats.quests.lastUpdated) {
       if (shouldGenerateQuests(stats.quests.lastUpdated)) {
@@ -6281,7 +7448,97 @@ const App = () => {
         showMessageBox("Your daily and weekly quests have been refreshed!", "info");
       }
     }
-  }, [user, stats.quests, updateStatsInFirestore]);
+    }, [user, stats.quests, updateStatsInFirestore]);
+
+  const triageableAssignments = useMemo(() => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const tenDaysFromNow = new Date();
+    tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10);
+    tenDaysFromNow.setHours(23, 59, 59, 999);
+
+    return assignments.filter(a => {
+      if (a.status === 'Completed' || !a.dueDate) {
+        return false;
+      }
+      // Task must be due between the start of today and 10 days from now.
+      return a.dueDate >= startOfToday && a.dueDate <= tenDaysFromNow;
+    });
+  }, [assignments]);
+
+  // --- NEW: Triage and Buff Logic ---
+  // FIX: This logic is moved into a useEffect to prevent re-render loops.
+  useEffect(() => {
+    // This condition checks if the user has never set up triage.
+    // It will trigger the setup modal to appear automatically one time.
+    if (user && !triageState.isOpen && !stats.triageSettings && !stats.lastTriageCompleted) {
+      const timer = setTimeout(() => {
+        setTriageState({ isOpen: true, needsSetup: true });
+      }, 1500); // Delay slightly to not be too jarring on load.
+      return () => clearTimeout(timer);
+    }
+  }, [user, stats.triageSettings, stats.lastTriageCompleted, triageState.isOpen]);
+
+  // This function now only determines if the BANNER should be shown. It has no side effects.
+  const shouldShowTriageBanner = useMemo(() => {
+    if (!stats.triageSettings) return false; // Don't show banner if setup isn't done.
+
+    const today = new Date();
+    const triageDay = stats.triageSettings.triageDay;
+
+    // Calculate the date of this week's triage day.
+    const thisWeeksTriageDate = new Date();
+    thisWeeksTriageDate.setDate(today.getDate() - (today.getDay() - triageDay + 7) % 7);
+    thisWeeksTriageDate.setHours(0, 0, 0, 0);
+    
+    // Don't show the banner if today is before this week's triage day.
+    if (today < thisWeeksTriageDate) {
+      return false;
+    }
+
+    // FIX: Safely handle the timestamp, which might not be a Firestore object when loaded from cache.
+    const lastCompletion = stats.lastTriageCompleted && typeof stats.lastTriageCompleted.toDate === 'function'
+      ? stats.lastTriageCompleted.toDate()
+      : null;
+
+    // If they have never completed it, show the banner (after setup is done).
+    if (!lastCompletion) return true;
+
+    // Show the banner if the last completion was before this week's triage day.
+    return lastCompletion < thisWeeksTriageDate;
+  }, [stats.triageSettings, stats.lastTriageCompleted]);
+
+  const handleSaveTriageSettings = useCallback((settings) => {
+    updateStatsInFirestore({ triageSettings: settings });
+    setTriageState({ isOpen: true, needsSetup: false });
+  }, [updateStatsInFirestore]);
+
+  const handleCompleteTriage = useCallback(async (assignmentsWithPriority) => {
+    if (!db || !user) return;
+    const batch = [];
+    assignmentsWithPriority.forEach(assignmentUpdate => {
+      const docRef = doc(db, `artifacts/${appId}/public/data/assignmentTracker`, assignmentUpdate.id);
+      batch.push(updateDoc(docRef, { priorityQuadrant: assignmentUpdate.priorityQuadrant }));
+    });
+    
+    await Promise.all(batch);
+
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    
+    // Add the buff to the active boosts
+    const clarityBuff = { id: 'clarity', name: 'Clarity', expiresAt: sevenDaysFromNow };
+    const newActiveBoosts = [...(stats.activeBoosts || []).filter(b => b.id !== 'clarity'), clarityBuff];
+
+    await updateStatsInFirestore({
+      lastTriageCompleted: serverTimestamp(),
+      activeBoosts: newActiveBoosts
+    });
+    
+    showMessageBox("Weekly Triage Complete! 'Clarity' buff is active.", "info");
+
+  }, [db, user, appId, stats.activeBoosts, updateStatsInFirestore]);
 
 
   // Function to calculate days early
@@ -6527,6 +7784,7 @@ const App = () => {
         'cooldowns.resetDungeon': serverTimestamp(),
         lastActionTimestamp: serverTimestamp()
       });
+      setDungeonResetKey(prev => prev + 1); // Force remount
       showMessageBox("Dungeon has been reset! Choose your class.", "info");
     } catch (error) {
       const errorMsg = error.message.includes('permission-denied') ? "You're resetting too quickly!" : "Dungeon reset failed.";
@@ -6694,7 +7952,9 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
               const baseXpForTask = difficultyXpMap[completedAssignment.difficulty] || 10;
               calculatedXpBonus += baseXpForTask;
               const petBuff = serverStats.currentPet?.xpBuff || 0;
-              const newAssignmentsToHatch = serverStats.petStatus === 'egg' ? Math.max(0, (serverStats.assignmentsToHatch || 0) - 1) : serverStats.assignmentsToHatch;
+              const newAssignmentsToHatch = serverStats.petStatus === 'egg' 
+                ? Math.max(0, (serverStats.assignmentsToHatch || 0) - 1) 
+                : (serverStats.assignmentsToHatch || 0);
               
               let quests = JSON.parse(JSON.stringify(serverStats.quests || { daily: [], weekly: [] }));
               const processQuestList = (list) => {
@@ -6909,7 +8169,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
     });
   }, [missionControlState.assignment, stats.totalXP, updateStatsInFirestore]);
 
-  const handleMissionComplete = useCallback(async (isSuccess) => {
+    const handleMissionComplete = useCallback(async (isSuccess) => {
     const mission = activeMissionState;
     setActiveMissionState({ isActive: false, route: null, assignmentName: null });
 
@@ -7041,7 +8301,15 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
   }
   return (
     <>
-            {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
+                        {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
+      <WeeklyTriageModal
+        isOpen={triageState.isOpen}
+        onClose={() => setTriageState({ isOpen: false, needsSetup: false })}
+        assignments={triageableAssignments}
+        triageSettings={stats.triageSettings}
+        onSaveSettings={handleSaveTriageSettings}
+        onCompleteTriage={handleCompleteTriage}
+      />
       <MissionControlModal 
         isOpen={missionControlState.isOpen}
         onClose={() => setMissionControlState({ isOpen: false, assignment: null })}
@@ -7054,6 +8322,8 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           /* All your @import and CSS variables... */
           @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Inter:wght@400;700&family=Oswald&family=Permanent+Marker&family=Playfair+Display&family=Press+Start+2P&family=Roboto+Slab&family=Space+Mono&family=Cinzel+Decorative&family=Comic+Neue&family=Libre+Baskerville&family=Lato&family=Merriweather&family=Raleway&family=Ubuntu&display=swap');
           :root { --primary-color: #4f46e5; --accent-color: #818cf8; --text-color: #ffffff; transition: --primary-color 0.3s, --accent-color 0.3s; }
+          @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+          .animate-fade-in { animation: fade-in 0.3s ease-in-out; }
           body { background-color: #0f172a; }
           .bg-primary { background-color: var(--primary-color); }
           .text-accent { color: var(--accent-color); }
@@ -7143,8 +8413,8 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             { name: 'Dashboard', sheet: 'Stats + XP Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg> },
             { name: 'Assignments', sheet: 'Assignment Tracker', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg> },
             { name: 'Achievements', sheet: 'Achievements', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" /></svg> },
-            { name: 'Guild', sheet: 'Guild', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0118 15v3h-2zM4.75 12.094A5.973 5.973 0 004 15v3H2v-3a3.005 3.005 0 012.25-2.906z" /></svg> },
             { name: 'Sanctum', sheet: 'Sanctum', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4a1 1 0 112 0v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V7H8a1 1 0 010-2h1V4z" /></svg> },
+            { name: 'Alchemist\'s Workshop', sheet: 'Alchemist\'s Workshop', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" /><path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1z" /></svg>},
             { name: 'Calendar', sheet: 'Calendar View', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg> },
             { name: 'Analytics', sheet: 'GPA & Tags Analytics', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> },
             { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M1.5 6.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM6 11a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h4a1 1 0 100-2H7zM2 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM2.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM14 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM13.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2z" clipRule="evenodd"/></svg>},
@@ -7178,19 +8448,20 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
           </svg>
         </button>
         {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} promptMissionStart={promptMissionStart} isMobile={isMobile} />}
-        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} />}
-        {activeSheet === 'Guild' && <GuildPage />}
-        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
+               {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} shouldPromptForTriage={shouldShowTriageBanner} onStartTriage={() => setTriageState({ isOpen: true, needsSetup: !stats.triageSettings })} />}
+        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} />}
         {activeSheet === 'Sanctum' && <Sanctum stats={stats} completedAssignments={completedAssignments} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
 
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics completedAssignments={completedAssignments}/>}
-        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} />}
-        {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} />}
+        {activeSheet === 'Dungeon Crawler' && <DungeonCrawler key={dungeonResetKey} stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} addIngredientToInventory={addIngredientToInventory} />}
+        {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
-        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}      </main>
+        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
+        {activeSheet === "Alchemist's Workshop" && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} />}
+      </main>
     </div>
     </>
   );
