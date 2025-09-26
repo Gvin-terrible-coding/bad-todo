@@ -28,11 +28,93 @@ import hologramScreen from './assets/images/Space_Focus_Timer/hologram_screen_2.
 import spaceshipIcon from './assets/images/Space_Focus_Timer/spaceship.png';
 import hologramButton from './assets/images/Space_Focus_Timer/hologram_button.png';
 
+import wingmenSpriteSheet from './assets/images/Dungeon/Wingmen_icon_sheet.png';
+
 // --- NEW: Asset Imports for Alchemist's Workshop ---
 import alchemyLabIndoorBg from './assets/Maps/AlchemyLabIndoors.png';
 import alchemyBenchImage from './assets/images/Alchemy Lab/Indoors_assets/bench.png';
 import alchemyCauldronImage from './assets/images/Alchemy Lab/Indoors_assets/cauldron.png';
 import alchemyGardenBg from './assets/Maps/AlchemyLabOutdoors.png';
+
+// --- NEW: ALCHEMY CAT SPRITES (ALL VARIATIONS) ---
+// Cat 1 (Default)
+import catIdleSheet from './assets/Sprites/AlchemyLab/Cat-1-Idle.png';
+import catItchSheet from './assets/Sprites/AlchemyLab/Cat-1-Itch.png';
+import catLayingSheet from './assets/Sprites/AlchemyLab/Cat-1-Laying.png';
+import catLicking1Sheet from './assets/Sprites/AlchemyLab/Cat-1-Licking1.png';
+import catLicking2Sheet from './assets/Sprites/AlchemyLab/Cat-1-Licking2.png';
+import catMeowSheet from './assets/Sprites/AlchemyLab/Cat-1-Meow.png';
+import catRunSheet from './assets/Sprites/AlchemyLab/Cat-1-Run.png';
+import catSittingSheet from './assets/Sprites/AlchemyLab/Cat-1-Sitting.png';
+import catSleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-1-Sleeping1.png';
+import catSleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-1-Sleeping2.png';
+import catStretchingSheet from './assets/Sprites/AlchemyLab/Cat-1-Stretching.png';
+import catWalkSheet from './assets/Sprites/AlchemyLab/Cat-1-Walk.png';
+// Cat 2 (Calico) - Assuming filenames, replace if needed
+import cat2IdleSheet from './assets/Sprites/AlchemyLab/Cat-2-Idle.png';
+import cat2ItchSheet from './assets/Sprites/AlchemyLab/Cat-2-Itch.png';
+import cat2LayingSheet from './assets/Sprites/AlchemyLab/Cat-2-Laying.png';
+import cat2Licking1Sheet from './assets/Sprites/AlchemyLab/Cat-2-Licking1.png';
+import cat2Licking2Sheet from './assets/Sprites/AlchemyLab/Cat-2-Licking2.png';
+import cat2MeowSheet from './assets/Sprites/AlchemyLab/Cat-2-Meow.png';
+import cat2RunSheet from './assets/Sprites/AlchemyLab/Cat-2-Run.png';
+import cat2SittingSheet from './assets/Sprites/AlchemyLab/Cat-2-Sitting.png';
+import cat2Sleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-2-Sleeping1.png';
+import cat2Sleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-2-Sleeping2.png';
+import cat2StretchingSheet from './assets/Sprites/AlchemyLab/Cat-2-Stretching.png';
+import cat2WalkSheet from './assets/Sprites/AlchemyLab/Cat-2-Walk.png';
+// Cat 3 (Sable)
+import cat3IdleSheet from './assets/Sprites/AlchemyLab/Cat-3-Idle.png';
+import cat3ItchSheet from './assets/Sprites/AlchemyLab/Cat-3-Itch.png';
+import cat3LayingSheet from './assets/Sprites/AlchemyLab/Cat-3-Laying.png';
+import cat3Licking1Sheet from './assets/Sprites/AlchemyLab/Cat-3-Licking1.png';
+import cat3Licking2Sheet from './assets/Sprites/AlchemyLab/Cat-3-Licking2.png';
+import cat3MeowSheet from './assets/Sprites/AlchemyLab/Cat-3-Meow.png';
+import cat3RunSheet from './assets/Sprites/AlchemyLab/Cat-3-Run.png';
+import cat3SittingSheet from './assets/Sprites/AlchemyLab/Cat-3-Sitting.png';
+import cat3Sleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-3-Sleeping1.png';
+import cat3Sleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-3-Sleeping2.png';
+import cat3StretchingSheet from './assets/Sprites/AlchemyLab/Cat-3-Stretching.png';
+import cat3WalkSheet from './assets/Sprites/AlchemyLab/Cat-3-Walk.png';
+// Cat 4 (Ginger)
+import cat4IdleSheet from './assets/Sprites/AlchemyLab/Cat-4-Idle.png';
+import cat4ItchSheet from './assets/Sprites/AlchemyLab/Cat-4-Itch.png';
+import cat4LayingSheet from './assets/Sprites/AlchemyLab/Cat-4-Laying.png';
+import cat4Licking1Sheet from './assets/Sprites/AlchemyLab/Cat-4-Licking1.png';
+import cat4Licking2Sheet from './assets/Sprites/AlchemyLab/Cat-4-Licking2.png';
+import cat4MeowSheet from './assets/Sprites/AlchemyLab/Cat-4-Meow.png';
+import cat4RunSheet from './assets/Sprites/AlchemyLab/Cat-4-Run.png';
+import cat4SittingSheet from './assets/Sprites/AlchemyLab/Cat-4-Sitting.png';
+import cat4Sleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-4-Sleeping1.png';
+import cat4Sleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-4-Sleeping2.png';
+import cat4StretchingSheet from './assets/Sprites/AlchemyLab/Cat-4-Stretching.png';
+import cat4WalkSheet from './assets/Sprites/AlchemyLab/Cat-4-Walk.png';
+// Cat 5 (Tuxedo)
+import cat5IdleSheet from './assets/Sprites/AlchemyLab/Cat-5-Idle.png';
+import cat5ItchSheet from './assets/Sprites/AlchemyLab/Cat-5-Itch.png';
+import cat5LayingSheet from './assets/Sprites/AlchemyLab/Cat-5-Laying.png';
+import cat5Licking1Sheet from './assets/Sprites/AlchemyLab/Cat-5-Licking1.png';
+import cat5Licking2Sheet from './assets/Sprites/AlchemyLab/Cat-5-Licking2.png';
+import cat5MeowSheet from './assets/Sprites/AlchemyLab/Cat-5-Meow.png';
+import cat5RunSheet from './assets/Sprites/AlchemyLab/Cat-5-Run.png';
+import cat5SittingSheet from './assets/Sprites/AlchemyLab/Cat-5-Sitting.png';
+import cat5Sleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-5-Sleeping1.png';
+import cat5Sleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-5-Sleeping2.png';
+import cat5StretchingSheet from './assets/Sprites/AlchemyLab/Cat-5-Stretching.png';
+import cat5WalkSheet from './assets/Sprites/AlchemyLab/Cat-5-Walk.png';
+// Cat 6 (Siamese)
+import cat6IdleSheet from './assets/Sprites/AlchemyLab/Cat-6-Idle.png';
+import cat6ItchSheet from './assets/Sprites/AlchemyLab/Cat-6-Itch.png';
+import cat6LayingSheet from './assets/Sprites/AlchemyLab/Cat-6-Laying.png';
+import cat6Licking1Sheet from './assets/Sprites/AlchemyLab/Cat-6-Licking1.png';
+import cat6Licking2Sheet from './assets/Sprites/AlchemyLab/Cat-6-Licking2.png';
+import cat6MeowSheet from './assets/Sprites/AlchemyLab/Cat-6-Meow.png';
+import cat6RunSheet from './assets/Sprites/AlchemyLab/Cat-6-Run.png';
+import cat6SittingSheet from './assets/Sprites/AlchemyLab/Cat-6-Sitting.png';
+import cat6Sleeping1Sheet from './assets/Sprites/AlchemyLab/Cat-6-Sleeping1.png';
+import cat6Sleeping2Sheet from './assets/Sprites/AlchemyLab/Cat-6-Sleeping2.png';
+import cat6StretchingSheet from './assets/Sprites/AlchemyLab/Cat-6-Stretching.png';
+import cat6WalkSheet from './assets/Sprites/AlchemyLab/Cat-6-Walk.png';
 
 // Loot Ingredients
 import ingredientBeak from './assets/images/Alchemy Lab/Loot_icons_in_Inventory/Beak.png';
@@ -317,6 +399,24 @@ const cosmeticItems = {
     { id: 'td_dragon_undead', name: 'Undead Dragon', type: 'td_skin', cost: 4000, rarity: 'legendary', display: '🐉', for: 'dragon', floorRequired: 20 },
   ],
 };
+
+const wingmanDefinitions = {
+  // XP Recruits
+  'recruit_knight': { id: 'recruit_knight', name: 'Knight', role: 'Melee DPS', cost: 3000, currency: 'xp', hp: 80, atk: 15, ap: 2, armor: 3, moveCost: 1, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'taunt', name: 'Taunt', cost: 2, range: 2.5, duration: 2, target: 'enemy' }], spriteStyle: { width: 92, height: 76, backgroundPosition: '-124px -85px' } },
+  'recruit_cleric': { id: 'recruit_cleric', name: 'Battle Cleric', role: 'Healer', cost: 4000, currency: 'xp', hp: 60, atk: 8, ap: 2, armor: 1, moveCost: 1, attackCost: 1, moveRange: 2, attackRange: 1.5, abilities: [{ id: 'heal', name: 'Heal', cost: 2, range: 1.5, power: 25, target: 'friendly' }], spriteStyle: { width: 62, height: 80, backgroundPosition: '-241px -169px' } },
+  'recruit_mage': { id: 'recruit_mage', name: 'Arcane Apprentice', role: 'Ranged DPS', cost: 4000, currency: 'xp', hp: 50, atk: 20, ap: 2, armor: 0, moveCost: 1, attackCost: 2, moveRange: 2, attackRange: 4, abilities: [{ id: 'firebolt', name: 'Firebolt', cost: 2, range: 4, power: 30, target: 'enemy' }], spriteStyle: { width: 63, height: 76, backgroundPosition: '-130px -174px' } },
+  'recruit_heavy_axeman': { id: 'recruit_heavy_axeman', name: 'Guardian', role: 'Tank', cost: 3000, currency: 'xp', hp: 200, atk: 10, ap: 3, armor: 5, thorns: 0, moveCost: 3, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'fortify', name: 'Fortify', cost: 1, selfTarget: true, effect: { tempHp: 40 }, duration: 2, target: 'friendly' }], spriteStyle: { width: 91, height: 81, backgroundPosition: '-34px -174px' } },
+  'recruit_undead_vanguard': { id: 'recruit_undead_vanguard', name: 'Undead Vanguard', role: 'Heavy DPS', cost: 4500, currency: 'xp', hp: 70, atk: 28, ap: 2, armor: 2, moveCost: 1, attackCost: 2, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'sunder', name: 'Sunder', cost: 2, range: 1.5, power: 35, armorPiercing: 10, target: 'enemy' }], spriteStyle: { width: 102, height: 87, backgroundPosition: '-231px -255px' } },
+  'recruit_crusader': { id: 'recruit_crusader', name: 'Holy Crusader', role: 'Support Tank', cost: 3500, currency: 'xp', hp: 150, atk: 8, ap: 3, armor: 4, moveCost: 2, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'divine_shield', name: 'Divine Shield', cost: 2, selfTarget: true, effect: { tempHp: 30 }, duration: 3, target: 'friendly' }], spriteStyle: { width: 98, height: 74, backgroundPosition: '-246px -88px' } },
+
+  // Gold Gacha Recruits
+  'recruit_rogue': { id: 'recruit_rogue', name: 'Shadow Rogue', role: 'Assassin', cost: 500, currency: 'gold', hp: 40, atk: 25, ap: 3, armor: 1, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, rarity: 'rare', abilities: [{ id: 'shadow_strike', name: 'Shadow Strike', cost: 1, range: 1.5, power: 40, armorPiercing: 5, target: 'enemy' }], spriteStyle: { width: 99, height: 69, backgroundPosition: '-448px -281px' } },
+  'recruit_mounted_knight': { id: 'recruit_mounted_knight', name: 'Cavalier', role: 'Mobile DPS', cost: 500, currency: 'gold', hp: 100, atk: 20, ap: 3, armor: 3, moveCost: 1, attackCost: 2, moveRange: 4, attackRange: 1.5, rarity: 'epic', abilities: [{ id: 'piercing_lance', name: 'Piercing Lance', cost: 2, range: 2.5, power: 25, target: 'enemy' }], spriteStyle: { width: 125, height: 145, backgroundPosition: '-348px -17px' } },
+  'recruit_duelist': { id: 'recruit_duelist', name: 'Swift Duelist', role: 'Agile DPS', cost: 500, currency: 'gold', hp: 50, atk: 18, ap: 3, armor: 0, moveCost: 0.5, attackCost: 1, moveRange: 2, attackRange: 1.5, rarity: 'rare', abilities: [{ id: 'riposte', name: 'Riposte', cost: 1, selfTarget: true, effect: { counterAttack: 0.5 }, duration: 1, target: 'friendly' }], spriteStyle: { width: 92, height: 75, backgroundPosition: '-124px -272px' } },
+  'recruit_warg_rider': { id: 'recruit_warg_rider', name: 'Warg Rider', role: 'Mobile Skirmisher', cost: 500, currency: 'gold', hp: 90, atk: 18, ap: 3, armor: 2, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, rarity: 'epic', abilities: [{ id: 'savage_rush', name: 'Savage Rush', cost: 2, range: 1.5, power: 20, effect: { knockback: 1 }, target: 'enemy' }], spriteStyle: { width: 114, height: 105, backgroundPosition: '-332px -246px' } }
+
+};
+
 // Furniture Item Definitions (with SVG Icons) - UPDATED FOR BETTER VISUALS & STACKING
 const furnitureDefinitions = {
   desks: [
@@ -351,6 +451,7 @@ const furnitureDefinitions = {
     { id: 'vr_headset', name: 'VR Headset', type: 'furniture', cost: 650, rarity: 'epic', display: '<svg viewBox="0 0 40 30"><path d="M0,5 H40 V25 H0 Z" rx="10" fill="#1a202c"/><path d="M5,0 h30 v5 h-30 z" fill="#4a5568"/></svg>', width: 2, height: 1, isObstacle: true },
   ],
 };
+
 // Combine all rollable items (avatars, banners, fonts, animations, titles, backgrounds) for the slot machine animation
 const allRollableItems = [
     ...cosmeticItems.avatars,
@@ -631,7 +732,10 @@ const questDefinitions = {
     { id: 'weekly_complete_5_hard', name: "Grit", description: "Complete 5 'Hard' assignments in a week.", goal: 5, reward: { xp: 400, shards: 25 }, type: 'difficulty' },
   ]
 };
-
+const contractDefinitions = [
+  { id: 'contract_deadline_warrior', name: 'Deadline Warrior', description: 'Complete a "Hard" assignment that is due within the next 24 hours.', deposit: 150, reward: { xp: 500, shards: 20 }, timeLimitHours: 24, type: 'completeHardDueSoon' },
+  { id: 'contract_task_blitz', name: 'Task Blitz', description: 'Complete any 3 assignments within the next 48 hours.', deposit: 100, reward: { xp: 400, shards: 15 }, timeLimitHours: 48, type: 'completeNumber' },
+];
 const cosmicEvents = [
   { id: 'asteroid_field', name: 'Asteroid Field', description: 'You successfully navigated a dense asteroid field!', weight: 10, reward: { type: 'shards', amount: 15 } },
   { id: 'solar_wind', name: 'Solar Wind', description: 'You caught a solar wind! Your next assignment completion will award bonus XP.', weight: 8, reward: { type: 'xp_boost', multiplier: 1.5, duration: 1 } },
@@ -639,31 +743,188 @@ const cosmicEvents = [
   { id: 'ancient_signal', name: 'Ancient Signal', description: 'A strange signal leads you to a forgotten relic!', weight: 1, reward: { type: 'cosmetic', cosmeticId: 'avatar_dragon' } },
 ];
 
+const wingmanUpgrades = {
+  // --- XP Recruits ---
+  'recruit_knight': {
+    stats: [
+      { id: 'knight_hp_1', name: 'Vigor I', description: '+15 Max HP', cost: 800, currency: 'xp', effect: { hp: 15 } },
+      { id: 'knight_atk_1', name: 'Strength I', description: '+3 Attack', cost: 1200, currency: 'xp', effect: { atk: 3 } },
+      { id: 'knight_hp_2', name: 'Vigor II', description: '+20 Max HP', cost: 1600, currency: 'xp', effect: { hp: 20 } },
+      { id: 'knight_atk_2', name: 'Strength II', description: '+5 Attack', cost: 2500, currency: 'xp', effect: { atk: 5 } },
+      { id: 'knight_armor_1', name: 'Plated Armor I', description: '+2 Armor', cost: 1500, currency: 'xp', effect: { armor: 2 } },
+      { id: 'knight_armor_2', name: 'Plated Armor II', description: '+3 Armor', cost: 3000, currency: 'xp', effect: { armor: 3 } },
+    ],
+    ability: [
+      { id: 'knight_ability_a', name: 'Intimidating Shout', description: 'Taunt now also reduces the target\'s Attack by 20% for its duration.', cost: 3000, currency: 'xp', type: 'choice' },
+      { id: 'knight_ability_b', name: 'Vengeful Guardian', description: 'While Taunt is active, the Knight will counter-attack for 50% damage when hit.', cost: 3000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_cleric': {
+    stats: [
+      { id: 'cleric_hp_1', name: 'Endurance I', description: '+10 Max HP', cost: 750, currency: 'xp', effect: { hp: 10 } },
+      { id: 'cleric_atk_1', name: 'Divine Power I', description: '+2 Attack', cost: 1100, currency: 'xp', effect: { atk: 2 } },
+      { id: 'cleric_hp_2', name: 'Endurance II', description: '+15 Max HP', cost: 1500, currency: 'xp', effect: { hp: 15 } },
+      { id: 'cleric_atk_2', name: 'Divine Power II', description: '+3 Attack', cost: 2200, currency: 'xp', effect: { atk: 3 } },
+      { id: 'cleric_heal_1', name: 'Soothing Light I', description: 'Heal power +5', cost: 1800, currency: 'xp', effect: { healPower: 5 } },
+      { id: 'cleric_heal_2', name: 'Soothing Light II', description: 'Heal power +10', cost: 3200, currency: 'xp', effect: { healPower: 10 } },
+    ],
+    ability: [
+      { id: 'cleric_ability_a', name: 'Purifying Light', description: 'Heal now also cleanses one negative status effect (e.g., poison) from the target.', cost: 4000, currency: 'xp', type: 'choice' },
+      { id: 'cleric_ability_b', name: 'Divine Favor', description: 'Heal now also grants the target a temporary +15% damage buff for their next turn.', cost: 4000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_mage': {
+    stats: [
+      { id: 'mage_atk_1', name: 'Arcane Focus I', description: '+4 Attack', cost: 1300, currency: 'xp', effect: { atk: 4 } },
+      { id: 'mage_hp_1', name: 'Toughness I', description: '+8 Max HP', cost: 800, currency: 'xp', effect: { hp: 8 } },
+      { id: 'mage_atk_2', name: 'Arcane Focus II', description: '+6 Attack', cost: 2600, currency: 'xp', effect: { atk: 6 } },
+      { id: 'mage_ap_1', name: 'Quick Cast', description: 'Firebolt attack cost reduced by 1 AP.', cost: 5000, currency: 'xp', effect: { attackCost: -1 } },
+    ],
+    ability: [
+      { id: 'mage_ability_a', name: 'Scorching Blast', description: 'Firebolt now leaves a burning effect, dealing 20% of its damage for 2 turns.', cost: 4500, currency: 'xp', type: 'choice' },
+      { id: 'mage_ability_b', name: 'Frostbolt', description: 'Firebolt now chills the target, reducing their next movement by 1 tile.', cost: 4500, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_heavy_axeman': {
+    stats: [
+      { id: 'heavy_hp_1', name: 'Iron Skin I', description: '+25 Max HP', cost: 1000, currency: 'xp', effect: { hp: 25 } },
+      { id: 'heavy_atk_1', name: 'Brute Force I', description: '+2 Attack', cost: 1000, currency: 'xp', effect: { atk: 2 } },
+      { id: 'heavy_hp_2', name: 'Iron Skin II', description: '+35 Max HP', cost: 2000, currency: 'xp', effect: { hp: 35 } },
+      { id: 'heavy_armor_1', name: 'Steel Plating', description: '+3 Armor', cost: 1800, currency: 'xp', effect: { armor: 3 } },
+      { id: 'heavy_thorns_1', name: 'Spiked Armor', description: 'Reflect 2 damage when hit.', cost: 2500, currency: 'xp', effect: { thorns: 2 } },
+    ],
+    ability: [
+      { id: 'heavy_ability_a', name: 'Reinforced Plating', description: 'Fortify now grants an additional +20 temporary HP.', cost: 3500, currency: 'xp', type: 'choice' },
+      { id: 'heavy_ability_b', name: 'Retaliation', description: 'While Fortify is active, reflect 25% of melee damage taken.', cost: 3500, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_undead_vanguard': {
+    stats: [
+      { id: 'undead_atk_1', name: 'Unholy Strength I', description: '+5 Attack', cost: 1500, currency: 'xp', effect: { atk: 5 } },
+      { id: 'undead_hp_1', name: 'Necrotic Vigor I', description: '+10 Max HP', cost: 900, currency: 'xp', effect: { hp: 10 } },
+      { id: 'undead_atk_2', name: 'Unholy Strength II', description: '+7 Attack', cost: 3000, currency: 'xp', effect: { atk: 7 } },
+      { id: 'undead_armor_1', name: 'Bone Plating', description: '+2 Armor', cost: 1600, currency: 'xp', effect: { armor: 2 } },
+    ],
+    ability: [
+      { id: 'undead_ability_a', name: 'Armor Shatter', description: 'Sunder now permanently reduces the target\'s armor by 2.', cost: 5000, currency: 'xp', type: 'choice' },
+      { id: 'undead_ability_b', name: 'Life Drain', description: 'Sunder now heals you for 30% of the damage dealt.', cost: 5000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_crusader': {
+    stats: [
+      { id: 'crusader_hp_1', name: 'Faithful Vigor I', description: '+20 Max HP', cost: 950, currency: 'xp', effect: { hp: 20 } },
+      { id: 'crusader_atk_1', name: 'Smite I', description: '+3 Attack', cost: 1150, currency: 'xp', effect: { atk: 3 } },
+      { id: 'crusader_hp_2', name: 'Faithful Vigor II', description: '+30 Max HP', cost: 1900, currency: 'xp', effect: { hp: 30 } },
+      { id: 'crusader_armor_1', name: 'Holy Aegis', description: '+2 Armor', cost: 1700, currency: 'xp', effect: { armor: 2 } },
+    ],
+    ability: [
+      { id: 'crusader_ability_a', name: 'Aegis of Retribution', description: 'Divine Shield now explodes when it expires, dealing its absorbed damage to adjacent enemies.', cost: 4000, currency: 'xp', type: 'choice' },
+      { id: 'crusader_ability_b', name: 'Sanctuary', description: 'Divine Shield now also heals you for 20% of your Max HP over its duration.', cost: 4000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  // --- Gold Gacha Recruits ---
+  'recruit_rogue': {
+    stats: [
+      { id: 'rogue_atk_1', name: 'Lethality I', description: '+5 Attack', cost: 2000, currency: 'xp', effect: { atk: 5 } },
+      { id: 'rogue_atk_2', name: 'Lethality II', description: '+8 Attack', cost: 4000, currency: 'xp', effect: { atk: 8 } },
+      { id: 'rogue_move_1', name: 'Swiftness', description: '+1 Move Range', cost: 3000, currency: 'xp', effect: { moveRange: 1 } },
+    ],
+    ability: [
+      { id: 'rogue_ability_a', name: 'Venom Strike', description: 'Shadow Strike now applies a poison, dealing 5 damage per turn for 3 turns.', cost: 5000, currency: 'xp', type: 'choice' },
+      { id: 'rogue_ability_b', name: 'Fleet Footed', description: 'After using Shadow Strike, gain +1 Move Range for the rest of your turn.', cost: 5000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_mounted_knight': {
+    stats: [
+      { id: 'cavalier_hp_1', name: 'Mount Vigor I', description: '+15 Max HP', cost: 1500, currency: 'xp', effect: { hp: 15 } },
+      { id: 'cavalier_atk_1', name: 'Sharp Lance', description: '+4 Attack', cost: 2200, currency: 'xp', effect: { atk: 4 } },
+      { id: 'cavalier_armor_1', name: 'Barding', description: '+2 Armor', cost: 1800, currency: 'xp', effect: { armor: 2 } },
+    ],
+    ability: [
+      { id: 'cavalier_ability_a', name: 'Trample', description: 'Piercing Lance now hits a second target in a line behind the first for 50% damage.', cost: 6000, currency: 'xp', type: 'choice' },
+      { id: 'cavalier_ability_b', name: 'Momentum', description: 'Piercing Lance deals up to 50% more damage based on the distance traveled this turn.', cost: 6000, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_duelist': {
+    stats: [
+      { id: 'duelist_atk_1', name: 'Finesse I', description: '+4 Attack', cost: 1800, currency: 'xp', effect: { atk: 4 } },
+      { id: 'duelist_atk_2', name: 'Finesse II', description: '+6 Attack', cost: 3500, currency: 'xp', effect: { atk: 6 } },
+      { id: 'duelist_ap_1', name: 'Adrenaline', description: '+1 Max AP per turn', cost: 7000, currency: 'xp', effect: { ap: 1 } },
+    ],
+    ability: [
+      { id: 'duelist_ability_a', name: 'Perfect Riposte', description: 'Riposte now has a 100% chance to counter-attack.', cost: 5500, currency: 'xp', type: 'choice' },
+      { id: 'duelist_ability_b', name: 'Parry', description: 'Riposte now also completely blocks the incoming attack.', cost: 5500, currency: 'xp', type: 'choice' }
+    ]
+  },
+  'recruit_warg_rider': {
+    stats: [
+      { id: 'warg_hp_1', name: 'Warg Vigor I', description: '+12 Max HP', cost: 1400, currency: 'xp', effect: { hp: 12 } },
+      { id: 'warg_atk_1', name: 'Savage Claws', description: '+3 Attack', cost: 2000, currency: 'xp', effect: { atk: 3 } },
+      { id: 'warg_move_1', name: 'Beastial Speed', description: '+1 Move Range', cost: 3200, currency: 'xp', effect: { moveRange: 1 } },
+    ],
+    ability: [
+      { id: 'warg_ability_a', name: 'Crippling Rush', description: 'Savage Rush now also cripples the target, reducing their next move by 2 tiles.', cost: 6000, currency: 'xp', type: 'choice' },
+      { id: 'warg_ability_b', name: 'Frenzied Assault', description: 'After using Savage Rush, the Warg Rider may attack a second time for 50% damage.', cost: 6000, currency: 'xp', type: 'choice' }
+    ]
+  }
+};
+
+
 // --- NEW: ALCHEMY DEFINITIONS ---
 
+// Master object for all cat animation sheets
+const catAnimationSheets = {
+  cat1: { idle: catIdleSheet, walk: catWalkSheet, run: catRunSheet, sitting: catSittingSheet, laying: catLayingSheet, sleeping1: catSleeping1Sheet, sleeping2: catSleeping2Sheet, stretching: catStretchingSheet, licking1: catLicking1Sheet, licking2: catLicking2Sheet, itch: catItchSheet, meow: catMeowSheet },
+  cat2: { idle: cat2IdleSheet, walk: cat2WalkSheet, run: cat2RunSheet, sitting: cat2SittingSheet, laying: cat2LayingSheet, sleeping1: cat2Sleeping1Sheet, sleeping2: cat2Sleeping2Sheet, stretching: cat2StretchingSheet, licking1: cat2Licking1Sheet, licking2: cat2Licking2Sheet, itch: cat2ItchSheet, meow: cat2MeowSheet },
+  cat3: { idle: cat3IdleSheet, walk: cat3WalkSheet, run: cat3RunSheet, sitting: cat3SittingSheet, laying: cat3LayingSheet, sleeping1: cat3Sleeping1Sheet, sleeping2: cat3Sleeping2Sheet, stretching: cat3StretchingSheet, licking1: cat3Licking1Sheet, licking2: cat3Licking2Sheet, itch: cat3ItchSheet, meow: cat3MeowSheet },
+  cat4: { idle: cat4IdleSheet, walk: cat4WalkSheet, run: cat4RunSheet, sitting: cat4SittingSheet, laying: cat4LayingSheet, sleeping1: cat4Sleeping1Sheet, sleeping2: cat4Sleeping2Sheet, stretching: cat4StretchingSheet, licking1: cat4Licking1Sheet, licking2: cat4Licking2Sheet, itch: cat4ItchSheet, meow: cat4MeowSheet },
+  cat5: { idle: cat5IdleSheet, walk: cat5WalkSheet, run: cat5RunSheet, sitting: cat5SittingSheet, laying: cat5LayingSheet, sleeping1: cat5Sleeping1Sheet, sleeping2: cat5Sleeping2Sheet, stretching: cat5StretchingSheet, licking1: cat5Licking1Sheet, licking2: cat5Licking2Sheet, itch: cat5ItchSheet, meow: cat5MeowSheet },
+  cat6: { idle: cat6IdleSheet, walk: cat6WalkSheet, run: cat6RunSheet, sitting: cat6SittingSheet, laying: cat6LayingSheet, sleeping1: cat6Sleeping1Sheet, sleeping2: cat6Sleeping2Sheet, stretching: cat6StretchingSheet, licking1: cat6Licking1Sheet, licking2: cat6Licking2Sheet, itch: cat6ItchSheet, meow: cat6MeowSheet },
+};
+
 const alchemyIngredients = {
+  // --- Raw Ingredients ---
   // Common Plants
-  'focuroot': { id: 'focuroot', name: 'Focuroot', type: 'plant', rarity: 'common', description: 'A common root that aids concentration.', icon: plantCarrotIcon, seedId: 'seed_focuroot' },
-  'swiftblossom': { id: 'swiftblossom', name: 'Swiftblossom', type: 'plant', rarity: 'common', description: 'A leafy green that seems to quicken the senses.', icon: plantSpinachIcon, seedId: 'seed_swiftblossom' },
-  'stillpetal': { id: 'stillpetal', name: 'Stillpetal', type: 'plant', rarity: 'common', description: 'A calm, aromatic flower.', icon: plantDriedRoseIcon, seedId: 'seed_stillpetal'},
-  'oyster_mushroom': { id: 'oyster_mushroom', name: 'Oyster Mushroom', type: 'plant', rarity: 'common', description: 'An earthy, hearty mushroom.', icon: plantOysterMushroomIcon, seedId: 'seed_oyster_mushroom' },
+  'focuroot': { id: 'focuroot', name: 'Focuroot', type: 'plant', rarity: 'common', description: 'A common root that aids concentration.', icon: plantCarrotIcon, seedId: 'seed_focuroot', processAs: 'chopped_vegetable' },
+  'swiftblossom': { id: 'swiftblossom', name: 'Swiftblossom', type: 'plant', rarity: 'common', description: 'A leafy green that seems to quicken the senses.', icon: plantSpinachIcon, seedId: 'seed_swiftblossom', processAs: 'chopped_vegetable' },
+  'stillpetal': { id: 'stillpetal', name: 'Stillpetal Rose', type: 'plant', rarity: 'common', description: 'A calm, aromatic flower.', icon: plantDriedRoseIcon, seedId: 'seed_stillpetal', processAs: 'ground_powder'},
+  'oyster_mushroom': { id: 'oyster_mushroom', name: 'Oyster Mushroom', type: 'plant', rarity: 'common', description: 'An earthy, hearty mushroom.', icon: plantOysterMushroomIcon, seedId: 'seed_oyster_mushroom', processAs: 'chopped_vegetable' },
 
   // Rare Plants
-  'sunfruit': { id: 'sunfruit', name: 'Sunfruit', type: 'plant', rarity: 'rare', description: 'A bright, radiant fruit that glows with inner warmth.', icon: plantSunflowerIcon, seedId: 'seed_sunfruit' },
-  'luckleaf': { id: 'luckleaf', name: 'Luckleaf Chamomile', type: 'plant', rarity: 'rare', description: 'A rare five-petaled flower, said to bring minor fortune.', icon: plantChamomileLeavesIcon, seedId: 'seed_luckleaf'},
+  'sunfruit': { id: 'sunfruit', name: 'Sunfruit', type: 'plant', rarity: 'rare', description: 'A bright, radiant fruit that glows with inner warmth.', icon: plantSunflowerIcon, seedId: 'seed_sunfruit', processAs: 'distilled_liquid' },
+  'luckleaf': { id: 'luckleaf', name: 'Luckleaf Chamomile', type: 'plant', rarity: 'rare', description: 'A rare five-petaled flower, said to bring minor fortune.', icon: plantChamomileLeavesIcon, seedId: 'seed_luckleaf', processAs: 'ground_powder'},
 
   // Dungeon Drops
-  'goblin_ear': { id: 'goblin_ear', name: 'Goblin Ear', type: 'loot', rarity: 'common', description: 'Surprisingly waxy. Dropped by Goblins.', icon: ingredientJaggedTooth },
-  'skeleton_bone': { id: 'skeleton_bone', name: 'Skeleton Bone', type: 'loot', rarity: 'common', description: 'A dry, brittle bone from a reanimated skeleton.', icon: ingredientBone },
-  'shadow_essence': { id: 'shadow_essence', name: 'Shadow Essence', type: 'loot', rarity: 'rare', description: 'A swirling globule of pure darkness. Dropped by Shadows.', icon: ingredientPoisoniousPoultice },
-  'golem_heart': { id: 'golem_heart', name: 'Golem Heart', type: 'loot', rarity: 'epic', description: 'The magical stone that animates a Stone Golem.', icon: ingredientHeart },
+  'goblin_ear': { id: 'goblin_ear', name: 'Goblin Ear', type: 'loot', rarity: 'common', description: 'Surprisingly waxy. Dropped by Goblins.', icon: ingredientJaggedTooth, processAs: 'distilled_liquid' },
+  'skeleton_bone': { id: 'skeleton_bone', name: 'Skeleton Bone', type: 'loot', rarity: 'common', description: 'A dry, brittle bone from a reanimated skeleton.', icon: ingredientBone, processAs: 'ground_powder' },
+  'shadow_essence': { id: 'shadow_essence', name: 'Shadow Essence', type: 'loot', rarity: 'rare', description: 'A swirling globule of pure darkness. Dropped by Shadows.', icon: ingredientPoisoniousPoultice, processAs: 'distilled_liquid' },
+  'golem_heart': { id: 'golem_heart', name: 'Golem Heart', type: 'loot', rarity: 'epic', description: 'The magical stone that animates a Stone Golem.', icon: ingredientHeart, processAs: 'ground_powder' },
 
   // Tower Defense Drops
-  'pristine_crystal': { id: 'pristine_crystal', name: 'Pristine Crystal', type: 'loot', rarity: 'rare', description: 'Thrums with contained energy. Awarded for fending off many foes.', icon: ingredientMysteriousRing },
-  'dragon_scale': { id: 'dragon_scale', name: 'Dragon Scale', type: 'loot', rarity: 'epic', description: 'An iridescent scale from a powerful dragon.', icon: ingredientCrown },
+  'pristine_crystal': { id: 'pristine_crystal', name: 'Pristine Crystal', type: 'loot', rarity: 'rare', description: 'Thrums with contained energy. Awarded for fending off many foes.', icon: ingredientMysteriousRing, processAs: 'ground_powder' },
+  'dragon_scale': { id: 'dragon_scale', name: 'Dragon Scale', type: 'loot', rarity: 'epic', description: 'An iridescent scale from a powerful dragon.', icon: ingredientCrown, processAs: 'ground_powder' },
 
   // Platformer Drops
-  'stardust_phial': { id: 'stardust_phial', name: 'Stardust Phial', type: 'loot', rarity: 'legendary', description: 'A vial of shimmering, cosmic dust. Awarded for incredible platforming skill.', icon: potionIcon11 },
+  'stardust_phial': { id: 'stardust_phial', name: 'Stardust Phial', type: 'loot', rarity: 'legendary', description: 'A vial of shimmering, cosmic dust. Awarded for incredible platforming skill.', icon: potionIcon11, processAs: 'distilled_liquid' },
+  
+  // --- Processed Ingredients ---
+  // Chopped Vegetables
+  'chopped_vegetable_crude': { id: 'chopped_vegetable_crude', name: 'Roughly Chopped Greens', type: 'processed', rarity: 'common', description: 'A messy but usable chop.', icon: plantSpinachIcon, baseName: 'chopped_vegetable', quality: 'crude', potency: 1 },
+  'chopped_vegetable_decent': { id: 'chopped_vegetable_decent', name: 'Decently Chopped Greens', type: 'processed', rarity: 'common', description: 'A standard, clean chop.', icon: plantSpinachIcon, baseName: 'chopped_vegetable', quality: 'decent', potency: 3 },
+  'chopped_vegetable_fine': { id: 'chopped_vegetable_fine', name: 'Finely Chopped Greens', type: 'processed', rarity: 'rare', description: 'A precise and perfect chop.', icon: plantSpinachIcon, baseName: 'chopped_vegetable', quality: 'fine', potency: 5 },
+
+  // Ground Powders
+  'ground_powder_crude': { id: 'ground_powder_crude', name: 'Crude Dust', type: 'processed', rarity: 'common', description: 'A coarse, gritty powder.', icon: ingredientBone, baseName: 'ground_powder', quality: 'crude', potency: 1 },
+  'ground_powder_decent': { id: 'ground_powder_decent', name: 'Decent Dust', type: 'processed', rarity: 'common', description: 'A standard, milled powder.', icon: ingredientBone, baseName: 'ground_powder', quality: 'decent', potency: 3 },
+  'ground_powder_fine': { id: 'ground_powder_fine', name: 'Fine Dust', type: 'processed', rarity: 'rare', description: 'An impossibly fine, silky powder.', icon: ingredientBone, baseName: 'ground_powder', quality: 'fine', potency: 5 },
+  
+  // Distilled Liquids
+  'distilled_liquid_crude': { id: 'distilled_liquid_crude', name: 'Murky Distillate', type: 'processed', rarity: 'common', description: 'Cloudy and impure.', icon: ingredientPoisoniousPoultice, baseName: 'distilled_liquid', quality: 'crude', potency: 1 },
+  'distilled_liquid_decent': { id: 'distilled_liquid_decent', name: 'Clear Distillate', type: 'processed', rarity: 'common', description: 'A properly distilled liquid.', icon: ingredientPoisoniousPoultice, baseName: 'distilled_liquid', quality: 'decent', potency: 3 },
+  'distilled_liquid_fine': { id: 'distilled_liquid_fine', name: 'Pure Essence', type: 'processed', rarity: 'rare', description: 'Perfectly pure and potent.', icon: ingredientPoisoniousPoultice, baseName: 'distilled_liquid', quality: 'fine', potency: 5 },
+
+  // --- Potions & Failures ---
+  'dubious_sludge': { id: 'dubious_sludge', name: 'Dubious Sludge', type: 'potion', rarity: 'common', description: 'Something went wrong. It smells... interesting.', icon: potionIcon10, goldValue: 1 },
 };
 
 const alchemyPlants = {
@@ -676,38 +937,69 @@ const alchemyPlants = {
 };
 
 const alchemyPotions = {
-  // Dungeon Crawler Potions
-  'potion_minor_strength': { id: 'potion_minor_strength', name: 'Minor Strength', goldValue: 50, icon: potionIcon1,
-    recipe: ['focuroot', 'goblin_ear'],
+  // --- Standard Potions ---
+  'potion_minor_strength': { 
+    id: 'potion_minor_strength', name: 'Potion of Minor Strength', goldValue: 50, icon: potionIcon1,
+    recipe: [{ baseName: 'chopped_vegetable', amount: 1 }, { baseName: 'distilled_liquid', amount: 1 }],
+    maxPotency: 10, // 1 fine + 1 fine
     buff: { target: 'dungeon', type: 'temp_stat', effect: { attack: 10 }, durationFloors: 3, description: 'Grants +10 Attack for 3 floors.' }
   },
-  'potion_stonehide': { id: 'potion_stonehide', name: 'Stonehide Draught', goldValue: 150, icon: potionIcon2,
-    recipe: ['focuroot', 'skeleton_bone', 'golem_heart'],
+  'potion_stonehide': { 
+    id: 'potion_stonehide', name: 'Stonehide Draught', goldValue: 150, icon: potionIcon2,
+    recipe: [{ baseName: 'ground_powder', amount: 2 }, { baseName: 'chopped_vegetable', amount: 1 }],
+    maxPotency: 15, // 2 fine + 1 fine
     buff: { target: 'dungeon', type: 'temp_stat', effect: { hp: 50 }, durationFloors: 3, description: 'Grants +50 Max HP for 3 floors.' }
   },
-
-  // Tower Defense Potions
-  'potion_tower_power': { id: 'potion_tower_power', name: 'Elixir of Power', goldValue: 100, icon: potionIcon7,
-    recipe: ['swiftblossom', 'pristine_crystal'],
+  'potion_tower_power': { 
+    id: 'potion_tower_power', name: 'Elixir of Tower Power', goldValue: 100, icon: potionIcon7,
+    recipe: [{ baseName: 'chopped_vegetable', amount: 1 }, { baseName: 'ground_powder', amount: 1 }],
+    maxPotency: 10,
     buff: { target: 'tower_defense', type: 'start_boost', effect: { startingXP: 200 }, description: 'Start your next TD game with an extra 200 XP.' }
   },
-  'potion_castle_health': { id: 'potion_castle_health', name: 'Castle Fortification', goldValue: 200, icon: potionIcon15,
-    recipe: ['stillpetal', 'dragon_scale', 'pristine_crystal'],
+  'potion_castle_health': { 
+    id: 'potion_castle_health', name: 'Draught of Fortification', goldValue: 200, icon: potionIcon15,
+    recipe: [{ baseName: 'ground_powder', amount: 2 }, { baseName: 'ground_powder', amount: 1 }],
+    maxPotency: 15,
     buff: { target: 'tower_defense', type: 'start_boost', effect: { startingHealth: 2 }, description: 'Start your next TD game with +2 Castle Health.' }
   },
-
-  // General / XP Potions
-  'potion_xp_boost': { id: 'potion_xp_boost', name: 'Potion of Enlightenment', goldValue: 250, icon: potionIcon20,
-    recipe: ['sunfruit', 'shadow_essence', 'stardust_phial'],
+  'potion_xp_boost': { 
+    id: 'potion_xp_boost', name: 'Potion of Enlightenment', goldValue: 250, icon: potionIcon20,
+    recipe: [{ baseName: 'distilled_liquid', amount: 2 }, { baseName: 'distilled_liquid', amount: 1 }],
+    maxPotency: 15,
     buff: { target: 'global', type: 'xp_multiplier', effect: { multiplier: 1.25 }, durationTasks: 3, description: 'Gain 25% more XP from the next 3 completed assignments.' }
   },
-  'potion_luck': { id: 'potion_luck', name: 'Brewer\'s Luck Elixir', goldValue: 180, icon: potionIcon13,
-    recipe: ['luckleaf', 'ingredientEyeballs', 'ingredientVoodooDoll'],
+  'potion_luck': { 
+    id: 'potion_luck', name: 'Brewer\'s Luck Elixir', goldValue: 180, icon: potionIcon13,
+    recipe: [{ baseName: 'ground_powder', amount: 1 }, { baseName: 'distilled_liquid', amount: 1 }],
+    maxPotency: 10,
     buff: { target: 'global', type: 'slot_machine', effect: { bonus: 'better_odds' }, durationSpins: 5, description: 'Slightly increases your odds of a good result at the Slot Machine for 5 spins.' }
   },
+  // --- Potent Potions ---
+  'potion_minor_strength_potent': { 
+    id: 'potion_minor_strength_potent', name: 'Potent Potion of Strength', goldValue: 100, icon: potionIcon1,
+    buff: { target: 'dungeon', type: 'temp_stat', effect: { attack: 18 }, durationFloors: 4, description: 'Grants +18 Attack for 4 floors.' }
+  },
+  'potion_stonehide_potent': { 
+    id: 'potion_stonehide_potent', name: 'Potent Stonehide Draught', goldValue: 300, icon: potionIcon2,
+    buff: { target: 'dungeon', type: 'temp_stat', effect: { hp: 80 }, durationFloors: 4, description: 'Grants +80 Max HP for 4 floors.' }
+  },
+  'potion_tower_power_potent': { 
+    id: 'potion_tower_power_potent', name: 'Potent Elixir of Tower Power', goldValue: 200, icon: potionIcon7,
+    buff: { target: 'tower_defense', type: 'start_boost', effect: { startingXP: 350 }, description: 'Start your next TD game with an extra 350 XP.' }
+  },
+  'potion_castle_health_potent': { 
+    id: 'potion_castle_health_potent', name: 'Potent Draught of Fortification', goldValue: 400, icon: potionIcon15,
+    buff: { target: 'tower_defense', type: 'start_boost', effect: { startingHealth: 4 }, description: 'Start your next TD game with +4 Castle Health.' }
+  },
+  'potion_xp_boost_potent': { 
+    id: 'potion_xp_boost_potent', name: 'Potent Potion of Enlightenment', goldValue: 500, icon: potionIcon20,
+    buff: { target: 'global', type: 'xp_multiplier', effect: { multiplier: 1.5 }, durationTasks: 3, description: 'Gain 50% more XP from the next 3 completed assignments.' }
+  },
+  'potion_luck_potent': { 
+    id: 'potion_luck_potent', name: 'Potent Brewer\'s Luck Elixir', goldValue: 360, icon: potionIcon13,
+    buff: { target: 'global', type: 'slot_machine', effect: { bonus: 'much_better_odds' }, durationSpins: 5, description: 'Greatly increases your odds of a good result at the Slot Machine for 5 spins.' }
+  },
 };
-
-// --- END ALCHEMY DEFINITIONS ---
 
 const generatePath = () => {
     const boardSize = 10;
@@ -781,7 +1073,14 @@ const generateQuests = () => {
     weekly.push({ ...weeklyPool[randomIndex], progress: 0, completed: false });
   }
 
-  return { daily, weekly, lastUpdated: serverTimestamp() };
+  let contract = null;
+  // 25% chance to generate a new contract offer if one isn't already active/offered
+  if (Math.random() < 0.25) {
+      const contractDef = contractDefinitions[Math.floor(Math.random() * contractDefinitions.length)];
+      contract = { ...contractDef, status: 'offered' };
+  }
+
+  return { daily, weekly, lastUpdated: serverTimestamp(), contract };
 };
 
 // Moved this function to the top-level scope to make it accessible by all components in this file.
@@ -791,16 +1090,24 @@ const generateInitialDungeonState = () => {
     playerClass: null,
     floor: 1,
     board: {},
-    player: { x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, hasKey: false, activeEffects: [] },
+    player: { 
+        id: 'player', entityType: 'player', x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, hasKey: false, activeEffects: [],
+        lastWeaponSwitchFloor: 0,
+    },
     enemies: [],
     enemyMovePaths: {}, 
-    lastMoveTrails: [], // NEW: To track only the last turn's movement
+    lastMoveTrails: [],
     turnCount: 1,
     log: ['Choose your class to begin your adventure.'],
     gameOver: false,
     shopOpen: false,
+    shopView: 'buy', // 'buy' or 'armory'
     ownedWeapons: [],
+    ownedOffhandWeapons: [],
     ownedArmor: [],
+    equippedWeapon: null,
+    equippedOffhandWeapon: null,
+    equippedArmor: null,
     potions: 0,
     boughtStats: { hp: 0, attack: 0 },
   };
@@ -813,6 +1120,7 @@ const defaultStats = {
   focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
   activeBoosts: [],
   dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
+  dungeon_wingmen: { roster: [], graveyard: [], equipped: null, upgrades: {} },
   td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
   lab_state: {
     sciencePoints: 0,
@@ -824,15 +1132,26 @@ const defaultStats = {
   alchemy_state: {
     gold: 100,
     inventory: { 'seed_focuroot': 3 },
-    unlockedRecipes: ['potion_minor_strength'],
-    upgrades: { garden_plots: 1 },
+    unlockedRecipes: ['potion_minor_strength', 'potion_stonehide', 'potion_tower_power'],
+    upgrades: { 
+      garden_plots: 1,
+      bench_level: 1,
+      cauldron_level: 1,
+      grimoire_level: 1,
+    },
+    cat: {
+      name: 'Jasper',
+      equippedAppearance: 'cat1',
+      unlockedAppearances: ['cat1'],
+    },
     gardenPlots: [
       { plantId: null, plantedAt: null, stage: 0 }
     ],
   },
   studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
   achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
-  quests: generateQuests()
+  quests: generateQuests(),
+  contract: null,
 };
 
 
@@ -851,6 +1170,11 @@ const AddAssignmentModal = ({ isOpen, onClose, onSubmit }) => {
     recurrenceEndDate: '',
     tags: [], // New: tags array
   });
+  const [isEpic, setIsEpic] = useState(false);
+
+  const isEligibleForEpic = useMemo(() => {
+    return newAssignment.difficulty === 'Hard' && parseFloat(newAssignment.timeEstimate) >= 8;
+  }, [newAssignment.difficulty, newAssignment.timeEstimate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -869,14 +1193,16 @@ const AddAssignmentModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(newAssignment);
-    setNewAssignment({ // Reset form
+    onSubmit({ ...newAssignment, isEpic: isEligibleForEpic && isEpic });
+    // Reset form
+    setNewAssignment({
       class: '', assignment: '', dueDate: '', timeEstimate: '',
       pointsEarned: '', pointsMax: '',
       difficulty: 'Easy', status: 'To Do',
       recurrenceType: 'none', recurrenceEndDate: '',
       tags: [],
     });
+    setIsEpic(false);
     onClose();
   };
 
@@ -988,8 +1314,26 @@ return (
             </div>
           </div>
 
+          {/* Epic Quest Option */}
+          {isEligibleForEpic && (
+            <div className="md:col-span-2 bg-indigo-900/50 border border-indigo-700 p-4 rounded-lg">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isEpic}
+                  onChange={(e) => setIsEpic(e.target.checked)}
+                  className="form-checkbox h-5 w-5 text-indigo-500 rounded bg-slate-800 border-slate-600"
+                />
+                <div>
+                  <span className="font-bold text-white">Make this an Epic Quest!</span>
+                  <p className="text-xs text-indigo-300">This will automatically add milestone subtasks and grant bonus XP for completing them.</p>
+                </div>
+              </label>
+            </div>
+          )}
+
           {/* Recurrence Options */}
-          <div className="md:col-span-2 border-t border-slate-700 pt-4 mt-4">
+          <div className="md:col-span-2 border-t border-slate-700 pt-4 mt-2">
             <label htmlFor="recurrenceType" className="block text-slate-400 text-sm font-bold mb-1">Recurrence</label>
             <select
               id="recurrenceType"
@@ -1371,8 +1715,67 @@ const Projectile = ({ from, to, type }) => {
   );
 };
 // Particle Effect Component
-const Particle = ({ onComplete }) => {
+const GachaAnimationModal = ({ isOpen, onAnimationComplete, result }) => {
+  const [phase, setPhase] = useState('shaking'); // shaking, revealing, revealed
+
   useEffect(() => {
+    if (isOpen) {
+      setPhase('shaking');
+      const revealTimer = setTimeout(() => setPhase('revealing'), 2000); // 2s shake
+      const revealedTimer = setTimeout(() => setPhase('revealed'), 3000); // 1s reveal transition
+      return () => {
+        clearTimeout(revealTimer);
+        clearTimeout(revealedTimer);
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const renderResult = () => {
+    if (!result) return <p>An error occurred.</p>;
+    switch (result.type) {
+      case 'wingman':
+        return <p className="text-2xl font-bold text-green-400">New Recruit: {result.wingman.name}!</p>;
+      case 'gold':
+        return <p className="text-2xl font-bold text-yellow-400">You found {result.amount} Gold!</p>;
+      case 'nothing':
+        return <p className="text-2xl font-bold text-slate-500">The box was empty...</p>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 border border-slate-700 p-8 rounded-lg text-center">
+        <h3 className="text-3xl font-bold mb-6">Opening Lootbox...</h3>
+        <div className="w-48 h-48 mx-auto mb-6 text-8xl flex items-center justify-center">
+          <span className={`transition-transform duration-1000 ${phase === 'shaking' ? 'animate-shake' : ''} ${phase === 'revealing' || phase === 'revealed' ? 'scale-150 opacity-0' : 'scale-100'}`}>📦</span>
+        </div>
+        
+        {phase === 'revealed' && (
+          <div className="animate-fade-in">
+            {renderResult()}
+            <button onClick={() => onAnimationComplete(result)} className="mt-6 bg-indigo-600 text-white px-6 py-2 rounded-lg">Continue</button>
+          </div>
+        )}
+      </div>
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.5s infinite; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
+      `}</style>
+    </div>
+  );
+};
+// In App.js, right after the closing of the Projectile component definition
+const Particle = ({ onComplete }) => {  useEffect(() => {
     const timer = setTimeout(onComplete, 500); // Animation duration
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -1397,27 +1800,436 @@ const Particle = ({ onComplete }) => {
       })}
     </>
   );
+}; 
+
+// --- NEW: WingmanBarracks Component with Upgrades ---
+const WingmanBarracks = ({ stats, wingmanDefs, updateStatsInFirestore, showMessageBox, sessionGold, sessionXp, isRunActive, pendingEquippedWingman, onEquipWingman }) => {
+  const [selectedView, setSelectedView] = useState('recruit'); // 'recruit' or a wingman instanceId
+  const [barracksView, setBarracksView] = useState('roster'); // 'roster' or 'graveyard'
+  const [isGachaAnimating, setIsGachaAnimating] = useState(false);
+  const [gachaResult, setGachaResult] = useState(null);
+  
+  const roster = stats.dungeon_wingmen?.roster || [];
+  const graveyard = stats.dungeon_wingmen?.graveyard || [];
+  const selectedUnit = roster.find(w => w.instanceId === selectedView) || graveyard.find(w => w.instanceId === selectedView);
+
+  const handleRecruitXP = (wingmanId) => {
+    const def = wingmanDefs[wingmanId];
+    if (sessionXp < def.cost) { showMessageBox("Not enough XP!", "error"); return; }
+    
+    const newWingmanInstance = { ...def, instanceId: `${wingmanId}_${Date.now()}` };
+
+    updateStatsInFirestore({
+      totalXP: increment(-def.cost),
+      'dungeon_wingmen.roster': [...(stats.dungeon_wingmen.roster || []), newWingmanInstance],
+    });
+    showMessageBox(`Recruited ${def.name}!`, 'info');
+  };
+
+  const handleRecruitGold = () => {
+    if (sessionGold < 500) { showMessageBox("Not enough Gold!", "error"); return; }
+    
+    updateStatsInFirestore({ dungeon_gold: increment(-500) });
+    
+    const roll = Math.random();
+    let result;
+
+    if (roll < 0.1) { // 10% chance of nothing
+        result = { type: 'nothing' };
+    } else if (roll < 0.4) { // 30% chance of gold
+        const amount = Math.floor(Math.random() * 501) + 250; // 250 to 750 gold
+        result = { type: 'gold', amount };
+    } else { // 60% chance of a wingman
+        const gachaPool = Object.values(wingmanDefs).filter(w => w.currency === 'gold');
+        
+        if (gachaPool.length === 0) { // Should not happen, but good practice
+            result = { type: 'gold', amount: 500 };
+        } else {
+            const recruit = gachaPool[Math.floor(Math.random() * gachaPool.length)];
+            const newInstance = { ...recruit, instanceId: `${recruit.id}_${Date.now()}` };
+            result = { type: 'wingman', wingman: newInstance };
+        }
+    }
+    
+    setGachaResult(result);
+    setIsGachaAnimating(true);
+  };
+
+  const handleGachaAnimationEnd = (result) => {
+      setIsGachaAnimating(false);
+      setGachaResult(null);
+  
+      let updates = {};
+      let message = "";
+  
+      if (result.type === 'gold') {
+          updates.dungeon_gold = increment(result.amount);
+          message = `You found ${result.amount} Gold in the lootbox!`;
+      } else if (result.type === 'wingman') {
+          updates['dungeon_wingmen.roster'] = [...(stats.dungeon_wingmen.roster || []), result.wingman];
+          message = `From the shadows emerges... ${result.wingman.name}!`;
+      } else { // 'nothing'
+          message = "The lootbox was empty...";
+      }
+  
+      if (Object.keys(updates).length > 0) {
+          updateStatsInFirestore(updates);
+      }
+      showMessageBox(message, 'info');
+  };
+
+  const handlePurchaseUpgrade = (wingman, upgrade) => {
+    if (sessionXp < upgrade.cost) { showMessageBox("Not enough XP!", "error"); return; }
+
+    const upgrades = stats.dungeon_wingmen?.upgrades || {};
+    const purchasedUpgrades = upgrades[wingman.id] || [];
+
+    // Prevent re-buying a choice-based upgrade
+    if (upgrade.type === 'choice') {
+      const tierUpgrades = wingmanUpgrades[wingman.id]?.ability || [];
+      if (tierUpgrades.some(u => purchasedUpgrades.includes(u.id))) {
+        showMessageBox("You have already chosen a specialization for this ability.", "error");
+        return;
+      }
+    }
+    
+    updateStatsInFirestore({
+      totalXP: increment(-upgrade.cost),
+      [`dungeon_wingmen.upgrades.${wingman.id}`]: [...purchasedUpgrades, upgrade.id]
+    });
+
+    showMessageBox(`Purchased upgrade: ${upgrade.name}!`, 'info');
+  };
+
+  const SpriteIcon = ({ style, size = 60 }) => {
+    // Determine the scale factor needed to fit the largest dimension of the sprite into the 'size' box.
+    const largestDim = Math.max(style.width, style.height);
+    const scale = size / largestDim;
+
+    return (
+      // Outer container: A fixed-size box that centers its child.
+      <div style={{
+        width: size,
+        height: size,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden', // Prevents scaled sprite from overflowing
+      }}>
+        {/* Inner container: Holds the sprite at its original dimensions and is then scaled down. */}
+        <div style={{
+          width: style.width,          // Original sprite width
+          height: style.height,        // Original sprite height
+          backgroundImage: `url(${wingmenSpriteSheet})`,
+          backgroundPosition: style.backgroundPosition, // Original, unscaled position
+          transform: `scale(${scale})`, // Scale the entire element down
+          transformOrigin: 'center',   // Ensure scaling happens from the center
+          imageRendering: 'pixelated',
+          flexShrink: 0, // Prevent flexbox from shrinking this element
+        }} />
+      </div>
+    );
+  };
+  
+  const UpgradedStats = ({ wingman }) => {
+    const baseStats = wingmanDefs[wingman.id];
+    const mergedWingman = { ...baseStats, ...wingman };
+
+    const { totalStats, bonuses } = useMemo(() => {
+        const purchased = stats.dungeon_wingmen?.upgrades?.[mergedWingman.id] || [];
+        const available = wingmanUpgrades[mergedWingman.id];
+        
+        const calculatedBonuses = { hp: 0, atk: 0, armor: 0, thorns: 0 };
+        const finalStats = { ...mergedWingman };
+
+        if (available?.stats) {
+          purchased.forEach(upgradeId => {
+            const upgrade = available.stats.find(u => u.id === upgradeId);
+            if (upgrade?.effect) {
+              for (const stat in upgrade.effect) {
+                // Add to bonus tracker
+                if (calculatedBonuses.hasOwnProperty(stat)) {
+                  calculatedBonuses[stat] += upgrade.effect[stat];
+                }
+                // Apply to final stat total
+                finalStats[stat] = (finalStats[stat] || 0) + upgrade.effect[stat];
+              }
+            }
+          });
+        }
+        return { totalStats: finalStats, bonuses: calculatedBonuses };
+    }, [mergedWingman.id, stats.dungeon_wingmen?.upgrades]);
+
+    const primaryAbility = mergedWingman.abilities?.[0];
+
+    return (
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <p>HP: <span className="font-bold text-red-400">{mergedWingman.hp} {bonuses.hp > 0 && <span className="text-green-400">(+{bonuses.hp})</span>}</span></p>
+        <p>Attack: <span className="font-bold text-yellow-400">{mergedWingman.atk} {bonuses.atk > 0 && <span className="text-green-400">(+{bonuses.atk})</span>}</span></p>
+        <p>Armor: <span className="font-bold text-slate-400">{mergedWingman.armor || 0} {bonuses.armor > 0 && <span className="text-green-400">(+{bonuses.armor})</span>}</span></p>
+        <p>AP / Turn: <span className="font-bold text-cyan-400">{mergedWingman.ap}</span></p>
+        {totalStats.thorns > 0 && <p>Thorns: <span className="font-bold text-orange-400">{totalStats.thorns}</span></p>}
+        <p>Move Range: <span className="font-bold text-slate-400">{totalStats.moveRange}</span></p>
+        <p>Attack Cost: <span className="font-bold text-slate-400">{totalStats.attackCost} AP</span></p>
+        {primaryAbility && <p className="col-span-2">Ability: <span className="font-bold text-slate-400">{primaryAbility.name} ({primaryAbility.cost} AP)</span></p>}
+      </div>
+    );
+  };
+
+
+  return (
+    <div className="mt-6 bg-slate-800/50 border border-slate-700 rounded-2xl p-4">
+      <GachaAnimationModal isOpen={isGachaAnimating} onAnimationComplete={handleGachaAnimationEnd} result={gachaResult} />
+      <h3 className="text-3xl font-bold text-white mb-4">Barracks</h3>
+      <div className="flex flex-col md:flex-row gap-4 min-h-[60vh]">
+        {/* Left Panel: Roster / Graveyard */}
+        <div className="w-full md:w-1/3 lg:w-1/4 bg-slate-900/50 p-3 rounded-lg flex flex-col">
+          <div className="flex border-b border-slate-700 mb-2">
+            <button onClick={() => setBarracksView('roster')} className={`flex-1 py-2 text-sm font-semibold ${barracksView === 'roster' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400'}`}>Roster ({roster.length})</button>
+            <button onClick={() => setBarracksView('graveyard')} className={`flex-1 py-2 text-sm font-semibold ${barracksView === 'graveyard' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400'}`}>Graveyard ({graveyard.length})</button>
+          </div>
+          <div className="space-y-2 overflow-y-auto flex-grow">
+            {barracksView === 'roster' && roster.map(w => (
+              <button key={w.instanceId} onClick={() => setSelectedView(w.instanceId)} className={`w-full flex items-center gap-3 p-2 rounded-md transition-colors ${selectedView === w.instanceId ? 'bg-indigo-600' : 'bg-slate-800 hover:bg-slate-700'}`}>
+                <div className="w-10 h-10 bg-slate-900 rounded-md flex items-center justify-center flex-shrink-0"><SpriteIcon style={w.spriteStyle} size={36} /></div>
+                <div>
+                  <p className="font-semibold text-left text-sm">{w.name}</p>
+                  <p className="text-xs text-slate-400 text-left">{w.role}</p>
+                </div>
+              </button>
+            ))}
+            {barracksView === 'graveyard' && graveyard.map(w => (
+              <button key={w.instanceId} onClick={() => setSelectedView(w.instanceId)} className={`w-full flex items-center gap-3 p-2 rounded-md transition-colors ${selectedView === w.instanceId ? 'bg-indigo-600' : 'bg-slate-800 hover:bg-slate-700'}`}>
+                <div className="w-10 h-10 bg-slate-900 rounded-md flex items-center justify-center flex-shrink-0"><SpriteIcon style={w.spriteStyle} size={36} /></div>
+                <div>
+                  <p className="font-semibold text-left text-sm">{w.name}</p>
+                  <p className="text-xs text-slate-500 text-left">Fallen in battle</p>
+                </div>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => { setSelectedView('recruit'); setBarracksView('roster'); }} className={`w-full flex items-center justify-center gap-3 p-2 mt-2 rounded-md transition-colors ${selectedView === 'recruit' ? 'bg-indigo-600' : 'bg-slate-800 hover:bg-slate-700'}`}>
+            <span className="text-2xl">+</span><span className="font-semibold">Recruit New Wingmen</span>
+          </button>
+        </div>
+
+        {/* Right Panel: Details/Recruit */}
+        <div className="w-full md:w-2/3 lg:w-3/4 bg-slate-900/50 p-4 rounded-lg">
+          {selectedUnit ? (
+            <div>
+              <div className="flex flex-col sm:flex-row gap-4 items-center mb-4 pb-4 border-b border-slate-700">
+                <div className="w-24 h-24 bg-slate-800 rounded-lg flex items-center justify-center"><SpriteIcon style={selectedUnit.spriteStyle} size={80} /></div>
+                <div className="flex-grow">
+                    <h3 className="text-2xl font-bold">{selectedUnit.name}</h3>
+                    <p className="text-indigo-400 font-semibold">{selectedUnit.role}</p>
+                    {selectedUnit.dateOfDeath ? (
+                      <p className="text-sm text-red-400 mt-2">Defeated on: {new Date(selectedUnit.dateOfDeath).toLocaleDateString()}</p>
+                    ) : (
+                      <div className="mt-2"><UpgradedStats wingman={selectedUnit} /></div>
+                    )}
+                </div>
+                {!selectedUnit.dateOfDeath && (
+                  <div className="flex-shrink-0">
+                    {pendingEquippedWingman === selectedUnit.instanceId ?
+                      <button onClick={() => onEquipWingman(null)} disabled={isRunActive} className="w-full sm:w-auto bg-slate-600 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Equipped</button> :
+                      <button onClick={() => onEquipWingman(selectedUnit.instanceId)} disabled={isRunActive} className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50">Equip</button>
+                    }
+                  </div>
+                )}
+              </div>
+              
+              {!selectedUnit.dateOfDeath && (
+                <>
+                  <h4 className="text-xl font-semibold text-white mb-2">Training</h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                          <h5 className="text-lg font-semibold text-indigo-300 mb-2">Stat Training</h5>
+                          <div className="space-y-2">
+                              {(wingmanUpgrades[selectedUnit.id]?.stats || []).map(upgrade => {
+                                  const purchasedCount = (stats.dungeon_wingmen?.upgrades?.[selectedUnit.id] || []).filter(id => id === upgrade.id).length;
+                                  const isOwned = purchasedCount > 0 && upgrade.type !== 'repeatable';
+                                  return (
+                                      <div key={upgrade.id} className="bg-slate-800 p-3 rounded-md flex justify-between items-center">
+                                          <div>
+                                              <p className="font-semibold">{upgrade.name}</p>
+                                              <p className="text-xs text-slate-400">{upgrade.description}</p>
+                                          </div>
+                                          <button onClick={() => handlePurchaseUpgrade(selectedUnit, upgrade)} disabled={isOwned} className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white text-sm font-semibold px-3 py-1 rounded-md">
+                                            {isOwned ? 'Owned' : `${upgrade.cost} XP`}
+                                          </button>
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                      </div>
+                      <div>
+                          <h5 className="text-lg font-semibold text-indigo-300 mb-2">Ability Specialization</h5>
+                          <div className="space-y-2">
+                            {(wingmanUpgrades[selectedUnit.id]?.ability || []).map(upgrade => {
+                                  const purchasedUpgrades = stats.dungeon_wingmen?.upgrades?.[selectedUnit.id] || [];
+                                  const isOwned = purchasedUpgrades.includes(upgrade.id);
+                                  const hasChosenTier = (wingmanUpgrades[selectedUnit.id]?.ability || []).some(u => purchasedUpgrades.includes(u.id));
+                                  return (
+                                      <div key={upgrade.id} className="bg-slate-800 p-3 rounded-md">
+                                          <p className="font-semibold">{upgrade.name}</p>
+                                          <p className="text-xs text-slate-400 mb-2">{upgrade.description}</p>
+                                          <button onClick={() => handlePurchaseUpgrade(selectedUnit, upgrade)} disabled={isOwned || hasChosenTier} className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white text-sm font-semibold px-3 py-1 rounded-md">
+                                            {isOwned ? 'Chosen' : hasChosenTier ? 'Path Chosen' : `Specialize (${upgrade.cost} XP)`}
+                                          </button>
+                                      </div>
+                                  );
+                            })}
+                          </div>
+                      </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : ( /* Recruit View */
+            <div>
+              <h4 className="text-xl font-semibold text-white mb-2">Recruit with XP</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                {Object.values(wingmanDefs).filter(w => w.currency === 'xp').map(wingman => {
+                  const isOwned = roster.some(r => r.id === wingman.id);
+                  return (
+                    <div key={wingman.id} className="p-4 bg-slate-800/80 rounded-lg flex flex-col items-center text-center border border-slate-700">
+                      <div className="h-16 flex items-center justify-center"><SpriteIcon style={wingman.spriteStyle} size={60} /></div>
+                      <p className="font-bold mt-2 flex-grow">{wingman.name}</p>
+                      <button disabled={isOwned} onClick={() => handleRecruitXP(wingman.id)} className="mt-3 w-full bg-blue-600 text-white text-sm py-1 rounded hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed">
+                        {isOwned ? 'Recruited' : `${wingman.cost} XP`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <h4 className="text-xl font-semibold text-white mb-2">Recruit with Gold</h4>
+              <button onClick={handleRecruitGold} className="w-full p-4 bg-yellow-600 text-black font-bold rounded-lg hover:bg-yellow-700">
+                Spend 500 Gold for a Rare or Epic Recruit
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp, isMobile, addIngredientToInventory }) => {  // This state holds the entire dungeon object (board, enemies, player location, etc.)
+const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFullPetDetails, onResetDungeon, getFullCosmeticDetails, processAchievement, syncDungeonXp, isMobile, addIngredientToInventory }) => {
+  const statsPropRef = useRef(stats);
+  useEffect(() => {
+    statsPropRef.current = stats;
+  }, [stats]);
   const [localDungeonState, setLocalDungeonState] = useState(stats.dungeon_state);
-  // REFACTORED: movingEnemies is no longer needed as the animation is now driven by state updates.
   const [animationState, setAnimationState] = useState({ hits: {}, particles: [], enemyPaths: {} });
-  const [isEnemyTurn, setIsEnemyTurn] = useState(false);
+  const [activeTurn, setActiveTurn] = useState('player');
+  const [playerActionPoints, setPlayerActionPoints] = useState(2);
+  const [wingmanActionPoints, setWingmanActionPoints] = useState(0);
+  const [wingmanAbilityTarget, setWingmanAbilityTarget] = useState(null);
   const [dangerZone, setDangerZone] = useState({ tiles: [], forEnemy: null });
+  const [barracksOpen, setBarracksOpen] = useState(false);
+  const [pendingEquippedWingman, setPendingEquippedWingman] = useState(stats.dungeon_wingmen?.equipped);
+  const [wingmanTurnState, setWingmanTurnState] = useState({ distanceMoved: 0, frenziedAttackAvailable: false });
 
   // These states track resources for the current session to batch updates.
   const [sessionXp, setSessionXp] = useState(stats.totalXP);
   const [sessionGold, setSessionGold] = useState(stats.dungeon_gold || 0);
   
-  // NEW: Ref to hold the latest state for use in closures like the game loop.
   const dungeonStateRef = useRef(localDungeonState);
   useEffect(() => {
     dungeonStateRef.current = localDungeonState;
   }, [localDungeonState]);
 
-  const [attackTarget, setAttackTarget] = useState(null); 
+  // Syncs the pending choice with the saved choice from Firestore when stats change.
+  useEffect(() => {
+    setPendingEquippedWingman(stats.dungeon_wingmen?.equipped);
+  }, [stats.dungeon_wingmen?.equipped]);
+
+  // NEW & IMPROVED: Wingman spawning with stat AND ability upgrades.
+  useEffect(() => {
+    const state = localDungeonState;
+    const equippedWingmanInstanceId = pendingEquippedWingman; // This now holds the instanceId
+
+    if (state.phase !== 'playing' || state.floor !== 1 || state.turnCount > 1) return;
+
+    const currentWingmanInstanceId = state.wingman?.instanceId;
+
+    // Handle unequipping
+    if (!equippedWingmanInstanceId && currentWingmanInstanceId) {
+      const oldPos = `${state.wingman.y},${state.wingman.x}`;
+      setLocalDungeonState(prev => {
+        const newBoard = { ...prev.board };
+        if (newBoard[oldPos]?.type === 'wingman') newBoard[oldPos] = { type: 'empty' };
+        return { ...prev, wingman: null, board: newBoard };
+      });
+      return;
+    }
+
+    // Handle equipping a new/different wingman
+    if (equippedWingmanInstanceId && equippedWingmanInstanceId !== currentWingmanInstanceId) {
+      const wingmanRosterEntry = (stats.dungeon_wingmen?.roster || []).find(w => w.instanceId === equippedWingmanInstanceId);
+      if (!wingmanRosterEntry) {
+          console.error("Equipped wingman not found in roster:", equippedWingmanInstanceId);
+          return;
+      }
+      
+      const upgradedWingman = JSON.parse(JSON.stringify(wingmanRosterEntry)); // Deep copy from the roster entry
+      const baseDef = wingmanDefinitions[upgradedWingman.id];
+      const purchasedUpgrades = stats.dungeon_wingmen?.upgrades?.[upgradedWingman.id] || [];
+      
+      // Reset all potentially upgradeable stats to their base definition values
+      Object.assign(upgradedWingman, {
+        hp: baseDef.hp,
+        atk: baseDef.atk,
+        armor: baseDef.armor || 0,
+        thorns: baseDef.thorns || 0,
+      });
+      
+      // Re-apply all purchased stat upgrades generically
+      purchasedUpgrades.forEach(upgradeId => {
+        const upgradeDef = wingmanUpgrades[upgradedWingman.id]?.stats.find(u => u.id === upgradeId);
+        if (upgradeDef?.effect) {
+          for (const stat in upgradeDef.effect) {
+            upgradedWingman[stat] = (upgradedWingman[stat] || 0) + upgradeDef.effect[stat];
+          }
+        }
+      });
+      upgradedWingman.maxHp = upgradedWingman.hp;
+
+      // Apply ability specializations
+      const abilityUpgradeDefs = wingmanUpgrades[upgradedWingman.id]?.ability || [];
+      const purchasedAbilityUpgrade = abilityUpgradeDefs.find(u => purchasedUpgrades.includes(u.id));
+      if (purchasedAbilityUpgrade) {
+          upgradedWingman.abilities = upgradedWingman.abilities.map(ability => ({
+              ...ability,
+              specialization: purchasedAbilityUpgrade.id // Add specialization ID to the ability object
+          }));
+      }
+
+      setLocalDungeonState(prev => {
+        let newBoard = { ...prev.board };
+        if (prev.wingman) {
+          const oldPos = `${prev.wingman.y},${prev.wingman.x}`;
+          if (newBoard[oldPos]?.type === 'wingman') newBoard[oldPos] = { type: 'empty' };
+        }
+        
+        const possibleSpots = [{x: 1, y: 0}, {x: 0, y: 1}, {x: 2, y: 1}, {x: 1, y: 2}];
+        const startPos = possibleSpots.find(p => newBoard[`${p.y},${p.x}`]?.type === 'empty');
+
+        if (startPos) {
+          const newWingman = { ...upgradedWingman, x: startPos.x, y: startPos.y, entityType: 'wingman' };
+          newBoard[`${startPos.y},${startPos.x}`] = { type: 'wingman' };
+          setWingmanActionPoints(newWingman.ap);
+          return { ...prev, wingman: newWingman, board: newBoard };
+        }
+        return { ...prev, wingman: null };
+      });
+    }
+  }, [localDungeonState.phase, localDungeonState.floor, localDungeonState.turnCount, localDungeonState.wingman, pendingEquippedWingman, stats.dungeon_wingmen?.roster, stats.dungeon_wingmen?.upgrades]);
+
+  const [attackTarget, setAttackTarget] = useState(null); // Can be true, or an object like { type: 'secondary' }
   const [abilityTarget, setAbilityTarget] = useState(null);
+  const [shopView, setShopView] = useState('buy'); // 'buy' or 'armory'
+  const [selectedArmoryItem, setSelectedArmoryItem] = useState(null);
   
   const addLog = useCallback((message, style = 'text-slate-300') => {
     // Add a unique ID to each log entry
@@ -1473,33 +2285,90 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       archer: { name: 'Archer', icon: '🏹', description: 'A nimble marksman who attacks from a great distance.', startingHp: 60, moveCost: 5, attackCost: 60, attackRange: 5, ability: { id: 'double_tap', name: 'Double Tap', cost: 150 } },
       tank: { name: 'Tank', icon: '🛡️', description: 'A sturdy protector who can endure heavy damage.', startingHp: 200, moveCost: 8, attackCost: 40, attackRange: 1.5, ability: { id: 'hunker_down', name: 'Hunker Down', cost: 80 } },
     },
-    weapons: [ // Warrior
-      { id: 'weapon_sword', name: 'Iron Sword', cost: 500, attack: 10, class: 'warrior' },
-      { id: 'weapon_axe', name: 'Battle Axe', cost: 1000, attack: 25, class: 'warrior' },
-      { id: 'weapon_flame', name: 'Flame Tongue', cost: 2000, attack: 45, class: 'warrior' },
-      { id: 'weapon_void', name: 'Void Blade', cost: 5000, attack: 70, class: 'warrior' },
-      { id: 'weapon_sunforged', name: 'Sunforged Blade', cost: 7500, attack: 100, class: 'warrior', tdWinsRequired: 5 },
-    ],
-    wands: [ // Mage
-      { id: 'wand_apprentice', name: 'Apprentice Wand', cost: 500, attack: 15, aoeRange: 1.5, class: 'mage' },
-      { id: 'wand_fireball', name: 'Fireball Staff', cost: 1200, attack: 28, aoeRange: 1.5, class: 'mage' },
-      { id: 'wand_lightning', name: 'Lightning Staff', cost: 2500, attack: 50, aoeRange: 2, class: 'mage' },
-      { id: 'wand_void', name: 'Void Core Staff', cost: 5000, attack: 75, aoeRange: 2, class: 'mage' },
-      { id: 'wand_archmage', name: 'Archmage\'s Staff', cost: 7500, attack: 110, aoeRange: 2.5, class: 'mage', tdWinsRequired: 5 },
-    ],
-    bows: [ // Archer
-      { id: 'bow_short', name: 'Shortbow', cost: 500, attack: 12, class: 'archer' },
-      { id: 'bow_long', name: 'Longbow', cost: 1100, attack: 28, class: 'archer' },
-      { id: 'bow_eagle', name: 'Eagle Eye Bow', cost: 2200, attack: 55, class: 'archer' },
-      { id: 'bow_void', name: 'Voidstring Bow', cost: 5000, attack: 80, class: 'archer' },
-      { id: 'bow_sunstrider', name: 'Sunstrider\'s Mark', cost: 7500, attack: 120, class: 'archer', tdWinsRequired: 5 },
-    ],
-    shields: [ // Tank
-      { id: 'shield_iron', name: 'Iron Shield', cost: 500, attack: 8, hp: 50, class: 'tank' },
-      { id: 'shield_steel', name: 'Steel Tower Shield', cost: 1000, attack: 15, hp: 120, class: 'tank' },
-      { id: 'shield_aegis', name: 'Aegis Wall', cost: 2000, attack: 25, hp: 250, class: 'tank' },
-      { id: 'shield_void', name: 'Void Bulwark', cost: 5000, attack: 40, hp: 400, class: 'tank' },
-      { id: 'shield_unbreakable', name: 'The Unbreakable', cost: 7500, attack: 60, hp: 600, class: 'tank', tdWinsRequired: 5 },
+primaryWeapons: {
+      warrior: {
+        swords: [
+          { id: 'weapon_sword', name: 'Iron Sword', cost: 500, attack: 10, accuracy: 1.0, description: "Balanced and reliable." },
+          { id: 'weapon_broadsword', name: 'Steel Broadsword', cost: 1200, attack: 22, accuracy: 1.0, description: "A solid, dependable upgrade." },
+          { id: 'weapon_vampiric_falchion', name: 'Vampiric Falchion', cost: 2800, attack: 35, accuracy: 1.0, lifesteal: 0.15, description: "Restores 15% of damage dealt as health." },
+          { id: 'weapon_flame', name: 'Flame Tongue', cost: 2000, attack: 45, accuracy: 1.0, description: "Deals bonus fire damage." },
+          { id: 'weapon_void', name: 'Void Blade', cost: 5000, attack: 70, accuracy: 1.0, statusEffect: { type: 'weakened', chance: 0.3, duration: 2 }, description: "Has a 30% chance to weaken enemies, reducing their damage." },
+          { id: 'weapon_sunforged', name: 'Sunforged Blade', cost: 7500, attack: 100, accuracy: 1.0,  tdWinsRequired: 5, description: "A legendary, perfectly balanced blade." },
+        ],
+        axes: [
+          { id: 'weapon_axe_iron', name: 'Iron Axe', cost: 550, attack: 16, accuracy: 0.90, cleave: 0.25, description: "High damage, but less accurate. Hits adjacent enemies for 25% damage." },
+          { id: 'weapon_axe_steel', name: 'Steel War Axe', cost: 1000, attack: 25, accuracy: 0.85, cleave: 0.30, description: "A heavier axe with a better cleave effect." },
+          { id: 'weapon_axe_berserker', name: 'Berserker Axe', cost: 1200, attack: 35, accuracy: 0.80, cleave: 0.35, description: "More powerful, but wilder. Hits adjacent enemies for 35% damage." },
+          { id: 'weapon_axe_executioner', name: 'Executioner\'s Axe', cost: 4500, attack: 65, accuracy: 0.75, cleave: 0.40, description: "Incredibly powerful with a wide swing, but very inaccurate." },
+        ],
+        spears: [
+          { id: 'weapon_spear_iron', name: 'Iron Spear', cost: 600, attack: 9, attackRange: 2.5, accuracy: 1.0, description: "Increased reach allows attacking from a distance." },
+          { id: 'weapon_spear_lance', name: 'Lance', cost: 1100, attack: 18, attackRange: 2.5, accuracy: 1.0, description: "A long polearm for controlling the battlefield." },
+          { id: 'weapon_spear_pike', name: 'Steel Pike', cost: 1600, attack: 24, attackRange: 2.5, accuracy: 1.0, description: "A powerful polearm with exceptional reach." },
+          { id: 'weapon_spear_trident', name: 'Trident', cost: 3200, attack: 40, attackRange: 2.5, accuracy: 0.95, description: "A three-pronged spear that can strike multiple foes in a line." },
+        ]
+      },
+      mage: {
+        wands: [
+          { id: 'wand_apprentice', name: 'Apprentice Wand', cost: 500, attack: 15, aoeRange: 1.5, accuracy: 1.0, description: "Quick, reliable single-target damage." },
+          { id: 'wand_fireball', name: 'Fireball Wand', cost: 1200, attack: 28, aoeRange: 1.5, accuracy: 1.0, description: "Casts a small exploding fireball." },
+          { id: 'wand_frost', name: 'Frost Wand', cost: 1800, attack: 20, aoeRange: 1.5, accuracy: 1.0, statusEffect: { type: 'crippled', chance: 1.0, duration: 1, reduction: 1 }, description: "Chills the target on hit, slowing them for a turn." },
+          { id: 'wand_lightning', name: 'Lightning Wand', cost: 2500, attack: 50, aoeRange: 2, accuracy: 1.0, description: "A more powerful elemental wand." },
+          { id: 'wand_void', name: 'Void Core Wand', cost: 5000, attack: 75, aoeRange: 2, accuracy: 1.0, description: "Channels unstable but powerful energy." },
+          { id: 'wand_archmage', name: 'Archmage\'s Wand', cost: 7500, attack: 110, aoeRange: 2.5, accuracy: 1.0, tdWinsRequired: 5, description: "A wand of immense power." },
+        ],
+        staves: [
+          { id: 'staff_charged', name: 'Charged Staff', cost: 1500, attack: 40, aoeRange: 2.0, accuracy: 1.0, isChargeable: true, maxCharges: 1, description: "Can be charged for one turn to unleash a x2 damage blast." },
+          { id: 'staff_power', name: 'Staff of Power', cost: 2500, attack: 52, aoeRange: 2.0, accuracy: 1.0, isChargeable: true, maxCharges: 1, description: "A staff that holds a greater latent charge." },
+          { id: 'staff_chain_lightning', name: 'Chain Lightning Staff', cost: 3800, attack: 45, aoeRange: 0, chain: { count: 3, range: 3.5, falloff: 0.7 }, accuracy: 1.0, description: "Hits the target, then arcs to 3 nearby enemies for 70% damage." },
+          { id: 'staff_grand', name: 'Grand Staff', cost: 4000, attack: 65, aoeRange: 2.5, accuracy: 1.0, isChargeable: true, maxCharges: 2, description: "Can be charged up multiple times for immense power." },
+        ],
+        tomes: [
+          { id: 'tome_stunning', name: 'Tome of Stunning', cost: 1800, attack: 5, accuracy: 1.0, statusEffect: { type: 'stunned', chance: 0.75, duration: 1 }, description: "Low damage, but has a 75% chance to stun the target for a turn." },
+          { id: 'tome_frost', name: 'Tome of Frost', cost: 1800, attack: 5, accuracy: 1.0, statusEffect: { type: 'crippled', chance: 1.0, duration: 2, reduction: 1 }, description: "Low damage, but slows the target's movement for 2 turns." },
+          { id: 'tome_cursing', name: 'Tome of Cursing', cost: 2200, attack: 10, accuracy: 1.0, statusEffect: { type: 'cursed', chance: 0.8, duration: 3, multiplier: 1.2 }, description: "80% chance to curse the target, making them take 20% more damage for 3 turns." },
+        ]
+      },
+      archer: {
+        bows: [
+          { id: 'bow_short', name: 'Shortbow', cost: 500, attack: 12, accuracy: 1.0, description: "A reliable, standard-issue bow." },
+          { id: 'bow_long', name: 'Longbow', cost: 1100, attack: 28, accuracy: 1.0, description: "Offers greater power and range." },
+          { id: 'bow_multishot', name: 'Multishot Bow', cost: 2000, attack: 18, accuracy: 1.0, multishot: 3, description: "Fires a spread of 3 arrows at once." },
+          { id: 'bow_eagle', name: 'Eagle Eye Bow', cost: 2200, attack: 55, accuracy: 1.0, description: "A masterfully crafted bow that rarely misses." },
+          { id: 'bow_void', name: 'Voidstring Bow', cost: 5000, attack: 80, accuracy: 1.0, description: "Fires arrows imbued with weakening energy." },
+          { id: 'bow_sunstrider', name: 'Sunstrider\'s Mark', cost: 7500, attack: 120, accuracy: 1.0, tdWinsRequired: 5, description: "A legendary bow of unmatched power." },
+        ],
+        crossbows: [
+          { id: 'crossbow_iron', name: 'Iron Crossbow', cost: 1300, attack: 35, accuracy: 1.0, armorPiercing: 5, description: "Slower to fire, but its bolts ignore 5 enemy armor." },
+          { id: 'crossbow_hunter', name: 'Hunter\'s Crossbow', cost: 1800, attack: 45, accuracy: 1.0, armorPiercing: 7, description: "A well-made crossbow with superior armor penetration." },
+          { id: 'crossbow_repeater', name: 'Repeating Crossbow', cost: 2800, attack: 25, accuracy: 1.0, armorPiercing: 3, multishot: 2, description: "Fires two bolts in quick succession." },
+          { id: 'crossbow_heavy', name: 'Heavy Crossbow', cost: 2500, attack: 60, accuracy: 1.0, armorPiercing: 10, description: "A powerful, heavy weapon that is highly effective against armored foes." },
+        ]
+      },
+      tank: {
+        sword_and_shield: [
+          { id: 'shield_iron', name: 'Iron Sword & Shield', cost: 500, attack: 8, hp: 50, accuracy: 1.0, description: "A standard, defensive starting weapon." },
+          { id: 'shield_steel', name: 'Steel Tower Shield', cost: 1000, attack: 15, hp: 120, accuracy: 1.0, description: "Provides excellent protection." },
+          { id: 'shield_spiked', name: 'Spiked Shield', cost: 1800, attack: 20, hp: 180, accuracy: 1.0, thorns: 5, description: "Deals 5 damage to melee attackers." },
+          { id: 'shield_aegis', name: 'Aegis Wall', cost: 2000, attack: 25, hp: 250, accuracy: 1.0, description: "An almost impenetrable defensive shield." },
+          { id: 'shield_void', name: 'Void Bulwark', cost: 5000, attack: 40, hp: 400, accuracy: 1.0, description: "A shield that absorbs dark energy." },
+          { id: 'shield_unbreakable', name: 'The Unbreakable', cost: 7500, attack: 60, hp: 600, accuracy: 1.0, tdWinsRequired: 5, description: "A legendary shield said to be indestructible." },
+        ],
+        hammers: [
+          { id: 'hammer_warhammer', name: 'Warhammer', cost: 1200, attack: 20, accuracy: 0.9, statusEffect: { type: 'stunned', chance: 0.4, duration: 1 }, description: "A heavy two-handed hammer with a 40% chance to stun enemies." },
+          { id: 'hammer_maul', name: 'Stunning Maul', cost: 2400, attack: 30, accuracy: 0.9, statusEffect: { type: 'stunned', chance: 0.6, duration: 1 }, description: "Slower, but has a 60% chance to stun enemies." },
+          { id: 'hammer_sunderer', name: 'Sunderer Maul', cost: 3500, attack: 45, accuracy: 0.85, statusEffect: { type: 'armor_break', chance: 0.5, duration: 3, amount: 5 }, description: "50% chance to reduce enemy armor by 5 for 3 turns." },
+        ]
+      }
+    },
+    offhandWeapons: [
+      { id: 'offhand_dagger', name: 'Dagger', cost: 200, attack: 8, attackRange: 1.5, accuracy: 1.0, forClass: ['mage', 'archer'] },
+      { id: 'offhand_shortbow', name: 'Shortbow', cost: 350, attack: 10, attackRange: 4, accuracy: 1.0, forClass: ['warrior', 'tank'] },
+      { id: 'offhand_wand', name: 'Wand', cost: 450, attack: 6, attackRange: 3, accuracy: 1.0, aoeRange: 1.5, forClass: ['warrior', 'tank'] },
+      // New additions
+      { id: 'offhand_buckler', name: 'Buckler', cost: 300, hp: 25, forClass: ['mage', 'archer'], description: "+25 Max HP." },
+      { id: 'offhand_tome', name: 'Tome of Focus', cost: 400, attack: 5, forClass: ['mage'], description: "Passively adds +5 Attack." },
+      { id: 'offhand_throwing_axe', name: 'Throwing Axe', cost: 350, attack: 12, attackRange: 3, accuracy: 0.9, forClass: ['warrior', 'tank'] },
     ],
     armors: [ // Universal
       { id: 'armor_leather', name: 'Leather Armor', cost: 500, hp: 50 },
@@ -1509,8 +2378,6 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       { id: 'armor_dragonscale', name: 'Dragonscale Mail', cost: 7500, hp: 500, tdWinsRequired: 5 },
     ],
     attacks: [
-      // Universal
-      { id: 'attack_normal', name: 'Normal Attack', power: 10, class: 'all' },
       // Warrior
       { id: 'warrior_power_strike', name: 'Power Strike', cost: 70, class: 'warrior', maxUses: 2, effect: { damageMultiplier: 2.5 }, range: 1.5 },
       { id: 'warrior_whirlwind', name: 'Whirlwind', cost: 120, class: 'warrior', maxUses: 2, effect: { damageMultiplier: 0.8, aoe: 1.5 }, range: 1.5 },
@@ -1634,8 +2501,9 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     if (!localDungeonState || !localDungeonState.playerClass) return { maxHp: 100, attack: 10 };
 
     const classDef = dungeonDefinitions.classes[localDungeonState.playerClass];
-    const allWeapons = [...dungeonDefinitions.weapons, ...dungeonDefinitions.wands, ...dungeonDefinitions.bows, ...dungeonDefinitions.shields];
-    const weapon = allWeapons.find(w => w.id === localDungeonState.equippedWeapon);
+    const allPrimaryWeapons = Object.values(dungeonDefinitions.primaryWeapons)
+      .flatMap(classWeapons => Object.values(classWeapons).flat());
+    const weapon = allPrimaryWeapons.find(w => w.id === localDungeonState.equippedWeapon);
     const armor = dungeonDefinitions.armors.find(a => a.id === localDungeonState.equippedArmor);
     const pet = stats.currentPet ? getFullPetDetails(stats.currentPet.id) : null;
     
@@ -1663,7 +2531,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   // --- NEW: Pathfinding, AI, and Turn Logic ---
 
   // Finds all tiles a unit can move to within its range.
-  const getReachableTiles = useCallback((start, range, board, allEntities) => {
+  const getReachableTiles = (start, range, board, allEntities) => {
     const reachable = new Map(); // Stores {pos, dist}
     const queue = [{ pos: start, dist: 0 }];
     const visited = new Set([`${start.x},${start.y}`]);
@@ -1704,10 +2572,10 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       }
     }
     return Array.from(reachable.values()).map(r => r.pos);
-  }, []);
+  };
 
   // Finds the shortest path from start to end using Breadth-First Search.
-  const findPathBFS = useCallback((start, end, board, allEntities) => {
+  const findPathBFS = (start, end, board, allEntities) => {
     const queue = [[start]];
     const visited = new Set([`${start.x},${start.y}`]);
     const entityPositions = new Set(allEntities.map(e => `${e.x},${e.y}`));
@@ -1749,142 +2617,301 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         }
     }
     return null; // No path found
-  }, []);
+  };
 
   // REFACTORED: This now triggers the enemy turn sequence.
   const processEnemyTurns = useCallback(() => {
-    if (isEnemyTurn) return;
     addLog("Enemy turn...", 'text-gray-400 italic');
-    // Clear old paths at the start of the enemy turn
-    setLocalDungeonState(prev => ({ ...prev, enemyMovePaths: {} }));
-    setIsEnemyTurn(true); // This state change triggers the useEffect below
-  }, [isEnemyTurn, addLog]);
+    setLocalDungeonState(prev => ({ ...prev, lastMoveTrails: [] })); // Clear trails at turn start
+  }, [addLog]);
 
   // NEW: React-friendly useEffect for handling sequential enemy turns
   useEffect(() => {
-    if (!isEnemyTurn || dungeonStateRef.current.gameOver) return;
-
+    if (activeTurn !== 'enemy' || dungeonStateRef.current.gameOver) return;
+  
     const enemiesToProcess = [...dungeonStateRef.current.enemies];
     let currentEnemyIndex = 0;
-
+  
     const processNextEnemy = () => {
-      // Use the ref for all state reads to prevent stale data
       const currentState = dungeonStateRef.current;
       if (currentEnemyIndex >= enemiesToProcess.length || currentState.player.hp <= 0) {
-        setLocalDungeonState(prev => ({...prev, turnCount: (prev.turnCount || 1) + 1}));
-        setIsEnemyTurn(false);
-        setDangerZone({ tiles: [], forEnemy: null });
-        if (currentState.player.hp > 0) {
-            addLog("Your turn.", 'text-gray-400 italic');
-        } else {
-            handleGameOver();
-        }
+        // --- End of Enemy Turn / Start of Player Turn ---
+        const endTurnLogic = () => {
+            const latestState = dungeonStateRef.current;
+            let wingmanDiedThisTurn = false;
+
+            if (latestState.wingman && latestState.wingman.hp <= 0) {
+                wingmanDiedThisTurn = true;
+                addLog(`${latestState.wingman.name} has been defeated! He has been moved to the Graveyard.`, 'text-red-500 font-bold');
+                
+                const defeatedWingman = { ...latestState.wingman, dateOfDeath: new Date().toISOString() };
+                const wingmanInstanceId = defeatedWingman.instanceId;
+                const wingmanBaseId = defeatedWingman.id;
+
+                const latestRoster = statsPropRef.current.dungeon_wingmen?.roster || [];
+                const latestGraveyard = statsPropRef.current.dungeon_wingmen?.graveyard || [];
+                const latestUpgrades = { ...(statsPropRef.current.dungeon_wingmen?.upgrades || {}) };
+
+                const newRoster = latestRoster.filter(w => w.instanceId !== wingmanInstanceId);
+                const newGraveyard = [...latestGraveyard, defeatedWingman];
+                delete latestUpgrades[wingmanBaseId];
+
+                const boardUpdate = { ...latestState.board };
+                boardUpdate[`${defeatedWingman.y},${defeatedWingman.x}`] = { type: 'empty' };
+
+                const stateUpdateForFirestore = {
+                  ...latestState,
+                  board: boardUpdate,
+                  wingman: null,
+                };
+                
+                updateStatsInFirestore({
+                    'dungeon_wingmen.roster': newRoster,
+                    'dungeon_wingmen.graveyard': newGraveyard,
+                    'dungeon_wingmen.upgrades': latestUpgrades,
+                    'dungeon_state': stateUpdateForFirestore
+                });
+
+                setLocalDungeonState(stateUpdateForFirestore);
+            }
+
+            setLocalDungeonState(prev => {
+                let newState = { ...prev };
+                if (wingmanDiedThisTurn) {
+                  newState.wingman = null; 
+                }
+                newState.turnCount = (prev.turnCount || 1) + 1;
+
+                if (newState.wingman) {
+                  // ... [rest of the effect processing logic remains the same] ...
+                   let newWingman = { ...newState.wingman };
+                    let wingmanEffects = [...(newWingman.activeEffects || [])];
+                    let effectsToRemove = [];
+                    
+                    wingmanEffects.forEach((effect, index) => {
+                      effect.durationTurns = (effect.durationTurns || 99) - 1;
+                      if (effect.specialization === 'crusader_ability_b' && effect.id === 'divine_shield') {
+                        const healAmount = Math.round(newWingman.maxHp * 0.2 / effect.duration);
+                        newWingman.hp = Math.min(newWingman.maxHp, newWingman.hp + healAmount);
+                        addLog(`${newWingman.name}'s Sanctuary heals them for ${healAmount} HP.`, 'text-green-300');
+                      }
+                      if (effect.durationTurns <= 0) {
+                        if (effect.specialization === 'crusader_ability_a' && effect.id === 'divine_shield') {
+                           addLog(`${newWingman.name}'s Divine Shield explodes!`, 'text-yellow-300');
+                           const explosionDamage = effect.tempHp || 30;
+                           newState.enemies.forEach(enemy => {
+                             if (Math.hypot(enemy.x - newWingman.x, enemy.y - newWingman.y) < 1.6) enemy.hp -= explosionDamage;
+                           });
+                        }
+                        if (effect.tempHp) newWingman.maxHp -= effect.tempHp;
+                        effectsToRemove.push(index);
+                      }
+                    });
+                    
+                    newWingman.activeEffects = wingmanEffects.filter((_, index) => !effectsToRemove.includes(index));
+                    newState.wingman = newWingman;
+                }
+                return newState;
+            });
+            
+            setActiveTurn('player');
+            setPlayerActionPoints(2);
+            setWingmanTurnState({ distanceMoved: 0, frenziedAttackAvailable: false });
+            if (dungeonStateRef.current.wingman) setWingmanActionPoints(dungeonStateRef.current.wingman.ap);
+            setDangerZone({ tiles: [], forEnemy: null });
+      
+            if (dungeonStateRef.current.player.hp > 0) addLog("Your turn.", 'text-gray-400 italic');
+            else handleGameOver();
+        };
+
+        // Use a short timeout to ensure the last state update from an attack has been processed.
+        setTimeout(endTurnLogic, 50);
         return;
       }
 
-      const enemy = enemiesToProcess[currentEnemyIndex];
+      const enemy = { ...enemiesToProcess[currentEnemyIndex] };
+      const performAttack = (attacker, currentTarget) => {
+          const targetId = currentTarget.entityType === 'player' ? 'player' : 'wingman';
+          const targetName = targetId === 'player' ? 'you' : (currentTarget.name || 'your wingman');
+          
+          setLocalDungeonState(prev => {
+              if (!prev[targetId]) return prev;
+              let newState = JSON.parse(JSON.stringify(prev));
+              let defender = newState[targetId];
+              let attackerInState = newState.enemies.find(e => e.id === attacker.id);
+              
+              const riposteEffect = defender.activeEffects?.find(e => e.id === 'riposte');
+              if (riposteEffect) {
+                  const chance = riposteEffect.specialization === 'duelist_ability_a' ? 1.0 : 0.5;
+                  if (Math.random() < chance) {
+                      const counterDamage = Math.round(defender.atk * 0.5);
+                      if (attackerInState) attackerInState.hp -= counterDamage;
+                      newState.log.unshift({ id: Date.now() + Math.random(), message: `${defender.name} ripostes for ${counterDamage} damage!`, style: 'text-sky-400' });
+                  }
+                  if (riposteEffect.specialization === 'duelist_ability_b') {
+                      newState.log.unshift({ id: Date.now() + Math.random(), message: `${defender.name} parries the attack!`, style: 'text-sky-400' });
+                      setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, [targetId]: Date.now()}}));
+                      return newState;
+                  }
+              }
+
+              const defenderArmor = defender.armor || 0;
+              let finalDamage = Math.max(1, attacker.atk - defenderArmor);
+              
+              const retaliationEffect = defender.activeEffects?.find(e => e.id === 'fortify' && e.specialization === 'heavy_ability_b');
+              if (retaliationEffect) {
+                  const reflectDamage = Math.round(finalDamage * 0.25);
+                  if(attackerInState) attackerInState.hp -= reflectDamage;
+                  newState.log.unshift({ id: Date.now() + Math.random(), message: `${defender.name} reflects ${reflectDamage} damage!`, style: 'text-orange-400' });
+              }
+              
+              // Check for player thorns from equipped shield
+              const primaryWeapon = Object.values(dungeonDefinitions.primaryWeapons).flat().flatMap(cat => Object.values(cat).flat()).find(w => w.id === prev.equippedWeapon);
+              const thornsDamageFromItems = (defender.thorns || 0) + (targetId === 'player' && primaryWeapon?.thorns ? primaryWeapon.thorns : 0);
+
+              if (thornsDamageFromItems > 0 && attackerInState) {
+                  attackerInState.hp -= thornsDamageFromItems;
+                  newState.log.unshift({ id: Date.now() + Math.random(), message: `${targetName}'s thorns reflect ${thornsDamageFromItems} damage!`, style: 'text-orange-300' });
+              }
+              
+              defender.hp -= finalDamage;
+              
+              newState.log.unshift({ id: Date.now() + Math.random(), message: `${attacker.name} attacks ${targetName} for ${finalDamage} damage!`, style: 'text-red-400' });
+              setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, [targetId]: Date.now()}}));
+              
+              return newState;
+          });
+      };
       
-      if (enemy.moveFrequency && currentState.turnCount % enemy.moveFrequency !== 0) {
-          currentEnemyIndex++;
-          setTimeout(processNextEnemy, 50);
-          return;
-      }
-
-      // NEW: Chance-based movement. If the roll fails, the enemy does not move.
-      if (enemy.moveChance && Math.random() > enemy.moveChance) {
-          addLog(`${enemy.name} hesitates...`, 'text-slate-400 italic');
-          // Still check for an attack if the player is adjacent
-          const distanceToPlayer = Math.hypot(enemy.x - currentState.player.x, enemy.y - currentState.player.y);
-          if (distanceToPlayer <= enemy.attackRange) {
-              setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
-              addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
-              setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
-          }
-          currentEnemyIndex++;
-          setTimeout(processNextEnemy, 200);
-          return; // Skip the rest of the movement logic for this enemy
-      }
-
-      let action = { type: 'wait' };
-      const allEntities = [...currentState.enemies, currentState.player];
-      const path = findPathBFS({ x: enemy.x, y: enemy.y }, { x: currentState.player.x, y: currentState.player.y }, currentState.board, allEntities);
-
-      if (enemy.ai === 'cowardly' && enemy.hp < enemy.maxHp * 0.25) {
-        const reachable = getReachableTiles({ x: enemy.x, y: enemy.y }, enemy.moveRange, currentState.board, allEntities.filter(e => e.id !== enemy.id));
-        if (reachable.length > 0) {
-            const furthestTile = reachable.reduce((best, curr) => Math.hypot(curr.x - currentState.player.x, curr.y - currentState.player.y) > Math.hypot(best.x - currentState.player.x, best.y - currentState.player.y) ? curr : best);
-            const fleePath = findPathBFS({ x: enemy.x, y: enemy.y }, furthestTile, currentState.board, allEntities.filter(e => e.id !== enemy.id));
-            if (fleePath) action = { type: 'move', path: fleePath.slice(1, enemy.moveRange + 1) };
-        }
-      } else if (path && path.length > 1) {
-        // ROBUST FIX: This logic is much clearer. It takes the full path, removes the start and end points,
-        // and then takes a number of steps equal to the enemy's move range. This prevents any overshooting.
-        const movePath = path.slice(1, -1).slice(0, enemy.moveRange);
-        const finalPos = movePath.length > 0 ? movePath[movePath.length - 1] : {x: enemy.x, y: enemy.y};
-        action = { type: 'move', path: movePath };
-        if (Math.hypot(finalPos.x - currentState.player.x, finalPos.y - currentState.player.y) <= enemy.attackRange) {
-            action.then = { type: 'attack', target: 'player' };
-        }
-      }
-      
-      // REFACTORED: Simplified animation logic.
-      if (action.type === 'move' && action.path.length > 0) {
-        const endPos = action.path[action.path.length - 1];
-        const moveDuration = 250; // A fixed, smooth duration for the slide.
-
-        // Update the state immediately. The CSS transition will handle the animation.
-        setLocalDungeonState(prev => {
-          const startPos = { x: enemy.x, y: enemy.y };
-          const newBoard = { ...prev.board };
-          const fullPath = [startPos, ...action.path];
-          newBoard[`${startPos.y},${startPos.x}`] = { type: 'empty' };
-          newBoard[`${endPos.y},${endPos.x}`] = { type: 'enemy', enemyId: enemy.id };
-          const newPaths = { ...(prev.enemyMovePaths || {}), [enemy.id]: fullPath };
-          const newTrails = [...(prev.lastMoveTrails || []), startPos];
-          return { ...prev, board: newBoard, enemies: prev.enemies.map(e => e.id === enemy.id ? {...e, x: endPos.x, y: endPos.y} : e), enemyMovePaths: newPaths, lastMoveTrails: newTrails };
+      // --- Status Effects ---
+      if (enemy.statusEffects) {
+        let damageOverTime = 0;
+        enemy.statusEffects.forEach(effect => {
+            if (effect.type === 'poison' || effect.type === 'burning') damageOverTime += effect.damage;
         });
-        
-        // After the animation duration, check for an attack and then process the next enemy.
-        setTimeout(() => {
-          if (action.then?.type === 'attack') {
-              setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
-              addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
-              setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
-          }
-          currentEnemyIndex++;
-          setTimeout(processNextEnemy, 50); // Small delay before next enemy moves
-        }, moveDuration);
-
-      } else {
-        if (action.type === 'attack' || (path && path.length <= 2 && Math.hypot(enemy.x - currentState.player.x, enemy.y - currentState.player.y) <= enemy.attackRange)) {
-            setLocalDungeonState(prev => ({...prev, player: {...prev.player, hp: prev.player.hp - enemy.atk}}));
-            addLog(`${enemy.name} attacks you for ${enemy.atk} damage!`, 'text-orange-400');
-            setAnimationState(prevAnims => ({...prevAnims, hits: {...prevAnims.hits, player: Date.now()}}));
+        if (damageOverTime > 0) {
+            enemy.hp -= damageOverTime;
+            addLog(`${enemy.name} takes ${damageOverTime} damage from status effects.`, 'text-purple-400');
+            if (enemy.hp <= 0) {
+              setLocalDungeonState(prev => ({ ...prev, enemies: prev.enemies.filter(e => e.id !== enemy.id) }));
+              currentEnemyIndex++; setTimeout(processNextEnemy, 50); return;
+            }
         }
+        enemy.statusEffects = enemy.statusEffects.map(effect => ({ ...effect, duration: effect.duration - 1 })).filter(e => e.duration > 0);
+      }
+      
+      if ((enemy.moveFrequency && currentState.turnCount % enemy.moveFrequency !== 0) || (enemy.moveChance && Math.random() > enemy.moveChance)) {
+          currentEnemyIndex++; setTimeout(processNextEnemy, 50); return;
+      }
+
+      // Stun check
+      const stunnedEffect = enemy.statusEffects?.find(e => e.type === 'stunned');
+      if (stunnedEffect) {
+        addLog(`${enemy.name} is stunned and cannot act!`, 'text-yellow-400');
+        currentEnemyIndex++;
+        setTimeout(processNextEnemy, 50);
+        return;
+      }
+  
+      // --- AI Logic ---
+      let target = currentState.player;
+      let allEntities = [...currentState.enemies, currentState.player];
+      if (currentState.wingman) {
+        allEntities.push(currentState.wingman);
+        const tauntEffect = enemy.statusEffects?.find(e => e.type === 'taunted');
+        if (tauntEffect) { target = currentState.wingman; } 
+        else {
+          const distToPlayer = Math.hypot(enemy.x - currentState.player.x, enemy.y - currentState.player.y);
+          const distToWingman = Math.hypot(enemy.x - currentState.wingman.x, enemy.y - currentState.wingman.y);
+          if (distToWingman < distToPlayer) target = currentState.wingman;
+        }
+      }
+      
+      let enemyMoveRange = enemy.moveRange;
+      const crippledEffect = enemy.statusEffects?.find(e => e.type === 'crippled');
+      if (crippledEffect) enemyMoveRange = Math.max(0, enemyMoveRange - crippledEffect.reduction);
+      
+      const path = findPathBFS({ x: enemy.x, y: enemy.y }, { x: target.x, y: target.y }, currentState.board, allEntities);
+      const inRangeNow = Math.hypot(enemy.x - target.x, enemy.y - target.y) <= enemy.attackRange;
+
+      if (inRangeNow) {
+        performAttack(enemy, target);
+        currentEnemyIndex++;
+        setTimeout(processNextEnemy, 200);
+      } else if (path && path.length > 1) {
+        const stepsToAdjacent = path.length - 2;
+        if (stepsToAdjacent <= enemyMoveRange) { // Can move and attack
+          const movePath = path.slice(1, path.length - 1);
+          const endPos = movePath.length > 0 ? movePath[movePath.length - 1] : { x: enemy.x, y: enemy.y };
+          
+          setLocalDungeonState(prev => {
+            const newBoard = { ...prev.board };
+            newBoard[`${enemy.y},${enemy.x}`] = { type: 'empty' };
+            newBoard[`${endPos.y},${endPos.x}`] = { type: 'enemy', enemyId: enemy.id };
+            return { ...prev, board: newBoard, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, x: endPos.x, y: endPos.y } : e) };
+          });
+
+          setTimeout(() => {
+            performAttack(enemy, target);
+            currentEnemyIndex++;
+            setTimeout(processNextEnemy, 50);
+          }, 250);
+
+        } else { // Can only move
+          const movePath = path.slice(1, enemyMoveRange + 1);
+          const endPos = movePath[movePath.length - 1];
+
+          setLocalDungeonState(prev => {
+            const newBoard = { ...prev.board };
+            newBoard[`${enemy.y},${enemy.x}`] = { type: 'empty' };
+            newBoard[`${endPos.y},${endPos.x}`] = { type: 'enemy', enemyId: enemy.id };
+            return { ...prev, board: newBoard, enemies: prev.enemies.map(e => e.id === enemy.id ? { ...e, x: endPos.x, y: endPos.y } : e) };
+          });
+
+          setTimeout(() => {
+            currentEnemyIndex++;
+            setTimeout(processNextEnemy, 50);
+          }, 250);
+        }
+      } else { // Cannot move and not in range, so wait
         currentEnemyIndex++;
         setTimeout(processNextEnemy, 200);
       }
     };
-
+  
     processNextEnemy();
-  }, [isEnemyTurn]);
-
+  }, [activeTurn]);
 
   // --- NEW: Danger Zone Logic ---
-  const handleEnemyClick = (e, enemy) => {
+    const handleEnemyClick = (e, enemy) => {
     e.stopPropagation(); // Prevent tile click from firing
 
-    // If we're in targeting mode, an enemy click should be an attack, not a danger zone display.
-    if (attackTarget) {
-      handleAttack(enemy, 'attack_normal');
+    if (attackTarget) { // this handles both player and wingman attack targeting
+        const attackType = typeof attackTarget === 'object' ? attackTarget.type : 'wingman_basic';
+        handleAttack(activeTurn, enemy, attackType);
+        setAttackTarget(null);
+        setAbilityTarget(null);
+        return;
+    }
+    
+    if (activeTurn === 'player' && abilityTarget) {
+      handleAttack('player', enemy, abilityTarget);
       return;
     }
-    if (abilityTarget) {
-      handleAttack(enemy, abilityTarget);
+    
+    // NEW: Wingman ability targeting
+    if (activeTurn === 'wingman' && wingmanAbilityTarget) {
+      handleUseWingmanAbility(enemy);
       return;
     }
 
-    // --- Danger Zone Logic (if not in targeting mode) ---
+    // --- Danger Zone Logic (if not in targeting mode during player turn) ---
+    if (dangerZone.forEnemy === enemy.id) {
+      setDangerZone({ tiles: [], forEnemy: null });
+      return;
+    }
+
+    // --- Danger Zone Logic (if not in targeting mode during player turn) ---
     if (dangerZone.forEnemy === enemy.id) {
       setDangerZone({ tiles: [], forEnemy: null });
       return;
@@ -2012,14 +3039,22 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       });
 
     const initialPlayerState = {
+      id: 'player',
+      entityType: 'player',
+      name: classDef.name,
       x: 1, y: 1, hp: classDef.startingHp, hasKey: false, activeEffects: [],
       moveCost: classDef.moveCost, attackCost: classDef.attackCost, attackRange: classDef.attackRange,
       abilityUses: initialAbilityUses,
+      lastWeaponSwitchFloor: 0,
     };
     
+    const startingWeaponId = Object.values(dungeonDefinitions.primaryWeapons[className])[0][0].id;
+
     const newGameState = {
       ...generateInitialDungeonState(),
       phase: 'playing',
+      ownedWeapons: [startingWeaponId],
+      equippedWeapon: startingWeaponId,
       turnCount: 1,
       playerClass: className,
       board: newBoard,
@@ -2027,9 +3062,11 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
       log: [`You have entered the dungeon as a ${classDef.name}!`],
       player: initialPlayerState,
     };
+
     setLocalDungeonState(newGameState);
-    updateStatsInFirestore({
-      dungeon_state: newGameState
+        updateStatsInFirestore({
+      dungeon_state: newGameState,
+      'dungeon_wingmen.equipped': pendingEquippedWingman || null // Ensure null instead of undefined
     });
   };
 
@@ -2052,6 +3089,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         enemies: newEnemies,
         player: { ...localDungeonState.player, x: 1, y: 1, hasKey: false, activeEffects: updatedEffects, abilityUses: newAbilityUses },
         log: newLogMessages,
+        turnCount: 1, // FIX: Reset turn count on new floor
     };
     setLocalDungeonState(nextState);
     updateStatsInFirestore({
@@ -2063,195 +3101,311 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     });
   };
 
-  const handleTileClick = (x, y) => {
-    if (isEnemyTurn || localDungeonState.gameOver || !localDungeonState.playerClass) return;
-    const targetTile = localDungeonState.board[`${y},${x}`];
-    if (abilityTarget) {
+  const handleTileClick = (x, y, actorType = 'player') => {
+    if (activeTurn !== actorType || localDungeonState.gameOver || !localDungeonState.playerClass) return;
+    
+    const actor = actorType === 'player' ? localDungeonState.player : localDungeonState.wingman;
+    if (!actor) return;
+
+    if (attackTarget && typeof attackTarget === 'object' && attackTarget.type === 'secondary') {
+      const targetTile = localDungeonState.board[`${y},${x}`];
       if (targetTile.type === 'enemy') {
         const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
-        if (enemy) handleAttack(enemy, abilityTarget);
+        if (enemy) handleAttack('player', enemy, 'secondary');
+      } else { addLog("No enemy at that location. Attack cancelled.", 'text-yellow-400'); }
+      setAttackTarget(null);
+      return;
+    }
+    
+    const currentAP = actorType === 'player' ? playerActionPoints : wingmanActionPoints;
+    const moveCostAP = actorType === 'player' ? 1 : (actor.moveCost || 1);
+    if (currentAP < moveCostAP) { addLog("Not enough action points to move.", "text-yellow-400"); return; }
+
+    const targetTile = localDungeonState.board[`${y},${x}`];
+    if (abilityTarget && actorType === 'player') {
+      if (targetTile.type === 'enemy') {
+        const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
+        if (enemy) handleAttack('player', enemy, abilityTarget);
       } else { addLog("No enemy at that location. Ability cancelled.", 'text-yellow-400'); }
       setAbilityTarget(null);
       return;
     }
-    if (attackTarget) {
+    if (attackTarget && actorType === 'player') {
       if (targetTile.type === 'enemy') {
         const enemy = localDungeonState.enemies.find(e => e.id === targetTile.enemyId);
-        if (enemy) handleAttack(enemy, 'attack_normal');
+        if (enemy) handleAttack(actorType, enemy, attackTarget.type);
       } else { addLog("No enemy at that location. Attack cancelled.", 'text-yellow-400'); }
       setAttackTarget(null);
       return;
     }
 
-    if (Math.abs(x - localDungeonState.player.x) > 1 || Math.abs(y - localDungeonState.player.y) > 1) { addLog("You can only move to adjacent tiles."); return; }
+    const bonusMoveEffect = actor.activeEffects?.find(e => e.type === 'bonus_move');
+    const moveRange = actorType === 'player' ? 1.5 : (actor.moveRange || 1.5) + (bonusMoveEffect ? bonusMoveEffect.amount : 0);
+
+    // Generic movement logic
+    if (Math.hypot(x - actor.x, y - actor.y) > moveRange) { addLog("You can only move to adjacent tiles."); return; }
     if (targetTile.type === 'wall') { addLog("You can't move through a wall."); return; }
     if (targetTile.type === 'enemy') { addLog("You cannot move onto an enemy's tile."); return; }
-    if (targetTile.type === 'hatch' && !localDungeonState.player.hasKey) { addLog("The hatch is locked. You need a key."); return; }
-    const moveCost = localDungeonState.player.moveCost || 5;
-    if (stats.totalXP < moveCost) { addLog(`Not enough XP to move (costs ${moveCost}).`, 'text-red-400'); return; }
+    
+    if (actorType === 'player') {
+      if (targetTile.type === 'hatch' && !localDungeonState.player.hasKey) { addLog("The hatch is locked. You need a key."); return; }
+      const moveCostXP = localDungeonState.player.moveCost || 5;
+      if (sessionXp < moveCostXP) { addLog(`Not enough XP to move (costs ${moveCostXP}).`, 'text-red-400'); return; }
+      setSessionXp(prevXp => prevXp - moveCostXP);
+    } else { // Wingman-specific checks
+      // Wingmen can't pick up items or use hatches
+      if (['hatch', 'key', 'chest'].includes(targetTile.type)) { addLog("Your wingman cannot interact with that.", "text-yellow-400"); return; }
+    }
+    
+    const distance = Math.round(Math.hypot(x - actor.x, y - actor.y));
+    if (actorType === 'wingman') setWingmanTurnState(prev => ({ ...prev, distanceMoved: prev.distanceMoved + distance }));
 
     let newGold = sessionGold || 0;
-    const playerStartPos = { x: localDungeonState.player.x, y: localDungeonState.player.y };
+    const actorStartPos = { x: actor.x, y: actor.y };
     const newBoard = { ...localDungeonState.board };
-    newBoard[`${playerStartPos.y},${playerStartPos.x}`] = { type: 'empty' };
-    newBoard[`${y},${x}`] = { type: 'player' };
+    newBoard[`${actorStartPos.y},${actorStartPos.x}`] = { type: 'empty' };
+    newBoard[`${y},${x}`] = { type: actorType }; // 'player' or 'wingman'
     
-    let newState = { 
-        ...localDungeonState, 
-        player: { ...localDungeonState.player, x, y }, 
-        board: newBoard,
-        lastMoveTrails: [playerStartPos] // Start new trails for this turn
-    };
+    let newState = { ...localDungeonState, board: newBoard };
+    if (actorType === 'player') {
+        newState.player = { ...localDungeonState.player, x, y };
+        newState.lastMoveTrails = [actorStartPos];
+    } else {
+        newState.wingman = { ...localDungeonState.wingman, x, y };
+        newState.lastMoveTrails = [...(newState.lastMoveTrails || []), actorStartPos];
+    }
 
-    if (targetTile.type === 'key') {
-      newState.player.hasKey = true;
-      newState.log.unshift({ id: Date.now(), message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
-    }
-    if (targetTile.type === 'chest' && !targetTile.opened) {
-      let goldFound = Math.floor(Math.random() * (20 + localDungeonState.floor * 5)) + 10;
-      newGold += goldFound;
-      newState.log.unshift({ id: Date.now(), message: `You opened a chest and found ${goldFound} gold!`, style: 'text-yellow-400 font-bold' });
-      newBoard[`${y},${x}`].opened = true;
-    }
-    if (targetTile.type === 'hatch') {
-      if (localDungeonState.player.hasKey) { goToNextFloor(); return; }
-      else { newState.log.unshift({ id: Date.now(), message: "The hatch is locked. You need a key.", style: 'text-yellow-400' }); }
+    if (actorType === 'player') {
+      if (targetTile.type === 'key') {
+        newState.player.hasKey = true;
+        newState.log.unshift({ id: Date.now(), message: `You picked up the key!`, style: 'text-yellow-400 font-bold' });
+      }
+      if (targetTile.type === 'chest' && !targetTile.opened) {
+        let goldFound = Math.floor(Math.random() * (20 + localDungeonState.floor * 5)) + 10;
+        newGold += goldFound;
+        newState.log.unshift({ id: Date.now(), message: `You opened a chest and found ${goldFound} gold!`, style: 'text-yellow-400 font-bold' });
+        newBoard[`${y},${x}`].opened = true;
+      }
+      if (targetTile.type === 'hatch') {
+        if (localDungeonState.player.hasKey) { goToNextFloor(); return; }
+        else { newState.log.unshift({ id: Date.now(), message: "The hatch is locked. You need a key.", style: 'text-yellow-400' }); }
+      }
     }
     
     setLocalDungeonState(newState);
-    setSessionXp(prevXp => prevXp - moveCost);
     setSessionGold(newGold);
     
-    // Trigger enemy turn after player moves
-    setTimeout(() => processEnemyTurns(), 100);
+    // --- Action Point Deduction and Turn Progression ---
+    const newAP = currentAP - moveCostAP;
+    if (actorType === 'player') {
+      setPlayerActionPoints(newAP);
+      if (newAP <= 0) {
+        if (localDungeonState.wingman) setActiveTurn('wingman');
+        else { setActiveTurn('enemy'); setTimeout(processEnemyTurns, 100); }
+      }
+    } else {
+      setWingmanActionPoints(newAP);
+      if (newAP <= 0) {
+        setActiveTurn('enemy');
+        setTimeout(processEnemyTurns, 100);
+      }
+    }
   };
 
-  const handleAttack = (targetEnemy, attackId = 'attack_normal') => {
-    const attackDef = dungeonDefinitions.attacks.find(a => a.id === attackId);
-    if (!attackDef) return;
-    const attackCost = attackId === 'attack_normal' ? localDungeonState.player.attackCost : attackDef.cost;
-    const attackRange = attackId === 'attack_normal' ? localDungeonState.player.attackRange : attackDef.range;
-    if (localDungeonState.gameOver) return;
-    if (stats.totalXP < attackCost) { addLog(`Not enough XP for ${attackDef.name} (costs ${attackCost}).`, 'text-red-400'); setAttackTarget(null); setAbilityTarget(null); return; }
-    if (attackId !== 'attack_normal' && (localDungeonState.player.abilityUses[attackId] || 0) <= 0) { addLog(`No uses left for ${attackDef.name}.`, 'text-yellow-400'); return; }
-    const distance = Math.hypot(targetEnemy.x - localDungeonState.player.x, targetEnemy.y - localDungeonState.player.y);
+// In App.js, inside the DungeonCrawler component
+
+const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
+    const actor = actorType === 'player' ? localDungeonState.player : localDungeonState.wingman;
+    if (!actor) return;
+
+    let weaponDef = null;
+    let isAbility = false;
+    
+    if (actorType === 'player') {
+        const playerClass = localDungeonState.playerClass;
+        if (attackId === 'primary') {
+            if (playerClass && dungeonDefinitions.primaryWeapons[playerClass]) {
+                const classWeapons = dungeonDefinitions.primaryWeapons[playerClass];
+                const allWeaponTypesForClass = Object.values(classWeapons).flat();
+                weaponDef = allWeaponTypesForClass.find(w => w.id === localDungeonState.equippedWeapon);
+            }
+        } else if (attackId === 'secondary') {
+            weaponDef = dungeonDefinitions.offhandWeapons.find(w => w.id === localDungeonState.equippedOffhandWeapon);
+        } else {
+            weaponDef = dungeonDefinitions.attacks.find(a => a.id === attackId);
+            isAbility = true;
+        }
+    } else {
+        weaponDef = { attackRange: actor.attackRange, attack: actor.atk };
+    }
+
+    if (!weaponDef) { addLog("Error: Could not find weapon or ability definition.", "text-red-500"); return; }
+
+    const currentAP = actorType === 'player' ? playerActionPoints : wingmanActionPoints;
+    const attackCostAP = actorType === 'player' ? 1 : (actor.attackCost || 1);
+    if (currentAP < attackCostAP) { addLog("Not enough action points to attack.", "text-yellow-400"); return; }
+
+    const distance = Math.hypot(targetEnemy.x - actor.x, targetEnemy.y - actor.y);
+    const attackRange = weaponDef.attackRange || weaponDef.range;
+
     if (distance > attackRange) { addLog("Target is out of range.", 'text-yellow-400'); setAttackTarget(null); setAbilityTarget(null); return; }
 
-    let isGameOver = false;
-    let turnEnded = false;
-
-    setLocalDungeonState(prevState => {
-      let newState = JSON.parse(JSON.stringify(prevState));
-      let { enemies, board, player, log } = newState;
-      if (attackId !== 'attack_normal') player.abilityUses[attackId]--;
-      const baseAttackPower = fullPlayerStats.attack + (attackDef.power || 0);
-      let mainTargetIndex = enemies.findIndex(e => e.id === targetEnemy.id);
-      if (mainTargetIndex === -1) return prevState;
-      
-      const damageMultiplier = attackDef.effect?.damageMultiplier || 1;
-      
-      let enemiesHit = [enemies[mainTargetIndex]];
-      if (attackDef.effect?.aoe) {
-        enemies.forEach(enemy => {
-          if (enemy.id === targetEnemy.id) return;
-          const aoeDist = Math.hypot(enemy.x - targetEnemy.x, enemy.y - targetEnemy.y);
-          if (aoeDist <= attackDef.effect.aoe) {
-            enemiesHit.push(enemy);
-          }
-        });
-      }
-
-      enemiesHit.forEach(target => {
-        let finalDamage = Math.round(baseAttackPower * damageMultiplier);
-        if (target.armor) finalDamage = Math.max(1, finalDamage - target.armor);
-        target.hp -= finalDamage;
-        log.unshift({ id: Date.now() + Math.random(), message: `You hit ${target.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
-      });
-
-      let enemiesToRemove = [];
-      let newEnemiesToAdd = [];
-      let newPaths = { ...(newState.enemyMovePaths || {}) }; 
-
-      enemies.forEach(enemy => {
-        if (enemy.hp <= 0) {
-          enemiesToRemove.push(enemy.id);
-          delete newPaths[enemy.id]; 
-          log.unshift({ id: Date.now() + Math.random(), message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
-          board[`${enemy.y},${enemy.x}`] = { type: enemy.baseId === 'keyholder_orc' ? 'key' : 'empty' };
-          if (enemy.loot && Math.random() < enemy.loot.chance) addIngredientToInventory(enemy.loot.id);
-          if (enemy.rareLoot && Math.random() < enemy.rareLoot.chance) addIngredientToInventory(enemy.rareLoot.id);
-          if (enemy.onDefeat?.type === 'split') {
-            const oozeDef = dungeonDefinitions.enemies.find(e => e.id === enemy.onDefeat.into);
-            if (oozeDef) {
-              for (let i = 0; i < enemy.onDefeat.count; i++) {
-                // Find an empty adjacent tile
-                const adjacent = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y:0}].map(d => ({x: enemy.x+d.x, y: enemy.y+d.y}));
-                const emptyTile = adjacent.find(t => board[`${t.y},${t.x}`]?.type === 'empty');
-                if(emptyTile) {
-                  const newOoze = {
-                    ...oozeDef,
-                    id: `ooze_${Date.now()}_${i}`,
-                    baseId: oozeDef.id,
-                    x: emptyTile.x, y: emptyTile.y,
-                    maxHp: oozeDef.hp,
-                  };
-                  newEnemiesToAdd.push(newOoze);
-                  board[`${emptyTile.y},${emptyTile.x}`] = { type: 'enemy', enemyId: newOoze.id };
-                }
-              }
-              log.unshift({ message: `The ${enemy.name} splits into smaller oozes!`, style: 'text-lime-400' });
-            }
-          }
-        }
-      });
-      
-      newState.enemies = [...enemies.filter(e => !enemiesToRemove.includes(e.id)), ...newEnemiesToAdd];
-      
-      const particleId = Date.now();
-      setAnimationState(prev => ({
-        ...prev,
-        hits: { ...prev.hits, ...Object.fromEntries(enemiesHit.map(e => [e.id, Date.now()])) },
-        particles: [...prev.particles, { id: particleId, x: targetEnemy.x, y: targetEnemy.y }]
-      }));
-      setTimeout(() => setAnimationState(prev => ({...prev, particles: prev.particles.filter(p => p.id !== particleId)})), 500);
-
-      newState.log = log.slice(0, 5);
-      newState.enemyMovePaths = newPaths;
-      newState.lastMoveTrails = []; // Clear trails on attack
-      
-      if (player.hp <= 0) isGameOver = true;
-      else turnEnded = true;
-
-      return newState;
-    });
-
-    setAttackTarget(null);
-    setAbilityTarget(null);
-    setSessionXp(prevXp => prevXp - attackCost);
+    if (isAbility) {
+        if (sessionXp < weaponDef.cost) { addLog(`Not enough XP for ${weaponDef.name}.`, 'text-red-400'); setAttackTarget(null); setAbilityTarget(null); return; }
+        if ((actor.abilityUses[attackId] || 0) <= 0) { addLog(`No uses left for ${weaponDef.name}.`, 'text-yellow-400'); return; }
+        setSessionXp(prevXp => prevXp - weaponDef.cost);
+    }
     
-    if (isGameOver) handleGameOver();
-    else if (turnEnded) setTimeout(() => processEnemyTurns(), 100);
-  };
+    if (weaponDef.accuracy && Math.random() > weaponDef.accuracy) {
+        addLog(`${actor.name || 'Your'} attack missed!`, "text-yellow-400");
+    } else {
+        let isGameOver = false;
+        setLocalDungeonState(prevState => {
+            let newState = JSON.parse(JSON.stringify(prevState));
+            let { enemies, board, player, log } = newState;
+            
+            if (isAbility) player.abilityUses[attackId]--;
+
+            let baseAttackPower = actorType === 'player' ? (weaponDef.attack || fullPlayerStats.attack) : (newState.wingman.atk || 0);
+            let damageMultiplier = isAbility ? (weaponDef.effect?.damageMultiplier || 1) : 1;
+            
+            const chargeEffect = player.activeEffects?.find(e => e.type === 'charge');
+            if (chargeEffect) {
+                damageMultiplier *= (chargeEffect.level + 1);
+                player.activeEffects = player.activeEffects.filter(e => e.type !== 'charge');
+                log.unshift({ id: Date.now() + Math.random(), message: `Unleashed a charged attack!`, style: 'text-cyan-400 font-bold' });
+            }
+
+            const mainTarget = enemies.find(e => e.id === targetEnemy.id);
+            if (!mainTarget) return prevState;
+
+            let enemiesHitThisAction = new Set();
+
+            const processHit = (target, dmgMultiplier = 1.0, isChain = false) => {
+                if (!target || enemiesHitThisAction.has(target.id)) return;
+                enemiesHitThisAction.add(target.id);
+                
+                let finalDamage = Math.round(baseAttackPower * damageMultiplier * dmgMultiplier);
+                
+                let targetArmor = target.armor || 0;
+                const armorBreakEffect = target.statusEffects?.find(e => e.type === 'armor_break');
+                if (armorBreakEffect) targetArmor = Math.max(0, targetArmor - armorBreakEffect.amount);
+
+                const armorPiercing = (actorType === 'player' && weaponDef.armorPiercing) ? weaponDef.armorPiercing : 0;
+                finalDamage = Math.max(1, finalDamage - Math.max(0, targetArmor - armorPiercing));
+                
+                target.hp -= finalDamage;
+                log.unshift({ id: Date.now() + Math.random(), message: `${isChain ? "Chain hits" : (actor.name || 'You') + " hit"} ${target.name} for ${finalDamage} damage.`, style: 'text-slate-300' });
+                setAnimationState(prev => ({ ...prev, hits: { ...prev.hits, [target.id]: Date.now() } }));
+
+                if (actorType === 'player' && weaponDef.lifesteal) {
+                    const healedAmount = Math.round(finalDamage * weaponDef.lifesteal);
+                    player.hp = Math.min(fullPlayerStats.maxHp, player.hp + healedAmount);
+                }
+
+                if (actorType === 'player' && !isChain && weaponDef.statusEffect && Math.random() < weaponDef.statusEffect.chance) {
+                    if (!target.statusEffects) target.statusEffects = [];
+                    target.statusEffects = target.statusEffects.filter(e => e.type !== weaponDef.statusEffect.type);
+                    target.statusEffects.push({ ...weaponDef.statusEffect });
+                    log.unshift({ id: Date.now() + Math.random(), message: `${target.name} is now ${weaponDef.statusEffect.type}!`, style: 'text-yellow-400' });
+                }
+                return finalDamage;
+            };
+            
+            processHit(mainTarget);
+
+            if (actorType === 'player') {
+                if (weaponDef.cleave) enemies.forEach(e => { if (Math.hypot(e.x - mainTarget.x, e.y - mainTarget.y) < 1.6) processHit(e, weaponDef.cleave, true); });
+                if (weaponDef.aoeRange) enemies.forEach(e => { if (Math.hypot(e.x - mainTarget.x, e.y - mainTarget.y) <= weaponDef.aoeRange) processHit(e); });
+
+                if (weaponDef.multishot) {
+                    const otherTargets = enemies.filter(e => e.id !== mainTarget.id && Math.hypot(e.x - player.x, e.y - player.y) <= attackRange);
+                    for(let i=0; i < weaponDef.multishot - 1 && i < otherTargets.length; i++) {
+                        processHit(otherTargets[i]);
+                    }
+                }
+                if (weaponDef.chain) {
+                    let lastTarget = mainTarget;
+                    let lastDamage = baseAttackPower * damageMultiplier;
+                    for (let i = 0; i < weaponDef.chain.count; i++) {
+                        const nextTarget = enemies.filter(e => !enemiesHitThisAction.has(e.id) && Math.hypot(e.x - lastTarget.x, e.y - lastTarget.y) <= weaponDef.chain.range).sort((a,b) => Math.hypot(a.x - lastTarget.x, a.y - lastTarget.y) - Math.hypot(b.x - lastTarget.x, b.y - lastTarget.y))[0];
+                        if (nextTarget) {
+                            lastDamage *= weaponDef.chain.falloff;
+                            processHit(nextTarget, (lastDamage / baseAttackPower), true);
+                            lastTarget = nextTarget;
+                        } else break;
+                    }
+                }
+            }
+
+            let newEnemiesToAdd = [];
+            newState.enemies = enemies.filter(enemy => {
+              if (enemy.hp <= 0) {
+                log.unshift({ id: Date.now() + Math.random(), message: `You defeated the ${enemy.name}!`, style: 'text-green-400' });
+                board[`${enemy.y},${enemy.x}`] = { type: enemy.baseId === 'keyholder_orc' ? 'key' : 'empty' };
+                if (enemy.loot && Math.random() < enemy.loot.chance) addIngredientToInventory(enemy.loot.id);
+                if (enemy.rareLoot && Math.random() < enemy.rareLoot.chance) addIngredientToInventory(enemy.rareLoot.id);
+                
+                // --- RE-INTEGRATED SPLIT LOGIC ---
+                if (enemy.onDefeat?.type === 'split') {
+                  const oozeDef = dungeonDefinitions.enemies.find(e => e.id === enemy.onDefeat.into);
+                  if (oozeDef) {
+                    for (let i = 0; i < enemy.onDefeat.count; i++) {
+                      const adjacent = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y:0}].map(d => ({x: enemy.x+d.x, y: enemy.y+d.y}));
+                      const emptyTile = adjacent.find(t => board[`${t.y},${t.x}`]?.type === 'empty');
+                      if(emptyTile) {
+                        const newOoze = { ...oozeDef, id: `ooze_${Date.now()}_${i}`, baseId: oozeDef.id, x: emptyTile.x, y: emptyTile.y, maxHp: oozeDef.hp };
+                        newEnemiesToAdd.push(newOoze);
+                        board[`${emptyTile.y},${emptyTile.x}`] = { type: 'enemy', enemyId: newOoze.id };
+                      }
+                    }
+                    log.unshift({ id: Date.now() + Math.random(), message: `The ${enemy.name} splits into smaller oozes!`, style: 'text-lime-400' });
+                  }
+                }
+                return false;
+              }
+              return true;
+            }).concat(newEnemiesToAdd);
+
+            if (player.hp <= 0) isGameOver = true;
+            return newState;
+        });
+        if (isGameOver) { handleGameOver(); return; }
+    }
+
+    setAttackTarget(null); setAbilityTarget(null);
+    const newAP = currentAP - attackCostAP;
+    if (actorType === 'player') {
+      setPlayerActionPoints(newAP);
+      if (newAP <= 0) {
+        if (localDungeonState.wingman) setActiveTurn('wingman');
+        else { setActiveTurn('enemy'); setTimeout(processEnemyTurns, 100); }
+      }
+    } else {
+      setWingmanActionPoints(newAP);
+      if (newAP <= 0) { setActiveTurn('enemy'); setTimeout(processEnemyTurns, 100); }
+    }
+};
+
 
 
   const handleBuyItem = (item, type, currency) => {
     const cost = item.cost;
-    // Read from session state for immediate feedback
     if (currency === 'xp' && sessionXp < cost) { showMessageBox("Not enough XP!", 'error'); return; }
     if (currency === 'gold' && sessionGold < cost) { showMessageBox("Not enough Gold!", 'error'); return; }
 
-    // Update LOCAL STATE ONLY
     setLocalDungeonState(prev => {
         const newState = { ...prev };
-        if (type === 'weapon') { newState.ownedWeapons.push(item.id); newState.equippedWeapon = item.id; }
-        else if (type === 'armor') { newState.ownedArmor.push(item.id); newState.equippedArmor = item.id; }
+        if (type === 'primaryWeapon') newState.ownedWeapons = [...(newState.ownedWeapons || []), item.id];
+        else if (type === 'offhandWeapon') newState.ownedOffhandWeapons = [...(newState.ownedOffhandWeapons || []), item.id];
+        else if (type === 'armor') newState.ownedArmor = [...(newState.ownedArmor || []), item.id];
         else if (type === 'potion') newState.potions = (newState.potions || 0) + 1;
         else if (type === 'temp_potion') {
-            const existingEffects = newState.player.activeEffects || [];
-            const effectIndex = existingEffects.findIndex(e => e.id === item.id);
-            if (effectIndex > -1) existingEffects[effectIndex].remainingFloors = item.duration;
-            else existingEffects.push({ id: item.id, remainingFloors: item.duration });
-            newState.player.activeEffects = existingEffects;
+             const existingEffects = newState.player.activeEffects || [];
+             const effectIndex = existingEffects.findIndex(e => e.id === item.id);
+             if (effectIndex > -1) existingEffects[effectIndex].remainingFloors = item.duration;
+             else existingEffects.push({ id: item.id, remainingFloors: item.duration });
+             newState.player.activeEffects = existingEffects;
         }
         return newState;
     });
@@ -2259,7 +3413,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     if (currency === 'xp') setSessionXp(prev => prev - cost);
     if (currency === 'gold') setSessionGold(prev => prev - cost);
     
-    showMessageBox(`Bought ${item.name}! (Changes will be saved at the next checkpoint)`, 'info');
+    showMessageBox(`Purchased ${item.name}! Go to the Armory to equip it.`, 'info');
   };
   
   const handleBuyStat = (stat) => {
@@ -2279,12 +3433,309 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     }
     // Update local state, don't write to Firestore directly
     setLocalDungeonState(prev => ({ ...prev, potions: (prev.potions || 0) + 1 }));
-    setSessionXp(prev => prev - 100);
-    showMessageBox("Bought a potion! (Changes will be saved at the next checkpoint)", 'info');
+      setSessionXp(prev => prev - 100);
+      showMessageBox("Bought a potion! (Changes will be saved at the next checkpoint)", 'info');
+  };
+  
+  const handleEquipItem = (item, type) => {
+    if (!item) return;
+
+    if (type === 'primaryWeapon') {
+        if (localDungeonState.floor <= localDungeonState.player.lastWeaponSwitchFloor) {
+            showMessageBox("You can only switch your primary weapon once per floor.", "error");
+            return;
+        }
+        setLocalDungeonState(prev => ({ ...prev, equippedWeapon: item.id, player: { ...prev.player, lastWeaponSwitchFloor: prev.floor } }));
+    } else if (type === 'offhandWeapon') {
+        setLocalDungeonState(prev => ({ ...prev, equippedOffhandWeapon: item.id }));
+    } else if (type === 'armor') {
+        setLocalDungeonState(prev => ({ ...prev, equippedArmor: item.id }));
+    }
+    setSelectedArmoryItem(null); // Close the details panel after equipping
   };
 
-    const usePotion = () => {
-      if(!localDungeonState || (localDungeonState.potions || 0) <= 0) { 
+  const handleWingmanAbilityClick = (ability) => {
+    setAttackTarget(null); // Cancel any attack targeting
+    setWingmanAbilityTarget(ability);
+    addLog(`Select a target for ${ability.name}.`, 'text-cyan-400');
+  };
+
+  const findEnemy = (enemyId) => {
+    // This function is now defined within the component scope.
+    // It uses a ref to the latest state to avoid stale closures in callbacks.
+    const state = dungeonStateRef.current;
+    return state.enemies.find(e => e.id === enemyId);
+  };
+
+  const handleCharge = useCallback(() => {
+    if (playerActionPoints < 1) {
+      addLog("Not enough AP to charge.", "text-yellow-400");
+      return;
+    }
+
+    setLocalDungeonState(prev => {
+      const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
+      let effects = newState.player.activeEffects || [];
+      const chargeEffect = effects.find(e => e.type === 'charge');
+      
+      if (chargeEffect) {
+        chargeEffect.level += 1;
+      } else {
+        effects.push({ type: 'charge', level: 1 });
+      }
+      
+      newState.player.activeEffects = effects;
+      return newState;
+    });
+
+    setPlayerActionPoints(prev => prev - 1);
+    addLog("You focus your energy...", "text-cyan-300");
+  }, [playerActionPoints, addLog]);
+
+  const handleUseWingmanAbility = (target, isFrenzied = false) => {
+    const wingman = localDungeonState.wingman;
+    const abilityId = isFrenzied ? 'savage_rush' : wingmanAbilityTarget.id;
+    const ability = wingman.abilities.find(a => a.id === abilityId);
+
+    if (!wingman || !ability) return;
+
+    if (!isFrenzied && wingmanActionPoints < ability.cost) {
+        addLog(`Not enough AP for ${ability.name}.`, "text-yellow-400");
+        setWingmanAbilityTarget(null);
+        return;
+    }
+
+    const distance = Math.hypot(target.x - wingman.x, target.y - wingman.y);
+    if (!isFrenzied && distance > ability.range) {
+        addLog(`Target is out of range for ${ability.name}.`, "text-yellow-400");
+        setWingmanAbilityTarget(null);
+        return;
+    }
+    
+    let success = false;
+    setLocalDungeonState(prevState => {
+        let newState = JSON.parse(JSON.stringify(prevState));
+        let enemyTarget = target.entityType === 'enemy' ? newState.enemies.find(e => e.id === target.id) : null;
+        let friendlyTarget = (target.id === 'player' || target.id === wingman.id) ? (target.id === 'player' ? newState.player : newState.wingman) : null;
+        
+        
+        const applyDamage = (enemy, damage, armorPiercing = 0) => {
+            let finalDamage = damage - Math.max(0, (enemy.armor || 0) - armorPiercing);
+            finalDamage = Math.max(1, Math.round(finalDamage));
+            enemy.hp -= finalDamage;
+            newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} hits ${enemy.name} for ${finalDamage} damage!`, style: 'text-orange-400' });
+            setAnimationState(prev => ({ ...prev, hits: { ...prev.hits, [enemy.id]: Date.now() } }));
+            return finalDamage;
+        };
+
+        switch(ability.id) {
+            case 'taunt': {
+                if (enemyTarget) {
+                    if (!enemyTarget.statusEffects) enemyTarget.statusEffects = [];
+                    enemyTarget.statusEffects = enemyTarget.statusEffects.filter(e => e.type !== 'taunted');
+                    enemyTarget.statusEffects.push({ type: 'taunted', duration: ability.duration });
+                    newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} taunts ${enemyTarget.name}!`, style: 'text-cyan-400' });
+                    if (ability.specialization === 'knight_ability_a') {
+                        enemyTarget.statusEffects.push({ type: 'attack_debuff', multiplier: 0.8, duration: ability.duration });
+                    } else if (ability.specialization === 'knight_ability_b') {
+                        if(!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                        newState.wingman.activeEffects.push({ type: 'counter_attack', power: 0.5, duration: ability.duration });
+                    }
+                    success = true;
+                }
+                break;
+            }
+            case 'heal': {
+                 if (target.id === 'player' || target.id === wingman.id) {
+                    const isPlayer = target.id === 'player';
+                    const healedActor = isPlayer ? newState.player : newState.wingman;
+                    const maxHp = isPlayer ? fullPlayerStats.maxHp : wingman.maxHp;
+                    const newHp = Math.min(maxHp, healedActor.hp + ability.power);
+                    if (newHp > healedActor.hp) newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} heals for ${newHp - healedActor.hp} HP.`, style: 'text-green-400' });
+                    healedActor.hp = newHp;
+                    if (ability.specialization === 'cleric_ability_a') { // Purifying Light
+                        healedActor.statusEffects = (healedActor.statusEffects || []).filter(e => e.isPositive);
+                    } else if (ability.specialization === 'cleric_ability_b') { // Divine Favor
+                        if(!healedActor.activeEffects) healedActor.activeEffects = [];
+                        healedActor.activeEffects.push({ type: 'damage_buff', multiplier: 1.15, durationTurns: 1 });
+                    }
+                    success = true;
+                }
+                break;
+            }
+            case 'firebolt': {
+              if(enemyTarget) {
+                applyDamage(enemyTarget, ability.power);
+                if (ability.specialization === 'mage_ability_a') {
+                  if (!enemyTarget.statusEffects) enemyTarget.statusEffects = [];
+                  enemyTarget.statusEffects.push({ type: 'burning', damage: Math.round(ability.power * 0.2), duration: 2 });
+                } else if (ability.specialization === 'mage_ability_b') {
+                  if (!enemyTarget.statusEffects) enemyTarget.statusEffects = [];
+                  enemyTarget.statusEffects.push({ type: 'chilled', reduction: 1, duration: 1 });
+                }
+                success = true;
+              }
+              break;
+            }
+            case 'fortify': {
+                if (target.id === wingman.id) {
+                    if (!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                    newState.wingman.activeEffects = newState.wingman.activeEffects.filter(e => e.id !== 'fortify');
+                    
+                    let tempHpGain = ability.effect.tempHp;
+                    let effectToAdd = { id: 'fortify', duration: ability.duration, tempHp: tempHpGain };
+
+                    // Apply specialization logic
+                    if (ability.specialization === 'heavy_ability_a') { // Reinforced Plating
+                        tempHpGain += 20;
+                        effectToAdd.tempHp = tempHpGain;
+                    } else if (ability.specialization === 'heavy_ability_b') { // Retaliation
+                        effectToAdd.specialization = 'heavy_ability_b'; // Add specialization to the effect for later checks
+                    }
+                    
+                    newState.wingman.activeEffects.push(effectToAdd);
+                    newState.wingman.hp += tempHpGain;
+                    newState.wingman.maxHp += tempHpGain; 
+                    
+                    newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} fortifies for ${tempHpGain} HP!`, style: 'text-cyan-400' });
+                    success = true;
+                }
+                break;
+            }
+            case 'divine_shield': {
+                if (target.id === wingman.id) {
+                    if (!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                    const tempHpGain = ability.effect.tempHp;
+                    
+                    if (tempHpGain > 0) {
+                        newState.wingman.hp += tempHpGain;
+                        newState.wingman.maxHp += tempHpGain;
+                    }
+                    const effect = { 
+                        id: ability.id, 
+                        duration: ability.duration, 
+                        specialization: ability.specialization,
+                        tempHp: tempHpGain, // Store shield value for damage calculation
+                    };
+                    newState.wingman.activeEffects.push(effect);
+                    newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} gains a divine shield for ${tempHpGain} HP!`, style: 'text-yellow-300' });
+                    success = true;
+                }
+                break;
+            }
+            case 'riposte': {
+                if (!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                let tempHpGain = 0;
+                if (ability.id === 'fortify') tempHpGain = ability.effect.tempHp + (ability.specialization === 'heavy_ability_a' ? 20 : 0);
+                if (ability.id === 'divine_shield') tempHpGain = ability.effect.tempHp;
+                if (tempHpGain > 0) {
+                    newState.wingman.hp += tempHpGain;
+                    newState.wingman.maxHp += tempHpGain;
+                }
+                // Add new effect with specialization details
+                const effect = { id: ability.id, duration: ability.duration, specialization: ability.specialization };
+                newState.wingman.activeEffects.push(effect);
+                newState.log.unshift({ id: Date.now() + Math.random(), message: `${wingman.name} uses ${ability.name}!`, style: 'text-cyan-400' });
+                success = true;
+                break;
+            }
+            case 'sunder': {
+                if(enemyTarget) {
+                    const damageDealt = applyDamage(enemyTarget, ability.power, ability.armorPiercing);
+                    if (ability.specialization === 'undead_ability_a') enemyTarget.armor = Math.max(0, (enemyTarget.armor || 0) - 2);
+                    else if (ability.specialization === 'undead_ability_b') newState.wingman.hp = Math.min(newState.wingman.maxHp, newState.wingman.hp + Math.round(damageDealt * 0.3));
+                    success = true;
+                }
+                break;
+            }
+            case 'shadow_strike': {
+                if (enemyTarget) {
+                    applyDamage(enemyTarget, ability.power, ability.armorPiercing);
+                    if (ability.specialization === 'rogue_ability_a') {
+                        if (!enemyTarget.statusEffects) enemyTarget.statusEffects = [];
+                        enemyTarget.statusEffects.push({ type: 'poison', damage: 5, duration: 3 });
+                    } else if (ability.specialization === 'rogue_ability_b') {
+                         if (!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                         newState.wingman.activeEffects.push({ type: 'bonus_move', amount: 1, durationTurns: 1});
+                    }
+                    success = true;
+                }
+                break;
+                
+            }
+            case 'piercing_lance': {
+                if(enemyTarget) {
+                    let damage = ability.power;
+                    if (ability.specialization === 'cavalier_ability_b') { // Momentum
+                        const bonus = Math.min(0.5, (wingmanTurnState.distanceMoved || 0) * 0.1); // 10% bonus per tile, max 50%
+                        damage *= (1 + bonus);
+                    }
+                    applyDamage(enemyTarget, damage);
+
+                    if (ability.specialization === 'cavalier_ability_a') { // Trample
+                        const dx = enemyTarget.x - wingman.x;
+                        const dy = enemyTarget.y - wingman.y;
+                        const behindX = enemyTarget.x + dx;
+                        const behindY = enemyTarget.y + dy;
+                        const behindTarget = newState.enemies.find(e => e.x === behindX && e.y === behindY);
+                        if(behindTarget) {
+                            applyDamage(behindTarget, damage * 0.5);
+                            newState.log.unshift({ id: Date.now(), message: `The attack pierces through to ${behindTarget.name}!`, style: 'text-orange-300' });
+                        }
+                    }
+                    success = true;
+                }
+                break;
+            }
+             case 'savage_rush': {
+                if (enemyTarget) {
+                    applyDamage(enemyTarget, ability.power);
+                    // Knockback logic...
+                    if (ability.specialization === 'warg_ability_a') {
+                        if (!enemyTarget.statusEffects) enemyTarget.statusEffects = [];
+                        enemyTarget.statusEffects.push({ type: 'crippled', reduction: 2, duration: 1 });
+                    } else if (ability.specialization === 'warg_ability_b') {
+                        if (!newState.wingman.activeEffects) newState.wingman.activeEffects = [];
+                        newState.wingman.activeEffects.push({ type: 'frenzied', durationTurns: 1 });
+                    }
+                    success = true;
+                }
+                break;
+             }
+            default:
+                if (enemyTarget) {
+                    applyDamage(enemyTarget, ability.power || wingman.atk);
+                    success = true;
+                }
+                break;
+        }
+        return newState;
+    });
+
+    if (success) {
+        if (isFrenzied) {
+            setWingmanTurnState(prev => ({ ...prev, frenziedAttackAvailable: false }));
+        } else {
+            const newAP = wingmanActionPoints - ability.cost;
+            setWingmanActionPoints(newAP);
+            if (newAP <= 0) {
+              setActiveTurn('enemy');
+              setTimeout(processEnemyTurns, 100);
+            }
+        }
+    }
+    setWingmanAbilityTarget(null);
+  };
+  
+  const handleFriendlyClick = (e, target) => {
+    e.stopPropagation();
+    if (activeTurn === 'wingman' && wingmanAbilityTarget?.id === 'heal') {
+        handleUseWingmanAbility(target);
+    }
+  };
+
+  const usePotion = () => {
+          if(!localDungeonState || (localDungeonState.potions || 0) <= 0) { 
         addLog("You have no potions.", 'text-yellow-400'); 
         return; 
       }
@@ -2403,7 +3854,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
         }
 
         row.push(
-          <div key={key} onClick={() => handleTileClick(x, y)} style={tileStyle} className={`border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} ${!isEnemyTurn ? 'cursor-pointer hover:bg-slate-600/50' : 'cursor-wait'} ${isMobile ? 'w-8 h-8' : 'w-12 h-12'}`}>
+          <div key={key} onClick={() => handleTileClick(x, y, activeTurn)} style={tileStyle} className={`border border-slate-700/50 flex items-center justify-center transition-colors duration-200 ${tileClass} ${activeTurn !== 'enemy' ? 'cursor-pointer hover:bg-slate-600/50' : 'cursor-wait'} ${isMobile ? 'w-8 h-8' : 'w-12 h-12'}`}>
             {tileContent}
             {isDangerTile && tile.type !== 'wall' && (
               <div className="absolute inset-0 pointer-events-none bg-red-500/20 animate-pulse"></div>
@@ -2421,24 +3872,59 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
     }
     
     const TILE_SIZE = isMobile ? 32 : 48;
+
+    const WingmanSprite = ({ style }) => {
+      const containerSize = 32;
+      const largestDim = Math.max(style.width, style.height);
+      const scale = containerSize / largestDim;
+      
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: style.width, 
+              height: style.height,
+              backgroundImage: `url(${wingmenSpriteSheet})`,
+              backgroundPosition: style.backgroundPosition,
+              transform: `translate(-50%, -50%) scale(${scale})`,
+              imageRendering: 'pixelated',
+          }}/>
+        </div>
+      );
+    };
+
     const entities = [
         ...localDungeonState.enemies.map(e => ({...e, entityType: 'enemy'})),
         {...localDungeonState.player, id: 'player', entityType: 'player'}
     ];
+    if (localDungeonState.wingman) {
+      entities.push({...localDungeonState.wingman, entityType: 'wingman'});
+    }
 
     const entityElements = entities.map(entity => {
-      // The position is now directly from the main state.
       const top = entity.y * TILE_SIZE + (TILE_SIZE / 2 - 16);
       const left = entity.x * TILE_SIZE + (TILE_SIZE / 2 - 16);
 
-      const Icon = entity.entityType === 'player'
-        ? SVGIcons.player('player')
-        : (SVGIcons[entity.baseId] ? SVGIcons[entity.baseId](entity.id) : <div className="w-8 h-8 rounded-full bg-red-600" />);
+      let Icon;
+      if (entity.entityType === 'player') {
+        Icon = SVGIcons.player(entity.id);
+      } else if (entity.entityType === 'wingman') {
+        Icon = <WingmanSprite style={entity.spriteStyle} />;
+      } else { // enemy
+        Icon = SVGIcons[entity.baseId] ? SVGIcons[entity.baseId](entity.id) : <div className="w-8 h-8 rounded-full bg-red-600" />;
+      }
 
       return (
+
         <div 
           key={entity.id} 
-          onClick={entity.entityType === 'enemy' ? (e) => handleEnemyClick(e, entity) : undefined}
+          onClick={
+            entity.entityType === 'enemy' 
+              ? (e) => handleEnemyClick(e, entity) 
+              : (e) => handleFriendlyClick(e, entity)
+          }
           className="absolute z-10" 
           style={{ 
             width: 32, height: 32,
@@ -2446,10 +3932,21 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
             left: left,
             // The browser will now automatically animate any changes to top and left.
             transition: 'top 0.25s linear, left 0.25s linear',
-            cursor: entity.entityType === 'enemy' && !isEnemyTurn ? 'pointer' : 'default'
+            cursor: 
+              (entity.entityType === 'enemy' && activeTurn !== 'enemy' && (attackTarget || abilityTarget || (wingmanAbilityTarget && wingmanAbilityTarget.id !== 'heal'))) ||
+              (entity.entityType !== 'enemy' && activeTurn === 'wingman' && wingmanAbilityTarget?.id === 'heal')
+                ? 'pointer' : 'default'
           }}
         >
           {Icon}
+          {entity.entityType === 'enemy' && (
+            <div className="absolute -bottom-2 w-full h-1.5 bg-red-900/80 rounded-full overflow-hidden border border-black/50">
+              <div 
+                className="h-full bg-red-500 transition-all duration-200" 
+                style={{ width: `${Math.max(0, (entity.hp / entity.maxHp) * 100)}%` }}
+              />
+            </div>
+          )}
         </div>
       );
     });
@@ -2464,12 +3961,13 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
         <div><h2 className="text-3xl font-bold text-white">Dungeon Crawler</h2><p className="text-slate-400">Floor: {localDungeonState.floor} | Highest Floor: {stats.dungeon_floor || 1}</p></div>
         <div className="flex space-x-2">
-            <button onClick={() => saveGame(localDungeonState)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save Game</button>
-            <button onClick={() => setLocalDungeonState(prev => ({...prev, shopOpen: !prev.shopOpen, bestiaryOpen: false}))} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">{localDungeonState.shopOpen ? 'Shop' : 'Shop'}</button>
-            <button onClick={() => setLocalDungeonState(prev => ({...prev, bestiaryOpen: !prev.bestiaryOpen, shopOpen: false}))} className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">{localDungeonState.bestiaryOpen ? 'Bestiary' : 'Bestiary'}</button>
+            <button onClick={() => saveGame(localDungeonState)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save</button>
+            <button onClick={() => { setBarracksOpen(false); setLocalDungeonState(prev => ({...prev, shopOpen: !prev.shopOpen, bestiaryOpen: false})); setShopView('buy'); setSelectedArmoryItem(null); }} className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Shop / Armory</button>
+            <button onClick={() => { setLocalDungeonState(prev => ({...prev, shopOpen: false, bestiaryOpen: false})); setBarracksOpen(b => !b); }} className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">Barracks</button>
+            <button onClick={() => { setBarracksOpen(false); setLocalDungeonState(prev => ({...prev, bestiaryOpen: !prev.bestiaryOpen, shopOpen: false}))}} className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">Bestiary</button>
             <button onClick={onResetDungeon} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Reset</button>
         </div>
       </div>
@@ -2484,7 +3982,15 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
             <h3 className="font-bold text-white">Player Stats</h3>
             <p>HP: <span className="text-red-400 font-bold">{localDungeonState.player.hp} / {fullPlayerStats.maxHp}</span></p>
             <div className="w-full bg-slate-700 rounded-full h-2.5 mt-1"><div className="bg-red-600 h-2.5 rounded-full" style={{ width: `${(localDungeonState.player.hp / fullPlayerStats.maxHp) * 100}%` }}></div></div>
-            <p>Attack: <span className="text-yellow-400 font-bold">{fullPlayerStats.attack}</span> | Gold: <span className="text-yellow-400 font-bold">{sessionGold || 0}</span></p>            
+            <p>Attack: <span className="text-yellow-400 font-bold">{fullPlayerStats.attack}</span> | Gold: <span className="text-yellow-400 font-bold">{sessionGold || 0}</span></p>
+            {activeTurn === 'player' && <p>Action Points: <span className="font-bold text-cyan-400">{playerActionPoints} / 2</span></p>}
+             {localDungeonState.wingman && (
+              <div className="mt-2 border-t border-slate-700 pt-2">
+                <h4 className="text-sm font-bold text-slate-300">Wingman: {localDungeonState.wingman.name}</h4>
+                 <p>HP: <span className="text-red-400 font-bold">{localDungeonState.wingman.hp} / {localDungeonState.wingman.maxHp}</span> | Attack: <span className="text-yellow-400 font-bold">{localDungeonState.wingman.atk}</span></p>
+                 {activeTurn === 'wingman' && <p>Action Points: <span className="font-bold text-cyan-400">{wingmanActionPoints} / {localDungeonState.wingman.ap}</span></p>}
+              </div>
+            )}
             <p>Pet: <span className="font-semibold">{stats.currentPet?.name || 'None'}</span> {localDungeonState.player.hasKey && <span className="text-yellow-300 font-bold ml-4">🔑 Key</span>}</p>
             {localDungeonState.player.activeEffects && localDungeonState.player.activeEffects.length > 0 && (
               <div className="mt-2 border-t border-slate-700 pt-2">
@@ -2505,45 +4011,99 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
           <div className="bg-slate-800/50 p-4 rounded-xl mb-4">
             <h3 className="font-bold text-white mb-2">Actions</h3>
             <div className="grid grid-cols-2 gap-2">
-                <button 
-                  onClick={() => setAttackTarget(true)} 
-                  className="bg-red-600 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-wait"
-                  disabled={isEnemyTurn || !!attackTarget || !!abilityTarget}
-                >
-                  {isEnemyTurn ? "Enemy Turn..." : attackTarget || abilityTarget ? "Select Target..." : `Attack (${localDungeonState.player.attackCost} XP)`}
-                </button>
-                <button onClick={usePotion} className="bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:bg-slate-600" disabled={(localDungeonState.potions || 0) <= 0}>
-                    Use Potion ({localDungeonState.potions || 0})
-                </button>
-                {dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).map(attack => {
-                    const usesLeft = localDungeonState.player.abilityUses?.[attack.id] || 0;
-                                const canAfford = stats.totalXP >= attack.cost;
-                                const isDisabled = isEnemyTurn || usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget;
-                                
-                                const handleAbilityClick = () => {
-                                    if (attack.isSelfTarget) {
-                                        setLocalDungeonState(prev => {
-                                            const newPlayerState = { ...prev.player };
-                                            let newLog = [...prev.log];
-                                            if (attack.effect.heal) {
-                                                newPlayerState.hp = Math.min(newPlayerState.maxHp, newPlayerState.hp + attack.effect.heal);
-                                                newLog.unshift({ message: `You use ${attack.name}, restoring ${attack.effect.heal} HP.`, style: 'text-green-400' });
-                                            }
-                                            newPlayerState.abilityUses = { ...newPlayerState.abilityUses, [attack.id]: usesLeft - 1 };
-                                            return { ...prev, player: newPlayerState, log: newLog.slice(0, 5) };
-                                        });
-                                        updateStatsInFirestore({ totalXP: stats.totalXP - attack.cost });
-                                    } else {
-                                        setAbilityTarget(attack.id);
-                                    }
-                                };
+                {activeTurn === 'player' && (
+                  <>
+                    <button onClick={() => setAttackTarget({ type: 'primary' })} className="bg-red-600 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-wait" disabled={!!attackTarget || !!abilityTarget || playerActionPoints < 1}>
+                        {attackTarget ? "Select Target..." : `Primary Attack (1 AP)`}
+                    </button>
+                    <button onClick={() => setAttackTarget({ type: 'secondary' })} className="bg-red-800 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-wait" disabled={!localDungeonState.equippedOffhandWeapon || !!attackTarget || !!abilityTarget || playerActionPoints < 1}>
+                        Secondary Attack (1 AP)
+                    </button>
+                    <button onClick={usePotion} className="bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:bg-slate-600" disabled={(localDungeonState.potions || 0) <= 0}>
+                        Use Potion ({localDungeonState.potions || 0})
+                    </button>
+                    {dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).map(attack => {
+                        const usesLeft = localDungeonState.player.abilityUses?.[attack.id] || 0;
+                        const canAfford = sessionXp >= attack.cost;
+                        const isDisabled = usesLeft <= 0 || !canAfford || !!attackTarget || !!abilityTarget || playerActionPoints < 1;
+                        
+                        const handleAbilityClick = () => {
+                          if (isDisabled) return;
+                          setAttackTarget(null);
+                          if (attack.isSelfTarget) {
+                            handleAttack('player', localDungeonState.player, attack.id);
+                          } else {
+                            setAbilityTarget(attack.id);
+                            addLog(`Select a target for ${attack.name}.`, 'text-cyan-400');
+                          }
+                        };
 
-                    return (
-                        <button key={attack.id} onClick={handleAbilityClick} className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 disabled:bg-slate-600/50 disabled:cursor-not-allowed" disabled={isDisabled}>
-                            {abilityTarget === attack.id ? 'Select Target...' : `${attack.name} (${usesLeft}/${attack.maxUses})`}
+                        return (
+                            <button key={attack.id} onClick={handleAbilityClick} className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 disabled:bg-slate-600/50 disabled:cursor-not-allowed" disabled={isDisabled}>
+                                {abilityTarget === attack.id ? 'Select Target...' : `${attack.name} (${usesLeft}/${attack.maxUses})`}
+                            </button>
+                        );
+                    })}
+                    
+                    {/* NEW: Charge Button */}
+                    {(() => {
+                        const weapon = Object.values(dungeonDefinitions.primaryWeapons.mage).flat().find(w => w.id === localDungeonState.equippedWeapon);
+                        if (activeTurn === 'player' && weapon?.isChargeable) {
+                          const chargeEffect = localDungeonState.player.activeEffects?.find(e => e.type === 'charge');
+                          const chargeLevel = chargeEffect?.level || 0;
+                          const isDisabled = chargeLevel >= weapon.maxCharges || playerActionPoints < 1;
+                          return (
+                            <button onClick={handleCharge} disabled={isDisabled} className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:bg-slate-600">
+                              Charge Staff ({chargeLevel}/{weapon.maxCharges})
+                            </button>
+                          )
+                        }
+                        return null;
+                    })()}
+                  </>
+                )}
+                {activeTurn === 'wingman' && localDungeonState.wingman && (
+                  <>
+                    <button 
+                      onClick={() => { setWingmanAbilityTarget(null); setAttackTarget(true); }}
+                      className="bg-red-600 text-white p-2 rounded hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-wait" 
+                      disabled={!!attackTarget || !!wingmanAbilityTarget || wingmanActionPoints < localDungeonState.wingman.attackCost}
+                    >
+                      {attackTarget ? 'Select Target...' : `Attack (${localDungeonState.wingman.attackCost} AP)`}
+                    </button>
+                    {localDungeonState.wingman.abilities?.map(ability => (
+                       <button
+                           key={ability.id}
+                           onClick={() => handleWingmanAbilityClick(ability)}
+                           disabled={wingmanActionPoints < ability.cost || !!wingmanAbilityTarget || !!attackTarget}
+                           className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-wait"
+                       >
+                           {wingmanAbilityTarget?.id === ability.id ? 'Select Target...' : `${ability.name} (${ability.cost} AP)`}
+                       </button>
+                    ))}
+                    {wingmanTurnState.frenziedAttackAvailable && (
+                        <button
+                            onClick={() => { setWingmanAbilityTarget(null); setAttackTarget({ isFrenzied: true }); }}
+                            className="col-span-2 bg-orange-600 text-white p-2 rounded hover:bg-orange-700 animate-pulse"
+                        >
+                          Frenzied Assault (Free Action)
                         </button>
-                    );
-                })}
+                    )}
+                  </>
+                )}
+                 <button onClick={() => {
+                   setAttackTarget(null); // Clear any targeting state
+                   setAbilityTarget(null);
+                   if (activeTurn === 'player') {
+                     if (localDungeonState.wingman) setActiveTurn('wingman');
+                     else { setActiveTurn('enemy'); setTimeout(processEnemyTurns, 100); }
+                   } else if (activeTurn === 'wingman') {
+                     setActiveTurn('enemy');
+                     setTimeout(processEnemyTurns, 100);
+                   }
+                 }} className="col-span-2 bg-slate-600 text-white p-2 rounded hover:bg-slate-700 disabled:bg-slate-800 disabled:cursor-wait" disabled={activeTurn === 'enemy'}>
+                    End Turn
+                </button>
             </div>
           </div>
           <div className="bg-slate-800/50 p-4 rounded-xl">
@@ -2563,51 +4123,136 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
               </div>
           </div>
       )}
-      {localDungeonState.shopOpen && (
-    <div className="mt-6">
-        <h3 className="text-2xl font-bold text-white mb-4">Dungeon Shop</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Gold Shop */}
-            <div className="bg-slate-800/80 p-4 rounded-lg">
-                <h4 className="font-bold mb-2 text-white">Gold Shop (Consumables)</h4>
-                <button onClick={() => handleBuyItem({name: 'Potion', cost: 50}, 'potion', 'gold')} disabled={(sessionGold || 0) < 50} className="w-full bg-yellow-600 p-2 rounded mb-2 hover:bg-yellow-700 disabled:bg-slate-600/50 disabled:cursor-not-allowed">Buy Health Potion (50 Gold)</button>
-                {dungeonDefinitions.temp_potions.map(p => (
-                  <button key={p.id} onClick={() => handleBuyItem(p, 'temp_potion', 'gold')} disabled={(sessionGold || 0) < p.cost} className="w-full bg-yellow-600 p-2 rounded mb-2 hover:bg-yellow-700 disabled:bg-slate-600/50 disabled:cursor-not-allowed">
-                    Buy {p.name} ({p.cost} Gold)
-                  </button>
-                ))}
-            </div>
-            {/* Weapons Shop */}
-            <div className="bg-slate-800/80 p-4 rounded-lg">
-                <h4 className="font-bold mb-2 text-white">XP Shop ({localDungeonState.playerClass} Weapons)</h4>
-                {(() => {
-                    const classType = localDungeonState.playerClass;
-                    let availableWeapons = [];
-                    if (classType === 'warrior') availableWeapons = dungeonDefinitions.weapons;
-                    else if (classType === 'mage') availableWeapons = dungeonDefinitions.wands;
-                    else if (classType === 'archer') availableWeapons = dungeonDefinitions.bows;
-                    else if (classType === 'tank') availableWeapons = dungeonDefinitions.shields;
+            {barracksOpen && (
+              <WingmanBarracks 
+                stats={stats}
+                wingmanDefs={wingmanDefinitions}
+                updateStatsInFirestore={updateStatsInFirestore}
+                showMessageBox={showMessageBox}
+                sessionGold={sessionGold}
+                sessionXp={sessionXp}
+                isRunActive={localDungeonState.phase === 'playing' && (localDungeonState.floor > 1 || localDungeonState.turnCount > 1)}
+                pendingEquippedWingman={pendingEquippedWingman}
+                onEquipWingman={setPendingEquippedWingman}
+              />
+            )}
+            {localDungeonState.shopOpen && (
+              <div className="mt-6">
+                <div className="flex border-b border-slate-700 mb-4">
+                  <button onClick={() => setShopView('buy')} className={`px-4 py-2 text-lg font-semibold ${shopView === 'buy' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>Buy</button>
+                  <button onClick={() => { setShopView('armory'); setSelectedArmoryItem(null); }} className={`px-4 py-2 text-lg font-semibold ${shopView === 'armory' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>Armory</button>
+                </div>
+
+                {shopView === 'buy' && (
+                  <div className="flex flex-col gap-6">
+                    {/* Primary Weapons Section */}
+                    <div className="bg-slate-800/80 p-4 rounded-lg">
+                        <h3 className="text-xl font-bold text-white mb-3">Primary Weapons</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Object.entries(dungeonDefinitions.primaryWeapons[localDungeonState.playerClass] || {}).map(([type, weapons]) => (
+                                <div key={type} className="bg-slate-900/50 p-3 rounded-md">
+                                    <h4 className="font-semibold text-indigo-300 capitalize mb-2">{type}</h4>
+                                    <div className="space-y-2">
+                                        {weapons.map(w => {
+                                            const isOwned = (localDungeonState.ownedWeapons || []).includes(w.id);
+                                            return <button key={w.id} onClick={() => handleBuyItem(w, 'primaryWeapon', 'xp')} disabled={isOwned || sessionXp < w.cost} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : sessionXp >= w.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 text-slate-400'}`}>{isOwned ? 'Owned' : `${w.name} (${w.cost} XP)`}</button>;
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                     
-                    return availableWeapons.map(w => {
-                        const isOwned = localDungeonState.ownedWeapons.includes(w.id);
-                        const canAfford = stats.totalXP >= w.cost;
-                        return (<button key={w.id} onClick={() => handleBuyItem(w, 'weapon', 'xp')} disabled={isOwned || !canAfford} className={`w-full p-2 rounded mb-2 font-semibold transition-colors text-center ${isOwned ? 'bg-green-800/60 text-green-400 cursor-default' : canAfford ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>{isOwned ? 'Owned' : `${w.name} (${w.cost} XP)`}</button>);
-                    });
+                    {/* Other Items Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-slate-800/80 p-4 rounded-lg space-y-2">
+                            <h4 className="font-bold text-white">Secondary Weapons</h4>
+                            {dungeonDefinitions.offhandWeapons.filter(w => w.forClass.includes(localDungeonState.playerClass)).map(w => {
+                                const isOwned = (localDungeonState.ownedOffhandWeapons || []).includes(w.id);
+                                return <button key={w.id} onClick={() => handleBuyItem(w, 'offhandWeapon', 'xp')} disabled={isOwned || sessionXp < w.cost} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : sessionXp >= w.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 text-slate-400'}`}>{isOwned ? 'Owned' : `${w.name} (${w.cost} XP)`}</button>;
+                            })}
+                        </div>
+                        <div className="bg-slate-800/80 p-4 rounded-lg space-y-2">
+                            <h4 className="font-bold text-white">Armor</h4>
+                            {dungeonDefinitions.armors.map(a => {
+                                const isOwned = (localDungeonState.ownedArmor || []).includes(a.id);
+                                return <button key={a.id} onClick={() => handleBuyItem(a, 'armor', 'xp')} disabled={isOwned || sessionXp < a.cost} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : sessionXp >= a.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 text-slate-400'}`}>{isOwned ? 'Owned' : `${a.name} (${a.cost} XP)`}</button>;
+                            })}
+                        </div>
+                         <div className="bg-slate-800/80 p-4 rounded-lg space-y-2">
+                            <h4 className="font-bold text-white">Consumables (Gold)</h4>
+                            <button onClick={() => handleBuyItem({name: 'Potion', cost: 50}, 'potion', 'gold')} disabled={(sessionGold || 0) < 50} className="w-full bg-yellow-600 text-black font-semibold p-2 rounded hover:bg-yellow-700 disabled:bg-slate-600">Buy Health Potion (50g)</button>
+                            {dungeonDefinitions.temp_potions.map(p => (<button key={p.id} onClick={() => handleBuyItem(p, 'temp_potion', 'gold')} disabled={(sessionGold || 0) < p.cost} className="w-full bg-yellow-600 text-black font-semibold p-2 rounded hover:bg-yellow-700 disabled:bg-slate-600">Buy {p.name} ({p.cost}g)</button>))}
+                        </div>
+                    </div>
+                  </div>
+                )}
+
+                {shopView === 'armory' && (() => {
+                  const equippedPrimary = Object.values(dungeonDefinitions.primaryWeapons).flatMap(c => Object.values(c).flat()).find(w => w.id === localDungeonState.equippedWeapon);
+                  const equippedSecondary = dungeonDefinitions.offhandWeapons.find(w => w.id === localDungeonState.equippedOffhandWeapon);
+                  const equippedArmorItem = dungeonDefinitions.armors.find(a => a.id === localDungeonState.equippedArmor);
+                  
+                  return (
+                    <div className="flex flex-col md:flex-row gap-4 min-h-[400px]">
+                      {/* Left Side: Item Lists */}
+                      <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div className="bg-slate-800/80 p-4 rounded-lg">
+                          <h4 className="font-bold text-white mb-2">Primary Weapons</h4>
+                          <div className="space-y-1 max-h-96 overflow-y-auto">{(localDungeonState.ownedWeapons || []).map(id => { const item = Object.values(dungeonDefinitions.primaryWeapons).flatMap(c => Object.values(c).flat()).find(w => w.id === id); return item ? <button key={id} onClick={() => setSelectedArmoryItem({ ...item, type: 'primaryWeapon' })} className={`w-full text-left p-2 rounded text-sm ${selectedArmoryItem?.id === id ? 'bg-indigo-500' : 'bg-slate-700 hover:bg-slate-600'}`}>{item.name}</button> : null; })}</div>
+                        </div>
+                        <div className="bg-slate-800/80 p-4 rounded-lg">
+                          <h4 className="font-bold text-white mb-2">Secondary Weapons</h4>
+                          <div className="space-y-1 max-h-96 overflow-y-auto">{(localDungeonState.ownedOffhandWeapons || []).map(id => { const item = dungeonDefinitions.offhandWeapons.find(w => w.id === id); return item ? <button key={id} onClick={() => setSelectedArmoryItem({ ...item, type: 'offhandWeapon' })} className={`w-full text-left p-2 rounded text-sm ${selectedArmoryItem?.id === id ? 'bg-indigo-500' : 'bg-slate-700 hover:bg-slate-600'}`}>{item.name}</button> : null; })}</div>
+                        </div>
+                        <div className="bg-slate-800/80 p-4 rounded-lg">
+                          <h4 className="font-bold text-white mb-2">Armor</h4>
+                          <div className="space-y-1 max-h-96 overflow-y-auto">{(localDungeonState.ownedArmor || []).map(id => { const item = dungeonDefinitions.armors.find(a => a.id === id); return item ? <button key={id} onClick={() => setSelectedArmoryItem({ ...item, type: 'armor' })} className={`w-full text-left p-2 rounded text-sm ${selectedArmoryItem?.id === id ? 'bg-indigo-500' : 'bg-slate-700 hover:bg-slate-600'}`}>{item.name}</button> : null; })}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Right Side: Details & Actions */}
+                      <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0 flex flex-col gap-4">
+                        <div className="bg-slate-800/80 p-4 rounded-lg">
+                            <h4 className="font-bold text-white mb-2">Equipped</h4>
+                            <div className="space-y-2 text-sm">
+                              <p><strong>Primary:</strong> <span className="text-slate-300">{equippedPrimary?.name || 'None'}</span></p>
+                              <p><strong>Secondary:</strong> <span className="text-slate-300">{equippedSecondary?.name || 'None'}</span></p>
+                              <p><strong>Armor:</strong> <span className="text-slate-300">{equippedArmorItem?.name || 'None'}</span></p>
+                            </div>
+                        </div>
+                        <div className="bg-slate-800/80 p-4 rounded-lg flex-grow">
+                          <h4 className="font-bold text-white mb-2">Item Details</h4>
+                          {selectedArmoryItem ? (
+                            <div>
+                              <p className="text-lg font-semibold">{selectedArmoryItem.name}</p>
+                              <div className="text-sm text-slate-300 mt-2 space-y-1">
+                                {selectedArmoryItem.attack && <p>Attack: <span className="font-bold text-yellow-300">{selectedArmoryItem.attack}</span></p>}
+                                {selectedArmoryItem.hp && <p>Bonus HP: <span className="font-bold text-red-300">{selectedArmoryItem.hp}</span></p>}
+                                {selectedArmoryItem.description && <p className="text-xs italic text-slate-400 mt-1">{selectedArmoryItem.description}</p>}
+                                {selectedArmoryItem.attackRange && <p>Range: <span className="font-bold">{selectedArmoryItem.attackRange}</span></p>}
+                                {selectedArmoryItem.accuracy && <p>Accuracy: <span className="font-bold">{selectedArmoryItem.accuracy * 100}%</span></p>}
+                                {selectedArmoryItem.aoeRange && <p>AoE Range: <span className="font-bold">{selectedArmoryItem.aoeRange}</span></p>}
+                              </div>
+                              <button onClick={() => handleEquipItem(selectedArmoryItem, selectedArmoryItem.type)} className="mt-4 w-full bg-green-600 p-2 rounded hover:bg-green-700">Equip</button>
+                            </div>
+                          ) : <p className="text-slate-400">Select an item to see its stats.</p>}
+                        </div>
+                        <div className="bg-slate-800/80 p-4 rounded-lg">
+                            <h4 className="font-bold text-white mb-2">Permanent Upgrades</h4>
+                            <p className="text-xs text-slate-400 mb-3">Bonus HP: +{localDungeonState.boughtStats?.hp || 0} | Bonus Atk: +{localDungeonState.boughtStats?.attack || 0}</p>
+                            <div className="space-y-2">
+                              <button onClick={() => handleBuyStat('hp')} disabled={sessionXp < 300} className="w-full bg-blue-600 text-white p-2 rounded text-sm hover:bg-blue-700 disabled:bg-slate-600">Buy +10 HP (300 XP)</button>
+                              <button onClick={() => handleBuyStat('attack')} disabled={sessionXp < 300} className="w-full bg-blue-600 text-white p-2 rounded text-sm hover:bg-blue-700 disabled:bg-slate-600">Buy +10 Attack (300 XP)</button>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
                 })()}
-            </div>
-            {/* Armor Shop */}
-            <div className="bg-slate-800/80 p-4 rounded-lg">
-                <h4 className="font-bold mb-2 text-white">XP Shop (Armor)</h4>
-                {dungeonDefinitions.armors.map(a => { 
-                    const isOwned = localDungeonState.ownedArmor.includes(a.id); 
-                    const canAfford = stats.totalXP >= a.cost;
-                    return (<button key={a.id} onClick={() => handleBuyItem(a, 'armor', 'xp')} disabled={isOwned || !canAfford} className={`w-full p-2 rounded mb-2 font-semibold transition-colors text-center ${ isOwned ? 'bg-green-800/60 text-green-400 cursor-default' : canAfford ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>{isOwned ? 'Owned' : `${a.name} (${a.cost} XP)`}</button>);
-                })}
-            </div>
-        </div>
-    </div>
-)}
-{localDungeonState.bestiaryOpen && (
+              </div>
+            )}
+            {localDungeonState.bestiaryOpen && (
     <div className="mt-6">
         <h3 className="text-2xl font-bold text-white mb-4">Bestiary</h3>
         <div className="space-y-4">
@@ -2647,6 +4292,7 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
       labStateRef.current = lab_state;
     }, [localSciencePoints, lab_state]);
 
+
   const formatNumber = (num) => {
 
     if (num < 1000) return num.toFixed(1);
@@ -2655,6 +4301,7 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
     if (num < 1e12) return `${(num / 1e9).toFixed(2)}B`;
     return `${(num / 1e12).toFixed(2)}T`;
   };
+  
 
   const { totalSPS, totalClickPower, prestigeBonus } = useMemo(() => {
     if (!lab_state) return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
@@ -4381,8 +6028,14 @@ const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
 };
 
 // --- REVISED: Alchemist's Workshop Component ---
-const AlchemistsWorkshop = ({ stats, updateStatsInFirestore }) => {
+const AlchemistsWorkshop = ({ stats, updateStatsInFirestore, showMessageBox }) => {
   const [activeModal, setActiveModal] = useState(null);
+  
+  // HOOKS MOVED TO TOP: All hooks must be called before any conditional returns.
+  const catObstacles = useMemo(() => [
+    { top: 70, left: 20, width: 20, height: 20 }, // Cauldron area
+    { top: 68, left: 78, width: 15, height: 15 }, // Bench area
+  ], []);
 
   const alchemyState = stats?.alchemy_state;
   if (!alchemyState) {
@@ -4406,124 +6059,965 @@ const AlchemistsWorkshop = ({ stats, updateStatsInFirestore }) => {
       <div 
         className="relative w-full max-w-5xl mx-auto aspect-[3/2] bg-slate-900 rounded-2xl shadow-xl border border-slate-700 overflow-hidden"
       >
-        {/* Layer 1: Background Image */}
         <div className="absolute inset-0 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${alchemyLabIndoorBg})` }} />
+        <div className="absolute pointer-events-none" style={{ top: '75%', left: '85%', width: '15%', height: '15%', backgroundImage: `url(${alchemyBenchImage})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', transform: 'translate(-50%, -50%)' }} />
+        <div className="absolute pointer-events-none" style={{ top: '80%', left: '30%', width: '15%', height: '15%', backgroundImage: `url(${alchemyCauldronImage})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', transform: 'translate(-50%, -50%)' }} />
+        
+        <AlchemyCat obstacles={catObstacles} equippedAppearance={alchemyState.cat?.equippedAppearance || 'cat1'} />
 
-        {/* Layer 2: Placed Objects (Bench & Cauldron) */}
-        <div 
-          className="absolute pointer-events-none"
-          style={{ 
-            top: '75%', left: '85%', 
-            width: '15%', height: '15%',
-            backgroundImage: `url(${alchemyBenchImage})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            transform: 'translate(-50%, -50%)'
-          }}
-        />
-        <div 
-          className="absolute pointer-events-none"
-          style={{ 
-            top: '80%', left: '30%', 
-            width: '15%', height: '15%',
-            backgroundImage: `url(${alchemyCauldronImage})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            transform: 'translate(-50%, -50%)'
-          }}
-        />
-
-        {/* Layer 3: Invisible Clickable Hotspots */}
-        {/* Hotspot for Shop Counter (Left side) */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '42%', left: '13%', width: '10%', height: '50%' }}
-          onClick={() => setActiveModal('shop')}
-        >
-          <div className="absolute inset-0 bg-yellow-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Open Shop"></div>
-        </div>
-
-        {/* Hotspot for Cauldron (SEPARATE) */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '75%', left: '25%', width: '10%', height: '15%' }}
-          onClick={() => setActiveModal('cauldron')}
-        >
-           <div className="absolute inset-0 bg-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" title="Use Cauldron"></div>
-        </div>
-
-        {/* Hotspot for Alchemy Bench (SEPARATE) */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '70%', left: '81%', width: '9%', height: '12%' }}
-          onClick={() => setActiveModal('bench')}
-        >
+        {/* --- HOTSPOTS --- */}
+        <div className="absolute cursor-pointer group" style={{ top: '70%', left: '81%', width: '9%', height: '12%' }} onClick={() => setActiveModal('bench')} >
            <div className="absolute inset-0 bg-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Use Alchemy Bench"></div>
         </div>
-        
-        {/* Hotspot for Garden Door (Right side) */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '36%', left: '91%', width: '8%', height: '20%' }}
-          onClick={() => setActiveModal('garden')}
-        >
+        <div className="absolute cursor-pointer group" style={{ top: '75%', left: '25%', width: '10%', height: '15%' }} onClick={() => setActiveModal('cauldron')} >
+           <div className="absolute inset-0 bg-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" title="Use Cauldron"></div>
+        </div>
+        <div className="absolute cursor-pointer group" style={{ top: '36%', left: '91%', width: '8%', height: '20%' }} onClick={() => setActiveModal('garden')} >
           <div className="absolute inset-0 bg-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Go to Garden"></div>
         </div>
-
-        {/* Hotspot for Left Bookshelf */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '60%', left: '10%', width: '10%', height: '25%' }}
-          onClick={() => setActiveModal('bookshelf_left')}
-        >
-          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Check Bookshelf"></div>
+        <div className="absolute cursor-pointer group" style={{ top: '42%', left: '42%', width: '12%', height: '20%' }} onClick={() => setActiveModal('grimoire')} >
+          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Open Grimoire (Recipes)"></div>
         </div>
-
-        {/* Hotspot for Right Bookshelf */}
-        <div 
-          className="absolute cursor-pointer group" 
-          style={{ top: '40%', left: '72%', width: '12%', height: '25%' }}
-          onClick={() => setActiveModal('bookshelf_right')}
-        >
-          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Check Bookshelf"></div>
+        <div className="absolute cursor-pointer group" style={{ top: '42%', left: '62%', width: '12%', height: '20%' }} onClick={() => setActiveModal('storeroom')} >
+          <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Open Storeroom (Inventory)"></div>
+        </div>
+        <div className="absolute cursor-pointer group" style={{ top: '42%', left: '13%', width: '10%', height: '50%' }} onClick={() => setActiveModal('shop')} >
+          <div className="absolute inset-0 bg-yellow-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" title="Open Shop"></div>
+        </div>
+        <div className="absolute cursor-pointer group" style={{ top: '82%', left: '89%', width: '10%', height: '10%' }} onClick={() => setActiveModal('cattery')} >
+          <div className="absolute inset-0 bg-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" title="Open Cattery"></div>
         </div>
       </div>
 
-      {/* Modal Rendering */}
-      {activeModal === 'garden' && 
-        <GardenModal 
-          stats={stats} 
-          updateStatsInFirestore={updateStatsInFirestore} 
-          onClose={closeModal} 
-        />
-      }
-      {activeModal === 'cauldron' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Cauldron Modal Coming Soon (For Brewing)</div></div>}
-      {activeModal === 'bench' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Bench Modal Coming Soon (For Prep)</div></div>}
-      {activeModal === 'shop' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Shop Modal Coming Soon</div></div>}
-      {activeModal === 'bookshelf_left' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Left Bookshelf (Coming Soon)</div></div>}
-      {activeModal === 'bookshelf_right' && <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={closeModal}><div className="bg-slate-800 p-8 rounded-lg" onClick={e => e.stopPropagation()}>Right Bookshelf (Coming Soon)</div></div>}
+      {/* --- MODALS --- */}
+      {activeModal === 'garden' && <GardenModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} />}
+      {activeModal === 'bench' && <AlchemyBenchModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} showMessageBox={showMessageBox} />}
+      {activeModal === 'cauldron' && <CauldronModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} showMessageBox={showMessageBox} />}
+      {activeModal === 'grimoire' && <GrimoireModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} showMessageBox={showMessageBox} />}
+      {activeModal === 'storeroom' && <StoreroomModal stats={stats} onClose={closeModal} />}
+      {activeModal === 'shop' && <AlchemyShopModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} showMessageBox={showMessageBox} />}
+      {activeModal === 'cattery' && <CatteryModal stats={stats} updateStatsInFirestore={updateStatsInFirestore} onClose={closeModal} showMessageBox={showMessageBox} />}
     </div>
   );
 };
 
+
+// --- Sub-Modals for Alchemist's Workshop ---
+
+// NEW: Cattery Modal to change cat appearance
+const CatteryModal = ({ stats, onClose, updateStatsInFirestore, showMessageBox }) => {
+  const { cat = {} } = stats.alchemy_state;
+
+  const { unlockedAppearances = ['cat1'], equippedAppearance = 'cat1' } = cat;
+
+  const catDetails = [
+    { id: 'cat1', name: 'Silver Tabby', preview: catIdleSheet },
+    { id: 'cat2', name: 'Calico Companion', preview: cat2IdleSheet },
+    { id: 'cat3', name: 'Sable Shadow', preview: cat3IdleSheet },
+    { id: 'cat4', name: 'Golden Bombay', preview: cat4IdleSheet },
+    { id: 'cat5', name: 'White Persian', preview: cat5IdleSheet },
+    { id: 'cat6', name: 'Siamese Sphinx', preview: cat6IdleSheet },
+  ];
+
+  const handleEquip = (catId) => {
+    updateStatsInFirestore({ 'alchemy_state.cat.equippedAppearance': catId });
+    showMessageBox('Your companion has been changed!', 'info');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col" style={{ backgroundColor: '#F3EADF' }} onClick={e => e.stopPropagation()}>
+        <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">Cattery</h2>
+        <p className="text-center text-amber-800/80 mb-4 text-sm">Choose your loyal companion for the workshop.</p>
+        <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-lg grid grid-cols-2 md:grid-cols-3 gap-4">
+          {unlockedAppearances.map(catId => {
+            const detail = catDetails.find(c => c.id === catId);
+            if (!detail) return null;
+            const isEquipped = equippedAppearance === catId;
+            return (
+              <div key={catId} className={`bg-amber-200/40 p-3 rounded-md text-center flex flex-col ${isEquipped ? 'ring-2 ring-amber-800' : ''}`}>
+                <div className="w-20 h-20 mx-auto flex items-center justify-center overflow-hidden">
+                  <div
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      backgroundImage: `url(${detail.preview})`,
+                      backgroundSize: `${10 * 80}px 80px`, // 10 frames * 80px width
+                      backgroundPosition: '0px 0px',
+                      backgroundRepeat: 'no-repeat',
+                      imageRendering: 'pixelated',
+                      flexShrink: 0,
+                    }}
+                  />
+                </div>
+                <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{detail.name}</p>
+                <button onClick={() => handleEquip(catId)} disabled={isEquipped} className="mt-2 w-full bg-amber-700 text-white text-sm py-1 rounded hover:bg-amber-800 disabled:bg-slate-500">
+                  {isEquipped ? 'Equipped' : 'Select'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const StoreroomModal = ({ stats, onClose }) => {
+  const inventory = stats.alchemy_state.inventory || {};
+  
+  const categorized = useMemo(() => {
+    const cats = { raw: [], processed: [], potions: [], seeds: [] };
+    for (const itemId in inventory) {
+      const itemDef = alchemyIngredients[itemId] || alchemyPotions[itemId] || alchemyPlants[itemId];
+      if (!itemDef) continue;
+      
+      const itemEntry = { ...itemDef, count: inventory[itemId] };
+      if (itemDef.type === 'plant' || itemDef.type === 'loot') cats.raw.push(itemEntry);
+      else if (itemDef.type === 'processed') cats.processed.push(itemEntry);
+      else if (itemDef.type === 'potion') cats.potions.push(itemEntry);
+      else if (itemDef.yields) cats.seeds.push(itemEntry);
+    }
+    return cats;
+  }, [inventory]);
+
+  const [activeTab, setActiveTab] = useState('raw');
+
+  const TabButton = ({ name, label }) => (
+    <button onClick={() => setActiveTab(name)} className={`px-4 py-2 text-sm font-semibold ${activeTab === name ? 'bg-amber-800 text-white' : 'bg-amber-900/50 text-amber-200'}`}>
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl h-[70vh] bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col font-['Lato']" style={{ backgroundColor: '#F3EADF' }} onClick={e => e.stopPropagation()}>
+        <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">Storeroom</h2>
+        <div className="flex rounded-t-lg overflow-hidden border-b-2 border-amber-800">
+          <TabButton name="raw" label="Raw Ingredients" />
+          <TabButton name="processed" label="Processed" />
+          <TabButton name="potions" label="Potions" />
+          <TabButton name="seeds" label="Seeds" />
+        </div>
+        <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-b-lg grid grid-cols-2 md:grid-cols-4 gap-4">
+          {categorized[activeTab].map(item => (
+            <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col" title={item.description}>
+              <img src={item.icon} alt={item.name} className="w-16 h-16 mx-auto object-contain" />
+              <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{item.name}</p>
+              <p className="text-lg font-mono text-black">x{item.count}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const GrimoireModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox }) => {
+  const { alchemy_state } = stats;
+  const { unlockedRecipes = [], upgrades = {} } = alchemy_state;
+  const grimoireLevel = upgrades.grimoire_level || 1;
+  
+  const handleResearch = () => {
+    const researchCost = [250, 200, 150][grimoireLevel - 1] || 150;
+    const allRecipeIds = Object.keys(alchemyPotions).filter(id => !id.includes('_potent'));
+    const unlearned = allRecipeIds.filter(id => !unlockedRecipes.includes(id));
+
+    if (unlearned.length === 0) { showMessageBox("You've learned every recipe!", "info"); return; }
+    if ((alchemy_state.gold || 0) < researchCost) { showMessageBox("Not enough gold to research.", "error"); return; }
+    
+    const newRecipeId = unlearned[Math.floor(Math.random() * unlearned.length)];
+    
+    updateStatsInFirestore({
+      'alchemy_state.gold': increment(-researchCost),
+      'alchemy_state.unlockedRecipes': [...unlockedRecipes, newRecipeId]
+    });
+    showMessageBox(`You discovered the recipe for ${alchemyPotions[newRecipeId].name}!`, 'info');
+  };
+
+  const researchCost = [250, 200, 150][grimoireLevel - 1] || 150;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl h-[70vh] bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col" style={{ backgroundColor: '#F3EADF' }} onClick={e => e.stopPropagation()}>
+        <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">Grimoire of Potions</h2>
+        <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-lg space-y-3">
+          {unlockedRecipes.map(id => {
+            const recipe = alchemyPotions[id];
+            if (!recipe) return null;
+            return (
+              <div key={id} className="bg-amber-200/40 p-3 rounded-md">
+                <p className="font-bold text-amber-900">{recipe.name}</p>
+                <div className="flex gap-2 mt-1">
+                  {recipe.recipe.map((req, i) => {
+                    const baseName = req.baseName.replace(/_/g, ' ');
+                    return <span key={i} className="text-xs bg-amber-800/80 text-white px-2 py-1 rounded-full capitalize">{req.amount}x {baseName}</span>
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4">
+          <button onClick={handleResearch} className="w-full bg-amber-800 text-white font-bold py-3 rounded-lg hover:bg-amber-900">
+            Research New Recipe ({researchCost} Gold)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AlchemyBenchModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox }) => {
+  const [gameState, setGameState] = useState('selection');
+  const [currentItem, setCurrentItem] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [resultQuality, setResultQuality] = useState(null);
+  const progressIntervalRef = useRef(null);
+
+  const { inventory = {}, upgrades = {} } = stats.alchemy_state || {};
+  const benchLevel = upgrades.bench_level || 1;
+
+  const processableItems = useMemo(() => {
+    return Object.keys(inventory)
+      .map(id => alchemyIngredients[id])
+      .filter(item => item && item.processAs && inventory[item.id] > 0);
+  }, [inventory]);
+
+  const startProcessing = (item) => {
+    setCurrentItem(item);
+    setGameState('processing');
+    setProgress(0);
+    
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    progressIntervalRef.current = setInterval(() => {
+      let shouldStop = false;
+      let finalProgress = 0;
+
+      setProgress(p => {
+        const nextP = p + 1.5;
+        if (nextP >= 100) {
+          shouldStop = true;
+          finalProgress = p; // Capture the last progress value before exceeding 100
+          return 100;
+        }
+        return nextP;
+      });
+
+      if (shouldStop) {
+        clearInterval(progressIntervalRef.current);
+        handleStopProcessing(finalProgress, item);
+      }
+    }, 30);
+  };
+
+  const handleStopProcessing = (currentProgress, itemBeingProcessed) => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    
+    const item = itemBeingProcessed || currentItem;
+    if (!item) {
+      console.error("Processing stopped without a valid item.");
+      setGameState('selection');
+      return;
+    }
+
+    let quality;
+    const fineZoneStart = 90 - ((benchLevel - 1) * 5); // Level 1: 90, Level 2: 85, Level 3: 80
+    const decentZoneStart = 70 - ((benchLevel - 1) * 5); // Level 1: 70, Level 2: 65, Level 3: 60
+
+    if (currentProgress >= fineZoneStart && currentProgress <= 99) {
+      quality = 'fine';
+    } else if (currentProgress >= decentZoneStart && currentProgress < fineZoneStart) {
+      quality = 'decent';
+    } else {
+      quality = 'crude';
+    }
+    setResultQuality(quality);
+
+    const processedItemId = `${item.processAs}_${quality}`;
+    const processedItemDef = alchemyIngredients[processedItemId];
+
+    if (!processedItemDef) {
+        console.error("Could not find definition for processed item:", processedItemId);
+        showMessageBox(`Error: Could not process item. Definition missing.`, 'error');
+        setGameState('selection');
+        return;
+    }
+
+    const newInventory = { ...inventory };
+    newInventory[item.id] = (newInventory[item.id] || 1) - 1;
+    if (newInventory[item.id] <= 0) delete newInventory[item.id];
+    newInventory[processedItemId] = (newInventory[processedItemId] || 0) + 1;
+
+    updateStatsInFirestore({ 'alchemy_state.inventory': newInventory });
+    showMessageBox(`Created 1x ${processedItemDef.name}!`, 'info');
+    
+    setGameState('result');
+    setTimeout(() => {
+      setGameState('selection');
+      setCurrentItem(null);
+      setResultQuality(null);
+    }, 2000);
+  };
+  
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col" style={{ backgroundColor: '#F3EADF', minHeight: '300px' }} onClick={e => e.stopPropagation()}>
+        <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">Alchemy Bench</h2>
+        
+        {gameState === 'selection' && (
+          <>
+            <p className="text-center text-amber-800/80 mb-4 text-sm">Select a raw ingredient to prepare it for the cauldron.</p>
+            <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-4">
+              {processableItems.map(item => (
+                <button key={item.id} onClick={() => startProcessing(item)} className="bg-amber-200/40 p-2 rounded-md hover:bg-amber-300/60 transition-colors">
+                  <img src={item.icon} alt={item.name} className="w-16 h-16 mx-auto" />
+                  <p className="text-sm font-bold text-amber-900 mt-1">{item.name}</p>
+                  <p className="text-xs text-black">x{inventory[item.id]}</p>
+                </button>
+              ))}
+              {processableItems.length === 0 && <p className="col-span-full text-center text-slate-500 self-center">No processable ingredients.</p>}
+            </div>
+          </>
+        )}
+
+        {gameState === 'processing' && (
+          <div className="flex flex-col items-center justify-center flex-grow">
+            <img src={currentItem.icon} alt={currentItem.name} className="w-20 h-20 mb-4" />
+            <div className="w-full bg-slate-400 rounded-full h-8 border-2 border-slate-600 relative overflow-hidden">
+              <div className="absolute top-0 bottom-0 bg-red-600/50" style={{ left: '0%', width: `${70 - ((benchLevel - 1) * 5)}%` }}></div>
+              <div className="absolute top-0 bottom-0 bg-green-600/50" style={{ left: `${70 - ((benchLevel - 1) * 5)}%`, width: '20%' }}></div>
+              <div className="absolute top-0 bottom-0 bg-yellow-400/70" style={{ left: `${90 - ((benchLevel - 1) * 5)}%`, width: `${9 + ((benchLevel - 1) * 5)}%` }}></div>
+              <div className="absolute top-0 bottom-0 bg-slate-800 h-full" style={{ transform: `translateX(${progress}%)`, width: '4px', transition: 'transform 0.03s linear' }}></div>
+            </div>
+            {/* FIX: Pass currentItem to handleStopProcessing to avoid using stale state on manual stop */}
+            <button onClick={() => handleStopProcessing(progress, currentItem)} className="mt-6 bg-amber-800 text-white font-bold py-3 px-8 rounded-lg text-xl hover:bg-amber-900">
+              STOP
+            </button>
+          </div>
+        )}
+        
+        {gameState === 'result' && (
+            <div className="flex flex-col items-center justify-center flex-grow animate-fade-in">
+              <p className="text-xl font-semibold text-amber-900">Result:</p>
+              <p className={`text-4xl font-bold font-['Cinzel_Decorative'] ${resultQuality === 'fine' ? 'text-yellow-500' : resultQuality === 'decent' ? 'text-green-600' : 'text-red-700'}`}>
+                {resultQuality.toUpperCase()}
+              </p>
+            </div>
+        )}
+
+      </div>
+    </div>
+  );
+};
+
+const CauldronModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox }) => {
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [cauldronSlots, setCauldronSlots] = useState([]);
+  const { inventory = {}, unlockedRecipes = [], upgrades = {} } = stats.alchemy_state || {};
+  const cauldronLevel = upgrades.cauldron_level || 1;
+
+  const selectedRecipe = selectedRecipeId ? alchemyPotions[selectedRecipeId] : null;
+
+  const processedInventory = useMemo(() => {
+    return Object.entries(inventory)
+      .map(([id, count]) => ({ id, def: alchemyIngredients[id], count }))
+      .filter(item => item.def && item.def.type === 'processed');
+  }, [inventory]);
+
+  const addIngredientToCauldron = (ingredient) => {
+    if (!selectedRecipe) { showMessageBox("Select a recipe first.", "info"); return; }
+    if (cauldronSlots.length >= selectedRecipe.recipe.length) { showMessageBox("Cauldron is full for this recipe.", "info"); return; }
+
+    const ingredientInCauldronCount = cauldronSlots.filter(i => i.id === ingredient.id).length;
+    if (ingredientInCauldronCount >= ingredient.count) { showMessageBox("Not enough of that ingredient.", "error"); return; }
+
+    setCauldronSlots(prev => [...prev, ingredient]);
+  };
+  
+  const removeIngredientFromCauldron = (index) => {
+    setCauldronSlots(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRecipeSelect = (recipeId) => {
+    setSelectedRecipeId(recipeId);
+    setCauldronSlots([]); // Clear cauldron when recipe changes
+  };
+
+  const handleBrew = () => {
+    if (!selectedRecipe || cauldronSlots.length === 0) { showMessageBox("Cauldron is empty or no recipe is selected.", "error"); return; }
+
+    let success = true;
+    let totalPotency = 0;
+    const required = {};
+    selectedRecipe.recipe.forEach(req => {
+      required[req.baseName] = (required[req.baseName] || 0) + req.amount;
+    });
+    
+    // Check for recipe match
+    if (cauldronSlots.length !== selectedRecipe.recipe.length) {
+      success = false;
+    } else {
+      const added = {};
+      cauldronSlots.forEach(ing => {
+        const baseName = ing.def.baseName;
+        added[baseName] = (added[baseName] || 0) + 1;
+        totalPotency += ing.def.potency;
+      });
+      for(const baseName in required) {
+        if (required[baseName] !== added[baseName]) {
+          success = false;
+          break;
+        }
+      }
+    }
+
+    const failureChance = [1.0, 0.4, 0.15][cauldronLevel - 1] || 0.15;
+    if (!success && Math.random() < failureChance) {
+      // It's a failure
+    } else if (!success) {
+      success = true; // Salvaged
+      showMessageBox("Your improved cauldron salvaged the brew!", "info");
+    }
+
+    const newInventory = { ...inventory };
+    
+    const shouldSaveIngredients = !success && cauldronLevel === 3 && Math.random() < 0.25; // 25% chance to save on fail with Lvl3
+    if (!shouldSaveIngredients) {
+        cauldronSlots.forEach(ing => {
+            newInventory[ing.id] = (newInventory[ing.id] || 1) - 1;
+            if (newInventory[ing.id] <= 0) delete newInventory[ing.id];
+        });
+    } else {
+        showMessageBox("Your Star-Metal Cauldron saved your ingredients!", "info");
+    }
+
+
+    let potionId, message;
+    if (success) {
+      const isPotent = totalPotency >= selectedRecipe.maxPotency * 0.8; // 80% of max possible potency
+      potionId = isPotent ? `${selectedRecipe.id}_potent` : selectedRecipe.id;
+      const potionDef = alchemyPotions[potionId] || selectedRecipe;
+      message = `Success! You brewed a ${potionDef.name}!`;
+    } else {
+      potionId = 'dubious_sludge';
+      message = "The mixture failed... You created Dubious Sludge.";
+    }
+
+    newInventory[potionId] = (newInventory[potionId] || 0) + 1;
+    
+    updateStatsInFirestore({ 'alchemy_state.inventory': newInventory });
+    showMessageBox(message, success ? 'info' : 'error');
+    setCauldronSlots([]);
+    setSelectedRecipeId(null);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-4xl h-[80vh] bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col" style={{ backgroundColor: '#F3EADF' }} onClick={e => e.stopPropagation()}>
+        <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900 text-center mb-4">The Cauldron</h2>
+        <div className="flex-grow flex gap-4">
+          {/* Left: Recipe List */}
+          <div className="w-1/3 bg-black/10 rounded-lg p-2 overflow-y-auto">
+            {unlockedRecipes.map(id => {
+              const recipe = alchemyPotions[id];
+              return (
+                <button key={id} onClick={() => handleRecipeSelect(id)} className={`w-full text-left p-2 rounded mb-1 text-sm ${selectedRecipeId === id ? 'bg-amber-800 text-white' : 'bg-amber-200/50 hover:bg-amber-300/50 text-amber-900'}`}>
+                  {recipe.name}
+                </button>
+              );
+            })}
+          </div>
+          {/* Right: Brewing Interface */}
+          <div className="w-2/3 bg-black/10 rounded-lg p-4 flex flex-col">
+            {selectedRecipe ? (
+              <>
+                <h3 className="text-xl font-bold text-amber-900 text-center">{selectedRecipe.name}</h3>
+                <p className="text-xs text-center text-slate-600 mb-2">Requires: {selectedRecipe.recipe.map(r => `${r.amount}x ${r.baseName.replace('_', ' ')}`).join(', ')}</p>
+                
+                <div className="flex-grow flex flex-col items-center justify-center bg-purple-900/20 rounded-lg p-4 min-h-[150px]">
+                  <div className="flex gap-2 flex-wrap justify-center">
+                    {cauldronSlots.map((ing, i) => (
+                      <button key={i} onClick={() => removeIngredientFromCauldron(i)} className="p-1 bg-slate-800 rounded-md">
+                        <img src={ing.def.icon} alt={ing.def.name} className="w-10 h-10" />
+                      </button>
+                    ))}
+                    {Array.from({ length: selectedRecipe.recipe.length - cauldronSlots.length }).map((_, i) => (
+                      <div key={i} className="w-12 h-12 bg-black/20 rounded-md border-2 border-dashed border-slate-500" />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="h-40 mt-4 overflow-y-auto bg-slate-200/30 p-2 rounded-lg grid grid-cols-5 gap-2">
+                   {processedInventory.length > 0 ? processedInventory.map(ing => (
+                      <button key={ing.id} onClick={() => addIngredientToCauldron(ing)} className="p-1 bg-amber-200/50 rounded-md flex flex-col items-center justify-between hover:bg-amber-300/80">
+                         <img src={ing.def.icon} alt={ing.def.name} className="w-10 h-10" />
+                         <p className="text-xs text-black">x{ing.count - cauldronSlots.filter(slot => slot.id === ing.id).length}</p>
+                      </button>
+                   )) : <p className="col-span-full text-center text-slate-500 self-center">No processed ingredients.</p>}
+                </div>
+
+                <button onClick={handleBrew} className="w-full mt-4 bg-purple-800 text-white font-bold py-3 rounded-lg hover:bg-purple-900">
+                  Brew Potion
+                </button>
+              </>
+            ) : (
+              <div className="flex-grow flex items-center justify-center text-slate-500">
+                <p>Select a recipe to begin.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- NEW: ALCHEMY SHOP DEFINITIONS ---
+const alchemyShopItems = {
+  seeds: [
+    { id: 'seed_focuroot', cost: 15 },
+    { id: 'seed_swiftblossom', cost: 25 },
+    { id: 'seed_stillpetal', cost: 40 },
+    { id: 'seed_oyster_mushroom', cost: 60 },
+    { id: 'seed_sunfruit', cost: 150 },
+    { id: 'seed_luckleaf', cost: 300 },
+  ],
+  cats: [
+    { id: 'cat2', name: 'Calico Companion', cost: 2000, previewIcon: cat2IdleSheet },
+    { id: 'cat3', name: 'Sable Shadow', cost: 2000, previewIcon: cat3IdleSheet },
+    { id: 'cat4', name: 'Golden Bombay', cost: 2000, previewIcon: cat4IdleSheet },
+    { id: 'cat5', name: 'White Persian', cost: 2500, previewIcon: cat5IdleSheet },
+    { id: 'cat6', name: 'Siamese Sphinx', cost: 2500, previewIcon: cat6IdleSheet },
+  ],
+  rawIngredients: [
+    { id: 'goblin_ear', cost: 100 },
+    { id: 'skeleton_bone', cost: 120 },
+    { id: 'shadow_essence', cost: 400 },
+    { id: 'pristine_crystal', cost: 800 },
+  ],
+  upgrades: [
+    // Garden
+    { id: 'garden_plot_2', name: 'Additional Garden Plot', description: 'Adds one more plot to your garden.', cost: 500, required: { key: 'garden_plots', value: 1 }, action: { 'alchemy_state.upgrades.garden_plots': 2 } },
+    { id: 'garden_plot_3', name: 'Additional Garden Plot', description: 'Adds one more plot to your garden.', cost: 1200, required: { key: 'garden_plots', value: 2 }, action: { 'alchemy_state.upgrades.garden_plots': 3 } },
+    { id: 'garden_plot_4', name: 'Additional Garden Plot', description: 'Adds one more plot to your garden.', cost: 2500, required: { key: 'garden_plots', value: 3 }, action: { 'alchemy_state.upgrades.garden_plots': 4 } },
+    // Bench
+    { id: 'bench_level_2', name: 'Sturdy Mortar', description: 'Improves your tools, making it easier to achieve "Fine" quality.', cost: 750, required: { key: 'bench_level', value: 1 }, action: { 'alchemy_state.upgrades.bench_level': 2 } },
+    { id: 'bench_level_3', name: 'Refined Alchemist\'s Kit', description: 'Top-tier tools significantly increase the "Fine" quality zone.', cost: 2000, required: { key: 'bench_level', value: 2 }, action: { 'alchemy_state.upgrades.bench_level': 3 } },
+    // Cauldron
+    { id: 'cauldron_level_2', name: 'Cast-Iron Cauldron', description: 'Reduces the chance of failure when brewing.', cost: 1000, required: { key: 'cauldron_level', value: 1 }, action: { 'alchemy_state.upgrades.cauldron_level': 2 } },
+    { id: 'cauldron_level_3', name: 'Star-Metal Cauldron', description: 'Greatly reduces failure chance and may save ingredients.', cost: 3000, required: { key: 'cauldron_level', value: 2 }, action: { 'alchemy_state.upgrades.cauldron_level': 3 } },
+    // Grimoire
+    { id: 'grimoire_level_2', name: 'Leather-Bound Tome', description: 'Reduces the cost of researching new recipes.', cost: 1500, required: { key: 'grimoire_level', value: 1 }, action: { 'alchemy_state.upgrades.grimoire_level': 2 } },
+  ]
+};
+
+// --- NEW: Alchemy Shop Modal Component ---
+const AlchemyShopModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox }) => {
+  const [activeTab, setActiveTab] = useState('seeds');
+  const { gold = 0, inventory = {}, upgrades = {}, cat = {} } = stats.alchemy_state;
+  const { unlockedAppearances = ['cat1'] } = cat;
+
+  const handleTransaction = (item, type) => {
+    if (type === 'buy_seed') {
+      if (gold < item.cost) { showMessageBox("Not enough gold.", "error"); return; }
+      updateStatsInFirestore({ 'alchemy_state.gold': increment(-item.cost), [`alchemy_state.inventory.${item.id}`]: increment(1) });
+      showMessageBox(`Purchased 1x ${alchemyPlants[item.id].name}!`, 'info');
+    } else if (type === 'buy_ingredient') {
+      if (gold < item.cost) { showMessageBox("Not enough gold.", "error"); return; }
+      updateStatsInFirestore({ 'alchemy_state.gold': increment(-item.cost), [`alchemy_state.inventory.${item.id}`]: increment(1) });
+      showMessageBox(`Purchased 1x ${alchemyIngredients[item.id].name}!`, 'info');
+    } else if (type === 'sell_potion') {
+      if ((inventory[item.id] || 0) < 1) { showMessageBox("You don't have any to sell.", "error"); return; }
+      const potionDef = alchemyPotions[item.id] || alchemyIngredients[item.id];
+      const sellValue = Math.round(potionDef.goldValue * 0.75);
+      updateStatsInFirestore({ 'alchemy_state.gold': increment(sellValue), [`alchemy_state.inventory.${item.id}`]: increment(-1) });
+      showMessageBox(`Sold 1x ${potionDef.name} for ${sellValue} gold.`, 'info');
+    } else if (type === 'buy_upgrade') {
+      if (gold < item.cost) { showMessageBox("Not enough gold.", "error"); return; }
+      const updates = { 'alchemy_state.gold': increment(-item.cost), ...item.action };
+      updateStatsInFirestore(updates);
+      showMessageBox(`Upgrade purchased: ${item.name}!`, 'info');
+    } else if (type === 'buy_cat') {
+      if (gold < item.cost) { showMessageBox("Not enough gold.", "error"); return; }
+      const updates = { 
+        'alchemy_state.gold': increment(-item.cost),
+        'alchemy_state.cat.unlockedAppearances': [...unlockedAppearances, item.id]
+      };
+      updateStatsInFirestore(updates);
+      showMessageBox(`You've adopted the ${item.name}!`, 'info');
+    }
+  };
+
+  const TabButton = ({ name, label }) => (
+    <button onClick={() => setActiveTab(name)} className={`px-4 py-2 text-sm font-semibold transition-colors ${activeTab === name ? 'bg-amber-800 text-white' : 'bg-amber-900/50 text-amber-200'}`}>
+      {label}
+    </button>
+  );
+  
+  const sellablePotions = useMemo(() => {
+    return Object.entries(inventory)
+      .map(([id, count]) => ({ id, count, def: alchemyPotions[id] || alchemyIngredients[id] }))
+      .filter(item => item.def && item.def.goldValue > 0 && item.count > 0);
+  }, [inventory]);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-3xl h-[80vh] bg-amber-100 border-4 border-amber-800 rounded-lg p-6 flex flex-col font-['Lato']" style={{ backgroundColor: '#F3EADF' }} onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-3xl font-['Cinzel_Decorative'] text-amber-900">The Spirited Cauldron</h2>
+          <div className="bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-lg">
+            <span className="text-yellow-400 font-bold text-lg">💰 {gold} Gold</span>
+          </div>
+        </div>
+        <div className="flex rounded-t-lg overflow-hidden border-b-2 border-amber-800">
+          <TabButton name="seeds" label="Buy Seeds" />
+          <TabButton name="raw" label="Raw Materials" />
+          <TabButton name="sell" label="Sell Potions" />
+          <TabButton name="upgrades" label="Upgrades" />
+          <TabButton name="cats" label="Cats" />
+        </div>
+        <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-b-lg">
+          {activeTab === 'seeds' && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {alchemyShopItems.seeds.map(item => {
+                const def = alchemyPlants[item.id];
+                const ingDef = alchemyIngredients[def.yields];
+                return (
+                  <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
+                    <img src={ingDef.icon} alt={def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{def.name}</p>
+                    <button onClick={() => handleTransaction(item, 'buy_seed')} className="mt-2 w-full bg-green-700 text-white text-sm py-1 rounded hover:bg-green-800 disabled:bg-slate-500" disabled={gold < item.cost}>
+                      Buy ({item.cost}g)
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {activeTab === 'raw' && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {alchemyShopItems.rawIngredients.map(item => {
+                const def = alchemyIngredients[item.id];
+                return (
+                  <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
+                    <img src={def.icon} alt={def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{def.name}</p>
+                    <button onClick={() => handleTransaction(item, 'buy_ingredient')} className="mt-2 w-full bg-green-700 text-white text-sm py-1 rounded hover:bg-green-800 disabled:bg-slate-500" disabled={gold < item.cost}>
+                      Buy ({item.cost}g)
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {activeTab === 'sell' && (
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               {sellablePotions.map(item => (
+                  <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
+                    <img src={item.def.icon} alt={item.def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{item.def.name} (x{item.count})</p>
+                    <button onClick={() => handleTransaction(item, 'sell_potion')} className="mt-2 w-full bg-yellow-700 text-white text-sm py-1 rounded hover:bg-yellow-800">
+                      Sell ({Math.round(item.def.goldValue * 0.75)}g)
+                    </button>
+                  </div>
+               ))}
+               {sellablePotions.length === 0 && <p className="col-span-full text-center text-slate-500 self-center">No potions to sell.</p>}
+             </div>
+          )}
+          {activeTab === 'upgrades' && (
+            <div className="space-y-3">
+              {alchemyShopItems.upgrades.map(item => {
+                const upgradeKey = item.required.key;
+                const currentLevel = upgrades[upgradeKey] || 1;
+                const isMaxed = !item.action; // A way to define max level items if needed
+                const isPurchased = currentLevel > item.required.value;
+                const canAfford = gold >= item.cost;
+                const meetsRequirement = currentLevel === item.required.value;
+
+                return (
+                  <div key={item.id} className="bg-amber-200/40 p-3 rounded-md flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-amber-900">{item.name}</p>
+                      <p className="text-xs text-slate-600">{item.description}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleTransaction(item, 'buy_upgrade')} 
+                      disabled={isPurchased || !canAfford || !meetsRequirement} 
+                      className="bg-indigo-700 text-white text-sm py-2 px-4 rounded hover:bg-indigo-800 disabled:bg-slate-500 disabled:cursor-not-allowed flex-shrink-0 w-40 text-center"
+                    >
+                      {isPurchased ? 'Purchased' : !meetsRequirement ? 'Locked' : `Buy (${item.cost}g)`}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+          {activeTab === 'cats' && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {alchemyShopItems.cats.map(item => {
+                const isOwned = unlockedAppearances.includes(item.id);
+                const canAfford = gold >= item.cost;
+                return (
+                  <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
+                    <div className="w-24 h-24 mx-auto flex items-center justify-center overflow-hidden">
+                      <div
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          backgroundImage: `url(${item.previewIcon})`,
+                          backgroundSize: `${10 * 80}px 80px`, // 10 frames * 80px width
+                          backgroundPosition: '0px 0px',
+                          backgroundRepeat: 'no-repeat',
+                          imageRendering: 'pixelated',
+                          flexShrink: 0,
+                        }}
+                      />
+                    </div>
+                    <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{item.name}</p>
+                    <button onClick={() => handleTransaction(item, 'buy_cat')} className="mt-2 w-full bg-pink-600 text-white text-sm py-1 rounded hover:bg-pink-700 disabled:bg-slate-500" disabled={isOwned || !canAfford}>
+                      {isOwned ? 'Adopted' : `Adopt (${item.cost}g)`}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- NEW: Alchemy Cat Component ---
+const AlchemyCat = React.memo(({ obstacles, equippedAppearance }) => {
+  const displaySize = { width: 128, height: 128 }; // Increased size
+
+  const animations = useMemo(() => {
+    const selectedCatSheets = catAnimationSheets[equippedAppearance] || catAnimationSheets.cat1;
+    return {
+      idle: { sheet: selectedCatSheets.idle, frames: 10, speed: 150, loop: true },
+      walk: { sheet: selectedCatSheets.walk, frames: 8, speed: 100, loop: true },
+      run: { sheet: selectedCatSheets.run, frames: 8, speed: 80, loop: true },
+      sitting: { sheet: selectedCatSheets.sitting, frames: 1, speed: 5000, loop: false, onComplete: 'idle' },
+      laying: { sheet: selectedCatSheets.laying, frames: 8, speed: 150, loop: false, onComplete: 'sleeping1' },
+      sleeping1: { sheet: selectedCatSheets.sleeping1, frames: 1, speed: 5000, loop: true }, // Loop static pose
+      sleeping2: { sheet: selectedCatSheets.sleeping2, frames: 1, speed: 5000, loop: true }, // Loop static pose
+      stretching: { sheet: selectedCatSheets.stretching, frames: 13, speed: 150, loop: false, onComplete: 'idle' },
+      licking1: { sheet: selectedCatSheets.licking1, frames: 5, speed: 150, loop: false, onComplete: 'idle' },
+      licking2: { sheet: selectedCatSheets.licking2, frames: 5, speed: 150, loop: false, onComplete: 'idle' },
+      itch: { sheet: selectedCatSheets.itch, frames: 12, speed: 100, loop: false, onComplete: 'idle' },
+      meow: { sheet: selectedCatSheets.meow, frames: 4, speed: 150, loop: false, onComplete: 'idle' },
+    };
+  }, [equippedAppearance]);
+
+  const [catState, setCatState] = useState({
+    x: 80, y: 85,
+    action: 'idle',
+    frame: 0,
+    facing: 'right',
+    target: null,
+    pendingAction: null, // The action to perform after walking somewhere
+  });
+
+  useEffect(() => {
+    const CATTERY_POS = { x: 94, y: 88 };
+    const BOUNDS = { minX: 45, maxX: 92, minY: 70, maxY: 90 };
+    const isOccupied = (x, y) => {
+      return obstacles.some(o => x > o.left && x < o.left + o.width && y > o.top && y < o.top + o.height);
+    };
+
+    let animationFrameId;
+    let lastTime = 0;
+    let actionTimer = 2500;
+    let frameTimer = 0;
+
+    const gameLoop = (currentTime) => {
+      if (lastTime === 0) lastTime = currentTime;
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      setCatState(s => {
+        let { x, y, action, target, facing, frame, pendingAction } = s;
+        const anim = animations[action] || animations.idle;
+
+        // --- 1. Animation Update ---
+        frameTimer += deltaTime;
+        if (frameTimer >= anim.speed) {
+          frameTimer %= anim.speed;
+          frame = (frame + 1);
+
+          if (!anim.loop && frame >= anim.frames) {
+            action = anim.onComplete || 'idle';
+            frame = 0;
+          } else if (anim.loop) {
+            frame %= anim.frames;
+          }
+        }
+
+        // --- 2. AI & Logic Update ---
+        actionTimer -= deltaTime;
+        if (actionTimer <= 0) {
+          const oldAction = action;
+          const nextActionRoll = Math.random();
+          let decidedAction = null;
+          
+          if (action.includes('sleeping')) {
+            decidedAction = 'stretching'; // Wake up
+          } else if (nextActionRoll < 0.25 && action !== 'walk') { // Decide to sleep
+            decidedAction = 'laying';
+          } else if (nextActionRoll < 0.6 && action !== 'walk') { // Decide to walk somewhere random
+            decidedAction = 'walk_random'; 
+          } else { // Decide to do an idle action
+            const idleActions = ['idle', 'sitting', 'licking1', 'itch', 'meow'];
+            decidedAction = idleActions[Math.floor(Math.random() * idleActions.length)];
+          }
+
+          if (decidedAction === 'laying') {
+            action = 'walk';
+            target = CATTERY_POS;
+            pendingAction = 'laying';
+          } else if (decidedAction === 'walk_random') {
+            let newTarget, attempts = 0;
+            do {
+              newTarget = { x: Math.random() * (BOUNDS.maxX - BOUNDS.minX) + BOUNDS.minX, y: Math.random() * (BOUNDS.maxY - BOUNDS.minY) + BOUNDS.minY };
+              attempts++;
+            } while (isOccupied(newTarget.x, newTarget.y) && attempts < 20);
+
+            if (attempts < 20) {
+              action = 'walk';
+              target = newTarget;
+              pendingAction = null;
+            } else {
+              action = 'idle';
+              target = null;
+              pendingAction = null;
+            }
+          } else if (decidedAction) {
+            action = decidedAction;
+            target = null;
+            pendingAction = null;
+          }
+          
+          actionTimer = Math.random() * 8000 + 4000;
+          if (action !== oldAction) {
+            frame = 0;
+            frameTimer = 0;
+          }
+        }
+
+        // --- 3. Movement & Physics Update ---
+        if (action === 'walk' && target) {
+          const dx = target.x - x;
+          const dy = target.y - y;
+          const dist = Math.hypot(dx, dy);
+          const speed = 2.5; // % per second
+
+          if (dist < 1) { // Reached target
+            action = pendingAction || 'idle';
+            pendingAction = null;
+            target = null;
+            frame = 0;
+          } else {
+            const moveX = (dx / dist) * (speed / 1000) * deltaTime;
+            const moveY = (dy / dist) * (speed / 1000) * deltaTime;
+            x += moveX;
+            y += moveY;
+            if (Math.abs(moveX) > 0.01) {
+              facing = moveX > 0 ? 'right' : 'left';
+            }
+          }
+        }
+        
+        // --- 4. Boundary checks ---
+        x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, x));
+        y = Math.max(BOUNDS.minY, Math.min(BOUNDS.maxY, y));
+        
+        return { x, y, action, target, facing, frame, pendingAction };
+      });
+      
+      animationFrameId = requestAnimationFrame(gameLoop);
+    };
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [animations, obstacles]);
+
+  const currentAnim = animations[catState.action] || animations.idle;
+
+  return (
+    <div 
+      className="absolute pointer-events-none z-20" 
+      style={{
+        left: `${catState.x}%`,
+        top: `${catState.y}%`,
+        width: `${displaySize.width}px`,
+        height: `${displaySize.height}px`,
+        transform: `translate(-50%, -50%) scaleX(${catState.facing === 'right' ? 1 : -1})`,
+        willChange: 'left, top',
+        overflow: 'hidden',
+      }}
+    >
+      <div 
+        className="h-full"
+        style={{
+          backgroundImage: `url(${currentAnim.sheet})`,
+          width: `${currentAnim.frames * displaySize.width}px`,
+          transform: `translateX(-${catState.frame * displaySize.width}px)`,
+          transition: 'transform 0s',
+          imageRendering: 'pixelated',
+          backgroundSize: 'cover',
+        }}
+      />
+    </div>
+  );
+});
+
+
+
+// --- END OF NEW ALCHEMY COMPONENTS ---
+
 // --- NEW: Garden Modal Component ---
 const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
   const [seedModalState, setSeedModalState] = useState({ isOpen: false, plotIndex: null });
-  const alchemyState = stats.alchemy_state;
+
+  // DEFENSIVE DATA HANDLING:
+  // These lines ensure that even if parts of the alchemy_state are missing from the user's data,
+  // the component will use safe, empty defaults instead of crashing.
+  const alchemyState = stats?.alchemy_state || {};
+  const upgrades = alchemyState.upgrades || {};
+  const inventory = alchemyState.inventory || {};
+  const gardenPlots = Array.isArray(alchemyState.gardenPlots) ? alchemyState.gardenPlots : [];
 
   const handlePlant = (seedId, plotIndex) => {
-    const newInventory = { ...alchemyState.inventory };
-    newInventory[seedId] = (newInventory[seedId] || 0) - 1;
+    const newInventory = { ...inventory };
+    newInventory[seedId] = (newInventory[seedId] || 1) - 1;
     if (newInventory[seedId] <= 0) {
       delete newInventory[seedId];
     }
     
-    const newGardenPlots = [...alchemyState.gardenPlots];
+    const newGardenPlots = [...gardenPlots];
+    // Ensure the array is long enough, filling with empty plots if needed
+    while (newGardenPlots.length <= plotIndex) {
+      newGardenPlots.push({ plantId: null, plantedAt: null, stage: 0 });
+    }
     newGardenPlots[plotIndex] = {
       plantId: alchemyPlants[seedId].yields,
-      plantedAt: new Date(),
+      plantedAt: new Date(), // Firestore client SDK converts this to a Timestamp
       stage: 0
     };
 
@@ -4535,14 +7029,14 @@ const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
   };
 
   const handleHarvest = (plotIndex) => {
-    const plot = alchemyState.gardenPlots[plotIndex];
+    const plot = gardenPlots[plotIndex];
     if (!plot || !plot.plantId) return;
 
     const ingredientId = plot.plantId;
-    const newInventory = { ...alchemyState.inventory };
+    const newInventory = { ...inventory };
     newInventory[ingredientId] = (newInventory[ingredientId] || 0) + 1;
 
-    const newGardenPlots = [...alchemyState.gardenPlots];
+    const newGardenPlots = [...gardenPlots];
     newGardenPlots[plotIndex] = { plantId: null, plantedAt: null, stage: 0 };
     
     updateStatsInFirestore({
@@ -4550,6 +7044,14 @@ const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
       'alchemy_state.gardenPlots': newGardenPlots
     });
   };
+
+  // Use nullish coalescing (??) for the safest default value.
+  const numPlots = upgrades.garden_plots ?? 1;
+  
+  // Create an array of plot data to render, ensuring it matches the number of unlocked plots.
+  const plotsToRender = Array.from({ length: numPlots }).map((_, index) => {
+    return gardenPlots[index] || { plantId: null, plantedAt: null, stage: 0 };
+  });
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" onClick={onClose}>
@@ -4563,7 +7065,7 @@ const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
           className="flex-grow bg-cover bg-center rounded-md p-4 grid grid-cols-4 gap-4"
           style={{ backgroundImage: `url(${alchemyGardenBg})` }}
         >
-          {alchemyState.gardenPlots.map((plot, index) => (
+          {plotsToRender.map((plot, index) => (
             <PlantPlot 
               key={index}
               plotData={plot}
@@ -4585,62 +7087,81 @@ const GardenModal = ({ stats, updateStatsInFirestore, onClose }) => {
 
 // --- NEW: Plant Plot Component ---
 const PlantPlot = ({ plotData, onHarvest, onPlant }) => {
-  const [growthPercent, setGrowthPercent] = useState(0);
-  const [isGrown, setIsGrown] = useState(false);
-  
-  useEffect(() => {
-    if (plotData?.plantId && plotData.plantedAt) {
-      const interval = setInterval(() => {
-        const plantDef = Object.values(alchemyPlants).find(p => p.yields === plotData.plantId);
-        if (!plantDef) return;
-        
-        const plantedAtMs = plotData.plantedAt.toDate().getTime();
-        const nowMs = new Date().getTime();
-        const secondsElapsed = (nowMs - plantedAtMs) / 1000;
-        const percent = Math.min(100, (secondsElapsed / plantDef.growthTimeSeconds) * 100);
-        setGrowthPercent(percent);
-        setIsGrown(percent >= 100);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [plotData]);
+  const [growthState, setGrowthState] = useState({ percent: 0, isGrown: false });
 
+  // This effect will run whenever the plotData prop changes.
+  useEffect(() => {
+    // If there is no plant, we don't need to run any timers.
+    if (!plotData?.plantId || !plotData.plantedAt) {
+      setGrowthState({ percent: 0, isGrown: false });
+      return; // Exit the effect early.
+    }
+
+    // A plant exists, so we set up an interval to check its growth.
+    const interval = setInterval(() => {
+      const plantDef = Object.values(alchemyPlants).find(p => p.yields === plotData.plantId);
+      if (!plantDef) return;
+
+      // This safely handles both Firestore Timestamps (from saved data) and JS Dates (from newly planted seeds).
+      const plantedAtDate = plotData.plantedAt.toDate ? plotData.plantedAt.toDate() : new Date(plotData.plantedAt);
+      
+      const secondsElapsed = (new Date().getTime() - plantedAtDate.getTime()) / 1000;
+      const percent = Math.min(100, (secondsElapsed / plantDef.growthTimeSeconds) * 100);
+      
+      setGrowthState({ percent, isGrown: percent >= 100 });
+    }, 1000); // Check every second
+
+    // This is a cleanup function. React runs it when the component is removed or the effect re-runs.
+    return () => clearInterval(interval);
+  }, [plotData]); // The effect re-runs ONLY when plotData changes.
+
+  // --- Render Logic ---
+
+  // If there's no plantId, it's an empty plot. Render the "+" button.
   if (!plotData?.plantId) {
     return (
       <button 
         onClick={onPlant}
-        className="bg-amber-900/50 border-2 border-dashed border-amber-800/70 rounded-lg flex items-center justify-center text-amber-200/80 hover:bg-amber-900/70 transition-colors"
+        className="bg-amber-900/50 border-2 border-dashed border-amber-800/70 rounded-lg flex items-center justify-center text-amber-200/80 hover:bg-amber-900/70 transition-colors w-full h-full"
       >
-        <span className="text-3xl">+</span>
+        <span className="text-4xl font-thin">+</span>
       </button>
     );
   }
 
+  // A plant exists. Find its definitions.
   const plantDef = Object.values(alchemyPlants).find(p => p.yields === plotData.plantId);
   const ingredientDef = alchemyIngredients[plotData.plantId];
-  const stage = Math.min(3, Math.floor(growthPercent / 25)); // 4 stages (0-3)
+  
+  // Safety check in case of bad data.
+  if (!plantDef || !ingredientDef) {
+      return <div className="bg-red-900/50 rounded-lg flex items-center justify-center text-white p-2 text-xs">Data Error</div>;
+  }
+
+  // Determine which frame of the spritesheet to show.
+  const stage = Math.min(3, Math.floor(growthState.percent / 25));
 
   return (
-    <div className="bg-black/20 rounded-lg flex flex-col items-center justify-center p-2 relative">
+    <div className="bg-black/20 rounded-lg flex flex-col items-center justify-between p-2 relative h-full">
+      <p className="text-white text-xs font-bold text-center" style={{ textShadow: '1px 1px 2px #000' }}>{ingredientDef.name}</p>
       <div 
         className="w-16 h-16 bg-no-repeat bg-center" 
         style={{ 
           backgroundImage: `url(${plantDef.spritesheet})`,
-          backgroundPosition: `-${stage * 16}px 0px`, // Assuming 16x16 sprites
+          backgroundPosition: `-${stage * 16}px 0px`,
           width: '16px', height: '16px',
           transform: 'scale(4)',
           imageRendering: 'pixelated',
         }}
       />
-      <p className="text-white text-sm font-bold mt-2 text-center" style={{ textShadow: '1px 1px 2px #000' }}>{ingredientDef.name}</p>
       
-      {isGrown ? (
-        <button onClick={onHarvest} className="absolute inset-0 bg-green-500/70 text-white font-bold text-2xl flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+      {growthState.isGrown ? (
+        <button onClick={onHarvest} className="w-full bg-green-600 text-white font-bold text-sm py-1 rounded hover:bg-green-700 transition-colors">
           HARVEST
         </button>
       ) : (
-         <div className="absolute bottom-2 left-2 right-2 h-2 bg-slate-700 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 rounded-full" style={{ width: `${growthPercent}%` }}></div>
+         <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 rounded-full" style={{ width: `${growthState.percent}%` }}></div>
          </div>
       )}
     </div>
@@ -5046,7 +7567,7 @@ const AuthComponent = () => {
   };
 
 // Component for Assignment Tracker Sheet
-const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, promptMissionStart, isMobile }) => {
+const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, promptMissionStart, isMobile, updateStatsInFirestore }) => {
     const [expandedAssignmentId, setExpandedAssignmentId] = useState(null);
     const [editingAssignmentData, setEditingAssignmentData] = useState(null);
     const [newSubtaskName, setNewSubtaskName] = useState('');
@@ -5057,8 +7578,19 @@ const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedTogg
         return;
       }
 
+      let subtasks = [];
+      if (newAssignmentData.isEpic) {
+        subtasks = [
+          { name: 'Research & Outline', completed: false },
+          { name: 'Complete First Draft', completed: false },
+          { name: 'Review & Edit Pass', completed: false },
+          { name: 'Final Submission Prep', completed: false }
+        ];
+      }
+
       const assignmentToSave = {
         ...newAssignmentData,
+        isEpicQuest: newAssignmentData.isEpic || false,
         dueDate: newAssignmentData.dueDate ? new Date(newAssignmentData.dueDate) : null,
         timeEstimate: parseFloat(newAssignmentData.timeEstimate) || 0,
         pointsEarned: parseFloat(newAssignmentData.pointsEarned) || 0,
@@ -5066,10 +7598,11 @@ const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedTogg
         recurrenceType: newAssignmentData.recurrenceType || 'none',
         recurrenceEndDate: newAssignmentData.recurrenceEndDate ? new Date(newAssignmentData.recurrenceEndDate) : null,
         tags: newAssignmentData.tags || [],
-        // Explicitly add fields required for a new assignment to be valid
         dateCompleted: null,
-        subtasks: [],
+        subtasks: subtasks,
       };
+      delete assignmentToSave.isEpic; // clean up temp flag
+
 
       await addAssignmentToFirestore(assignmentToSave);
       showMessageBox("Assignment added successfully!", "info");
@@ -5143,8 +7676,17 @@ const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedTogg
       const assignment = assignments.find(a => a.id === assignmentId);
       if (assignment) {
         const updatedSubtasks = [...assignment.subtasks];
+        const wasCompleted = updatedSubtasks[subtaskIndex].completed;
         updatedSubtasks[subtaskIndex].completed = !updatedSubtasks[subtaskIndex].completed;
+        
         await updateAssignmentInFirestore(assignmentId, { subtasks: updatedSubtasks });
+        
+        // Award XP for completing an Epic Quest milestone
+        if (assignment.isEpicQuest && !wasCompleted) {
+          updateStatsInFirestore({ totalXP: increment(15) });
+          showMessageBox("Milestone Complete! +15 XP", "info");
+        }
+
          if (editingAssignmentData && editingAssignmentData.id === assignmentId) {
           setEditingAssignmentData(prev => ({...prev, subtasks: updatedSubtasks}));
         }
@@ -5212,9 +7754,14 @@ const AssignmentTracker = ({ assignments, setIsAddModalOpen, handleCompletedTogg
                   
                   return (
                     <React.Fragment key={assignment.id}>
-                      <tr className="border-b border-slate-700 hover:bg-slate-800/70">
+                      <tr className={`border-b border-slate-700 hover:bg-slate-800/70 ${assignment.isEpicQuest ? 'bg-indigo-900/30' : ''}`}>
                         <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left whitespace-nowrap`}>{assignment.class || '⚠️'}</td>
-                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>{assignment.assignment}</td>
+                        <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>
+                          <div className="flex items-center">
+                            {assignment.isEpicQuest && <span className="text-yellow-400 mr-2 text-lg" title="Epic Quest">📜</span>}
+                            <span>{assignment.assignment}</span>
+                          </div>
+                        </td>
                         <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>{assignment.dueDate ? assignment.dueDate.toLocaleDateString() : '⚠️'}</td>
                         {!isMobile && <td className="py-3 px-6 text-center">
                           <input
@@ -5374,31 +7921,6 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
     setUsernameInput(draftState.username || '');
   }, [draftState.username]);
   
-    useEffect(() => {
-    // FIX: This effect ensures that a public username entry exists for the current user.
-    // It runs once when the profile page loads, creating the document if it's missing.
-    // This makes existing users (who signed up before this feature) searchable.
-    const ensureUsernameEntry = async () => {
-      if (!db || !user || !stats.username) return;
-
-      try {
-        const usernameLower = stats.username.toLowerCase();
-        const usernameDocRef = doc(db, `usernames/${usernameLower}`);
-        const docSnap = await getDoc(usernameDocRef);
-
-        if (!docSnap.exists()) {
-          // The public record doesn't exist, so we create it.
-          await setDoc(usernameDocRef, { userId: user.uid });
-          console.log(`Created missing public username entry for: ${stats.username}`);
-        }
-      } catch (error) {
-        console.error("Error ensuring username entry exists:", error);
-      }
-    };
-
-    ensureUsernameEntry();
-  }, [db, user, stats.username]); // Depends on user and their username being loaded.
-
   useEffect(() => {
     if (!db || !stats.friends || stats.friends.length === 0) {
       setFriendProfiles({}); // Clear profiles if no friends
@@ -5886,11 +8408,48 @@ const QuestsComponent = ({ quests }) => {
   );
 };
 // Component for Stats + XP Tracker Sheet
-
-  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine, shouldPromptForTriage, onStartTriage }) => {
+  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine, shouldPromptForTriage, onStartTriage, onAcceptContract }) => {
     const persona = getProductivityPersona();
     const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => stats.currentLevel >= t.level) || { title: 'Novice Learner' };
     const currentTitle = stats?.equippedItems?.title ? cosmeticItems.titles.find(t => t.id === stats.equippedItems.title)?.name : currentLevelBasedTitle.title;
+
+    const completedAssignmentsWithScores = completedAssignments.filter(t =>
+      t.pointsEarned !== undefined && t.pointsEarned !== null &&
+      t.pointsMax !== undefined && t.pointsMax !== null && t.pointsMax > 0
+    );
+
+    const tagAnalytics = {};
+    assignmentTags.forEach(tag => {
+      tagAnalytics[tag] = {
+        totalPointsEarned: 0,
+        totalPointsMax: 0,
+        totalTimeSpent: 0,
+        assignmentCount: 0,
+      };
+    });
+
+    completedAssignmentsWithScores.forEach(t => {
+      const assignmentDate = new Date(t.dateCompleted);
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+      if (assignmentDate >= oneYearAgo && t.tags && t.tags.length > 0) {
+        t.tags.forEach(tag => {
+          if (tagAnalytics[tag]) {
+            tagAnalytics[tag].totalPointsEarned += t.pointsEarned;
+            tagAnalytics[tag].totalPointsMax += t.pointsMax;
+            tagAnalytics[tag].totalTimeSpent += t.timeEstimate || 0;
+            tagAnalytics[tag].assignmentCount++;
+          }
+        });
+      }
+    });
+
+    const getFormattedAnalytics = (tag) => {
+      const data = tagAnalytics[tag];
+      const avgTime = data.assignmentCount > 0 ? (data.totalTimeSpent / data.assignmentCount).toFixed(1) : 'N/A';
+      return { avgTime };
+    };
 
     const calculateStressRisk = useCallback(() => {
       let totalStressScore = 0;
@@ -6004,6 +8563,28 @@ const QuestsComponent = ({ quests }) => {
           </div>
         )}
 
+        {stats.contract && (
+          <div className={`mb-8 p-6 border-2 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 ${stats.contract.status === 'offered' ? 'bg-slate-800/80 border-yellow-600/80' : 'bg-slate-800/50 border-slate-700'}`}>
+            <div>
+              <h3 className="text-2xl font-bold text-white">
+                {stats.contract.status === 'offered' ? '📜 New Contract Available!' : 'Active Contract'}
+              </h3>
+              <p className="text-yellow-300 font-semibold">{stats.contract.name}</p>
+              <p className="text-slate-400">{stats.contract.description}</p>
+            </div>
+            {stats.contract.status === 'offered' ? (
+              <button onClick={onAcceptContract} className="px-6 py-3 bg-yellow-600 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors shadow-lg flex-shrink-0">
+                Accept (Cost: {stats.contract.deposit} XP)
+              </button>
+            ) : (
+              <div className="text-center">
+                <p className="text-slate-300 font-semibold">Contract is active.</p>
+                <p className="text-xs text-slate-500">Time Limit: {stats.contract.timeLimitHours} hours</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Top Stat Cards */}
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
@@ -6030,51 +8611,82 @@ const QuestsComponent = ({ quests }) => {
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column (Graphs) */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
-                {/* XP Gain Graph */}
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-semibold text-white mb-4">XP Gain Over Time</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={cumulativeXPGainData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                        <XAxis dataKey="date" tick={{ fill: '#94a3b8' }} />
-                        <YAxis tick={{ fill: '#94a3b8' }}/>
-                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                        <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                        <Line type="monotone" dataKey="cumulativeXP" stroke="#818cf8" strokeWidth={2} activeDot={{ r: 8 }} name="Cumulative XP" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                </div>
-                {/* Two bottom graphs */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-semibold text-white mb-4">Predicted Workload</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <LineChart data={predictedHoursGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                                <XAxis dataKey="class" tick={{ fill: '#94a3b8' }}/>
-                                <YAxis tick={{ fill: '#94a3b8' }}/>
-                                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                                <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                                <Line type="monotone" dataKey="hours" stroke="#34d399" activeDot={{ r: 8 }} name="Predicted Hours" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-semibold text-white mb-4">Hours Worked (Weekly)</h3>
-                         <ResponsiveContainer width="100%" height={250}>
-                            <LineChart data={hoursSpentWorkingGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#475569"/>
-                                <XAxis dataKey="week" tick={{ fill: '#94a3b8' }}/>
-                                <YAxis tick={{ fill: '#94a3b8' }}/>
-                                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                                <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                                <Line type="monotone" dataKey="hours" stroke="#facc15" activeDot={{ r: 8 }} name="Hours Worked" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+            {/* Left Column (Graphs & Table) */}
+            <div className="lg:col-span-2">
+              <div className="flex flex-col gap-6">
+                  {/* XP Gain Graph */}
+                  <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
+                      <h3 className="text-xl font-semibold text-white mb-4">XP Gain Over Time</h3>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={cumulativeXPGainData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                          <XAxis dataKey="date" tick={{ fill: '#94a3b8' }} />
+                          <YAxis tick={{ fill: '#94a3b8' }}/>
+                          <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
+                          <Legend wrapperStyle={{ color: '#94a3b8' }} />
+                          <Line type="monotone" dataKey="cumulativeXP" stroke="#818cf8" strokeWidth={2} activeDot={{ r: 8 }} name="Cumulative XP" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                  </div>
+                  {/* Two bottom graphs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
+                          <h3 className="text-xl font-semibold text-white mb-4">Predicted Workload</h3>
+                          <ResponsiveContainer width="100%" height={250}>
+                              <LineChart data={predictedHoursGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                                  <XAxis dataKey="class" tick={{ fill: '#94a3b8' }}/>
+                                  <YAxis tick={{ fill: '#94a3b8' }}/>
+                                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
+                                  <Legend wrapperStyle={{ color: '#94a3b8' }} />
+                                  <Line type="monotone" dataKey="hours" stroke="#34d399" activeDot={{ r: 8 }} name="Predicted Hours" />
+                              </LineChart>
+                          </ResponsiveContainer>
+                      </div>
+                      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
+                          <h3 className="text-xl font-semibold text-white mb-4">Hours Worked (Weekly)</h3>
+                          <ResponsiveContainer width="100%" height={250}>
+                              <LineChart data={hoursSpentWorkingGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="#475569"/>
+                                  <XAxis dataKey="week" tick={{ fill: '#94a3b8' }}/>
+                                  <YAxis tick={{ fill: '#94a3b8' }}/>
+                                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
+                                  <Legend wrapperStyle={{ color: '#94a3b8' }} />
+                                  <Line type="monotone" dataKey="hours" stroke="#facc15" activeDot={{ r: 8 }} name="Hours Worked" />
+                              </LineChart>
+                          </ResponsiveContainer>
+                      </div>
+                  </div>
+              </div>
+              
+              {/* Analytics Table with corrected margin */}
+              <div className="mt-8 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
+                  <h3 className="text-xl font-bold text-white p-6">Analytics by Tag (Last Year)</h3>
+                  <div className="overflow-x-auto">
+                      <table className="min-w-full text-white">
+                      <thead>
+                          <tr className="text-slate-400 uppercase text-sm leading-normal border-b-2 border-slate-700">
+                          <th className="py-3 px-6 text-left">Tag</th>
+                          <th className="py-3 px-6 text-center">Assignments</th>
+                          <th className="py-3 px-6 text-center">Avg Time (hrs)</th>
+                          </tr>
+                      </thead>
+                      <tbody className="text-slate-300 text-sm font-light">
+                          {assignmentTags.map(tag => {
+                          const analytics = getFormattedAnalytics(tag);
+                          const data = tagAnalytics[tag];
+                          return (
+                              <tr key={tag} className="border-b border-slate-700 hover:bg-slate-800/70">
+                              <td className="py-4 px-6 text-left font-medium">{tag}</td>
+                              <td className="py-4 px-6 text-center">{data.assignmentCount}</td>
+                              <td className="py-4 px-6 text-center">{analytics.avgTime}</td>
+                              </tr>
+                          );
+                          })}
+                      </tbody>
+                      </table>
+                  </div>
+              </div>
             </div>
 
                         {/* Right Column (Widgets) */}
@@ -6146,7 +8758,7 @@ const QuestsComponent = ({ quests }) => {
                         <div className={`h-2.5 rounded-full ${stressRisk <= 33 ? 'bg-green-500' : stressRisk <= 66 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${stressRisk}%` }}></div>
                     </div>
                 </div>
-                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
                     <h3 className="text-xl font-semibold text-white mb-3">Slot Machine</h3>
                     <p className="text-slate-400 mb-4 text-sm">Spin for 50 XP for a chance to win cosmetics or more XP!</p>
                     <button onClick={spinProductivitySlotMachine} className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors hover:bg-indigo-700">Spin Now</button>
@@ -6290,86 +8902,6 @@ const QuestsComponent = ({ quests }) => {
     );
   };
 
-// Component for GPA & Tags Analytics Sheet
-  const GPATagsAnalytics = ({ completedAssignments }) => {
-    const completedAssignmentsWithScores = completedAssignments.filter(t =>
-      t.pointsEarned !== undefined && t.pointsEarned !== null &&
-      t.pointsMax !== undefined && t.pointsMax !== null && t.pointsMax > 0
-    );
-
-    const tagAnalytics = {};
-    assignmentTags.forEach(tag => {
-      tagAnalytics[tag] = {
-        totalPointsEarned: 0,
-        totalPointsMax: 0,
-        totalTimeSpent: 0,
-        assignmentCount: 0,
-      };
-    });
-
-    completedAssignmentsWithScores.forEach(t => {
-      const assignmentDate = new Date(t.dateCompleted);
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-      if (assignmentDate >= oneYearAgo && t.tags && t.tags.length > 0) {
-        t.tags.forEach(tag => {
-          if (tagAnalytics[tag]) {
-            tagAnalytics[tag].totalPointsEarned += t.pointsEarned;
-            tagAnalytics[tag].totalPointsMax += t.pointsMax;
-            tagAnalytics[tag].totalTimeSpent += t.timeEstimate || 0;
-            tagAnalytics[tag].assignmentCount++;
-          }
-        });
-      }
-    });
-
-    const getFormattedAnalytics = (tag) => {
-      const data = tagAnalytics[tag];
-      const avgScore = data.assignmentCount > 0 && data.totalPointsMax > 0 ? ((data.totalPointsEarned / data.totalPointsMax) * 100).toFixed(1) : 'N/A';
-      const avgTime = data.assignmentCount > 0 ? (data.totalTimeSpent / data.assignmentCount).toFixed(1) : 'N/A';
-      return { avgScore, avgTime };
-    };
-
-    return (
-      <div>
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-white">Tags Analytics</h2>
-          <p className="text-slate-400">Analyze your academic performance by subject over the last year.</p>
-        </div>
-
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
-          <h3 className="text-xl font-bold text-white p-6">Analytics by Tag (Last Year)</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-white">
-              <thead>
-                <tr className="text-slate-400 uppercase text-sm leading-normal border-b-2 border-slate-700">
-                  <th className="py-3 px-6 text-left">Tag</th>
-                  <th className="py-3 px-6 text-center">Assignments</th>
-                  <th className="py-3 px-6 text-center">Avg Score (%)</th>
-                  <th className="py-3 px-6 text-center">Avg Time (hrs)</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-300 text-sm font-light">
-                {assignmentTags.map(tag => {
-                  const analytics = getFormattedAnalytics(tag);
-                  const data = tagAnalytics[tag];
-                  return (
-                    <tr key={tag} className="border-b border-slate-700 hover:bg-slate-800/70">
-                      <td className="py-4 px-6 text-left font-medium">{tag}</td>
-                      <td className="py-4 px-6 text-center">{data.assignmentCount}</td>
-                      <td className="py-4 px-6 text-center">{analytics.avgScore}</td>
-                      <td className="py-4 px-6 text-center">{analytics.avgTime}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  };
 // NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
 const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
     const [activeTab, setActiveTab] = useState('game');
@@ -7269,13 +9801,16 @@ const App = () => {
     const docRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     const finalData = { ...dataToUpdate, lastActionTimestamp: serverTimestamp() };
     try {
-      // Use set with merge to create or update the single stats document
-      await setDoc(docRef, finalData, { merge: true });
+      // FIX: Use updateDoc instead of setDoc with merge. This correctly handles
+      // dot notation for nested fields (like 'dungeon_wingmen.roster') and
+      // sentinel values like increment().
+      await updateDoc(docRef, finalData);
     } catch (error) {
       console.error("Firestore Write Error (Stats):", error);
       showMessageBox(`Failed to update stats.`, "error");
     }
   }, [user, db, appId]);
+
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSlotAnimationOpen, setIsSlotAnimationOpen] = useState(false);
@@ -7428,6 +9963,7 @@ const App = () => {
             recurrenceType: doc.data().recurrenceType || 'none',
             recurrenceEndDate: doc.data().recurrenceEndDate?.toDate(),
             tags: doc.data().tags || [],
+            isEpicQuest: doc.data().isEpicQuest || false, // Explicitly check for the new flag
         }));
         setAssignments(fetchedAssignments);
     });
@@ -7775,18 +10311,31 @@ const App = () => {
   
   const resetDungeonGame = () => actionLock(async () => {
     if (!db || !user) return;
+
+    const initialDungeonState = generateInitialDungeonState();
+    
+    // Optimistically update the local state for an instant UI change
+    setStats(prevStats => ({
+      ...prevStats,
+      dungeon_state: initialDungeonState,
+      dungeon_floor: 0,
+      dungeon_gold: 0,
+    }));
+    
+    // Perform the Firestore update in the background
     const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     try {
       await updateDoc(statsDocRef, {
-        dungeon_state: generateInitialDungeonState(),
+        dungeon_state: initialDungeonState,
         dungeon_floor: 0,
         dungeon_gold: 0,
         'cooldowns.resetDungeon': serverTimestamp(),
         lastActionTimestamp: serverTimestamp()
       });
-      setDungeonResetKey(prev => prev + 1); // Force remount
+      setDungeonResetKey(prev => prev + 1); // Force remount for a clean slate
       showMessageBox("Dungeon has been reset! Choose your class.", "info");
     } catch (error) {
+      // The listener will eventually correct the state if the update fails.
       const errorMsg = error.message.includes('permission-denied') ? "You're resetting too quickly!" : "Dungeon reset failed.";
       showMessageBox(errorMsg, "error");
     }
@@ -8147,6 +10696,27 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
     }
   });
 
+const handleAcceptContract = useCallback(() => actionLock(async () => {
+    const contract = stats.contract;
+    if (!db || !user || !contract || contract.status !== 'offered') return;
+    
+    if (stats.totalXP < contract.deposit) {
+      showMessageBox("Not enough XP to accept this contract.", "error");
+      return;
+    }
+
+    const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
+    try {
+      await updateDoc(statsDocRef, {
+        totalXP: increment(-contract.deposit),
+        'contract.status': 'active',
+        'contract.acceptedAt': serverTimestamp(),
+      });
+      showMessageBox(`Contract accepted! Deposit of ${contract.deposit} XP paid. Good luck.`, "info");
+    } catch (error) {
+      showMessageBox("Failed to accept contract.", "error");
+    }
+  }), [user, db, appId, stats.contract, stats.totalXP, actionLock, showMessageBox]);
 
   const promptMissionStart = useCallback((assignment) => {
     if (stats.totalXP < 5) {
@@ -8416,7 +10986,6 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             { name: 'Sanctum', sheet: 'Sanctum', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4a1 1 0 112 0v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V7H8a1 1 0 010-2h1V4z" /></svg> },
             { name: 'Alchemist\'s Workshop', sheet: 'Alchemist\'s Workshop', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" /><path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1z" /></svg>},
             { name: 'Calendar', sheet: 'Calendar View', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg> },
-            { name: 'Analytics', sheet: 'GPA & Tags Analytics', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg> },
             { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M1.5 6.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM6 11a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h4a1 1 0 100-2H7zM2 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM2.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM14 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM13.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2z" clipRule="evenodd"/></svg>},
             { name: 'Tower Defense', sheet: 'Tower Defense', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 3a1 1 0 011-1h8a1 1 0 011 1v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h1V3zm3 4a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" /></svg>},
             { name: 'Science Lab', sheet: 'Science Lab', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 2a.5.5 0 01.5.5V3h5V2.5a.5.5 0 011 0V3h1a2 2 0 012 2v1.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a2 2 0 012-2h1V2.5A.5.5 0 017 2zM4.002 8.5a.5.5 0 01.498.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM16 8.5a.5.5 0 01.5.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM7 9a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1z" clipRule="evenodd" /></svg>},
@@ -8447,20 +11016,17 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
-        {activeSheet === 'Assignment Tracker' && <AssignmentTracker assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} promptMissionStart={promptMissionStart} isMobile={isMobile} />}
-               {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} shouldPromptForTriage={shouldShowTriageBanner} onStartTriage={() => setTriageState({ isOpen: true, needsSetup: !stats.triageSettings })} />}
-        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} />}
+        {activeSheet === 'Assignment Tracker' && <AssignmentTracker stats={stats} assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} promptMissionStart={promptMissionStart} isMobile={isMobile} updateStatsInFirestore={updateStatsInFirestore} />}               {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} shouldPromptForTriage={shouldShowTriageBanner} onStartTriage={() => setTriageState({ isOpen: true, needsSetup: !stats.triageSettings })} onAcceptContract={handleAcceptContract} />}        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} />}
         {activeSheet === 'Sanctum' && <Sanctum stats={stats} completedAssignments={completedAssignments} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
 
         {activeSheet === 'Why' && <WhyTab />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
-        {activeSheet === 'GPA & Tags Analytics' && <GPATagsAnalytics completedAssignments={completedAssignments}/>}
         {activeSheet === 'Dungeon Crawler' && <DungeonCrawler key={dungeonResetKey} stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
         {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
-        {activeSheet === "Alchemist's Workshop" && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} />}
+        {activeSheet === "Alchemist's Workshop" && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
       </main>
     </div>
     </>
