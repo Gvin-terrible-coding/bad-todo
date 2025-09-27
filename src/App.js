@@ -402,18 +402,18 @@ const cosmeticItems = {
 
 const wingmanDefinitions = {
   // XP Recruits
-  'recruit_knight': { id: 'recruit_knight', name: 'Knight', role: 'Melee DPS', cost: 3000, currency: 'xp', hp: 80, atk: 15, ap: 2, armor: 3, moveCost: 1, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'taunt', name: 'Taunt', cost: 2, range: 2.5, duration: 2, target: 'enemy' }], spriteStyle: { width: 92, height: 76, backgroundPosition: '-124px -85px' } },
-  'recruit_cleric': { id: 'recruit_cleric', name: 'Battle Cleric', role: 'Healer', cost: 4000, currency: 'xp', hp: 60, atk: 8, ap: 2, armor: 1, moveCost: 1, attackCost: 1, moveRange: 2, attackRange: 1.5, abilities: [{ id: 'heal', name: 'Heal', cost: 2, range: 1.5, power: 25, target: 'friendly' }], spriteStyle: { width: 62, height: 80, backgroundPosition: '-241px -169px' } },
-  'recruit_mage': { id: 'recruit_mage', name: 'Arcane Apprentice', role: 'Ranged DPS', cost: 4000, currency: 'xp', hp: 50, atk: 20, ap: 2, armor: 0, moveCost: 1, attackCost: 2, moveRange: 2, attackRange: 4, abilities: [{ id: 'firebolt', name: 'Firebolt', cost: 2, range: 4, power: 30, target: 'enemy' }], spriteStyle: { width: 63, height: 76, backgroundPosition: '-130px -174px' } },
-  'recruit_heavy_axeman': { id: 'recruit_heavy_axeman', name: 'Guardian', role: 'Tank', cost: 3000, currency: 'xp', hp: 200, atk: 10, ap: 3, armor: 5, thorns: 0, moveCost: 3, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'fortify', name: 'Fortify', cost: 1, selfTarget: true, effect: { tempHp: 40 }, duration: 2, target: 'friendly' }], spriteStyle: { width: 91, height: 81, backgroundPosition: '-34px -174px' } },
-  'recruit_undead_vanguard': { id: 'recruit_undead_vanguard', name: 'Undead Vanguard', role: 'Heavy DPS', cost: 4500, currency: 'xp', hp: 70, atk: 28, ap: 2, armor: 2, moveCost: 1, attackCost: 2, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'sunder', name: 'Sunder', cost: 2, range: 1.5, power: 35, armorPiercing: 10, target: 'enemy' }], spriteStyle: { width: 102, height: 87, backgroundPosition: '-231px -255px' } },
-  'recruit_crusader': { id: 'recruit_crusader', name: 'Holy Crusader', role: 'Support Tank', cost: 3500, currency: 'xp', hp: 150, atk: 8, ap: 3, armor: 4, moveCost: 2, attackCost: 1, moveRange: 1, attackRange: 1.5, abilities: [{ id: 'divine_shield', name: 'Divine Shield', cost: 2, selfTarget: true, effect: { tempHp: 30 }, duration: 3, target: 'friendly' }], spriteStyle: { width: 98, height: 74, backgroundPosition: '-246px -88px' } },
+  'recruit_knight': { id: 'recruit_knight', name: 'Knight', role: 'Melee DPS', cost: 3000, currency: 'xp', hp: 80, atk: 15, ap: 2, armor: 3, moveCost: 1, attackCost: 1, moveRange: 1, attackRange: 1.5, combatStyle: 'Martial', abilities: [{ id: 'taunt', name: 'Taunt', cost: 2, range: 2.5, duration: 2, target: 'enemy' }], spriteStyle: { width: 92, height: 76, backgroundPosition: '-124px -85px' } },
+  'recruit_cleric': { id: 'recruit_cleric', name: 'Battle Cleric', role: 'Healer', cost: 4000, currency: 'xp', hp: 60, atk: 8, ap: 2, armor: 1, moveCost: 1, attackCost: 1, moveRange: 2, attackRange: 1.5, combatStyle: 'Arcane', abilities: [{ id: 'heal', name: 'Heal', cost: 2, range: 1.5, power: 25, target: 'friendly' }], spriteStyle: { width: 62, height: 80, backgroundPosition: '-241px -169px' } },
+  'recruit_mage': { id: 'recruit_mage', name: 'Arcane Apprentice', role: 'Ranged DPS', cost: 4000, currency: 'xp', hp: 50, atk: 20, ap: 2, armor: 0, moveCost: 1, attackCost: 2, moveRange: 2, attackRange: 4, combatStyle: 'Arcane', abilities: [{ id: 'firebolt', name: 'Firebolt', cost: 2, range: 4, power: 30, target: 'enemy' }], spriteStyle: { width: 63, height: 76, backgroundPosition: '-130px -174px' } },
+  'recruit_heavy_axeman': { id: 'recruit_heavy_axeman', name: 'Guardian', role: 'Tank', cost: 3000, currency: 'xp', hp: 200, atk: 10, ap: 3, armor: 5, thorns: 0, moveCost: 3, attackCost: 1, moveRange: 1, attackRange: 1.5, combatStyle: 'Martial', abilities: [{ id: 'fortify', name: 'Fortify', cost: 1, selfTarget: true, effect: { tempHp: 40 }, duration: 2, target: 'friendly' }], spriteStyle: { width: 91, height: 81, backgroundPosition: '-34px -174px' } },
+  'recruit_undead_vanguard': { id: 'recruit_undead_vanguard', name: 'Undead Vanguard', role: 'Heavy DPS', cost: 4500, currency: 'xp', hp: 70, atk: 28, ap: 2, armor: 2, moveCost: 1, attackCost: 2, moveRange: 1, attackRange: 1.5, combatStyle: 'Martial', abilities: [{ id: 'sunder', name: 'Sunder', cost: 2, range: 1.5, power: 35, armorPiercing: 10, target: 'enemy' }], spriteStyle: { width: 102, height: 87, backgroundPosition: '-231px -255px' } },
+  'recruit_crusader': { id: 'recruit_crusader', name: 'Holy Crusader', role: 'Support Tank', cost: 3500, currency: 'xp', hp: 150, atk: 8, ap: 3, armor: 4, moveCost: 2, attackCost: 1, moveRange: 1, attackRange: 1.5, combatStyle: 'Martial', abilities: [{ id: 'divine_shield', name: 'Divine Shield', cost: 2, selfTarget: true, effect: { tempHp: 30 }, duration: 3, target: 'friendly' }], spriteStyle: { width: 98, height: 74, backgroundPosition: '-246px -88px' } },
 
   // Gold Gacha Recruits
-  'recruit_rogue': { id: 'recruit_rogue', name: 'Shadow Rogue', role: 'Assassin', cost: 500, currency: 'gold', hp: 40, atk: 25, ap: 3, armor: 1, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, rarity: 'rare', abilities: [{ id: 'shadow_strike', name: 'Shadow Strike', cost: 1, range: 1.5, power: 40, armorPiercing: 5, target: 'enemy' }], spriteStyle: { width: 99, height: 69, backgroundPosition: '-448px -281px' } },
-  'recruit_mounted_knight': { id: 'recruit_mounted_knight', name: 'Cavalier', role: 'Mobile DPS', cost: 500, currency: 'gold', hp: 100, atk: 20, ap: 3, armor: 3, moveCost: 1, attackCost: 2, moveRange: 4, attackRange: 1.5, rarity: 'epic', abilities: [{ id: 'piercing_lance', name: 'Piercing Lance', cost: 2, range: 2.5, power: 25, target: 'enemy' }], spriteStyle: { width: 125, height: 145, backgroundPosition: '-348px -17px' } },
-  'recruit_duelist': { id: 'recruit_duelist', name: 'Swift Duelist', role: 'Agile DPS', cost: 500, currency: 'gold', hp: 50, atk: 18, ap: 3, armor: 0, moveCost: 0.5, attackCost: 1, moveRange: 2, attackRange: 1.5, rarity: 'rare', abilities: [{ id: 'riposte', name: 'Riposte', cost: 1, selfTarget: true, effect: { counterAttack: 0.5 }, duration: 1, target: 'friendly' }], spriteStyle: { width: 92, height: 75, backgroundPosition: '-124px -272px' } },
-  'recruit_warg_rider': { id: 'recruit_warg_rider', name: 'Warg Rider', role: 'Mobile Skirmisher', cost: 500, currency: 'gold', hp: 90, atk: 18, ap: 3, armor: 2, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, rarity: 'epic', abilities: [{ id: 'savage_rush', name: 'Savage Rush', cost: 2, range: 1.5, power: 20, effect: { knockback: 1 }, target: 'enemy' }], spriteStyle: { width: 114, height: 105, backgroundPosition: '-332px -246px' } }
+  'recruit_rogue': { id: 'recruit_rogue', name: 'Shadow Rogue', role: 'Assassin', cost: 500, currency: 'gold', hp: 40, atk: 25, ap: 3, armor: 1, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, combatStyle: 'Martial', rarity: 'rare', abilities: [{ id: 'shadow_strike', name: 'Shadow Strike', cost: 1, range: 1.5, power: 40, armorPiercing: 5, target: 'enemy' }], spriteStyle: { width: 99, height: 69, backgroundPosition: '-448px -281px' } },
+  'recruit_mounted_knight': { id: 'recruit_mounted_knight', name: 'Cavalier', role: 'Mobile DPS', cost: 500, currency: 'gold', hp: 100, atk: 20, ap: 3, armor: 3, moveCost: 1, attackCost: 2, moveRange: 4, attackRange: 1.5, combatStyle: 'Martial', rarity: 'epic', abilities: [{ id: 'piercing_lance', name: 'Piercing Lance', cost: 2, range: 2.5, power: 25, target: 'enemy' }], spriteStyle: { width: 125, height: 145, backgroundPosition: '-348px -17px' } },
+  'recruit_duelist': { id: 'recruit_duelist', name: 'Swift Duelist', role: 'Agile DPS', cost: 500, currency: 'gold', hp: 50, atk: 18, ap: 3, armor: 0, moveCost: 0.5, attackCost: 1, moveRange: 2, attackRange: 1.5, combatStyle: 'Finesse', rarity: 'rare', abilities: [{ id: 'riposte', name: 'Riposte', cost: 1, selfTarget: true, effect: { counterAttack: 0.5 }, duration: 1, target: 'friendly' }], spriteStyle: { width: 92, height: 75, backgroundPosition: '-124px -272px' } },
+  'recruit_warg_rider': { id: 'recruit_warg_rider', name: 'Warg Rider', role: 'Mobile Skirmisher', cost: 500, currency: 'gold', hp: 90, atk: 18, ap: 3, armor: 2, moveCost: 1, attackCost: 1, moveRange: 3, attackRange: 1.5, combatStyle: 'Martial', rarity: 'epic', abilities: [{ id: 'savage_rush', name: 'Savage Rush', cost: 2, range: 1.5, power: 20, effect: { knockback: 1 }, target: 'enemy' }], spriteStyle: { width: 114, height: 105, backgroundPosition: '-332px -246px' } }
 
 };
 
@@ -1108,8 +1108,9 @@ const generateInitialDungeonState = () => {
     equippedWeapon: null,
     equippedOffhandWeapon: null,
     equippedArmor: null,
-    potions: 0,
-    boughtStats: { hp: 0, attack: 0 },
+    potions: 10,
+        boughtStats: { hp: 0, attack: 0 },
+    floorModifier: null,
   };
 };
 
@@ -2129,6 +2130,21 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   const [barracksOpen, setBarracksOpen] = useState(false);
   const [pendingEquippedWingman, setPendingEquippedWingman] = useState(stats.dungeon_wingmen?.equipped);
   const [wingmanTurnState, setWingmanTurnState] = useState({ distanceMoved: 0, frenziedAttackAvailable: false });
+  const [turnIndicator, setTurnIndicator] = useState(null);
+
+  useEffect(() => {
+    if (activeTurn === 'player' && localDungeonState.phase === 'playing') {
+      setTurnIndicator('Player Turn');
+    } else if (activeTurn === 'enemy' && localDungeonState.phase === 'playing') {
+      setTurnIndicator('Enemy Turn');
+    }
+    
+    const timer = setTimeout(() => {
+      setTurnIndicator(null);
+    }, 1500); // The animation `animate-fade-out-fast` lasts 1.5s
+  
+    return () => clearTimeout(timer);
+  }, [activeTurn, localDungeonState.phase]);
 
   // These states track resources for the current session to batch updates.
   const [sessionXp, setSessionXp] = useState(stats.totalXP);
@@ -2245,6 +2261,7 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   
   // REFACTORED: saveGame now updates the single stats document.
   const saveGame = useCallback(async (stateToSave) => {
+
     if (!stateToSave) return;
     try {
       await updateStatsInFirestore({
@@ -2280,26 +2297,26 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
 
   const dungeonDefinitions = {
     classes: {
-      warrior: { name: 'Warrior', icon: '⚔️', description: 'A balanced fighter with strong melee attacks.', startingHp: 100, moveCost: 5, attackCost: 50, attackRange: 1.5, ability: { id: 'whirlwind', name: 'Whirlwind', cost: 120 } },
-      mage: { name: 'Mage', icon: '🧙', description: 'A fragile caster with powerful area-of-effect spells.', startingHp: 60, moveCost: 5, attackCost: 100, attackRange: 4, ability: { id: 'fireball', name: 'Fireball', cost: 200 } },
-      archer: { name: 'Archer', icon: '🏹', description: 'A nimble marksman who attacks from a great distance.', startingHp: 60, moveCost: 5, attackCost: 60, attackRange: 5, ability: { id: 'double_tap', name: 'Double Tap', cost: 150 } },
-      tank: { name: 'Tank', icon: '🛡️', description: 'A sturdy protector who can endure heavy damage.', startingHp: 200, moveCost: 8, attackCost: 40, attackRange: 1.5, ability: { id: 'hunker_down', name: 'Hunker Down', cost: 80 } },
+      warrior: { name: 'Warrior', icon: '⚔️', combatStyle: 'Martial', description: 'A balanced fighter with strong melee attacks.', startingHp: 100, moveCost: 5, attackCost: 50, attackRange: 1.5, ability: { id: 'whirlwind', name: 'Whirlwind', cost: 120 } },
+      mage: { name: 'Mage', icon: '🧙', combatStyle: 'Arcane', description: 'A fragile caster with powerful area-of-effect spells.', startingHp: 60, moveCost: 5, attackCost: 100, attackRange: 4, ability: { id: 'fireball', name: 'Fireball', cost: 200 } },
+      archer: { name: 'Archer', icon: '🏹', combatStyle: 'Finesse', description: 'A nimble marksman who attacks from a great distance.', startingHp: 60, moveCost: 5, attackCost: 60, attackRange: 5, ability: { id: 'double_tap', name: 'Double Tap', cost: 150 } },
+      tank: { name: 'Tank', icon: '🛡️', combatStyle: 'Martial', description: 'A sturdy protector who can endure heavy damage.', startingHp: 200, moveCost: 8, attackCost: 40, attackRange: 1.5, ability: { id: 'hunker_down', name: 'Hunker Down', cost: 80 } },
     },
 primaryWeapons: {
       warrior: {
         swords: [
-          { id: 'weapon_sword', name: 'Iron Sword', cost: 500, attack: 10, accuracy: 1.0, description: "Balanced and reliable." },
-          { id: 'weapon_broadsword', name: 'Steel Broadsword', cost: 1200, attack: 22, accuracy: 1.0, description: "A solid, dependable upgrade." },
-          { id: 'weapon_vampiric_falchion', name: 'Vampiric Falchion', cost: 2800, attack: 35, accuracy: 1.0, lifesteal: 0.15, description: "Restores 15% of damage dealt as health." },
-          { id: 'weapon_flame', name: 'Flame Tongue', cost: 2000, attack: 45, accuracy: 1.0, description: "Deals bonus fire damage." },
-          { id: 'weapon_void', name: 'Void Blade', cost: 5000, attack: 70, accuracy: 1.0, statusEffect: { type: 'weakened', chance: 0.3, duration: 2 }, description: "Has a 30% chance to weaken enemies, reducing their damage." },
-          { id: 'weapon_sunforged', name: 'Sunforged Blade', cost: 7500, attack: 100, accuracy: 1.0,  tdWinsRequired: 5, description: "A legendary, perfectly balanced blade." },
+          { id: 'weapon_sword', name: 'Iron Sword', cost: 500, attack: 10, accuracy: 1.0, attackRange: 1.5, description: "Balanced and reliable." },
+          { id: 'weapon_broadsword', name: 'Steel Broadsword', cost: 1200, attack: 22, accuracy: 1.0, attackRange: 1.5, description: "A solid, dependable upgrade." },
+          { id: 'weapon_vampiric_falchion', name: 'Vampiric Falchion', cost: 2800, attack: 35, accuracy: 1.0, lifesteal: 0.15, attackRange: 1.5, description: "Restores 15% of damage dealt as health." },
+          { id: 'weapon_flame', name: 'Flame Tongue', cost: 2000, attack: 45, accuracy: 1.0, attackRange: 1.5, description: "Deals bonus fire damage." },
+          { id: 'weapon_void', name: 'Void Blade', cost: 5000, attack: 70, accuracy: 1.0, attackRange: 1.5, statusEffect: { type: 'weakened', chance: 0.3, duration: 2 }, description: "Has a 30% chance to weaken enemies, reducing their damage." },
+          { id: 'weapon_sunforged', name: 'Sunforged Blade', cost: 7500, attack: 100, accuracy: 1.0, attackRange: 1.5,  tdWinsRequired: 5, description: "A legendary, perfectly balanced blade." },
         ],
         axes: [
-          { id: 'weapon_axe_iron', name: 'Iron Axe', cost: 550, attack: 16, accuracy: 0.90, cleave: 0.25, description: "High damage, but less accurate. Hits adjacent enemies for 25% damage." },
-          { id: 'weapon_axe_steel', name: 'Steel War Axe', cost: 1000, attack: 25, accuracy: 0.85, cleave: 0.30, description: "A heavier axe with a better cleave effect." },
-          { id: 'weapon_axe_berserker', name: 'Berserker Axe', cost: 1200, attack: 35, accuracy: 0.80, cleave: 0.35, description: "More powerful, but wilder. Hits adjacent enemies for 35% damage." },
-          { id: 'weapon_axe_executioner', name: 'Executioner\'s Axe', cost: 4500, attack: 65, accuracy: 0.75, cleave: 0.40, description: "Incredibly powerful with a wide swing, but very inaccurate." },
+          { id: 'weapon_axe_iron', name: 'Iron Axe', cost: 550, attack: 16, accuracy: 0.90, cleave: 0.25, attackRange: 1.5, description: "High damage, but less accurate. Hits adjacent enemies for 25% damage." },
+          { id: 'weapon_axe_steel', name: 'Steel War Axe', cost: 1000, attack: 25, accuracy: 0.85, cleave: 0.30, attackRange: 1.5, description: "A heavier axe with a better cleave effect." },
+          { id: 'weapon_axe_berserker', name: 'Berserker Axe', cost: 1200, attack: 35, accuracy: 0.80, cleave: 0.35, attackRange: 1.5, description: "More powerful, but wilder. Hits adjacent enemies for 35% damage." },
+          { id: 'weapon_axe_executioner', name: 'Executioner\'s Axe', cost: 4500, attack: 65, accuracy: 0.75, cleave: 0.40, attackRange: 1.5, description: "Incredibly powerful with a wide swing, but very inaccurate." },
         ],
         spears: [
           { id: 'weapon_spear_iron', name: 'Iron Spear', cost: 600, attack: 9, attackRange: 2.5, accuracy: 1.0, description: "Increased reach allows attacking from a distance." },
@@ -2310,54 +2327,54 @@ primaryWeapons: {
       },
       mage: {
         wands: [
-          { id: 'wand_apprentice', name: 'Apprentice Wand', cost: 500, attack: 15, aoeRange: 1.5, accuracy: 1.0, description: "Quick, reliable single-target damage." },
-          { id: 'wand_fireball', name: 'Fireball Wand', cost: 1200, attack: 28, aoeRange: 1.5, accuracy: 1.0, description: "Casts a small exploding fireball." },
-          { id: 'wand_frost', name: 'Frost Wand', cost: 1800, attack: 20, aoeRange: 1.5, accuracy: 1.0, statusEffect: { type: 'crippled', chance: 1.0, duration: 1, reduction: 1 }, description: "Chills the target on hit, slowing them for a turn." },
-          { id: 'wand_lightning', name: 'Lightning Wand', cost: 2500, attack: 50, aoeRange: 2, accuracy: 1.0, description: "A more powerful elemental wand." },
-          { id: 'wand_void', name: 'Void Core Wand', cost: 5000, attack: 75, aoeRange: 2, accuracy: 1.0, description: "Channels unstable but powerful energy." },
-          { id: 'wand_archmage', name: 'Archmage\'s Wand', cost: 7500, attack: 110, aoeRange: 2.5, accuracy: 1.0, tdWinsRequired: 5, description: "A wand of immense power." },
+          { id: 'wand_apprentice', name: 'Apprentice Wand', cost: 500, attack: 15, aoeRange: 1.5, accuracy: 1.0, attackRange: 4, description: "Quick, reliable single-target damage." },
+          { id: 'wand_fireball', name: 'Fireball Wand', cost: 1200, attack: 28, aoeRange: 1.5, accuracy: 1.0, attackRange: 4, description: "Casts a small exploding fireball." },
+          { id: 'wand_frost', name: 'Frost Wand', cost: 1800, attack: 20, aoeRange: 1.5, accuracy: 1.0, attackRange: 4, statusEffect: { type: 'crippled', chance: 1.0, duration: 1, reduction: 1 }, description: "Chills the target on hit, slowing them for a turn." },
+          { id: 'wand_lightning', name: 'Lightning Wand', cost: 2500, attack: 50, aoeRange: 2, accuracy: 1.0, attackRange: 4, description: "A more powerful elemental wand." },
+          { id: 'wand_void', name: 'Void Core Wand', cost: 5000, attack: 75, aoeRange: 2, accuracy: 1.0, attackRange: 4, description: "Channels unstable but powerful energy." },
+          { id: 'wand_archmage', name: 'Archmage\'s Wand', cost: 7500, attack: 110, aoeRange: 2.5, accuracy: 1.0, attackRange: 4, tdWinsRequired: 5, description: "A wand of immense power." },
         ],
         staves: [
-          { id: 'staff_charged', name: 'Charged Staff', cost: 1500, attack: 40, aoeRange: 2.0, accuracy: 1.0, isChargeable: true, maxCharges: 1, description: "Can be charged for one turn to unleash a x2 damage blast." },
-          { id: 'staff_power', name: 'Staff of Power', cost: 2500, attack: 52, aoeRange: 2.0, accuracy: 1.0, isChargeable: true, maxCharges: 1, description: "A staff that holds a greater latent charge." },
-          { id: 'staff_chain_lightning', name: 'Chain Lightning Staff', cost: 3800, attack: 45, aoeRange: 0, chain: { count: 3, range: 3.5, falloff: 0.7 }, accuracy: 1.0, description: "Hits the target, then arcs to 3 nearby enemies for 70% damage." },
-          { id: 'staff_grand', name: 'Grand Staff', cost: 4000, attack: 65, aoeRange: 2.5, accuracy: 1.0, isChargeable: true, maxCharges: 2, description: "Can be charged up multiple times for immense power." },
+          { id: 'staff_charged', name: 'Charged Staff', cost: 1500, attack: 40, aoeRange: 2.0, accuracy: 1.0, attackRange: 4, isChargeable: true, maxCharges: 1, description: "Can be charged for one turn to unleash a x2 damage blast." },
+          { id: 'staff_power', name: 'Staff of Power', cost: 2500, attack: 52, aoeRange: 2.0, accuracy: 1.0, attackRange: 4, isChargeable: true, maxCharges: 1, description: "A staff that holds a greater latent charge." },
+          { id: 'staff_chain_lightning', name: 'Chain Lightning Staff', cost: 3800, attack: 45, aoeRange: 0, chain: { count: 3, range: 3.5, falloff: 0.7 }, accuracy: 1.0, attackRange: 4, description: "Hits the target, then arcs to 3 nearby enemies for 70% damage." },
+          { id: 'staff_grand', name: 'Grand Staff', cost: 4000, attack: 65, aoeRange: 2.5, accuracy: 1.0, attackRange: 4, isChargeable: true, maxCharges: 2, description: "Can be charged up multiple times for immense power." },
         ],
         tomes: [
-          { id: 'tome_stunning', name: 'Tome of Stunning', cost: 1800, attack: 5, accuracy: 1.0, statusEffect: { type: 'stunned', chance: 0.75, duration: 1 }, description: "Low damage, but has a 75% chance to stun the target for a turn." },
-          { id: 'tome_frost', name: 'Tome of Frost', cost: 1800, attack: 5, accuracy: 1.0, statusEffect: { type: 'crippled', chance: 1.0, duration: 2, reduction: 1 }, description: "Low damage, but slows the target's movement for 2 turns." },
-          { id: 'tome_cursing', name: 'Tome of Cursing', cost: 2200, attack: 10, accuracy: 1.0, statusEffect: { type: 'cursed', chance: 0.8, duration: 3, multiplier: 1.2 }, description: "80% chance to curse the target, making them take 20% more damage for 3 turns." },
+          { id: 'tome_stunning', name: 'Tome of Stunning', cost: 1800, attack: 5, accuracy: 1.0, attackRange: 4, statusEffect: { type: 'stunned', chance: 0.75, duration: 1 }, description: "Low damage, but has a 75% chance to stun the target for a turn." },
+          { id: 'tome_frost', name: 'Tome of Frost', cost: 1800, attack: 5, accuracy: 1.0, attackRange: 4, statusEffect: { type: 'crippled', chance: 1.0, duration: 2, reduction: 1 }, description: "Low damage, but slows the target's movement for 2 turns." },
+          { id: 'tome_cursing', name: 'Tome of Cursing', cost: 2200, attack: 10, accuracy: 1.0, attackRange: 4, statusEffect: { type: 'cursed', chance: 0.8, duration: 3, multiplier: 1.2 }, description: "80% chance to curse the target, making them take 20% more damage for 3 turns." },
         ]
       },
       archer: {
         bows: [
-          { id: 'bow_short', name: 'Shortbow', cost: 500, attack: 12, accuracy: 1.0, description: "A reliable, standard-issue bow." },
-          { id: 'bow_long', name: 'Longbow', cost: 1100, attack: 28, accuracy: 1.0, description: "Offers greater power and range." },
-          { id: 'bow_multishot', name: 'Multishot Bow', cost: 2000, attack: 18, accuracy: 1.0, multishot: 3, description: "Fires a spread of 3 arrows at once." },
-          { id: 'bow_eagle', name: 'Eagle Eye Bow', cost: 2200, attack: 55, accuracy: 1.0, description: "A masterfully crafted bow that rarely misses." },
-          { id: 'bow_void', name: 'Voidstring Bow', cost: 5000, attack: 80, accuracy: 1.0, description: "Fires arrows imbued with weakening energy." },
-          { id: 'bow_sunstrider', name: 'Sunstrider\'s Mark', cost: 7500, attack: 120, accuracy: 1.0, tdWinsRequired: 5, description: "A legendary bow of unmatched power." },
+          { id: 'bow_short', name: 'Shortbow', cost: 500, attack: 12, accuracy: 1.0, attackRange: 5, description: "A reliable, standard-issue bow." },
+          { id: 'bow_long', name: 'Longbow', cost: 1100, attack: 28, accuracy: 1.0, attackRange: 5, description: "Offers greater power and range." },
+          { id: 'bow_multishot', name: 'Multishot Bow', cost: 2000, attack: 18, accuracy: 1.0, attackRange: 5, multishot: 3, description: "Fires a spread of 3 arrows at once." },
+          { id: 'bow_eagle', name: 'Eagle Eye Bow', cost: 2200, attack: 55, accuracy: 1.0, attackRange: 5, description: "A masterfully crafted bow that rarely misses." },
+          { id: 'bow_void', name: 'Voidstring Bow', cost: 5000, attack: 80, accuracy: 1.0, attackRange: 5, description: "Fires arrows imbued with weakening energy." },
+          { id: 'bow_sunstrider', name: 'Sunstrider\'s Mark', cost: 7500, attack: 120, accuracy: 1.0, attackRange: 5, tdWinsRequired: 5, description: "A legendary bow of unmatched power." },
         ],
         crossbows: [
-          { id: 'crossbow_iron', name: 'Iron Crossbow', cost: 1300, attack: 35, accuracy: 1.0, armorPiercing: 5, description: "Slower to fire, but its bolts ignore 5 enemy armor." },
-          { id: 'crossbow_hunter', name: 'Hunter\'s Crossbow', cost: 1800, attack: 45, accuracy: 1.0, armorPiercing: 7, description: "A well-made crossbow with superior armor penetration." },
-          { id: 'crossbow_repeater', name: 'Repeating Crossbow', cost: 2800, attack: 25, accuracy: 1.0, armorPiercing: 3, multishot: 2, description: "Fires two bolts in quick succession." },
-          { id: 'crossbow_heavy', name: 'Heavy Crossbow', cost: 2500, attack: 60, accuracy: 1.0, armorPiercing: 10, description: "A powerful, heavy weapon that is highly effective against armored foes." },
+          { id: 'crossbow_iron', name: 'Iron Crossbow', cost: 1300, attack: 35, accuracy: 1.0, attackRange: 5, armorPiercing: 5, description: "Slower to fire, but its bolts ignore 5 enemy armor." },
+          { id: 'crossbow_hunter', name: 'Hunter\'s Crossbow', cost: 1800, attack: 45, accuracy: 1.0, attackRange: 5, armorPiercing: 7, description: "A well-made crossbow with superior armor penetration." },
+          { id: 'crossbow_repeater', name: 'Repeating Crossbow', cost: 2800, attack: 25, accuracy: 1.0, attackRange: 5, armorPiercing: 3, multishot: 2, description: "Fires two bolts in quick succession." },
+          { id: 'crossbow_heavy', name: 'Heavy Crossbow', cost: 2500, attack: 60, accuracy: 1.0, attackRange: 5, armorPiercing: 10, description: "A powerful, heavy weapon that is highly effective against armored foes." },
         ]
       },
       tank: {
         sword_and_shield: [
-          { id: 'shield_iron', name: 'Iron Sword & Shield', cost: 500, attack: 8, hp: 50, accuracy: 1.0, description: "A standard, defensive starting weapon." },
-          { id: 'shield_steel', name: 'Steel Tower Shield', cost: 1000, attack: 15, hp: 120, accuracy: 1.0, description: "Provides excellent protection." },
-          { id: 'shield_spiked', name: 'Spiked Shield', cost: 1800, attack: 20, hp: 180, accuracy: 1.0, thorns: 5, description: "Deals 5 damage to melee attackers." },
-          { id: 'shield_aegis', name: 'Aegis Wall', cost: 2000, attack: 25, hp: 250, accuracy: 1.0, description: "An almost impenetrable defensive shield." },
-          { id: 'shield_void', name: 'Void Bulwark', cost: 5000, attack: 40, hp: 400, accuracy: 1.0, description: "A shield that absorbs dark energy." },
-          { id: 'shield_unbreakable', name: 'The Unbreakable', cost: 7500, attack: 60, hp: 600, accuracy: 1.0, tdWinsRequired: 5, description: "A legendary shield said to be indestructible." },
+          { id: 'shield_iron', name: 'Iron Sword & Shield', cost: 500, attack: 8, hp: 50, accuracy: 1.0, attackRange: 1.5, description: "A standard, defensive starting weapon." },
+          { id: 'shield_steel', name: 'Steel Tower Shield', cost: 1000, attack: 15, hp: 120, accuracy: 1.0, attackRange: 1.5, description: "Provides excellent protection." },
+          { id: 'shield_spiked', name: 'Spiked Shield', cost: 1800, attack: 20, hp: 180, accuracy: 1.0, attackRange: 1.5, thorns: 5, description: "Deals 5 damage to melee attackers." },
+          { id: 'shield_aegis', name: 'Aegis Wall', cost: 2000, attack: 25, hp: 250, accuracy: 1.0, attackRange: 1.5, description: "An almost impenetrable defensive shield." },
+          { id: 'shield_void', name: 'Void Bulwark', cost: 5000, attack: 40, hp: 400, accuracy: 1.0, attackRange: 1.5, description: "A shield that absorbs dark energy." },
+          { id: 'shield_unbreakable', name: 'The Unbreakable', cost: 7500, attack: 60, hp: 600, accuracy: 1.0, attackRange: 1.5, tdWinsRequired: 5, description: "A legendary shield said to be indestructible." },
         ],
         hammers: [
-          { id: 'hammer_warhammer', name: 'Warhammer', cost: 1200, attack: 20, accuracy: 0.9, statusEffect: { type: 'stunned', chance: 0.4, duration: 1 }, description: "A heavy two-handed hammer with a 40% chance to stun enemies." },
-          { id: 'hammer_maul', name: 'Stunning Maul', cost: 2400, attack: 30, accuracy: 0.9, statusEffect: { type: 'stunned', chance: 0.6, duration: 1 }, description: "Slower, but has a 60% chance to stun enemies." },
-          { id: 'hammer_sunderer', name: 'Sunderer Maul', cost: 3500, attack: 45, accuracy: 0.85, statusEffect: { type: 'armor_break', chance: 0.5, duration: 3, amount: 5 }, description: "50% chance to reduce enemy armor by 5 for 3 turns." },
+          { id: 'hammer_warhammer', name: 'Warhammer', cost: 1200, attack: 20, accuracy: 0.9, attackRange: 1.5, statusEffect: { type: 'stunned', chance: 0.4, duration: 1 }, description: "A heavy two-handed hammer with a 40% chance to stun enemies." },
+          { id: 'hammer_maul', name: 'Stunning Maul', cost: 2400, attack: 30, accuracy: 0.9, attackRange: 1.5, statusEffect: { type: 'stunned', chance: 0.6, duration: 1 }, description: "Slower, but has a 60% chance to stun enemies." },
+          { id: 'hammer_sunderer', name: 'Sunderer Maul', cost: 3500, attack: 45, accuracy: 0.85, attackRange: 1.5, statusEffect: { type: 'armor_break', chance: 0.5, duration: 3, amount: 5 }, description: "50% chance to reduce enemy armor by 5 for 3 turns." },
         ]
       }
     },
@@ -2396,17 +2413,19 @@ primaryWeapons: {
       { id: 'potion_fortitude', name: 'Potion of Fortitude', cost: 75, effect: { hp: 50 }, duration: 3, type: 'temp_potion' },
       { id: 'potion_wealth', name: 'Potion of Wealth', cost: 100, effect: { goldBonus: 0.1 }, duration: 3, type: 'temp_potion' },
     ],
-    enemies: [
-      { id: 'goblin', name: 'Goblin', hp: 20, atk: 5, minFloor: 1, loot: { id: 'goblin_ear', chance: 0.1 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
-      { id: 'skeleton', name: 'Skeleton', hp: 35, atk: 8, minFloor: 1, loot: { id: 'skeleton_bone', chance: 0.15 }, rareLoot: { id: 'ingredientSkull', chance: 0.05 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
-      { id: 'bat', name: 'Giant Bat', hp: 15, atk: 6, minFloor: 2, dodgeChance: 0.33, loot: { id: 'ingredientBeak', chance: 0.2 }, moveRange: 2, attackRange: 1.5, ai: 'standard' },
-      { id: 'slime', name: 'Slime', hp: 40, atk: 7, minFloor: 3, onDefeat: { type: 'split', into: 'ooze', count: 2 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.5 },
-      { id: 'ooze', name: 'Ooze', hp: 20, atk: 5, minFloor: 3, moveRange: 1, attackRange: 1.5, ai: 'standard' },
-      { id: 'skeleton_archer', name: 'Skeleton Archer', hp: 25, atk: 10, minFloor: 4, isRanged: true, moveRange: 1, attackRange: 5, ai: 'ranged' },
-      { id: 'shadow', name: 'Shadow', hp: 50, atk: 12, minFloor: 6, abilities: [{ type: 'invisible', chance: 0.25, duration: 1 }], loot: { id: 'shadow_essence', chance: 0.25 }, moveRange: 1, attackRange: 1.5, ai: 'cowardly' },
-      { id: 'golem', name: 'Stone Golem', hp: 80, atk: 15, minFloor: 8, armor: 5, loot: { id: 'golem_heart', chance: 0.5 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.33 },
-      { id: 'keyholder_orc', name: 'Orc Keywarden', hp: 50, atk: 12, minFloor: 1, loot: { id: 'ingredientCrown', chance: 1.0 }, moveRange: 1, attackRange: 1.5, ai: 'standard' }
+        enemies: [
+      { id: 'goblin', name: 'Goblin', combatStyle: 'Martial', hp: 20, atk: 5, minFloor: 1, loot: { id: 'goblin_ear', chance: 0.1 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'skeleton', name: 'Skeleton', combatStyle: 'Martial', hp: 35, atk: 8, minFloor: 1, loot: { id: 'skeleton_bone', chance: 0.15 }, rareLoot: { id: 'ingredientSkull', chance: 0.05 }, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'bat', name: 'Giant Bat', combatStyle: 'Finesse', hp: 15, atk: 6, minFloor: 2, dodgeChance: 0.33, loot: { id: 'ingredientBeak', chance: 0.2 }, moveRange: 2, attackRange: 1.5, ai: 'standard' },
+      { id: 'slime', name: 'Slime', combatStyle: 'Martial', hp: 40, atk: 7, minFloor: 3, onDefeat: { type: 'split', into: 'ooze', count: 2 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.5 },
+      { id: 'ooze', name: 'Ooze', combatStyle: 'Martial', hp: 20, atk: 5, minFloor: 3, moveRange: 1, attackRange: 1.5, ai: 'standard' },
+      { id: 'skeleton_archer', name: 'Skeleton Archer', combatStyle: 'Finesse', hp: 25, atk: 10, minFloor: 4, isRanged: true, moveRange: 1, attackRange: 5, ai: 'ranged' },
+      { id: 'cultist', name: 'Cultist', combatStyle: 'Arcane', hp: 30, atk: 12, minFloor: 5, isRanged: true, moveRange: 1, attackRange: 4, ai: 'ranged' },
+      { id: 'shadow', name: 'Shadow', combatStyle: 'Finesse', hp: 50, atk: 12, minFloor: 6, abilities: [{ type: 'invisible', chance: 0.25, duration: 1 }], loot: { id: 'shadow_essence', chance: 0.25 }, moveRange: 1, attackRange: 1.5, ai: 'cowardly' },
+      { id: 'golem', name: 'Stone Golem', combatStyle: 'Martial', hp: 80, atk: 15, minFloor: 8, armor: 5, loot: { id: 'golem_heart', chance: 0.5 }, moveRange: 1, attackRange: 1.5, ai: 'standard', moveFrequency: 2, moveChance: 0.33 },
+      { id: 'keyholder_orc', name: 'Orc Keywarden', combatStyle: 'Martial', hp: 50, atk: 12, minFloor: 1, loot: { id: 'ingredientCrown', chance: 1.0 }, moveRange: 1, attackRange: 1.5, ai: 'standard' }
     ],
+
     bestiary: [
       { 
         id: 'goblin', name: 'Goblin Scavenger',
@@ -2488,6 +2507,16 @@ primaryWeapons: {
         description: 'A hulking Orc chosen for its brute strength. It is entrusted with the key that unlocks the passage to the deeper levels of the dungeon.',
         abilities: 'A powerful mini-boss. Defeating it drops the key for the floor.'
       },
+       {
+        id: 'cultist', name: 'Cultist Acolyte',
+        icon: (
+          <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
+            <div className="w-10 h-10 text-purple-400 drop-shadow-lg" dangerouslySetInnerHTML={{ __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v4h-2zm0 6h2v2h-2z"/></svg>` }} />
+          </div>
+        ),
+        description: 'A robed figure chanting forbidden words. They channel raw magical energy, bypassing physical defenses with ease.',
+        abilities: 'A standard ranged attacker that deals Arcane damage, effective against heavily armored foes.'
+      },
     ]
   };
 
@@ -2530,6 +2559,43 @@ primaryWeapons: {
   
   // --- NEW: Pathfinding, AI, and Turn Logic ---
 
+  // Checks line of sight between two points, accounting for walls and pillars.
+  const lineOfSightClear = (startPos, endPos, board) => {
+    let x0 = startPos.x;
+    let y0 = startPos.y;
+    const x1 = endPos.x;
+    const y1 = endPos.y;
+    const dx = Math.abs(x1 - x0);
+    const dy = -Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+
+    while (true) {
+      if (x0 === x1 && y0 === y1) break;
+      // Check the tile at (x0, y0), but ignore the very start and very end tiles
+      if (!(x0 === startPos.x && y0 === startPos.y) && !(x0 === endPos.x && y0 === endPos.y)) {
+        const tile = board[`${y0},${x0}`];
+        if (tile && (tile.type === 'wall' || tile.type === 'pillar')) {
+          return false;
+        }
+      }
+      const e2 = 2 * err;
+      if (e2 >= dy) {
+        if (x0 === x1) break;
+        err += dy;
+        x0 += sx;
+      }
+      if (e2 <= dx) {
+        if (y0 === y1) break;
+        err += dx;
+        y0 += sy;
+      }
+    }
+    return true; // No obstacles found
+  };
+
+
   // Finds all tiles a unit can move to within its range.
   const getReachableTiles = (start, range, board, allEntities) => {
     const reachable = new Map(); // Stores {pos, dist}
@@ -2553,18 +2619,16 @@ primaryWeapons: {
 
             if (nextPos.x < 0 || nextPos.x >= 10 || nextPos.y < 0 || nextPos.y >= 10 || visited.has(key)) continue;
             
-            // CORNER CUTTING FIX: Prevent diagonal movement through walls.
             if (n.x !== 0 && n.y !== 0) {
                 const corner1Key = `${pos.x + n.x},${pos.y}`;
                 const corner2Key = `${pos.x},${pos.y + n.y}`;
-                if (board[corner1Key]?.type === 'wall' || board[corner2Key]?.type === 'wall') {
+                if (board[corner1Key]?.type === 'wall' || board[corner1Key]?.type === 'pillar' || board[corner2Key]?.type === 'wall' || board[corner2Key]?.type === 'pillar') {
                     continue;
                 }
             }
 
            const tile = board[key];
-        // Units can't move through walls, other units, hatches, or unopened chests
-        if (tile && tile.type !== 'wall' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
+        if (tile && tile.type !== 'wall' && tile.type !== 'pillar' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
           visited.add(key);
           reachable.set(key, { pos: nextPos, dist: dist + 1 });
           queue.push({ pos: nextPos, dist: dist + 1 });
@@ -2579,8 +2643,8 @@ primaryWeapons: {
     const queue = [[start]];
     const visited = new Set([`${start.x},${start.y}`]);
     const entityPositions = new Set(allEntities.map(e => `${e.x},${e.y}`));
-    entityPositions.delete(`${start.x},${start.y}`); // The moving unit isn't an obstacle to itself.
-    entityPositions.delete(`${end.x},${end.y}`);   // FIX: The target tile must be a valid destination for the algorithm to find a path.
+    entityPositions.delete(`${start.x},${start.y}`); 
+    entityPositions.delete(`${end.x},${end.y}`);   
     
     while(queue.length > 0) {
         const path = queue.shift();
@@ -2589,8 +2653,8 @@ primaryWeapons: {
         if(pos.x === end.x && pos.y === end.y) return path;
         
         const neighbors = [
-          {x: 0, y: 1}, {x: 0, y: -1}, {x: 1, y: 0}, {x: -1, y: 0}, // Cardinal
-          {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}  // Diagonal
+          {x: 0, y: 1}, {x: 0, y: -1}, {x: 1, y: 0}, {x: -1, y: 0},
+          {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}
         ];
         for (const n of neighbors) {
             const nextPos = { x: pos.x + n.x, y: pos.y + n.y };
@@ -2598,18 +2662,16 @@ primaryWeapons: {
 
             if (nextPos.x < 0 || nextPos.x >= 10 || nextPos.y < 0 || nextPos.y >= 10 || visited.has(key)) continue;
             
-            // CORNER CUTTING FIX: Prevent diagonal movement through walls.
             if (n.x !== 0 && n.y !== 0) {
                 const corner1Key = `${pos.x + n.x},${pos.y}`;
                 const corner2Key = `${pos.x},${pos.y + n.y}`;
-                if (board[corner1Key]?.type === 'wall' || board[corner2Key]?.type === 'wall') {
+                 if (board[corner1Key]?.type === 'wall' || board[corner1Key]?.type === 'pillar' || board[corner2Key]?.type === 'wall' || board[corner2Key]?.type === 'pillar') {
                     continue;
                 }
             }
 
            const tile = board[key];
-            // Units can't move through walls, other units, hatches, or unopened chests
-            if (tile && tile.type !== 'wall' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
+            if (tile && tile.type !== 'wall' && tile.type !== 'pillar' && tile.type !== 'hatch' && !(tile.type === 'chest' && !tile.opened) && !entityPositions.has(key)) {
                 const newPath = [...path, nextPos];
                 queue.push(newPath);
                 visited.add(key);
@@ -2618,6 +2680,7 @@ primaryWeapons: {
     }
     return null; // No path found
   };
+
 
   // REFACTORED: This now triggers the enemy turn sequence.
   const processEnemyTurns = useCallback(() => {
@@ -2675,12 +2738,47 @@ primaryWeapons: {
                 setLocalDungeonState(stateUpdateForFirestore);
             }
 
-            setLocalDungeonState(prev => {
+setLocalDungeonState(prev => {
                 let newState = { ...prev };
                 if (wingmanDiedThisTurn) {
                   newState.wingman = null; 
                 }
                 newState.turnCount = (prev.turnCount || 1) + 1;
+
+                   // --- Player & Wingman End-of-Turn Tile Effects ---
+                const checkAndHeal = (entity, entityKey) => {
+                    if (!entity) return;
+                    const tile = newState.board[`${entity.y},${entity.x}`];
+                    
+                    // Altar Logic
+                    if (tile && tile.type === 'altar') {
+                        addLog(`${entity.name || 'You'} activated a mysterious altar!`, 'text-purple-300 font-bold');
+                        if (!newState[entityKey].activeEffects) newState[entityKey].activeEffects = [];
+                        newState[entityKey].activeEffects.push({ id: 'altar_lifesteal', type: 'lifesteal', amount: 0.25, durationTurns: 3 });
+                        newState.board[`${entity.y},${entity.x}`] = { type: 'altar_used' };
+                    }
+
+                    // Miasma Damage
+                    if (newState.floorModifier?.id === 'miasma') {
+                        const maxHp = entityKey === 'player' ? fullPlayerStats.maxHp : entity.maxHp;
+                        const miasmaDamage = Math.max(1, Math.round(maxHp * 0.05));
+                        newState[entityKey].hp -= miasmaDamage;
+                        addLog(`${entity.name || 'You'} take ${miasmaDamage} damage from Miasma.`, 'text-purple-400');
+                    }
+                    
+                    if (tile && tile.type === 'healing_spring') {
+                        const maxHp = entityKey === 'player' ? fullPlayerStats.maxHp : entity.maxHp;
+                        const healAmount = Math.round(maxHp * 0.15);
+                        const healedHp = Math.min(maxHp, entity.hp + healAmount);
+                        if (healedHp > entity.hp) {
+                           addLog(`${entity.name || 'You'} healed for ${healedHp - entity.hp} HP on the spring.`, 'text-green-300');
+                           newState[entityKey].hp = healedHp;
+                        }
+                    }
+                };
+                checkAndHeal(newState.player, 'player');
+                checkAndHeal(newState.wingman, 'wingman');
+
 
                 if (newState.wingman) {
                   // ... [rest of the effect processing logic remains the same] ...
@@ -2757,6 +2855,18 @@ primaryWeapons: {
 
               const defenderArmor = defender.armor || 0;
               let finalDamage = Math.max(1, attacker.atk - defenderArmor);
+
+                            // NEW: Rubble tile damage reduction
+              const defenderTile = prev.board[`${defender.y},${defender.x}`];
+              if (defenderTile && defenderTile.type === 'rubble') {
+                finalDamage = Math.round(finalDamage * 0.8); // 20% damage reduction
+                newState.log.unshift({ id: Date.now() + Math.random(), message: `${defender.name || 'You'} took cover in the rubble!`, style: 'text-stone-400' });
+              }
+
+              // NEW: Volatile Magic modifier
+              if (prev.floorModifier?.id === 'volatile_magic') {
+                finalDamage = Math.round(finalDamage * 1.25);
+              }
               
               const retaliationEffect = defender.activeEffects?.find(e => e.id === 'fortify' && e.specialization === 'heavy_ability_b');
               if (retaliationEffect) {
@@ -2783,7 +2893,26 @@ primaryWeapons: {
           });
       };
       
+      // --- End of Previous Turn Tile Effects ---
+      const enemyTile = currentState.board[`${enemy.y},${enemy.x}`];
+      if (enemyTile && enemyTile.type === 'healing_spring') {
+          const healAmount = Math.round(enemy.maxHp * 0.15);
+          enemy.hp = Math.min(enemy.maxHp, enemy.hp + healAmount);
+          addLog(`${enemy.name} heals for ${healAmount}HP on the spring.`, 'text-green-300');
+      }
+
       // --- Status Effects ---
+            // --- Miasma Damage ---
+      if (currentState.floorModifier?.id === 'miasma') {
+          const miasmaDamage = Math.max(1, Math.round(enemy.maxHp * 0.05));
+          enemy.hp -= miasmaDamage;
+          addLog(`${enemy.name} takes ${miasmaDamage} damage from Miasma.`, 'text-purple-400');
+          if (enemy.hp <= 0) {
+            setLocalDungeonState(prev => ({ ...prev, enemies: prev.enemies.filter(e => e.id !== enemy.id), board: {...prev.board, [`${enemy.y},${enemy.x}`]: {type: 'empty'}} }));
+            currentEnemyIndex++; setTimeout(processNextEnemy, 50); return;
+          }
+      }
+
       if (enemy.statusEffects) {
         let damageOverTime = 0;
         enemy.statusEffects.forEach(effect => {
@@ -2811,6 +2940,26 @@ primaryWeapons: {
         currentEnemyIndex++;
         setTimeout(processNextEnemy, 50);
         return;
+      }
+      
+      // Cobweb check
+      if (enemyTile && enemyTile.type === 'cobweb') {
+          addLog(`${enemy.name} is stuck in a cobweb and cannot move!`, 'text-slate-400');
+          // Enemy can still attack if target is in range, but cannot move.
+          // We remove the cobweb after it's triggered once.
+          setLocalDungeonState(prev => {
+              const newBoard = { ...prev.board };
+              newBoard[`${enemy.y},${enemy.x}`] = { type: 'empty' };
+              return { ...prev, board: newBoard };
+          });
+          // Directly try to attack if possible, otherwise end turn.
+          const target = currentState.player; // Simplified target for now
+          if (Math.hypot(enemy.x - target.x, enemy.y - target.y) <= enemy.attackRange) {
+              performAttack(enemy, target);
+          }
+          currentEnemyIndex++;
+          setTimeout(processNextEnemy, 200);
+          return;
       }
   
       // --- AI Logic ---
@@ -2948,17 +3097,37 @@ primaryWeapons: {
 
   const classDef = localDungeonState ? dungeonDefinitions.classes[localDungeonState.playerClass] : null;
 
-  // NEW: Now saves the game over state to Firebase.
+    const CombatStyleIcon = ({ style, size = 'w-4 h-4' }) => {
+    const iconMap = {
+      Martial: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M16.816 2.331a2.5 2.5 0 00-3.536 0L2.33 13.282a2.5 2.5 0 000 3.536l.884.884a2.5 2.5 0 003.535 0L17.7 6.753a2.5 2.5 0 000-3.535l-.884-.884zM8.25 12.336l-3.536 3.536a.5.5 0 01-.707 0l-.884-.884a.5.5 0 010-.707l3.536-3.536 2.092 2.091z"/></svg>,
+      Finesse: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v1.268a2 2 0 001.092 1.836l5.284 2.642a1 1 0 01.44 1.262l-1.328 2.656a1 1 0 01-1.262.44l-5.284-2.642A2 2 0 0010 11.732V16a1 1 0 11-2 0v-4.268a2 2 0 00-1.092-1.836l-5.284-2.642a1 1 0 01-.44-1.262L2.51 3.336a1 1 0 011.262-.44l5.284 2.642A2 2 0 0010 7.268V4a1 1 0 011-1z"/></svg>,
+      Arcane: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h.5a1.5 1.5 0 010 3H14a1 1 0 00-1 1v.5a1.5 1.5 0 01-3 0V8a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H6a1 1 0 00-1 1v.5a1.5 1.5 0 01-3 0V4a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1v-.5a1.5 1.5 0 013 0V3a1 1 0 001 1h.5a1.5 1.5 0 013 0V3.5zM1.5 11h.5a1 1 0 001-1v-.5a1.5 1.5 0 013 0V10a1 1 0 001 1h.5a1.5 1.5 0 010 3H8a1 1 0 00-1 1v.5a1.5 1.5 0 01-3 0V14a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3zM12 11.5a1.5 1.5 0 00-3 0V12a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3H8a1 1 0 011-1v-.5a1.5 1.5 0 003 0V13a1 1 0 011-1h.5a1.5 1.5 0 000-3H14a1 1 0 01-1 1v.5z"/></svg>
+    };
+    const colorMap = {
+      Martial: 'text-red-400', Finesse: 'text-green-400', Arcane: 'text-blue-400'
+    };
+    return <div className={`${size} ${colorMap[style]}`}>{iconMap[style]}</div>
+  };
+
   const handleGameOver = () => {
     const finalState = { ...localDungeonState, gameOver: true, log: [{ message: "You have been defeated! Your adventure ends here.", style: 'text-red-500 font-bold' }, ...(localDungeonState.log || []).slice(0, 4)] };
     setLocalDungeonState(finalState);
     saveGame(finalState);
   };
   
-  const generateFloor = (floorNum) => {
+    const generateFloor = (floorNum) => {
     const size = 10;
     let newBoard = {};
     let newEnemies = [];
+    
+    const floorModifiers = [
+      { id: 'horde', name: 'Horde', description: 'Enemy numbers are increased.' },
+      { id: 'volatile_magic', name: 'Volatile Magic', description: 'All units deal 25% more damage.' },
+      { id: 'miasma', name: 'Miasma', description: 'All units lose 5% of their max HP at the start of their turn.' },
+    ];
+    // Apply a modifier 33% of the time, but never on the first floor.
+    const modifier = floorNum > 1 && Math.random() < 0.33 ? floorModifiers[Math.floor(Math.random() * floorModifiers.length)] : null;
+
     
     // Initialize board
     for (let y = 0; y < size; y++) { for (let x = 0; x < size; x++) { newBoard[`${y},${x}`] = { type: 'empty' }; } }
@@ -2970,9 +3139,30 @@ primaryWeapons: {
         if((x !== 1 || y !== 1)) newBoard[`${y},${x}`] = { type: 'wall' };
     }
 
+    // Place special tiles
+    const placeTile = (type, count) => {
+      for (let i = 0; i < count; i++) {
+        let x, y;
+        do {
+          x = Math.floor(Math.random() * size);
+          y = Math.floor(Math.random() * size);
+        } while (newBoard[`${y},${x}`].type !== 'empty' || (x === 1 && y === 1));
+        newBoard[`${y},${x}`] = { type };
+      }
+    };
+    placeTile('forest', 3 + Math.floor(Math.random() * 3));
+    placeTile('pillar', 1 + Math.floor(Math.random() * 2));
+    placeTile('fort', 1 + Math.floor(Math.random() * 2));
+    placeTile('rough', 5 + Math.floor(Math.random() * 4));
+    placeTile('altar', 1); // Place one altar per floor
+
+
     // Determine available enemies for this floor
     const availableEnemies = dungeonDefinitions.enemies.filter(e => floorNum >= e.minFloor && e.id !== 'ooze' && e.id !== 'keyholder_orc');
-    const enemyCount = 6 + Math.floor(floorNum / 2);
+    let enemyCount = floorNum === 1 ? 4 : 6 + Math.floor(floorNum / 2);
+    if (modifier?.id === 'horde') {
+        enemyCount = Math.round(enemyCount * 1.5);
+    }
     
     // Spawn enemies
     for (let i = 0; i < enemyCount; i++) {
@@ -2981,19 +3171,28 @@ primaryWeapons: {
         
         const type = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
         const floorMultiplier = 1 + (Math.floor(floorNum / 3) * 0.5);
-        const enemyId = `enemy_${i}_${Date.now()}`; // More robust unique ID
+        const enemyId = `enemy_${i}_${Date.now()}`;
+
+        const isElite = Math.random() < 0.1; // 10% chance to be elite
         
-        newEnemies.push({ 
-            ...type, // Base stats first
-            id: enemyId, // Unique instance ID
-            baseId: type.id, // Original ID for visuals/type checking
+        let newEnemy = { 
+            ...type,
+            id: enemyId,
+            baseId: type.id,
             x, y, 
-            hp: Math.round(type.hp * floorMultiplier), 
-            maxHp: Math.round(type.hp * floorMultiplier), 
-            atk: Math.round(type.atk * floorMultiplier) 
-        });
+            hp: Math.round(type.hp * floorMultiplier * (isElite ? 1.5 : 1)), 
+            maxHp: Math.round(type.hp * floorMultiplier * (isElite ? 1.5 : 1)), 
+            atk: Math.round(type.atk * floorMultiplier * (isElite ? 1.2 : 1)),
+            isElite,
+        };
+        if (isElite) {
+            newEnemy.name = `Dire ${type.name}`;
+        }
+        
+        newEnemies.push(newEnemy);
         newBoard[`${y},${x}`] = { type: 'enemy', enemyId: enemyId };
     }
+  
 
     // Spawn keyholder
     let kx, ky;
@@ -3022,13 +3221,13 @@ primaryWeapons: {
         newBoard[`${cy},${cx}`] = { type: 'chest', opened: false };
     }
     
-    newBoard['1,1'] = {type: 'player'};
-    return { newBoard, newEnemies };
+        newBoard['1,1'] = {type: 'player'};
+    return { newBoard, newEnemies, modifier };
   };
 
-  const handleSelectClass = (className) => {
+    const handleSelectClass = (className) => {
     const classDef = dungeonDefinitions.classes[className];
-    const { newBoard, newEnemies } = generateFloor(1);
+    const { newBoard, newEnemies, modifier } = generateFloor(1);
 
     // Initialize ability uses for the selected class
     const initialAbilityUses = {};
@@ -3050,9 +3249,10 @@ primaryWeapons: {
     
     const startingWeaponId = Object.values(dungeonDefinitions.primaryWeapons[className])[0][0].id;
 
-    const newGameState = {
+        const newGameState = {
       ...generateInitialDungeonState(),
       phase: 'playing',
+      floorModifier: modifier,
       ownedWeapons: [startingWeaponId],
       equippedWeapon: startingWeaponId,
       turnCount: 1,
@@ -3070,9 +3270,9 @@ primaryWeapons: {
     });
   };
 
-  const goToNextFloor = () => {
+    const goToNextFloor = () => {
     const nextFloor = localDungeonState.floor + 1;
-    const { newBoard, newEnemies } = generateFloor(nextFloor);
+    const { newBoard, newEnemies, modifier } = generateFloor(nextFloor);
     let updatedEffects = (localDungeonState.player.activeEffects || []).map(effect => ({ ...effect, remainingFloors: effect.remainingFloors - 1 })).filter(effect => effect.remainingFloors > 0);
     let newAbilityUses = { ...localDungeonState.player.abilityUses };
     let newLogMessages = [{ message: `You descended to floor ${nextFloor}.`, style: 'text-slate-300' }];
@@ -3082,9 +3282,10 @@ primaryWeapons: {
       dungeonDefinitions.attacks.filter(a => a.class === localDungeonState.playerClass).forEach(a => { newAbilityUses[a.id] = a.maxUses; });
     }
 
-    const nextState = {
+        const nextState = {
         ...localDungeonState,
         floor: nextFloor,
+        floorModifier: modifier,
         board: newBoard,
         enemies: newEnemies,
         player: { ...localDungeonState.player, x: 1, y: 1, hasKey: false, activeEffects: updatedEffects, abilityUses: newAbilityUses },
@@ -3163,15 +3364,34 @@ primaryWeapons: {
     let newGold = sessionGold || 0;
     const actorStartPos = { x: actor.x, y: actor.y };
     const newBoard = { ...localDungeonState.board };
+    let newActorState = { ...actor }; // Create a mutable copy of the actor
+    let apDrained = false;
+
+    if (targetTile.type === 'trap' && !targetTile.triggered) {
+      const trapDamage = 15;
+      newActorState.hp -= trapDamage;
+      addLog(`${newActorState.name || 'You'} triggered a trap for ${trapDamage} damage!`, 'text-orange-400');
+      newBoard[`${y},${x}`] = { ...targetTile, triggered: true }; // Trap becomes inert
+    }
+    
+    if (targetTile.type === 'cobweb') {
+        addLog(`${newActorState.name || 'You'} are slowed by a thick cobweb!`, 'text-slate-400');
+        apDrained = true;
+        // The cobweb is a one-time obstacle, so it's removed after being triggered.
+        // We'll place the actor on an empty tile where the cobweb was.
+        newBoard[`${y},${x}`] = { type: 'empty' };
+    }
+
+
     newBoard[`${actorStartPos.y},${actorStartPos.x}`] = { type: 'empty' };
     newBoard[`${y},${x}`] = { type: actorType }; // 'player' or 'wingman'
     
     let newState = { ...localDungeonState, board: newBoard };
     if (actorType === 'player') {
-        newState.player = { ...localDungeonState.player, x, y };
+        newState.player = { ...newActorState, x, y };
         newState.lastMoveTrails = [actorStartPos];
     } else {
-        newState.wingman = { ...localDungeonState.wingman, x, y };
+        newState.wingman = { ...newActorState, x, y };
         newState.lastMoveTrails = [...(newState.lastMoveTrails || []), actorStartPos];
     }
 
@@ -3217,6 +3437,7 @@ primaryWeapons: {
 const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
     const actor = actorType === 'player' ? localDungeonState.player : localDungeonState.wingman;
     if (!actor) return;
+    const actorStyle = actor.combatStyle || dungeonDefinitions.classes[actor.name.toLowerCase()]?.combatStyle;
 
     let weaponDef = null;
     let isAbility = false;
@@ -3264,6 +3485,7 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
             let newState = JSON.parse(JSON.stringify(prevState));
             let { enemies, board, player, log } = newState;
             
+            
             if (isAbility) player.abilityUses[attackId]--;
 
             let baseAttackPower = actorType === 'player' ? (weaponDef.attack || fullPlayerStats.attack) : (newState.wingman.atk || 0);
@@ -3284,9 +3506,31 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
             const processHit = (target, dmgMultiplier = 1.0, isChain = false) => {
                 if (!target || enemiesHitThisAction.has(target.id)) return;
                 enemiesHitThisAction.add(target.id);
+
+                // --- NEW: Combat Triangle Logic ---
+                const targetStyle = target.combatStyle;
+                let advantageModifier = 1.0;
+                if (actorStyle === 'Martial' && targetStyle === 'Finesse') advantageModifier = 1.3;
+                else if (actorStyle === 'Martial' && targetStyle === 'Arcane') advantageModifier = 0.7;
+                else if (actorStyle === 'Finesse' && targetStyle === 'Arcane') advantageModifier = 1.3;
+                else if (actorStyle === 'Finesse' && targetStyle === 'Martial') advantageModifier = 0.7;
+                else if (actorStyle === 'Arcane' && targetStyle === 'Martial') advantageModifier = 1.3;
+                else if (actorStyle === 'Arcane' && targetStyle === 'Finesse') advantageModifier = 0.7;
                 
-                let finalDamage = Math.round(baseAttackPower * damageMultiplier * dmgMultiplier);
+                let finalDamage = Math.round(baseAttackPower * damageMultiplier * dmgMultiplier * advantageModifier);
+
+                // NEW: Volatile Magic modifier
+                if (newState.floorModifier?.id === 'volatile_magic') {
+                    finalDamage = Math.round(finalDamage * 1.25);
+                }
                 
+                // --- NEW: Defensive Tile Logic ---
+                const targetTile = board[`${target.y},${target.x}`];
+                if (targetTile && targetTile.type === 'rubble') {
+                    finalDamage = Math.round(finalDamage * 0.8); // 20% damage reduction
+                    log.unshift({ id: Date.now() + Math.random(), message: `${target.name} takes cover in the rubble!`, style: 'text-stone-400' });
+                }
+
                 let targetArmor = target.armor || 0;
                 const armorBreakEffect = target.statusEffects?.find(e => e.type === 'armor_break');
                 if (armorBreakEffect) targetArmor = Math.max(0, targetArmor - armorBreakEffect.amount);
@@ -3735,7 +3979,7 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
   };
 
   const usePotion = () => {
-          if(!localDungeonState || (localDungeonState.potions || 0) <= 0) { 
+      if(!localDungeonState || (localDungeonState.potions || 0) <= 0) { 
         addLog("You have no potions.", 'text-yellow-400'); 
         return; 
       }
@@ -3755,7 +3999,9 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
       });
   };
 
-  if (!localDungeonState) return <div className="text-center p-10 text-xl text-slate-400">Loading Dungeon...</div>;
+  if (!localDungeonState) {
+    return <div className="text-center p-10 text-xl text-slate-400">Loading Dungeon...</div>;
+  }
 
   if (localDungeonState.phase === 'class_selection') {
     return (
@@ -3794,6 +4040,12 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
       shadow: (id) => <div className={`w-10 h-10 text-violet-400 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='-5.0 -10.0 110.0 135.0' fill="currentColor"> <path d='m45.883 0.10938c-0.43359 0.039063-2.043 0.16797-3.5742 0.28906-2.8359 0.22656-4.3086 0.55469-9.2109 2.043-4.3789 1.332-6.5977 2.3906-12.281 5.8594-2.0859 1.2734-5.9336 4.6797-8.5391 7.5586-1.6484 1.8242-3.7891 4.957-5.8398 8.5391-2.1953 3.8438-4.2539 9.3008-5.7383 15.242-0.69141 2.7617-0.70703 2.918-0.69922 8.0352 0.011719 6.0273 0.085938 6.6211 1.5977 12.637 1.2539 4.9961 2.6367 8.4727 5.0312 12.688 2.1797 3.8398 6.2891 9.0781 9.1992 11.734 1.457 1.3281 6.2812 4.8164 8.9375 6.4609 6.8125 4.2109 13.883 6.918 21.582 8.2578 3.3438 0.58203 8.707 0.72266 12.07 0.3125 5.0703-0.61328 12.66-3.2773 19.535-6.8477l3.5469-2.418 3.4492-3.1914c5.168-5.2695 8.7227-10.152 11.594-15.914 3.7344-7.4922 4.5547-19.875 1.918-28.938-1.793-6.1562-4.7109-10.922-9.5234-15.555-2.5156-2.418-5.1953-5.1836-9.3008-7.3047-1.3789-0.71094-2.2109-0.98047-3.6367-1.5977-1.8984-0.82031-2.918-0.90625-4.875-2.0664-2.2773-1.3516-2.6562-1.7109-2.6562-2.5156 0-0.80859 0.6875-1.5117 2.6211-2.668 5.5508-3.3242 7.8867-4.7578 8.2578-5.0664 0.32422-0.27344 0.39453-0.51562 0.28125-1-0.33203-1.4023-1.4531-1.3125-4.6758 0.375-4.5117 2.3633-12.566 6.2227-16.055 7.6992-1.8711 0.78906-3.5156 1.5234-3.6484 1.625-0.13672 0.10547-2.3594 1.0352-4.9414 2.0703-6.4805 2.5938-9.1367 4.1914-13.539 8.1367-5.0742 4.5547-7.4805 7.9297-9.1797 12.895-1.0742 3.1328-1.3867 5.2305-1.1211 7.4766 0.37109 3.1367 0.89062 5.1445 1.5664 6.0547 0.33984 0.46094 0.79297 1.3984 1.0078 2.0898 0.43359 1.3867 1.0664 2.1914 2.1289 2.6992 0.43359 0.20703 0.75391 0.55078 0.83984 0.90625 0.28516 1.1914 0.37891 1.332 1.0898 1.6445 0.56641 0.25 0.78906 0.52734 0.99219 1.2383 0.35156 1.2109 1.4648 1.9141 3.3281 2.0938l1.3477 0.12891 0.91797-1.0156c2.0195-2.2266 4.293-6.3359 4.7539-8.5898 0.097656-0.49219 0.33984-0.78125 0.84766-1.0195 0.38672-0.18359 1.2227-0.71875 1.8555-1.1914 0.99219-0.74609 1.1953-1.0312 1.5117-2.1133 0.19922-0.69141 0.41016-1.7227 0.46875-2.2969 0.09375-0.95703 0.21094-1.1328 1.4219-2.1562 1.4609-1.2344 4.0547-2.4805 5.5508-2.6719 0.53125-0.066407 1.3984-0.015625 1.9258 0.11719 1.0195 0.25391-0.64453 1.6523-0.14453 3.2031 0.41016 1.2695 1.168 1.9492 2.5391 2.2734l3.1953-0.71875 0.18359 1.125c0.21875 1.3516 0.085937 2.7812-0.29688 3.2109-0.15625 0.17188-0.57812 0.3125-0.94531 0.3125-0.53906 0-0.71875 0.13281-0.98828 0.72656l-0.77734 2.0469-0.45312 1.457c0 0.87109 0.097656 1.0156 1.6602 2.4727 0.91406 0.84766 2.3789 2.1641 3.2578 2.918 1.3242 1.1445 1.6562 1.5664 1.9609 2.5078 1.1328 3.4844 0.98828 9.2773-0.30078 12.062-1.5391 3.3398-4.9883 6.6953-8.6094 8.3789-2.8594 1.332-5.7383 2.0898-8.4688 2.2227-4.3281 0.21484-7.7695-0.43359-14.617-2.7539-6.9922-2.3672-14.957-8.832-19.02-15.434-4.7383-7.707-6.6797-13.961-6.6797-21.539 0-4.2148 0.25391-6.457 1.2422-11.035 0.84375-3.9023 1.4961-5.4883 4.4336-10.754 1.2539-2.2422 2.1641-3.5 4.4609-6.1562 1.5859-1.8398 3.7422-4.0547 4.7891-4.9258 4.8594-4.043 11.695-7.2852 18.387-8.7148 3.8008-0.80859 7.2773-1.2969 9.2617-1.293 2.0234 0 2.6875-0.29688 2.7852-1.2422 0.12109-1.1719-0.21094-1.2617-4.4648-1.2227-2.0586 0.015625-4.0977 0.0625-4.5312 0.10156z' fill-rule='evenodd'/></svg></div>,
       golem: (id) => <div className={`w-10 h-10 text-stone-500 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill="currentColor"><path d='M316.18 22.05c-28.8.16-57.27 6.13-85.46 17.92-2.34 12.94-6.77 28.27-16.64 41.56-10.4 13.07-26.07 23.34-50.12 23.3-22.8 26.9-33.58 56.57-32.8 87.37-10.23 9.27-21.48 18.86-33.32 26.92-13.04 9.1-27.1 16.65-42.52 20.65-7.57 14.78-13.3 30.26-16.97 46.21 14.6 2.65 28.5 9.86 38.72 22.05 6.18 7.4 10.32 15.53 12.94 24.03 14.84 1.52 28.74 7.07 40.26 18.1 6.1 5.84 10.88 12.43 14.33 19.56 12.12-1.12 23.28 2.37 33.06 7.7 4.06 2.2 7.82 4.75 11.34 7.56 12.1-5.58 26.28-8.6 43.3-6.62 24.52-25.6 54.84-45.2 88.3-58.82 5.52-26.03 6.95-51.65 4.97-76.22-13.38-6.4-26.7-16.23-39.06-30.26-20.67-23.53-35.57-54.06-46.97-86.33-1.47-2.1-2.8-4.2-4.04-6.27 17.1-2.06 34.08-5.86 50.82-11.5-2.7-4.93-5.3-10.16-7.77-15.7 26.8 2.48 54.08-1.15 81.36-9.9 3.38-4.6 6.7-9.38 9.88-14.36-8.6-14.87-11.64-31.55-10.36-49.63-7.26-.22-14.56-.42-21.84-.36zm106.06 39.16c-6.66 1.1-13.18 3.1-19.26 6.05-17.2 8.45-29.14 24.22-35.73 42.06-1.68 4.6-2.93 9.28-3.73 13.96 10.23 16.84 23.38 31.73 38.66 44.28 3.16 2.65 6.43 5.14 9.78 7.48 16.57-2.8 32.92-10.03 46.14-22.4 9.46-8.87 16.64-19.42 21.5-30.83-7.72-12.96-18.55-23.92-31.5-31.7-7.87-4.73-16.4-8.04-25.28-9.86-1.71-.35-3.44-.66-5.16-.88-1.05-.13-2.1-.25-3.16-.32-.1-.02-.2-.02-.3-.02-.98-.06-1.96-.08-2.94-.08zm64.3 121.74c-14.64 6.57-28.38 13.45-41.62 20.6-10.98 5.96-21.5 12.05-31.56 18.3 5.3 9.13 8.6 18.9 9.6 28.67 13.18 1.22 27.5 4.76 41.64 11.58 4.8-10.1 11.66-19.1 19.94-26.5-1.35-16.44.26-33.18 2-52.65zm-94.02 55.07c-2.38 10.5-6.62 20.57-12.78 29.3-5.94 8.42-13.47 15.3-22.07 20.43.9 24.07-.1 48.8-5.4 74.72 12.27 3.76 24.28 8.45 35.92 14.1 6.06-6.9 13.8-12.23 22.3-15.84-1.52-17.35-.77-36.27 5.9-53.77 6.63-17.36 18.4-33.42 37.22-44.5-4.58-9.5-8.26-19.06-10.22-28.67-16.63 3.02-33.4 3.4-50.87 4.23zm-100.57 76.6c-9.55 7.43-19.12 15.46-28.22 24.12 7.27-.1 13.37 1.4 18.6 3.73 3.5-4.1 6.58-8.56 9.1-13.36 3.68-6.85 5.78-9.94.52-14.5zM44.1 390.67c-4.62 12.43-7.65 25.52-8.73 39.05 8.93 2.14 17.66 5.85 25.42 11.35 11.5-7.5 24.53-10.7 37.1-10.5-2.6-9.05-7.14-17.66-13.97-23.72-7.8-6.84-17.4-10.42-26.8-11.38-4.65-.47-9.17-.3-13.05.2zm97.78 34.36c-3.7 6.05-6.4 12.8-7.6 20-1.53 9.05-.26 17.88 3.12 25.67 8.6-1.5 17.47-1.4 26.32.93 7.22 1.88 13.73 5.23 19.26 9.62 6.6-6.82 14.72-11.5 23.26-13.97-1.94-2.92-4.1-5.63-6.6-8-8.26-7.9-19.4-11.78-30.14-10.57-.3.04-.6.08-.9.1-6.94-7.66-16.25-12.73-26.72-13.78zm94.07 34.77c-6.17 5.46-11.35 11.96-14.7 19.35-2.44 5.28-3.75 10.82-4.13 16.3 9.97 2.77 20.37 7.64 29.22 15.55 4.84-1.82 9.62-3.05 14.38-3.57-1.73-10.5-.72-21.1 2.73-31.3-11.9-1.8-20.97-7.04-27.5-16.33z'/></svg></div>,
       keyholder_orc: (id) => <div className={`w-8 h-8 text-emerald-500 drop-shadow-lg transition-transform ${animationState.hits[id] > Date.now() - 200 ? 'entity-hit' : ''}`}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor"><g><path d="M55.4,63.3c-0.1,0.2-0.3,0.4-0.4,0.6c0.2,0.7,0.6,1.9,1.5,3c1,1.1,2.1,1.7,2.6,1.9c0,0.5,0.1,1.5-0.4,2.6 c-0.7,1.7-1.9,2.6-2.4,2.8c0.7,1.2,1.7,3.2,2.2,5.7c0.7,4.1-0.2,7.4-0.8,8.9h19.3v-1.7c-1.8-0.4-4-1-6.4-2.1 c-1.5-0.7-2.8-1.4-3.9-2.1c1.5-1.6,3.7-4.6,5.1-8.7c0.8-2.4,1-4.5,1.1-6.2c-2.5-6.5-4.9-10-6.9-12c-0.3-0.3-0.7-0.7-1.2-1.4 c-1.8,1.1-3.6,2.4-5.2,3.9C58.1,59.9,56.6,61.5,55.4,63.3z"/><path d="M61.5,41.5c-0.4-1-0.6-2.1-0.7-3.2c-0.1-1.1,0.1-2.2,0.3-3.3c0.2-1.1,0.6-2.1,0.9-3.1c0.3-1,0.6-2,0.9-3.1 c0.3-1,0.6-2.1,0.9-3.1l1.6-6.2c-1.4,0-2.5,0.2-3.5,0.3c-0.3,1.8-0.8,3.5-1.3,5.2c-0.5,1.7-1.1,3.4-1.8,5.1 c-0.7,1.7-1.5,3.3-2.4,4.8c-0.9,1.6-1.8,3.1-2.8,4.6c-1,1.5-2.2,2.9-3.5,4.2c-1.3,1.3-2.6,2.5-4.1,3.5c-2.9,2.1-6.2,3.7-9.6,4.9 c-0.4,1-1,1.8-1.4,2.4c-0.5,0.6-0.9,1.1-1.2,1.4c-1.9,2-4.4,5.5-6.9,12c0.1,1.7,0.3,3.8,1.1,6.2c1.3,4.2,3.6,7.1,5.1,8.7 c-1.1,0.7-2.4,1.4-3.9,2.1c-2.4,1.1-4.5,1.7-6.4,2.1v1.7h19.3c-0.6-1.6-1.5-4.9-0.8-8.9c0.5-2.5,1.4-4.4,2.2-5.7 c-0.5-0.3-1.7-1.2-2.4-2.8c-0.4-1.1-0.4-2-0.4-2.6c0.6-0.3,1.7-0.8,2.6-1.9c0.9-1,1.3-2.2,1.5-3c-0.1-0.2-0.3-0.4-0.4-0.6 c-1.2-1.8-2.7-3.4-4.3-4.8c-1.6-1.5-3.4-2.7-5.2-3.9c0.5,0.3,1,0.5,1.4,0.8c0.5,0.3,0.9,0.6,1.4,0.9c0.9,0.6,1.8,1.2,2.6,1.9 c1.7,1.4,3.2,3,4.5,4.7c0.1,0.2,0.3,0.4,0.4,0.5c0.5,0.7,1,1.5,1.4,2.2c0.5,1,1,1.9,1.4,3c0.7,1.6,1.2,3.2,1.7,4.9 c0.5-1.7,1-3.3,1.7-4.9c0.4-1,0.9-2,1.4-3c0.4-0.8,0.9-1.5,1.4-2.2c0.1-0.2,0.3-0.4,0.4-0.5c1.3-1.8,2.8-3.3,4.5-4.7 c0.8-0.7,1.7-1.3,2.6-1.9c0.5-0.3,0.9-0.6,1.4-0.9c0.5-0.3,0.9-0.5,1.4-0.8c-0.7-0.9-1.4-2-1.9-3.6c-0.2-0.7-0.7-2.5-0.5-4.7 c0.1-0.7,0.2-1.3,0.4-1.9c-0.3-0.4-0.6-0.9-0.8-1.4C61.9,42.5,61.7,42,61.5,41.5z"/><path d="M97.6,69c-3.7-5.5-5-10.2-5.5-13.5c-0.5-3.3-0.4-6.2-2.5-9.1c-1.8-2.6-4.5-3.8-6.4-4.5c-0.2-1.4-0.7-3.5-1.9-5.6 c-0.8-1.5-1.7-2.7-2.5-3.6c0.1-0.9,0.7-5.7-2.5-9.3c-2.2-2.4-5.1-3-7.2-3.4c-1.3-0.3-2.5-0.4-3.6-0.4c-0.3,2.1-0.6,4.2-1.1,6.3 c-0.4,2.1-1,4.2-1.6,6.2c-0.3,1-0.7,2-0.9,3.1c-0.1,0.5-0.2,1-0.3,1.5c-0.1,0.5-0.1,1-0.1,1.6c0,2.1,0.7,4.2,1.6,6.1 c1.2-3.7,4.3-5.9,5-6.3c0.8,1.5,1.9,3.2,3.2,5c1.3,1.8,2.7,3.2,3.9,4.4c1.1,2.8,2.9,6.3,5.7,10c1.5,1.9,3,3.6,4.5,4.9 c-0.6,0.4-2.9,2.3-3.6,5.6c-0.8,4,1.4,7.1,1.7,7.6c0.1-1,0.5-2.8,1.7-4.7c0.9-1.4,1.9-2.3,2.7-2.9c0.5,1.2,1.1,2.5,1.7,3.8 c0.8,1.7,1.7,3.2,2.6,4.5c-0.4,0.2-0.9,0.6-1.4,1.2c-0.9,1-1.1,2.1-1.2,2.7c0.7,0.1,1.7,0.4,2.9,1.2c1,0.6,1.6,1.4,2,1.9 c0.9-0.9,2.2-2.5,3.1-4.8C99,74,98,70.3,97.6,69z"/><path d="M45.8,46.9c2.8-2.1,5.3-4.7,7.3-7.6c1-1.4,1.9-3,2.8-4.5c0.9-1.5,1.7-3.1,2.4-4.7c1.5-3.2,2.7-6.6,3.6-10.1 c-0.3,0.1-0.6,0.1-0.8,0.2c-0.2-0.4-0.6-1-1.3-1.6c-0.5-0.5-1.1-0.8-1.5-1c0.4-0.4,0.9-0.9,1.3-1.5c0.9-1.3,1.3-2.6,1.4-3.4 c-0.6,0-2.4-0.1-3.9,1.1c-0.6,0.5-1.1,1-1.3,1.4c-0.3-0.6-1-1.7-2.3-2.7c-1.4-1-2.9-1.2-3.5-1.3c-0.6,0.1-2.1,0.3-3.5,1.3 c-1.3,0.9-2,2.1-2.3,2.7c-0.3-0.4-0.7-1-1.3-1.4c-1.6-1.2-3.4-1.2-3.9-1.1c0.2,0.8,0.5,2.1,1.4,3.4c0.4,0.6,0.9,1.1,1.3,1.5 c-0.4,0.2-0.9,0.5-1.5,1c-0.6,0.6-1,1.2-1.3,1.6c-1.6-0.4-4.5-0.8-7.9-0.2c-2.2,0.4-5.1,1-7.3,3.4c-3.2,3.5-2.6,8.4-2.5,9.3 c-0.8,0.9-1.7,2.1-2.5,3.6c-1.1,2.2-1.6,4.2-1.9,5.6c-2,0.7-4.6,2-6.4,4.5c-2.1,2.9-2,5.8-2.5,9.1c-0.5,3.3-1.9,8-5.5,13.5 C2,70.3,1,74,2.5,78.3c0.9,2.3,2.2,3.9,3.1,4.8c0.4-0.5,1-1.2,2-1.9c1.1-0.7,2.2-1,2.9-1.2c-0.1-0.5-0.3-1.6-1.2-2.7 c-0.5-0.6-1-0.9-1.4-1.2c0.9-1.3,1.7-2.8,2.6-4.5c0.7-1.3,1.2-2.6,1.7-3.8c0.7,0.6,1.8,1.5,2.7,2.9c1.2,1.9,1.6,3.6,1.7,4.7 c0.4-0.5,2.6-3.5,1.7-7.6c-0.7-3.3-3-5.1-3.6-5.6c1.4-1.3,3-3,4.5-4.9c2.8-3.6,4.6-7.1,5.7-10c1.2-1.2,2.5-2.6,3.9-4.4 c1.4-1.8,2.4-3.5,3.2-5c0.8,0.5,4.8,3.3,5.4,8.2c0.3,2.2-0.2,4.1-0.5,4.7c-0.1,0.4-0.3,0.8-0.4,1.1c1.6-0.7,3.2-1.5,4.8-2.4 C42.9,48.9,44.4,47.9,45.8,46.9z M54.2,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8s-0.8-0.3-0.8-0.8 C53.4,16.7,53.7,16.3,54.2,16.3z M45.8,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8c-0.4,0-0.8-0.3-0.8-0.8 C45.1,16.7,45.4,16.3,45.8,16.3z M44.6,23c0.1-0.2,0.2-0.3,0.3-0.5c0.2-0.3,0.4-0.7,0.6-1c0.2-0.4,0.3-0.7,0.5-1.1 c0.1-0.4,0.2-0.7,0.3-1.1l0.1-0.7l0.3,0.6c0.3,0.6,0.5,1.2,0.4,1.9c0,0.3-0.1,0.6-0.2,0.9c-0.1,0.2-0.2,0.5-0.3,0.7 c0.1,0,0.3-0.1,0.4-0.1c1-0.2,2-0.3,3-0.3c1,0,2,0.1,3,0.3c0.1,0,0.3,0.1,0.4,0.1c-0.1-0.2-0.2-0.4-0.3-0.6 c-0.1-0.3-0.2-0.6-0.2-0.9c-0.1-0.6,0.1-1.3,0.4-1.9l0.3-0.6l0.1,0.7c0.1,0.4,0.2,0.8,0.3,1.1c0.1,0.4,0.3,0.7,0.5,1.1 c0.2,0.4,0.4,0.7,0.6,1c0.1,0.2,0.2,0.3,0.3,0.5c0.1,0.2,0.2,0.3,0.4,0.5c-1-0.2-1.9-0.4-2.9-0.6c-1-0.1-1.9-0.2-2.9-0.1 c-1,0-1.9,0.1-2.9,0.2c-1,0.1-1.9,0.3-2.9,0.5C44.4,23.3,44.5,23.1,44.6,23z"/></g></svg></div>,
+      rubble: () => <div className="w-8 h-8 text-stone-500"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M1 1 L1 5 L5 5 L5 1 Z M7 1 L7 5 L11 5 L11 1 Z M13 1 L13 5 L17 5 L17 1 Z M1 7 L1 11 L5 11 L5 7 Z M7 7 L7 11 L11 11 L11 7 Z M13 7 L13 11 L17 11 L17 7 Z M1 13 L1 17 L5 17 L5 13 Z M7 13 L7 17 L11 17 L11 13 Z M13 13 L13 17 L17 17 L17 13 Z" opacity="0.4" transform="rotate(15 10 10)"/><path d="M2 2 L2 6 L6 6 L6 2 Z M8 2 L8 6 L12 6 L12 2 Z M14 2 L14 6 L18 6 L18 2 Z M2 8 L2 12 L6 12 L6 8 Z M8 8 L8 12 L12 12 L12 8 Z M14 8 L14 12 L18 12 L18 8 Z M2 14 L2 18 L6 18 L6 14 Z M8 14 L8 18 L12 18 L12 14 Z M14 14 L14 18 L18 18 L18 14 Z" /></svg></div>,
+      cobweb: () => <div className="w-10 h-10 text-slate-300 opacity-60"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 2 L12 22 M2 12 L22 12 M4.9 4.9 L19.1 19.1 M4.9 19.1 L19.1 4.9"/><path d="M12 2 C 15 5, 17 8, 17 12 S 15 19, 12 22"/><path d="M12 2 C 9 5, 7 8, 7 12 S 9 19, 12 22"/><path d="M2 12 C 5 9, 8 7, 12 7 S 19 9, 22 12"/><path d="M2 12 C 5 15, 8 17, 12 17 S 19 15, 22 12"/></svg></div>,
+      healing_spring: () => <div className="w-10 h-10 text-cyan-400 animate-pulse"><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" /></svg></div>,
+      trap_triggered: () => <div className="w-8 h-8 text-red-500"><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/></svg></div>,
+      altar: () => <div className="w-10 h-10 text-purple-400 drop-shadow-lg animate-pulse"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"/><path d="M10 4a6 6 0 100 12 6 6 0 000-12zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" opacity="0.4"/></svg></div>,
+      altar_used: () => <div className="w-10 h-10 text-slate-600"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"/><path d="M10 4a6 6 0 100 12 6 6 0 000-12zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" opacity="0.4"/></svg></div>
     };
     
     for (let y = 0; y < size; y++) {
@@ -3807,17 +4059,49 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
         const isTrailTile = localDungeonState.lastMoveTrails?.some(t => t.x === x && t.y === y);
 
         if (isTrailTile) {
-            tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/concrete-wall.png')`, backgroundColor: '#334155' };
+            tileStyle = { backgroundColor: '#334155' };
             tileClass += 'bg-slate-700/50';
         } else {
-            tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/dark-brick-wall.png')`};
+            tileStyle = {};
             tileClass += 'bg-slate-800/20';
         }
 
-        switch(tile.type) {
+                switch(tile.type) {
             case 'wall': 
               tileClass = 'bg-black/80 shadow-inner'; 
               tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/brick-wall-dark.png')`};
+              break;
+            case 'rubble':
+              tileClass = 'bg-stone-700/50';
+              tileContent = SVGIcons.rubble();
+              break;
+            case 'cobweb':
+              tileContent = SVGIcons.cobweb();
+              break;
+            case 'healing_spring':
+              tileContent = SVGIcons.healing_spring();
+              break;
+            case 'trap':
+              if (tile.triggered) {
+                tileClass += 'bg-red-900/30';
+                tileContent = SVGIcons.trap_triggered();
+              }
+              // Untriggered traps are invisible to the player.
+              break;
+            case 'rubble':
+              tileClass = 'bg-stone-700/50';
+              tileStyle = { backgroundImage: `url('https://www.transparenttextures.com/patterns/asfalt-light.png')` };
+              break;
+            case 'cobweb':
+              tileClass = 'bg-slate-800/20';
+              tileContent = <div className="absolute inset-0 bg-white/20" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/cross-scratches.png')` }} />;
+              break;
+            case 'healing_spring':
+              tileClass = 'bg-cyan-800/50 animate-pulse';
+              break;
+            case 'trap':
+              tileClass = `bg-slate-800/20 ${tile.triggered ? 'bg-red-900/50' : ''}`;
+              if (tile.triggered) tileContent = <div className="text-red-500 text-2xl">!!</div>;
               break;
             case 'hatch':
                 const hasKey = localDungeonState.player.hasKey;
@@ -3871,7 +4155,7 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
       boardGrid.push(<div key={y} className="flex">{row}</div>);
     }
     
-    const TILE_SIZE = isMobile ? 32 : 48;
+   const TILE_SIZE = isMobile ? 32 : 48;
 
     const WingmanSprite = ({ style }) => {
       const containerSize = 32;
@@ -3897,7 +4181,7 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
 
     const entities = [
         ...localDungeonState.enemies.map(e => ({...e, entityType: 'enemy'})),
-        {...localDungeonState.player, id: 'player', entityType: 'player'}
+        {...localDungeonState.player, id: 'player', entityType: 'player', combatStyle: classDef?.combatStyle}
     ];
     if (localDungeonState.wingman) {
       entities.push({...localDungeonState.wingman, entityType: 'wingman'});
@@ -3906,17 +4190,21 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
     const entityElements = entities.map(entity => {
       const top = entity.y * TILE_SIZE + (TILE_SIZE / 2 - 16);
       const left = entity.x * TILE_SIZE + (TILE_SIZE / 2 - 16);
-
+      const enemyDef = entity.entityType === 'enemy' 
+        ? dungeonDefinitions.enemies.find(e => e.id === entity.baseId) 
+        : null;
+      const combatStyle = enemyDef ? enemyDef.combatStyle : entity.combatStyle;
       let Icon;
       if (entity.entityType === 'player') {
         Icon = SVGIcons.player(entity.id);
       } else if (entity.entityType === 'wingman') {
         Icon = <WingmanSprite style={entity.spriteStyle} />;
       } else { // enemy
+
         Icon = SVGIcons[entity.baseId] ? SVGIcons[entity.baseId](entity.id) : <div className="w-8 h-8 rounded-full bg-red-600" />;
       }
 
-      return (
+                  return (
 
         <div 
           key={entity.id} 
@@ -3925,20 +4213,24 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
               ? (e) => handleEnemyClick(e, entity) 
               : (e) => handleFriendlyClick(e, entity)
           }
-          className="absolute z-10" 
+          className={`absolute z-10 ${entity.isElite ? 'elite-enemy-glow' : ''}`} 
           style={{ 
             width: 32, height: 32,
             top: top,
             left: left,
+
             // The browser will now automatically animate any changes to top and left.
             transition: 'top 0.25s linear, left 0.25s linear',
             cursor: 
               (entity.entityType === 'enemy' && activeTurn !== 'enemy' && (attackTarget || abilityTarget || (wingmanAbilityTarget && wingmanAbilityTarget.id !== 'heal'))) ||
               (entity.entityType !== 'enemy' && activeTurn === 'wingman' && wingmanAbilityTarget?.id === 'heal')
-                ? 'pointer' : 'default'
+               ? 'pointer' : 'default'
           }}
         >
           {Icon}
+          <div className="absolute -top-1 -right-1 z-20 bg-slate-900/80 rounded-full p-0.5">
+            <CombatStyleIcon style={entity.combatStyle} />
+          </div>
           {entity.entityType === 'enemy' && (
             <div className="absolute -bottom-2 w-full h-1.5 bg-red-900/80 rounded-full overflow-hidden border border-black/50">
               <div 
@@ -3959,9 +4251,15 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
     );
   };
 
-  return (
+    return (
     <div>
-          <div className="flex justify-between items-center mb-6">
+      {localDungeonState.floorModifier && (
+        <div className="mb-4 p-4 bg-purple-900/50 border border-purple-700 rounded-lg text-center">
+          <h3 className="text-xl font-bold text-purple-300">{localDungeonState.floorModifier.name}</h3>
+          <p className="text-sm text-slate-400">{localDungeonState.floorModifier.description}</p>
+        </div>
+      )}
+      <div className="flex justify-between items-center mb-6">
         <div><h2 className="text-3xl font-bold text-white">Dungeon Crawler</h2><p className="text-slate-400">Floor: {localDungeonState.floor} | Highest Floor: {stats.dungeon_floor || 1}</p></div>
         <div className="flex space-x-2">
             <button onClick={() => saveGame(localDungeonState)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Save</button>
@@ -3974,6 +4272,13 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-grow flex justify-center lg:justify-start">
           <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block relative">
+            {turnIndicator && (
+                <div key={turnIndicator} className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                    <div className="text-5xl font-bold text-white bg-black/50 px-8 py-4 rounded-lg animate-fade-out-fast" style={{textShadow: '0 0 10px black'}}>
+                        {turnIndicator}
+                    </div>
+                </div>
+            )}
             {renderBoard()}
           </div>
         </div>
@@ -4155,7 +4460,13 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
                                     <div className="space-y-2">
                                         {weapons.map(w => {
                                             const isOwned = (localDungeonState.ownedWeapons || []).includes(w.id);
-                                            return <button key={w.id} onClick={() => handleBuyItem(w, 'primaryWeapon', 'xp')} disabled={isOwned || sessionXp < w.cost} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : sessionXp >= w.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 text-slate-400'}`}>{isOwned ? 'Owned' : `${w.name} (${w.cost} XP)`}</button>;
+                                            const meetsWinReq = !w.tdWinsRequired || (stats.td_wins || 0) >= w.tdWinsRequired;
+                                            const canAfford = sessionXp >= w.cost;
+                                            const isDisabled = isOwned || !canAfford || !meetsWinReq;
+
+                                            return <button key={w.id} onClick={() => handleBuyItem(w, 'primaryWeapon', 'xp')} disabled={isDisabled} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : isDisabled ? 'bg-slate-700 text-slate-400' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                                                {isOwned ? 'Owned' : !meetsWinReq ? `Req. ${w.tdWinsRequired} TD Wins` : `${w.name} (${w.cost} XP)`}
+                                            </button>;
                                         })}
                                     </div>
                                 </div>
@@ -4176,7 +4487,13 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
                             <h4 className="font-bold text-white">Armor</h4>
                             {dungeonDefinitions.armors.map(a => {
                                 const isOwned = (localDungeonState.ownedArmor || []).includes(a.id);
-                                return <button key={a.id} onClick={() => handleBuyItem(a, 'armor', 'xp')} disabled={isOwned || sessionXp < a.cost} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : sessionXp >= a.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-700 text-slate-400'}`}>{isOwned ? 'Owned' : `${a.name} (${a.cost} XP)`}</button>;
+                                const meetsWinReq = !a.tdWinsRequired || (stats.td_wins || 0) >= a.tdWinsRequired;
+                                const canAfford = sessionXp >= a.cost;
+                                const isDisabled = isOwned || !canAfford || !meetsWinReq;
+
+                                return <button key={a.id} onClick={() => handleBuyItem(a, 'armor', 'xp')} disabled={isDisabled} className={`w-full p-2 rounded text-center text-sm ${isOwned ? 'bg-green-800/60' : isDisabled ? 'bg-slate-700 text-slate-400' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                                    {isOwned ? 'Owned' : !meetsWinReq ? `Req. ${a.tdWinsRequired} TD Wins` : `${a.name} (${a.cost} XP)`}
+                                </button>;
                             })}
                         </div>
                          <div className="bg-slate-800/80 p-4 rounded-lg space-y-2">
@@ -4255,17 +4572,48 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
             {localDungeonState.bestiaryOpen && (
     <div className="mt-6">
         <h3 className="text-2xl font-bold text-white mb-4">Bestiary</h3>
-        <div className="space-y-4">
-            {dungeonDefinitions.bestiary.map(entry => (
-                <div key={entry.id} className="bg-slate-800/80 p-4 rounded-lg flex items-start gap-4">
-                    {entry.icon}
-                    <div className="flex-grow">
-                        <h4 className="font-bold text-xl text-white">{entry.name}</h4>
-                        <p className="text-slate-300 text-sm mt-1">{entry.description}</p>
-                        <p className="text-sm mt-2"><strong className="text-yellow-400">Combat Info:</strong> <span className="text-slate-400">{entry.abilities}</span></p>
-                    </div>
+        <div className="bg-slate-900/50 p-4 rounded-lg mb-6 border border-slate-700">
+            <h4 className="text-lg font-semibold text-center text-white mb-3">Combat Triangle</h4>
+            <div className="flex justify-around items-center text-center">
+                <div className="flex flex-col items-center">
+                    <CombatStyleIcon style="Martial" size="w-8 h-8" />
+                    <span className="font-bold text-red-400">Martial</span>
                 </div>
-            ))}
+                <span className="text-2xl text-slate-400 font-bold">&gt;</span>
+                <div className="flex flex-col items-center">
+                    <CombatStyleIcon style="Finesse" size="w-8 h-8" />
+                    <span className="font-bold text-green-400">Finesse</span>
+                </div>
+                <span className="text-2xl text-slate-400 font-bold">&gt;</span>
+                <div className="flex flex-col items-center">
+                    <CombatStyleIcon style="Arcane" size="w-8 h-8" />
+                    <span className="font-bold text-blue-400">Arcane</span>
+                </div>
+            </div>
+            <p className="text-xs text-slate-500 text-center mt-2">Martial is strong against Finesse, Finesse against Arcane, and Arcane against Martial. (30% Damage Bonus)</p>
+        </div>
+        <div className="space-y-4">
+            {dungeonDefinitions.bestiary.map(entry => {
+                const enemyDef = dungeonDefinitions.enemies.find(e => e.id === entry.id);
+                return (
+                    <div key={entry.id} className="bg-slate-800/80 p-4 rounded-lg flex items-start gap-4">
+                        {entry.icon}
+                        <div className="flex-grow">
+                            <div className="flex justify-between items-start">
+                                <h4 className="font-bold text-xl text-white">{entry.name}</h4>
+                                {enemyDef && (
+                                    <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1 rounded-full">
+                                        <CombatStyleIcon style={enemyDef.combatStyle} size="w-5 h-5" />
+                                        <span className="text-sm font-semibold capitalize text-slate-300">{enemyDef.combatStyle}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-slate-300 text-sm mt-1">{entry.description}</p>
+                            <p className="text-sm mt-2"><strong className="text-yellow-400">Combat Info:</strong> <span className="text-slate-400">{entry.abilities}</span></p>
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     </div>
 )}
@@ -4574,18 +4922,23 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
   // initialized directly from props to ensure saved data is loaded.
   const [localTowers, setLocalTowers] = useState(stats?.td_towers || []);
 
-  // Sync local towers when props change (e.g., after a reset)
+  // Memoize stringified versions of props to prevent unnecessary re-syncs
+  // that would wipe out local state changes (like placing a tower) before they are saved.
+  const stringifiedTowers = useMemo(() => JSON.stringify(stats?.td_towers), [stats?.td_towers]);
+  const stringifiedTowerUpgrades = useMemo(() => JSON.stringify(stats?.td_towerUpgrades), [stats?.td_towerUpgrades]);
+
+  // Sync local towers ONLY when the actual saved data from Firestore changes.
   useEffect(() => {
     setLocalTowers(stats?.td_towers || []);
-  }, [stats?.td_towers]);
+  }, [stringifiedTowers]);
 
   // NEW: This state holds tower upgrades locally, initialized from props.
   const [localTowerUpgrades, setLocalTowerUpgrades] = useState(stats?.td_towerUpgrades || {});
 
-  // Sync local upgrades when props change
+  // Sync local upgrades ONLY when the actual saved data from Firestore changes.
   useEffect(() => {
     setLocalTowerUpgrades(stats?.td_towerUpgrades || {});
-  }, [stats?.td_towerUpgrades]);
+  }, [stringifiedTowerUpgrades]);
 
   // FIX: This hook automatically resets the game if the path is missing,
   // preventing crashes for users with corrupted game states.
@@ -7324,7 +7677,7 @@ const XpBarAnimation = ({ xpGained, stats, calculateLevelInfo, onAnimationComple
     <>
       <div className="fixed inset-0 pointer-events-none z-[9999]">
         {orbs.map(orb => (
-          <div
+                    <div
             key={orb.id}
             className={`xp-orb ${satisfactionClass}`}
             style={{
@@ -10936,7 +11289,15 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
 
           /* Dungeon Crawler Animations */
           @keyframes entity-hit-flash { 0% { filter: brightness(1); } 50% { filter: brightness(3) drop-shadow(0 0 5px #fff); } 100% { filter: brightness(1); } }
-          .entity-hit { animation: entity-hit-flash 0.2s ease-in-out; }
+                    .entity-hit { animation: entity-hit-flash 0.2s ease-in-out; }
+
+          @keyframes elite-glow {
+            0%, 100% { filter: drop-shadow(0 0 3px #fde047); }
+            50% { filter: drop-shadow(0 0 7px #fde047); }
+          }
+          .elite-enemy-glow {
+            animation: elite-glow 2s infinite;
+          }
           
           @keyframes particle-burst {
             0% { transform: scale(0); opacity: 1; }
@@ -10950,6 +11311,14 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
             animation-duration: 0.5s;
             animation-timing-function: ease-out;
             animation-fill-mode: forwards;
+          }
+          @keyframes fade-out-fast {
+            0% { opacity: 1; transform: scale(1.1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.9); }
+          }
+          .animate-fade-out-fast {
+            animation: fade-out-fast 1.5s ease-in-out forwards;
           }
       `}</style>
 
