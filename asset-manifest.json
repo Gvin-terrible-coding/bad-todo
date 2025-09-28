@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/bad-todo/static/css/main.aaff85b2.css",
-    "main.js": "/bad-todo/static/js/main.05ca0bb3.js",
+    "main.css": "/bad-todo/static/css/main.84d4464a.css",
+    "main.js": "/bad-todo/static/js/main.2450751b.js",
     "static/js/453.d8e2a990.chunk.js": "/bad-todo/static/js/453.d8e2a990.chunk.js",
     "static/media/Animated_Starfield.mp4": "/bad-todo/static/media/Animated_Starfield.54df6273ed1fa74e10ff.mp4",
     "static/media/Starmap_Select_Background.png": "/bad-todo/static/media/Starmap_Select_Background.553728c6d5e2cb8cc1d2.png",
@@ -34,12 +34,12 @@
     "static/media/Onionicon.png": "/bad-todo/static/media/Onionicon.10845321c2c5c74f65e1.png",
     "static/media/OysterMushroomicon.png": "/bad-todo/static/media/OysterMushroomicon.6d93d10a1961f453e5d5.png",
     "index.html": "/bad-todo/index.html",
-    "main.aaff85b2.css.map": "/bad-todo/static/css/main.aaff85b2.css.map",
-    "main.05ca0bb3.js.map": "/bad-todo/static/js/main.05ca0bb3.js.map",
+    "main.84d4464a.css.map": "/bad-todo/static/css/main.84d4464a.css.map",
+    "main.2450751b.js.map": "/bad-todo/static/js/main.2450751b.js.map",
     "453.d8e2a990.chunk.js.map": "/bad-todo/static/js/453.d8e2a990.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.aaff85b2.css",
-    "static/js/main.05ca0bb3.js"
+    "static/css/main.84d4464a.css",
+    "static/js/main.2450751b.js"
   ]
 }
