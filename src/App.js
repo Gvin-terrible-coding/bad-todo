@@ -6,7 +6,7 @@ import {
   getFirestore, doc, getDoc as originalGetDoc, addDoc as originalAddDoc, setDoc as originalSetDoc, 
   updateDoc as originalUpdateDoc, deleteDoc as originalDeleteDoc, onSnapshot as originalOnSnapshot, 
   collection, serverTimestamp, runTransaction as originalRunTransaction, query, where, 
-  getDocs as originalGetDocs, orderBy, limit, increment
+  getDocs as originalGetDocs, orderBy, limit, increment, arrayUnion, writeBatch, deleteField, arrayRemove, startAfter
 } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -29,12 +29,35 @@ import spaceshipIcon from './assets/images/Space_Focus_Timer/spaceship.png';
 import hologramButton from './assets/images/Space_Focus_Timer/hologram_button.png';
 
 import wingmenSpriteSheet from './assets/images/Dungeon/Wingmen_icon_sheet.png';
-
+// --- NEW: Sanctum Tile Editor Assets ---
+import SFriskFantasyInteriorFloor from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Floors/Floors.png';
+import SFriskFantasyInteriorItems from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Items/AllItems.png';
+import SFriskFantasyInteriorFurniture from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Furniture/AllFurniture.png';
+import SFriskFantasyInteriorChair from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Chair/Chair.png';
+import SFriskFantasyInteriorDarkGreenCarpet from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Carpet/DarkGreenCarpet.png';
+import SFriskFantasyInteriorLightGreenCarpet from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Carpet/LightGreenCarpet.png';
+import SFriskFantasyInteriorRedCarpet from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Carpet/RedCarpet.png';
+import SFriskFantasyInteriorBlueCarpet from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Carpet/BlueCarpet.png';
+import SFriskFantasyInteriorExteriorBorder from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Border/ExteriorBorder.png';
+import SFriskFantasyInteriorBackground from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Background/Background.png';
+import SFriskFantasyInteriorWindows from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Windows.png';
+import SFriskFantasyInteriorSign from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Sign.png';
+import SFriskFantasyInteriorShelf from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Shelf.png';
+import SFriskFantasyInteriorPainting from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Painting.png';
+import SFriskFantasyInteriorFireplace from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Fireplace.png';
+import SFriskFantasyInteriorDoors from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Doors.png';
+import SFriskFantasyInteriorBanners from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Wall_Decor/Banners.png';
+import SFriskFantasyInteriorWallPaneling from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Walls/Paneling.png';
+import SFriskFantasyInteriorWainscotingWall from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Walls/WainscotingWall.png';
+import SFriskFantasyInteriorStoneWalls from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Walls/StoneWall.png';
+import SFriskFantasyInteriorPanelingWithStone from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Walls/PanelingWithStone.png';
+import SFriskFantasyInteriorWallwithStone from './assets/tilesets/S_Frisk_-_Fantasy_Interior_Tileset/Walls/WallwithStone.png';
 // --- NEW: Asset Imports for Alchemist's Workshop ---
 import alchemyLabIndoorBg from './assets/Maps/AlchemyLabIndoors.png';
 import alchemyBenchImage from './assets/images/Alchemy Lab/Indoors_assets/bench.png';
 import alchemyCauldronImage from './assets/images/Alchemy Lab/Indoors_assets/cauldron.png';
 import alchemyGardenBg from './assets/Maps/AlchemyLabOutdoors.png';
+
 
 // --- NEW: ALCHEMY CAT SPRITES (ALL VARIATIONS) ---
 // Cat 1 (Default)
@@ -398,6 +421,18 @@ const cosmeticItems = {
     { id: 'td_flyer_gargoyle', name: 'Gargoyle', type: 'td_skin', cost: 2200, rarity: 'rare', display: '🗿', for: 'flyer', floorRequired: 6 },
     { id: 'td_dragon_undead', name: 'Undead Dragon', type: 'td_skin', cost: 4000, rarity: 'legendary', display: '🐉', for: 'dragon', floorRequired: 20 },
   ],
+  tileset_unlocks: [ // NEW: Sanctum Tileset Unlocks for the Shop
+    { id: 'unlock_backgrounds', name: 'Background Schematics', type: 'tileset_unlock', cost: 200, rarity: 'common' },
+    { id: 'unlock_walls_stone', name: 'Stonemasonry Guide', type: 'tileset_unlock', cost: 500, rarity: 'common' },
+    { id: 'unlock_walls_panel', name: 'Fine Carpentry', type: 'tileset_unlock', cost: 500, rarity: 'common' },
+    { id: 'unlock_borders', name: 'Exterior Blueprints', type: 'tileset_unlock', cost: 750, rarity: 'rare' },
+    { id: 'unlock_carpets_basic', name: 'Basic Weaving', type: 'tileset_unlock', cost: 400, rarity: 'common' },
+    { id: 'unlock_carpets_adv', name: 'Advanced Dyes', type: 'tileset_unlock', cost: 800, rarity: 'rare' },
+    { id: 'unlock_furniture', name: 'Furniture Catalog', type: 'tileset_unlock', cost: 1200, rarity: 'rare' },
+    { id: 'unlock_items', name: 'Clutter & Items', type: 'tileset_unlock', cost: 1000, rarity: 'rare' },
+    { id: 'unlock_decor_basic', name: 'Basic Decor Pack', type: 'tileset_unlock', cost: 600, rarity: 'common' },
+    { id: 'unlock_decor_adv', name: 'Advanced Decor Pack', type: 'tileset_unlock', cost: 1500, rarity: 'epic' },
+  ],
 };
 
 const wingmanDefinitions = {
@@ -417,41 +452,109 @@ const wingmanDefinitions = {
 
 };
 
-// Furniture Item Definitions (with SVG Icons) - UPDATED FOR BETTER VISUALS & STACKING
-const furnitureDefinitions = {
-  desks: [
-    { id: 'desk_simple', name: 'Simple Wooden Desk', type: 'furniture', cost: 250, rarity: 'common', display: '<svg viewBox="0 0 80 60" class="text-amber-700"><path d="M0,20 H80 L75,60 H5 L0,20 Z" fill="currentColor"/><rect x="10" y="20" width="8" height="38" fill="#6b4a2f"/><rect x="62" y="20" width="8" height="38" fill="#6b4a2f"/></svg>', width: 4, height: 3, isObstacle: true },
-    { id: 'desk_modern', name: 'Modern Glass Desk', type: 'furniture', cost: 500, rarity: 'rare', display: '<svg viewBox="0 0 80 60"><path d="M0,20 H80 V28 H0 Z" fill="#a5f3fc" fill-opacity="0.7"/><rect x="10" y="28" width="5" height="30" fill="#e0e0e0"/><rect x="65" y="28" width="5" height="30" fill="#e0e0e0"/></svg>', width: 4, height: 3, isObstacle: true },
-    { id: 'desk_executive', name: 'Executive Desk', type: 'furniture', cost: 800, rarity: 'epic', display: '<svg viewBox="0 0 100 60"><path d="M0,15 H100 L95,60 H5 L0,15 Z" fill="#583927"/><rect x="10" y="15" width="25" height="42" fill="#4a2f1f"/><rect x="65" y="15" width="25" height="42" fill="#4a2f1f"/><line x1="0" y1="25" x2="100" y2="25" stroke="#4a2f1f" stroke-width="2"/></svg>', width: 5, height: 3, isObstacle: true },
-  ],
-  seating: [
-    { id: 'chair_office', name: 'Office Chair', type: 'furniture', cost: 150, rarity: 'common', display: '<svg viewBox="0 0 40 50"><path d="M5,10 H35 V30 H5 Z" fill="#4a5568"/><rect x="0" y="0" width="40" height="15" rx="5" fill="#2d3748"/><path d="M18,30 v15 h4 v-15"/><path d="M10,45 h20 v5 h-20 z"/></svg>', width: 2, height: 2, isObstacle: true },
-    { id: 'chair_gaming', name: 'Gaming Chair', type: 'furniture', cost: 400, rarity: 'rare', display: '<svg viewBox="0 0 40 60"><path d="M5,15 H35 L30,40 H10 Z" fill="#c53030"/><path d="M5,0 H35 V20 L28,15 H12 V20 Z" fill="#e53e3e"/><path d="M18,40 v15 h4 v-15"/><path d="M10,55 h20 v5 h-20 z"/></svg>', width: 2, height: 3, isObstacle: true },
-    { id: 'sofa_leather', name: 'Leather Sofa', type: 'furniture', cost: 700, rarity: 'rare', display: '<svg viewBox="0 0 120 60"><rect x="0" y="15" width="120" height="45" rx="10" fill="#7b341e"/><rect x="10" y="0" width="20" height="20" rx="5" fill="#9c4221"/><rect x="90" y="0" width="20" height="20" rx="5" fill="#9c4221"/></svg>', width: 6, height: 3, isObstacle: true },
-    { id: 'bean_bag', name: 'Bean Bag', type: 'furniture', cost: 120, rarity: 'common', display: '<svg viewBox="0 0 60 60"><ellipse cx="30" cy="40" rx="30" ry="20" fill="#718096"/><ellipse cx="30" cy="20" rx="15" ry="10" fill="#a0aec0"/></svg>', width: 3, height: 3, isObstacle: true },
-  ],
-  storage: [
-    { id: 'bookshelf_small', name: 'Small Bookshelf', type: 'furniture', cost: 200, rarity: 'common', display: '<svg viewBox="0 0 60 90"><rect width="60" height="90" fill="#8c5a3b"/><rect x="5" y="10" width="50" height="20" fill="#654321"/><rect x="5" y="35" width="50" height="20" fill="#654321"/><rect x="5" y="60" width="50" height="20" fill="#654321"/></svg>', width: 2, height: 4, isObstacle: true },
-    { id: 'bookshelf_large', name: 'Large Bookshelf', type: 'furniture', cost: 450, rarity: 'rare', display: '<svg viewBox="0 0 90 120"><rect width="90" height="120" fill="#6b4a2f"/><rect x="8" y="10" width="74" height="25" fill="#583927"/><rect x="8" y="45" width="74" height="25" fill="#583927"/><rect x="8" y="80" width="74" height="25" fill="#583927"/></svg>', width: 3, height: 5, isObstacle: true },
-    { id: 'filing_cabinet', name: 'Filing Cabinet', type: 'furniture', cost: 180, rarity: 'common', display: '<svg viewBox="0 0 40 60"><rect width="40" height="60" fill="#a0aec0"/><rect y="5" width="40" height="25" stroke="#4a5568" stroke-width="2"/><rect y="30" width="40" height="25" stroke="#4a5568" stroke-width="2"/><rect x="15" y="15" width="10" height="3" fill="#4a5568"/><rect x="15" y="40" width="10" height="3" fill="#4a5568"/></svg>', width: 2, height: 3, isObstacle: true },
-    { id: 'display_case', name: 'Display Case', type: 'furniture', cost: 600, rarity: 'epic', display: '<svg viewBox="0 0 60 90"><rect width="60" height="90" fill="#a0a0a0"/><rect x="5" y="5" width="50" height="80" fill="#d4f1f9" fill-opacity="0.5"/><line x1="5" y1="45" x2="55" y2="45" stroke="#a0a0a0" stroke-width="2"/></svg>', width: 2, height: 4, isObstacle: true },
-  ],
-  decor: [
-    { id: 'rug_shaggy', name: 'Shaggy Rug', type: 'furniture', cost: 100, rarity: 'common', display: '<svg viewBox="0 0 120 90"><rect width="120" height="90" rx="10" fill="#7f9cf5"/></svg>', width: 6, height: 4, isObstacle: false },
-    { id: 'plant_potted', name: 'Potted Plant', type: 'furniture', cost: 75, rarity: 'common', display: '<svg viewBox="0 0 40 60"><path d="M5,40 H35 V60 H5 Z" fill="#d59c6a"/><path d="M20,10 C0,30 40,30 20,10 Z" fill="#48bb78"/></svg>', width: 2, height: 3, isObstacle: true },
-    { id: 'lamp_floor', name: 'Floor Lamp', type: 'furniture', cost: 120, rarity: 'common', display: '<svg viewBox="0 0 30 90"><rect x="12" y="15" width="6" height="75" fill="#718096"/><path d="M0,0 H30 L20,15 H10 Z" fill="#faf089"/></svg>', width: 1, height: 4, isObstacle: true },
-    { id: 'trophy_case', name: 'Trophy Case', type: 'furniture', cost: 1000, rarity: 'epic', display: '<svg viewBox="0 0 90 90"><rect width="90" height="90" fill="#e5b84c"/><rect x="5" y="5" width="80" height="80" fill="#fffaf0" fill-opacity="0.6"/><line x1="5" y1="35" x2="85" y2="35" stroke="#e5b84c" stroke-width="2"/><line x1="5" y1="65" x2="85" y2="65" stroke="#e5b84c" stroke-width="2"/></svg>', width: 3, height: 4, isObstacle: true },
-    { id: 'wall_art_abstract', name: 'Abstract Wall Art', type: 'furniture', cost: 220, rarity: 'rare', display: '<svg viewBox="0 0 60 60"><rect width="60" height="60" fill="#1a202c"/><circle cx="30" cy="30" r="25" fill="#e53e3e"/><rect x="10" y="25" width="40" height="10" fill="#f6e05e"/></svg>', width: 3, height: 3, isObstacle: true }, // Note: Wall art logic not implemented, treated as floor item for now
-    { id: 'lava_lamp', name: 'Lava Lamp', type: 'furniture', cost: 90, rarity: 'common', display: '<svg viewBox="0 0 30 60"><path d="M5,60 H25 V50 H5 Z" fill="#4a5568"/><path d="M0,0 H30 L25,50 H5 Z" fill="#f56565" fill-opacity="0.8"/><circle cx="15" cy="20" r="5" fill="#fbd38d"/><circle cx="15" cy="40" r="8" fill="#fbd38d"/></svg>', width: 1, height: 3, isObstacle: true },
-  ],
-  electronics: [
-    { id: 'computer_setup', name: 'Desktop Computer', type: 'furniture', cost: 1200, rarity: 'epic', display: '<svg viewBox="0 0 60 60"><rect x="0" y="5" width="60" height="35" rx="5" fill="#2d3748"/><rect x="5" y="10" width="50" height="25" fill="#000"/><rect x="20" y="40" width="20" height="10" fill="#4a5568"/></svg>', width: 2, height: 2, isObstacle: true },
-    { id: 'laptop', name: 'Laptop', type: 'furniture', cost: 800, rarity: 'rare', display: '<svg viewBox="0 0 40 30"><path d="M0,25 H40 V28 H0 Z" fill="#a0aec0"/><path d="M2,2 L38,2 L35,25 L5,25 Z" fill="#e2e8f0"/></svg>', width: 2, height: 1, isObstacle: true },
-    { id: 'gaming_console', name: 'Gaming Console', type: 'furniture', cost: 500, rarity: 'rare', display: '<svg viewBox="0 0 40 20"><rect width="40" height="20" rx="5" fill="#2d3748"/><circle cx="30" cy="10" r="3" fill="#c53030"/></svg>', width: 2, height: 1, isObstacle: true },
-    { id: 'vr_headset', name: 'VR Headset', type: 'furniture', cost: 650, rarity: 'epic', display: '<svg viewBox="0 0 40 30"><path d="M0,5 H40 V25 H0 Z" rx="10" fill="#1a202c"/><path d="M5,0 h30 v5 h-30 z" fill="#4a5568"/></svg>', width: 2, height: 1, isObstacle: true },
-  ],
+// --- Sanctum Tile Editor Definitions ---
+// --- Sanctum Tile Editor Definitions ---
+const TILE_SIZE = 16; // Pixel size of each tile
+const CANVAS_DIMS = { width: 48, height: 48 };
+
+// THE REAL FIX: Providing the correct dimensions for the rendering logic AND keeping usableTileCount for the UI palette.
+// Please verify the width/height of your image files. My guesses are based on your counts.
+const tilesetDefinitions = {
+  'sfrisk_floors': { name: 'Floors', src: SFriskFantasyInteriorFloor, widthInTiles: 3, heightInTiles: 4, usableTileCount: 12, isDefault: true },
+  'sfrisk_items': { name: 'Items & Clutter', src: SFriskFantasyInteriorItems, widthInTiles: 6, heightInTiles: 3, usableTileCount: 256, unlockId: 'unlock_items' },
+  'sfrisk_furniture': { name: 'Furniture', src: SFriskFantasyInteriorFurniture, widthInTiles: 6, heightInTiles: 8, usableTileCount: 256, unlockId: 'unlock_furniture' },
+  'sfrisk_chairs': { name: 'Chairs', src: SFriskFantasyInteriorChair, widthInTiles: 2, heightInTiles: 1, usableTileCount: 2, unlockId: 'unlock_furniture' },
+  'sfrisk_carpet_dark_green': { name: 'Dark Green Carpet', src: SFriskFantasyInteriorDarkGreenCarpet, widthInTiles: 4, heightInTiles: 6, usableTileCount: 12, unlockId: 'unlock_carpets_basic' },
+  'sfrisk_carpet_light_green': { name: 'Light Green Carpet', src: SFriskFantasyInteriorLightGreenCarpet, widthInTiles: 4, heightInTiles: 6, usableTileCount: 12, unlockId: 'unlock_carpets_adv' },
+  'sfrisk_carpet_red': { name: 'Red Carpet', src: SFriskFantasyInteriorRedCarpet, widthInTiles: 4, heightInTiles: 6, usableTileCount: 12, unlockId: 'unlock_carpets_basic' },
+  'sfrisk_carpet_blue': { name: 'Blue Carpet', src: SFriskFantasyInteriorBlueCarpet, widthInTiles: 4, heightInTiles: 6, usableTileCount: 12, unlockId: 'unlock_carpets_adv' },
+  'sfrisk_borders': { name: 'Exterior Borders', src: SFriskFantasyInteriorExteriorBorder, widthInTiles: 15, heightInTiles: 1, usableTileCount: 100, unlockId: 'unlock_borders' },
+  'sfrisk_background': { name: 'Backgrounds', src: SFriskFantasyInteriorBackground, widthInTiles: 1, heightInTiles: 1, usableTileCount: 100, unlockId: 'unlock_backgrounds' },
+  'sfrisk_windows': { name: 'Windows', src: SFriskFantasyInteriorWindows, widthInTiles: 3, heightInTiles: 4, usableTileCount: 16, unlockId: 'unlock_decor_basic' },
+  'sfrisk_signs': { name: 'Signs', src: SFriskFantasyInteriorSign, widthInTiles: 4, heightInTiles: 3, usableTileCount:12, unlockId: 'unlock_decor_adv' },
+  'sfrisk_shelves': { name: 'Shelves', src: SFriskFantasyInteriorShelf, widthInTiles: 4, heightInTiles: 4, usableTileCount: 16, unlockId: 'unlock_decor_basic' },
+  'sfrisk_paintings': { name: 'Paintings', src: SFriskFantasyInteriorPainting, widthInTiles: 1, heightInTiles: 1, usableTileCount: 16, unlockId: 'unlock_decor_adv' },
+  'sfrisk_fireplaces': { name: 'Fireplaces', src: SFriskFantasyInteriorFireplace, widthInTiles: 1, heightInTiles: 4, usableTileCount: 16, unlockId: 'unlock_decor_adv' },
+  'sfrisk_doors': { name: 'Doors', src: SFriskFantasyInteriorDoors, widthInTiles: 2, heightInTiles: 2, usableTileCount: 4, unlockId: 'unlock_decor_basic' },
+  'sfrisk_banners': { name: 'Banners', src: SFriskFantasyInteriorBanners, widthInTiles: 4, heightInTiles: 4, usableTileCount: 16, unlockId: 'unlock_decor_adv' },
+  'sfrisk_walls_panel': { name: 'Wall Paneling', src: SFriskFantasyInteriorWallPaneling, widthInTiles: 14, heightInTiles: 3, usableTileCount: 100, unlockId: 'unlock_walls_panel' },
+  'sfrisk_walls_wainscot': { name: 'Wainscoting Walls', src: SFriskFantasyInteriorWainscotingWall, widthInTiles: 14, heightInTiles: 3, usableTileCount: 100, unlockId: 'unlock_walls_panel' },
+  'sfrisk_walls_stone': { name: 'Stone Walls', src: SFriskFantasyInteriorStoneWalls, widthInTiles: 14, heightInTiles: 3, usableTileCount: 100, unlockId: 'unlock_walls_stone' },
+  'sfrisk_walls_mix1': { name: 'Paneling with Stone', src: SFriskFantasyInteriorPanelingWithStone, widthInTiles: 14, heightInTiles: 3, usableTileCount: 100, unlockId: 'unlock_walls_stone' },
+  'sfrisk_walls_mix2': { name: 'Wall with Stone', src: SFriskFantasyInteriorWallwithStone, widthInTiles: 14, heightInTiles: 3, usableTileCount: 100, unlockId: 'unlock_walls_stone' },
 };
 
+// --- LAZY-INITIALIZED GLOBAL TILE REGISTRY ---
+let tileRegistry = null;
+let tilesetData = null;
+
+const initializeTileRegistry = () => {
+  if (tileRegistry) return; // Guard: Already initialized
+
+  const registry = new Map();
+  const data = {};
+  let globalIdOffset = 1;
+  const sortedKeys = Object.keys(tilesetDefinitions).sort();
+
+  for (const key of sortedKeys) {
+    const tileset = tilesetDefinitions[key];
+    const totalTiles = tileset.widthInTiles * tileset.heightInTiles;
+    data[key] = { ...tileset, key, offset: globalIdOffset, totalTiles };
+    for (let i = 0; i < totalTiles; i++) {
+      registry.set(globalIdOffset + i, { tilesetKey: key, localId: i });
+    }
+    globalIdOffset += totalTiles;
+  }
+  
+  tileRegistry = registry;
+  tilesetData = data;
+};
+
+// --- Global Style Function with LAZY INITIALIZATION ---
+const getSanctumTileStyle = (globalId) => {
+  initializeTileRegistry(); // This will run only once on the very first call.
+  
+  if (globalId === 0) {
+    return { backgroundColor: 'transparent', backgroundImage: 'none' };
+  }
+  const tileInfo = tileRegistry.get(globalId);
+  if (!tileInfo) {
+    return { backgroundColor: '#FF00FF' }; // Error color for missing tiles
+  }
+  const tileset = tilesetData[tileInfo.tilesetKey];
+  if (!tileset) {
+    return { backgroundColor: '#FF00FF' };
+  }
+
+  // --- THIS IS THE FIX ---
+  // Instead of pixel math, we use percentage-based math which works for both
+  // the main canvas and the differently-sized preview tiles in the palette.
+
+  const tileX = tileInfo.localId % tileset.widthInTiles;
+  const tileY = Math.floor(tileInfo.localId / tileset.widthInTiles);
+
+  // Calculate the total size of the background image as a percentage of the container.
+  // If a sheet is 4 tiles wide, the background needs to be 400% the width of the div to show one tile at 100% size.
+  const backgroundSizeX = tileset.widthInTiles * 100;
+  const backgroundSizeY = tileset.heightInTiles * 100;
+
+  // Calculate the position of the tile we want.
+  // We use (width - 1) because the positioning for N items is over N-1 intervals.
+  const backgroundPositionX = tileset.widthInTiles > 1 
+    ? (tileX / (tileset.widthInTiles - 1)) * 100 
+    : 0;
+  const backgroundPositionY = tileset.heightInTiles > 1
+    ? (tileY / (tileset.heightInTiles - 1)) * 100
+    : 0;
+
+  return {
+    backgroundImage: `url(${tileset.src})`,
+    backgroundSize: `${backgroundSizeX}% ${backgroundSizeY}%`,
+    backgroundPosition: `${backgroundPositionX}% ${backgroundPositionY}%`,
+    imageRendering: 'pixelated',
+    backgroundRepeat: 'no-repeat' // Explicitly prevent repeating
+  };
+};
 // Combine all rollable items (avatars, banners, fonts, animations, titles, backgrounds) for the slot machine animation
 const allRollableItems = [
     ...cosmeticItems.avatars,
@@ -1117,12 +1220,20 @@ const generateInitialDungeonState = () => {
 // A single, authoritative default structure for a user's stats.
 const defaultStats = {
   username: '', totalXP: 0, currentLevel: 1, assignmentsCompleted: 0, friends: [],
-  ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, ownedFurniture: [], ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
+  ownedItems: [], equippedItems: { avatar: null, banner: 'banner_default', background: null, font: 'font_inter', animation: null, title: null, wallpaper: null, dungeonEmojis: {}, tdSkins: {} }, 
+  unlockedTilesets: ['starter_pack'], // NEW: For Sanctum tile editor
+  sanctumCanvas: { // NEW: Replaces sanctumLayout
+    layers: [Array(CANVAS_DIMS.width * CANVAS_DIMS.height).fill(0).join(',')], // A single layer, filled with "empty" tile 0
+    layerNames: ["Floor"],
+    layerVisibility: [true],
+  },
+  ownedPets: [], currentPet: null, petStatus: 'none', assignmentsToHatch: 0, cosmeticShards: 0,
   focusNavigator: { unlockedLocations: ['genesis_prime'], explorerStreak: 0, lastStreakDay: null, dailyFocusMinutes: 0 },
   activeBoosts: [],
   dungeon_state: generateInitialDungeonState(), dungeon_floor: 0, dungeon_gold: 0,
   dungeon_wingmen: { roster: [], graveyard: [], equipped: null, upgrades: {} },
   td_wins: 0, td_wave: 0, td_castleHealth: 5, td_towers: [], td_path: generatePath(), td_gameOver: false, td_gameWon: false, td_unlockedTowers: [], td_towerUpgrades: {},
+  td_commander: { x: 5, y: 5, lastMove: null, abilityCooldowns: {}, activeBuffs: [] },
   lab_state: {
     sciencePoints: 0,
     lastLogin: serverTimestamp(),
@@ -1150,14 +1261,1040 @@ const defaultStats = {
     ],
   },
   studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
-  achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 } },
+  achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 }, sanctumTilesPlaced: { tier: 0, progress: 0 } },
   quests: generateQuests(),
   contract: null,
+  squads: [], // Array of squad IDs the user is a member of
+  squadInvites: [], // Array of squad IDs the user is invited to
+  cooldowns: {}, // Stores timestamps of last actions to prevent spam
+  availabilityPreferences: {
+    primeTimes: ['afternoons'], // 'mornings', 'afternoons', 'evenings'
+    unavailableDays: [], // 0 for Sunday, 1 for Monday, etc.
+  },
+};
+
+// --- NEW: Operations Room Components ---
+
+const CreateDivisionModal = ({ isOpen, onClose, onCreateDivision, divisionCount }) => {
+  const [divisionName, setDivisionName] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (divisionName.trim().length > 2) {
+      onCreateDivision(divisionName.trim());
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-md shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">FORM A NEW DIVISION</h3>
+        <form onSubmit={handleSubmit}>
+          <input 
+            type="text"
+            value={divisionName}
+            onChange={(e) => setDivisionName(e.target.value)}
+            placeholder="Division Name (e.g., The Vanguard)"
+            className="w-full p-3 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"
+            maxLength="30"
+          />
+          <div className="flex justify-end gap-4 mt-6">
+            <button type="button" onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
+            <button type="submit" className="px-5 py-2 bg-green-600 rounded hover:bg-green-700 disabled:bg-slate-500 disabled:cursor-not-allowed" disabled={divisionName.trim().length < 3 || divisionCount >= 3}>
+              {divisionCount >= 3 ? 'Limit Reached' : 'Form Division'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const OperationsRoomHelpModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-lg w-full max-w-2xl shadow-lg prose prose-invert prose-slate" onClick={e => e.stopPropagation()}>
+        <h2 className="font-mono text-green-400">MISSION BRIEFING: THE OPERATIONS ROOM</h2>
+        <h4>Objective</h4>
+        <p>The Operations Room is your command center for collaborative success. Its purpose is to synchronize efforts with your allies (friends) in shared "Divisions" to conquer academic and personal goals.</p>
+        
+        <h4>Key Features</h4>
+        <ul>
+          <li><strong>Form Divisions:</strong> Create or join small, focused groups (up to 3) to tackle specific subjects, projects, or goals.</li>
+          <li><strong>Strategy Calendar:</strong> A shared calendar where every member can post their personal commitments (classes, work) and propose group operations (study sessions, project meetings).</li>
+          <li><strong>Visual Intelligence:</strong> Each division member is assigned a unique color. At a glance, you can see who is busy on any given day, making it easy to identify windows of opportunity for collaboration.</li>
+          <li><strong>Coordinate Operations:</strong> Schedule group study sessions and link them directly to assignments from your tracker. This ensures everyone is focused on the same objective.</li>
+        </ul>
+
+        <h4>The Goal</h4>
+        <p>By sharing scheduling information, you eliminate the back-and-forth of planning. Use this tool to find the optimal times to work together, hold each other accountable, and turn individual assignments into team victories.</p>
+
+        <div className="text-center mt-6">
+          <button onClick={onClose} className="px-6 py-2 bg-indigo-600 rounded hover:bg-indigo-700">Understood</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const DayDetailModal = ({ isOpen, onClose, dayData, divisionMembers, allAssignments, user, onRsvp, onDeleteEvent, onVoteToDelete, isRsvping }) => {
+  if (!isOpen) return null;
+
+  const { date, events } = dayData;
+  const memberMap = divisionMembers.reduce((acc, member) => {
+    acc[member.uid] = member;
+    return acc;
+  }, {});
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-2xl shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Operations for {date.toLocaleDateString()}</h3>
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+          {events.length > 0 ? events.map(event => {
+            const memberColor = divisionMembers.find(m => m.uid === event.creatorId)?.color || '#94a3b8';
+            const eventTypeLabel = event.eventType === 'group_operation' ? 'Group Operation' : 'Personal Commitment';
+            
+            return (
+              <div key={event.id} className="bg-slate-800/70 p-3 rounded-md flex items-start gap-3">
+                <div className="w-3 h-3 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: memberColor }} />
+                <div className="flex-grow">
+                  <p className="font-bold text-white">{event.title}</p>
+                  <p className="text-sm text-slate-400">
+                    {new Date(event.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                    {new Date(event.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1 text-xs">
+                    <span className={`px-2 py-0.5 rounded-full ${event.priority === 'High' ? 'bg-red-500/30 text-red-300' : event.priority === 'Medium' ? 'bg-yellow-500/30 text-yellow-300' : 'bg-slate-600'}`}>{event.priority}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-slate-400">{eventTypeLabel} by {event.creatorUsername}</span>
+                  </div>
+                  {event.linkedAssignmentId && (
+                    <div className="mt-2 text-xs text-indigo-300 border-t border-slate-700/50 pt-2">
+                      <strong>Linked Assignment:</strong> {allAssignments.find(a => a.id === event.linkedAssignmentId)?.assignment || 'Unknown'}
+                    </div>
+                  )}
+                  {/* RSVP and Delete UI */}
+                  <div className="mt-3 pt-3 border-t border-slate-700/50 flex justify-between items-center">
+                    {event.eventType === 'group_operation' ? (
+                      <div className="flex items-center gap-2" title={`Attending: ${(event.rsvps || []).map(uid => divisionMembers.find(m => m.uid === uid)?.username || '...').join(', ')}`}>
+                        <button 
+                          onClick={() => onRsvp(event.id, true)} 
+                          disabled={isRsvping === event.id}
+                          className={`px-3 py-1 text-xs rounded transition-colors ${event.rsvps?.includes(user.uid) ? 'bg-green-600 text-white' : 'bg-slate-600 hover:bg-slate-500'} disabled:bg-slate-500 disabled:cursor-wait`}
+                        >
+                          {isRsvping === event.id ? '...' : `I'm In (${event.rsvps?.length || 0})`}
+                        </button>
+                        <button 
+                          onClick={() => onRsvp(event.id, false)} 
+                          disabled={isRsvping === event.id}
+                          className="px-3 py-1 text-xs rounded bg-slate-600 hover:bg-slate-500 disabled:bg-slate-500 disabled:cursor-wait"
+                        >
+                          {isRsvping === event.id ? '...' : 'Decline'}
+                        </button>
+                      </div>
+                    ) : <div />}
+                    <div>
+                      {event.creatorId === user.uid ? (
+                        <button onClick={() => onDeleteEvent(event.id)} className="text-xs text-red-400 hover:text-red-300">Delete Operation</button>
+                      ) : (
+                        <button onClick={() => onVoteToDelete(event.id)} className="text-xs text-yellow-400 hover:text-yellow-300">
+                          Vote to Delete ({event.deleteVotes?.length || 0}/{Math.ceil(divisionMembers.length / 2)})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }) : (
+            <p className="text-slate-400 text-center py-8">No operations scheduled for this day.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const FindTimeModal = ({ isOpen, onClose, onSchedule, onFind, assignments }) => {
+  const [step, setStep] = useState('params'); // 'params' or 'results'
+  const [params, setParams] = useState({ duration: 120, linkedAssignmentId: '' });
+  const [suggestions, setSuggestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep('params');
+      setSuggestions([]);
+      setParams({ duration: 120, linkedAssignmentId: '' });
+    }
+  }, [isOpen]);
+
+  const handleFindClick = async () => {
+    setIsLoading(true);
+    const results = await onFind(params);
+    setSuggestions(results);
+    setIsLoading(false);
+    setStep('results');
+  };
+
+  const linkedAssignment = assignments.find(a => a.id === params.linkedAssignmentId);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-2xl shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Strategic Opportunity Finder</h3>
+        {step === 'params' && (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-400">Set the parameters for your operation to find the best time to meet.</p>
+            <div>
+              <label htmlFor="duration" className="block text-sm font-bold text-slate-400 mb-1">Operation Duration</label>
+              <select name="duration" value={params.duration} onChange={e => setParams(p => ({...p, duration: parseInt(e.target.value)}))} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600">
+                <option value={60}>1 Hour</option>
+                <option value={90}>1.5 Hours</option>
+                <option value={120}>2 Hours</option>
+                <option value={180}>3 Hours</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="linkedAssignmentId" className="block text-sm font-bold text-slate-400 mb-1">Link to Assignment (Optional)</label>
+              <select name="linkedAssignmentId" value={params.linkedAssignmentId} onChange={e => setParams(p => ({...p, linkedAssignmentId: e.target.value}))} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600">
+                <option value="">-- None --</option>
+                {assignments.map(a => <option key={a.id} value={a.id}>{a.assignment}</option>)}
+              </select>
+            </div>
+            <div className="flex justify-end gap-4 pt-4 border-t border-slate-700">
+              <button onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
+              <button onClick={handleFindClick} className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Find Time</button>
+            </div>
+          </div>
+        )}
+        {step === 'results' && (
+          <div>
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+              {isLoading ? <p className="text-center">Analyzing schedules...</p> : suggestions.length > 0 ? suggestions.map((slot, index) => (
+                <div key={index} className="bg-slate-800/70 p-3 rounded-md flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-white">{slot.start.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <div className="flex items-center gap-2 text-xs mt-1">
+                        <span className="text-green-400">✅ {slot.availableMembers}/{slot.totalMembers} Available</span>
+                        {linkedAssignment && slot.deadlineScore < 0 && <span className="text-red-400">🚨 Near Deadline!</span>}
+                    </div>
+                  </div>
+                  <button onClick={() => onSchedule(slot.start)} className="bg-green-600 text-black font-bold px-4 py-1 rounded hover:bg-green-700">Schedule</button>
+                </div>
+              )) : (
+                <p className="text-slate-400 text-center py-8">Could not find any optimal time slots.</p>
+              )}
+            </div>
+            <button onClick={() => setStep('params')} className="mt-4 text-sm text-indigo-400 hover:underline">Back to Parameters</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignments, showMessageBox, prefilledTime }) => {
+  const [eventData, setEventData] = useState({
+    title: '',
+    startTime: '',
+    endTime: '',
+    priority: 'Medium',
+    eventType: 'group_operation',
+    recurrenceType: 'none',
+    recurrenceEndDate: '',
+    linkedAssignmentId: '',
+  });
+
+  // Effect to reset form when modal is reopened for a new event
+  useEffect(() => {
+    if (isOpen) {
+      // Convert prefilledTime to the format required by datetime-local input
+      const startTimeISO = prefilledTime ? new Date(prefilledTime.getTime() - (prefilledTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
+      const endTimeDate = prefilledTime ? new Date(prefilledTime.getTime() + 3600000) : '';
+      const endTimeISO = endTimeDate ? new Date(endTimeDate.getTime() - (endTimeDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
+
+      setEventData({
+        title: '', 
+        startTime: startTimeISO, 
+        endTime: endTimeISO, 
+        priority: 'Medium',
+        eventType: 'group_operation', 
+        recurrenceType: 'none', 
+        recurrenceEndDate: '',
+        linkedAssignmentId: '',
+      });
+    }
+  }, [isOpen, prefilledTime]);
+
+  if (!isOpen) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEventData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!eventData.title || !eventData.startTime || !eventData.endTime) {
+      showMessageBox("Title, start time, and end time are required.", "error");
+      return;
+    }
+    if (new Date(eventData.endTime) <= new Date(eventData.startTime)) {
+      showMessageBox("End time must be after the start time.", "error");
+      return;
+    }
+    
+    onAddEvent({
+      ...eventData,
+      startTime: new Date(eventData.startTime),
+      endTime: new Date(eventData.endTime),
+      recurrenceEndDate: eventData.recurrenceEndDate ? new Date(eventData.recurrenceEndDate) : null,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-lg shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">SCHEDULE OPERATION for "{activeDivision?.squadName}"</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="title" className="block text-sm font-bold text-slate-400 mb-1">Operation Title</label>
+            <input type="text" name="title" value={eventData.title} onChange={handleChange} placeholder="e.g., Midterm, Soccer Practice" required className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="startTime" className="block text-sm font-bold text-slate-400 mb-1">Start Time</label>
+              <input type="datetime-local" name="startTime" value={eventData.startTime} onChange={handleChange} required className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"/>
+            </div>
+            <div>
+              <label htmlFor="endTime" className="block text-sm font-bold text-slate-400 mb-1">End Time</label>
+              <input type="datetime-local" name="endTime" value={eventData.endTime} onChange={handleChange} required className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"/>
+            </div>
+          </div>
+           <div>
+            <label htmlFor="priority" className="block text-sm font-bold text-slate-400 mb-1">Priority</label>
+            <select name="priority" value={eventData.priority} onChange={handleChange} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-400 mb-2">Event Type</label>
+            <div className="flex gap-4">
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="eventType" value="group_operation" checked={eventData.eventType === 'group_operation'} onChange={handleChange} className="form-radio text-green-500 bg-slate-700 border-slate-600"/>
+                <span>Group Operation</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="eventType" value="personal_commitment" checked={eventData.eventType === 'personal_commitment'} onChange={handleChange} className="form-radio text-green-500 bg-slate-700 border-slate-600"/>
+                <span>Personal Commitment</span>
+              </label>
+            </div>
+          </div>
+           <div>
+            <label htmlFor="linkedAssignmentId" className="block text-sm font-bold text-slate-400 mb-1">Link to Assignment (Optional)</label>
+            <select name="linkedAssignmentId" value={eventData.linkedAssignmentId} onChange={handleChange} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono">
+              <option value="">-- None --</option>
+              {assignments.map(a => <option key={a.id} value={a.id}>{a.assignment}</option>)}
+            </select>
+          </div>
+          {/* Recurrence Options */}
+          <div className="pt-4 border-t border-slate-700">
+            <label htmlFor="recurrenceType" className="block text-sm font-bold text-slate-400 mb-1">Recurrence</label>
+            <select name="recurrenceType" value={eventData.recurrenceType} onChange={handleChange} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono">
+              <option value="none">Does not repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+            {eventData.recurrenceType !== 'none' && (
+              <div className="mt-2">
+                <label htmlFor="recurrenceEndDate" className="block text-sm font-bold text-slate-400 mb-1">Recurrence End Date (Optional)</label>
+                <input type="date" name="recurrenceEndDate" value={eventData.recurrenceEndDate} onChange={handleChange} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"/>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-4 pt-4 border-t border-slate-700">
+            <button type="button" onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
+            <button type="submit" className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Schedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const InviteFriendModal = ({ isOpen, onClose, friends, divisionMembers, onInvite }) => {
+  if (!isOpen) return null;
+
+  const memberIds = new Set(Object.keys(divisionMembers));
+  const friendsToInvite = friends.filter(friend => !memberIds.has(friend.id));
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-md shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Invite a Friend</h3>
+        <div className="max-h-64 overflow-y-auto space-y-2">
+          {friendsToInvite.length > 0 ? (
+            friendsToInvite.map(friend => (
+              <div key={friend.id} className="flex justify-between items-center bg-slate-800 p-3 rounded-md">
+                <span className="font-semibold">{friend.username}</span>
+                <button onClick={() => onInvite(friend.id, friend.username)} className="bg-green-600 text-black font-bold px-4 py-1 rounded hover:bg-green-700">Invite</button>
+              </div>
+            ))
+          ) : (
+            <p className="text-slate-400 text-center">All of your friends are already in this division.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DivisionSidebar = ({ view, divisions, activeDivision, selectedMemberId, user, onSelectDivision, onCreateDivision, onBackToDivisions, onSelectMember, onInviteClick, onKickMember }) => {
+  const divisionCount = divisions.length;
+  const isLeader = activeDivision && activeDivision.leaderId === user.uid;
+
+  return (
+    <div className="w-full md:w-64 flex-shrink-0 bg-slate-900/70 border border-slate-700 p-4 rounded-lg flex flex-col">
+      {view === 'divisions' ? (
+        <>
+          <h3 className="text-lg font-semibold text-white mb-4 font-mono">MY DIVISIONS [{divisionCount}/3]</h3>
+          <div className="flex-grow space-y-2 overflow-y-auto pr-2">
+            {divisions.map(division => (
+              <button key={division.id} onClick={() => onSelectDivision(division.id)} className="w-full text-left p-3 rounded-md text-sm font-semibold transition-colors bg-slate-800 hover:bg-slate-700">
+                {division.squadName}
+              </button>
+            ))}
+          </div>
+          <button onClick={onCreateDivision} disabled={divisionCount >= 3} title={divisionCount >= 3 ? "You can be in a maximum of 3 divisions." : "Form a new division"} className="mt-4 w-full p-3 bg-green-800 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed">
+            + Form New Division
+          </button>
+        </>
+      ) : ( // Member View
+        <>
+          <div className="flex items-center mb-4">
+            <button onClick={onBackToDivisions} className="mr-3 p-2 rounded-full hover:bg-slate-700">←</button>
+            <h3 className="text-lg font-semibold text-white font-mono truncate">{activeDivision?.squadName}</h3>
+          </div>
+          <div className="flex-grow space-y-2 overflow-y-auto pr-2">
+            <button onClick={() => onSelectMember(null)} className={`w-full text-left p-3 rounded-md text-sm font-semibold transition-colors ${!selectedMemberId ? 'bg-green-600 text-black' : 'bg-slate-800 hover:bg-slate-700'}`}>
+              All Members
+            </button>
+            {Object.entries(activeDivision?.members || {}).map(([uid, member]) => (
+              <div key={uid} className={`w-full flex justify-between items-center p-3 rounded-md transition-colors ${selectedMemberId === uid ? 'bg-green-600 text-black' : 'bg-slate-800'}`}>
+                <button onClick={() => onSelectMember(uid)} className="flex-grow text-left flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: member.color }}></div>
+                  <span className="font-semibold text-sm">{member.username}</span>
+                </button>
+                {isLeader && user.uid !== uid && (
+                  <button onClick={() => onKickMember(uid, member.username)} className="text-red-400 hover:text-red-300 text-xs font-bold">KICK</button>
+                )}
+              </div>
+            ))}
+          </div>
+          {isLeader && (
+            <button onClick={onInviteClick} className="mt-4 w-full p-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">
+              + Invite Friend
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+const StrategyCalendar = ({ activeDivision, onAddEvent, monthlyEvents, currentDate, setCurrentDate, onDayClick, onRefreshEvents, isLoadingEvents, selectedMemberId, onShowAll, onFindTime }) => {
+  const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay(); // Sunday - 0
+
+  const renderCalendarDays = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const numDays = daysInMonth(year, month);
+    const firstDay = firstDayOfMonth(year, month);
+    const startingDay = firstDay === 0 ? 6 : firstDay - 1; // Monday - 0
+
+    const calendarDays = [];
+    for (let i = 0; i < startingDay; i++) {
+      calendarDays.push(<div key={`empty-prev-${i}`} className="border-t border-l border-slate-700/50 bg-slate-800/10"></div>);
+    }
+
+    for (let day = 1; day <= numDays; day++) {
+      const date = new Date(year, month, day);
+      const eventsForDay = monthlyEvents.filter(e => {
+        const eventDate = new Date(e.startTime);
+        return eventDate.getFullYear() === year && eventDate.getMonth() === month && eventDate.getDate() === day;
+      });
+
+      // Get unique member IDs for the activity dots
+      const memberIdsWithEvents = [...new Set(eventsForDay.map(e => e.creatorId))];
+
+      calendarDays.push(
+        <div key={`day-${day}`} onClick={() => onDayClick(date, eventsForDay)} className="p-2 border-t border-l border-slate-700/50 min-h-[120px] flex flex-col bg-slate-800/30 hover:bg-slate-800/60 transition-colors cursor-pointer">
+          <span className="font-bold text-slate-400">{day}</span>
+          <div className="flex gap-1 mt-1 flex-wrap">
+            {memberIdsWithEvents.map(memberId => {
+              const member = Object.values(activeDivision.members).find(m => m.uid === memberId) || {};
+              return <div key={memberId} className="w-2 h-2 rounded-full" style={{ backgroundColor: member.color || '#94a3b8' }} title={member.username} />
+            })}
+          </div>
+        </div>
+      );
+    }
+    return calendarDays;
+  };
+  
+  const goToPreviousMonth = () => setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  const goToNextMonth = () => setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+
+  return (
+    <div className="flex-grow bg-slate-900/70 border border-slate-700 p-4 rounded-lg flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h3 className="text-xl font-bold text-green-400 font-mono tracking-widest">{activeDivision.squadName}</h3>
+          <p className="text-sm text-slate-400">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={goToPreviousMonth} className="p-2 rounded-full bg-slate-700 hover:bg-slate-600">{'<'}</button>
+          <button onClick={goToNextMonth} className="p-2 rounded-full bg-slate-700 hover:bg-slate-600">{'>'}</button>
+          <button onClick={onRefreshEvents} disabled={isLoadingEvents} className="p-2 rounded-full bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-wait" title="Refresh Calendar">
+            <svg className={`h-5 w-5 ${isLoadingEvents ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M4 4l1.5 1.5A9 9 0 0120.5 10.5M20 20l-1.5-1.5A9 9 0 013.5 13.5" />
+            </svg>
+          </button>
+          <button onClick={onFindTime} className="p-2 rounded-full bg-slate-700 hover:bg-slate-600" title="Find Best Time to Meet">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg>
+          </button>
+          <button onClick={onAddEvent} className="bg-green-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 text-black">+ Add Operation</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 text-center text-xs text-slate-400 font-bold font-mono">
+        {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day => <div key={day} className="py-2 border-b border-slate-700/50">{day}</div>)}
+      </div>
+      <div className="grid grid-cols-7 flex-grow">
+        {renderCalendarDays()}
+      </div>
+    </div>
+  );
+};
+
+const DivisionMemberPanel = ({ activeDivision, user, friends, onInviteFriend }) => {
+  // This would eventually fetch full friend profiles
+  return (
+    <div className="bg-slate-800/50 p-4 rounded-lg">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-xl font-bold">Members ({activeDivision.members.length})</h3>
+        {activeDivision.leaderId === user.uid && (
+          <button className="bg-slate-600 px-3 py-1 rounded text-sm hover:bg-slate-500">Invite Friend</button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-4">
+        {activeDivision.members.map(memberId => (
+          <div key={memberId} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: activeDivision.memberColors[memberId] || '#94a3b8' }} />
+            <span className="text-sm font-semibold">{memberId.slice(0, 8)}...</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ScheduleLinkedOperationModal = ({ isOpen, onClose, onSchedule, assignmentTitle, divisions, showMessageBox }) => {
+  const [eventData, setEventData] = useState({
+    divisionId: divisions[0]?.id || '', startTime: '', endTime: '', priority: 'Medium', eventType: 'group_operation'
+  });
+
+  useEffect(() => {
+    // Pre-fill division if not set or if the previously selected one is gone
+    if (isOpen && divisions.length > 0 && !divisions.find(d => d.id === eventData.divisionId)) {
+      setEventData(prev => ({ ...prev, divisionId: divisions[0].id }));
+    }
+  }, [isOpen, divisions, eventData.divisionId]);
+
+  if (!isOpen) return null;
+
+  const handleChange = (e) => {
+    setEventData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!eventData.divisionId || !eventData.startTime || !eventData.endTime) {
+      showMessageBox("Division, start time, and end time are required.", "error");
+      return;
+    }
+    onSchedule({
+      ...eventData,
+      title: assignmentTitle,
+      startTime: new Date(eventData.startTime),
+      endTime: new Date(eventData.endTime)
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-lg shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-1 font-mono text-green-400">Schedule Operation</h3>
+        <p className="text-slate-400 mb-4">For assignment: <span className="font-semibold text-white">{assignmentTitle}</span></p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="divisionId" className="block text-sm font-bold text-slate-400 mb-1">Select Division</label>
+            <select name="divisionId" value={eventData.divisionId} onChange={handleChange} className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono">
+              {divisions.map(div => <option key={div.id} value={div.id}>{div.squadName}</option>)}
+            </select>
+          </div>
+           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="startTime" className="block text-sm font-bold text-slate-400 mb-1">Start Time</label>
+              <input type="datetime-local" name="startTime" value={eventData.startTime} onChange={handleChange} required className="w-full p-2 bg-slate-800 rounded-md border border-slate-600"/>
+            </div>
+            <div>
+              <label htmlFor="endTime" className="block text-sm font-bold text-slate-400 mb-1">End Time</label>
+              <input type="datetime-local" name="endTime" value={eventData.endTime} onChange={handleChange} required className="w-full p-2 bg-slate-800 rounded-md border border-slate-600"/>
+            </div>
+          </div>
+           <div className="flex justify-end gap-4 pt-4 border-t border-slate-700">
+            <button type="button" onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
+            <button type="submit" className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Schedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divisionData, friendProfiles, showMessageBox }) => {
+  const [view, setView] = useState('divisions'); // 'divisions' or 'members'
+  const [activeDivisionId, setActiveDivisionId] = useState(null);
+  const [selectedMemberId, setSelectedMemberId] = useState(null);
+
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const [isInviteModalOpen, setInviteModalOpen] = useState(false);
+  const [isEventModalOpen, setEventModalOpen] = useState(false);
+  const [isHelpModalOpen, setHelpModalOpen] = useState(false);
+  const [isFindTimeModalOpen, setIsFindTimeModalOpen] = useState(false);
+  const [timeSuggestions, setTimeSuggestions] = useState([]);
+  const [prefilledEventTime, setPrefilledEventTime] = useState(null);
+
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [monthlyEvents, setMonthlyEvents] = useState([]);
+  const [isDayDetailModalOpen, setIsDayDetailModalOpen] = useState(false);
+  const [selectedDayDetails, setSelectedDayDetails] = useState({ date: null, events: [] });
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [rsvpingEventId, setRsvpingEventId] = useState(null);
+  const eventListenerUnsubscribeRef = useRef(null);
+  const rsvpCooldownsRef = useRef({}); // FIX: Define the missing ref
+  
+  // When active division changes, switch to member view
+  useEffect(() => {
+    if (activeDivisionId) {
+      setView('members');
+      setSelectedMemberId(null); // Default to "All Members" view
+    } else {
+      setView('divisions');
+    }
+  }, [activeDivisionId]);
+
+  useEffect(() => {
+    const divisionIds = Object.keys(divisionData);
+    // This effect now only runs when the division data itself changes.
+    // It correctly sets a default view or handles the case where the active division is deleted.
+    // It no longer interferes with the user explicitly setting the view back to the division list.
+    if (divisionIds.length > 0 && (!activeDivisionId || !divisionData[activeDivisionId])) {
+      setActiveDivisionId(divisionIds[0]);
+    } else if (divisionIds.length === 0) {
+      setActiveDivisionId(null);
+    }
+  }, [divisionData]); // FIX: Removed activeDivisionId from dependencies
+
+  const fetchMonthlyEvents = useCallback(() => {
+    if (!activeDivisionId || !db) {
+      setMonthlyEvents([]);
+      return;
+    }
+
+    if (eventListenerUnsubscribeRef.current) {
+      eventListenerUnsubscribeRef.current();
+    }
+    
+    setIsLoadingEvents(true);
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const startOfMonth = new Date(year, month, 1);
+    const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+
+    const eventsCollectionRef = collection(db, `squads/${activeDivisionId}/events`);
+    const q = query(eventsCollectionRef, 
+      where("startTime", ">=", startOfMonth), 
+      where("startTime", "<=", endOfMonth)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const events = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        startTime: doc.data().startTime.toDate(),
+        endTime: doc.data().endTime.toDate(),
+      }));
+      setMonthlyEvents(events);
+      setIsLoadingEvents(false);
+    }, (error) => {
+      console.error("Error fetching events:", error);
+      setIsLoadingEvents(false);
+    });
+
+    eventListenerUnsubscribeRef.current = unsubscribe;
+  }, [activeDivisionId, currentDate, db]);
+
+  // Effect to clean up listeners and state when the active division changes.
+  useEffect(() => {
+    // When the active division changes, clear old events. This does NOT fetch new ones.
+    setMonthlyEvents([]);
+    
+    // This return function acts as a cleanup. It runs when the component unmounts
+    // OR just before the effect runs again for a new divisionId.
+    return () => {
+      if (eventListenerUnsubscribeRef.current) {
+        eventListenerUnsubscribeRef.current();
+        eventListenerUnsubscribeRef.current = null;
+      }
+    };
+  }, [activeDivisionId]);
+
+  const handleDayClick = (date, events) => {
+    setSelectedDayDetails({ date, events });
+    setIsDayDetailModalOpen(true);
+  };
+
+  const handleRsvp = async (eventId, isAttending) => {
+    // ROBUST FIX: Time-based cooldown per event to prevent all forms of spam.
+    const now = Date.now();
+    const COOLDOWN_MS = 1500; // 3 second cooldown
+    const lastRsvpTime = rsvpCooldownsRef.current[eventId] || 0;
+
+    if (now - lastRsvpTime < COOLDOWN_MS) {
+      showMessageBox("You're changing your RSVP too quickly. Please wait a moment.", "error");
+      return;
+    }
+    
+    // If another event is already processing, block this action.
+    if (rsvpingEventId) return;
+
+    // Set the timestamp and loading state immediately to block subsequent clicks.
+    rsvpCooldownsRef.current[eventId] = now;
+    setRsvpingEventId(eventId);
+
+    const eventRef = doc(db, `squads/${activeDivisionId}/events`, eventId);
+    try {
+      if (isAttending) {
+        await updateDoc(eventRef, { rsvps: arrayUnion(user.uid) });
+      } else {
+        await updateDoc(eventRef, { rsvps: arrayRemove(user.uid) });
+      }
+    } catch (error) {
+      console.error("Error RSVPing to event:", error);
+      showMessageBox("Failed to update RSVP.", "error");
+      // If the write fails, reset the cooldown so the user can try again without waiting.
+      rsvpCooldownsRef.current[eventId] = 0;
+    } finally {
+      setRsvpingEventId(null);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!activeDivisionId) return;
+    if (window.confirm("Are you sure you want to permanently delete this operation?")) {
+      const eventRef = doc(db, `squads/${activeDivisionId}/events`, eventId);
+      await deleteDoc(eventRef);
+      showMessageBox("Operation deleted.", "info");
+    }
+  };
+
+  const handleVoteToDelete = async (eventId) => {
+    if (!activeDivisionId) return;
+    const eventRef = doc(db, `squads/${activeDivisionId}/events`, eventId);
+    await updateDoc(eventRef, { deleteVotes: arrayUnion(user.uid) });
+    showMessageBox("Your vote to delete has been registered.", "info");
+    // Note: A Cloud Function would be needed to automatically delete
+    // the event once the vote threshold is met.
+  };
+
+  const handleFindBestTime = async (params) => {
+    if (!activeDivisionId) return [];
+
+    setIsFindTimeModalOpen(true); // Open the modal immediately
+
+    const start = new Date();
+    const end = new Date();
+    end.setDate(start.getDate() + 7);
+
+    const eventsRef = collection(db, `squads/${activeDivisionId}/events`);
+    const q = query(eventsRef, where("startTime", ">=", start), where("startTime", "<=", end));
+    
+    try {
+        const querySnapshot = await getDocs(q);
+        const allEvents = querySnapshot.docs.map(doc => ({ ...doc.data(), startTime: doc.data().startTime.toDate(), endTime: doc.data().endTime.toDate() }));
+        
+        const memberUids = Object.keys(activeDivision.members);
+        const memberCount = memberUids.length;
+
+        // Fetch public profiles to get availability preferences
+        const publicProfilesRef = collection(db, 'publicProfiles');
+        const profilesQuery = query(publicProfilesRef, where('__name__', 'in', memberUids));
+        const profilesSnapshot = await getDocs(profilesQuery);
+        const memberPreferences = {};
+        profilesSnapshot.forEach(doc => {
+            memberPreferences[doc.id] = doc.data().availabilityPreferences || { primeTimes: [], unavailableDays: [] };
+        });
+
+        const suggestions = [];
+        const linkedAssignment = assignments.find(a => a.id === params.linkedAssignmentId);
+
+        // Check 30-minute slots for the next 7 days
+        for (let d = 0; d < 7; d++) {
+            const currentDay = new Date(start);
+            currentDay.setDate(start.getDate() + d);
+            const dayOfWeek = currentDay.getDay();
+
+            for (let h = 8; h <= 21; h++) { // 8 AM to 9 PM
+                for (let m = 0; m < 60; m += 30) {
+                    const slotStart = new Date(start);
+                    slotStart.setDate(start.getDate() + d);
+                    slotStart.setHours(h, m, 0, 0);
+                    const slotEnd = new Date(slotStart.getTime() + params.duration * 60 * 1000);
+
+                    const busyMembers = new Set();
+                    allEvents.forEach(event => {
+                        if (event.startTime < slotEnd && event.endTime > slotStart) {
+                            busyMembers.add(event.creatorId);
+                        }
+                    });
+                    
+                    const availableMemberIds = memberUids.filter(uid => !busyMembers.has(uid));
+
+                    // --- Scoring Heuristics ---
+                    // 1. Availability Score (Weight: 100)
+                    const availabilityScore = (availableMemberIds.length / memberCount) * 100;
+                    
+                    // 2. Deadline Proximity Score (Weight: 50, Negative)
+                    let deadlineScore = 0;
+                    if (linkedAssignment && linkedAssignment.dueDate) {
+                        const daysUntilDue = (linkedAssignment.dueDate.getTime() - slotStart.getTime()) / (1000 * 3600 * 24);
+                        if (daysUntilDue < 0) deadlineScore = -1000; // Impossible
+                        else if (daysUntilDue < 1) deadlineScore = -40;
+                        else if (daysUntilDue < 2) deadlineScore = -20;
+                    }
+
+                    const finalScore = availabilityScore + deadlineScore;
+                    
+                    if (availabilityScore > 50) { // Only suggest if at least half the team is free
+                        suggestions.push({
+                            start: slotStart,
+                            availableMembers: availableMemberIds.length,
+                            totalMembers: memberCount,
+                            score: finalScore,
+                            deadlineScore: deadlineScore
+                        });
+                    }
+                }
+            }
+        }
+        
+        suggestions.sort((a, b) => b.score - a.score);
+        return suggestions.slice(0, 5);
+
+    } catch (error) {
+        console.error("Error finding best time:", error);
+        showMessageBox("Could not analyze division schedule.", "error");
+        return [];
+    }
+  };
+
+  const handleScheduleFromSuggestion = (startTime) => {
+    setIsFindTimeModalOpen(false);
+    setPrefilledEventTime(startTime);
+    setEventModalOpen(true);
+  };
+
+
+  const activeDivision = divisionData[activeDivisionId];
+  const divisionCount = stats.squads?.length || 0;
+
+  const handleInviteFriend = async (friendId, friendUsername) => {
+    if (!activeDivisionId) return;
+    const batch = writeBatch(db);
+    const squadRef = doc(db, 'squads', activeDivisionId);
+    batch.update(squadRef, { pendingInvites: arrayUnion(friendId) });
+    const friendStatsRef = doc(db, `artifacts/${appId}/public/data/stats`, friendId);
+    batch.update(friendStatsRef, { squadInvites: arrayUnion(activeDivisionId) });
+    await batch.commit();
+    showMessageBox(`Invited ${friendUsername} to the division!`, 'info');
+  };
+
+  const handleKickMember = async (memberId, memberUsername) => {
+    if (!activeDivisionId || activeDivision.leaderId !== user.uid || user.uid === memberId) return;
+    if (!window.confirm(`Are you sure you want to kick ${memberUsername}?`)) return;
+
+    const batch = writeBatch(db);
+    const squadRef = doc(db, 'squads', activeDivisionId);
+    batch.update(squadRef, { [`members.${memberId}`]: deleteField() });
+    const memberStatsRef = doc(db, `artifacts/${appId}/public/data/stats`, memberId);
+    batch.update(memberStatsRef, { squads: arrayRemove(activeDivisionId) });
+    await batch.commit();
+    showMessageBox(`${memberUsername} has been removed from the division.`, 'info');
+  };
+
+  const handleCreateEvent = async (eventData) => {
+    const lastEventTime = stats.cooldowns?.createEvent?.toDate()?.getTime();
+    if (lastEventTime && Date.now() - lastEventTime < 30000) { // 30 second cooldown
+      showMessageBox("You can create an event every 30 seconds.", "error");
+      return;
+    }
+    if (!activeDivisionId) {
+      showMessageBox("No active division selected.", "error");
+      return;
+    }
+
+    const eventCollectionRef = collection(db, `squads/${activeDivisionId}/events`);
+    const newEventData = {
+      ...eventData,
+      creatorId: user.uid,
+      creatorUsername: stats.username,
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      await addDoc(eventCollectionRef, newEventData);
+      // Also update the user's cooldown in their stats doc
+      await updateStatsInFirestore({ 'cooldowns.createEvent': serverTimestamp() });
+      showMessageBox("Operation successfully scheduled!", "info");
+      setEventModalOpen(false);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      showMessageBox("Failed to schedule operation.", "error");
+    }
+  };
+
+  const handleCreateDivision = async (divisionName) => {
+    if (divisionCount >= 3) {
+      showMessageBox("You cannot be in more than 3 divisions.", "error");
+      return;
+    }
+    const lastCreate = stats.cooldowns?.createSquad?.toDate()?.getTime();
+    if (lastCreate && Date.now() - lastCreate < 60000) { // 1 minute cooldown
+      showMessageBox("You can form a new division once per minute.", "error");
+      return;
+    }
+    
+    const newSquadRef = doc(collection(db, 'squads'));
+    const userStatsRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
+    
+    const newSquadData = {
+      squadName: divisionName,
+      leaderId: user.uid,
+      members: { [user.uid]: { username: stats.username, color: '#34d399' } }, // Use a map for members
+      createdAt: serverTimestamp(),
+      pendingInvites: [] // Initialize pending invites array
+    };
+    
+    try {
+        await runTransaction(db, async (transaction) => {
+          transaction.set(newSquadRef, newSquadData);
+          transaction.update(userStatsRef, {
+            squads: arrayUnion(newSquadRef.id),
+            'cooldowns.createSquad': serverTimestamp(),
+          });
+        });
+        showMessageBox(`Division "${divisionName}" established!`, "info");
+        setCreateModalOpen(false);
+    } catch (e) {
+        showMessageBox("Failed to establish division.", "error");
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold text-white">The Operations Room</h2>
+          <p className="text-slate-400 mb-6">Coordinate with your divisions, schedule joint study operations, and track shared objectives to ensure academic victory.</p>
+        </div>
+        <button onClick={() => setHelpModalOpen(true)} className="w-10 h-10 flex-shrink-0 bg-slate-700 text-white font-bold rounded-full flex items-center justify-center text-xl hover:bg-slate-600 transition-colors">?</button>
+      </div>
+      
+      <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-200px)]">
+        <DivisionSidebar 
+          view={view}
+          divisions={Object.values(divisionData)} 
+          activeDivision={activeDivision}
+          selectedMemberId={selectedMemberId}
+          user={user}
+          onSelectDivision={setActiveDivisionId}
+          onCreateDivision={() => setCreateModalOpen(true)}
+          onBackToDivisions={() => setActiveDivisionId(null)}
+          onSelectMember={setSelectedMemberId}
+          onInviteClick={() => setInviteModalOpen(true)}
+          onKickMember={handleKickMember}
+        />
+        <div className="flex-grow flex flex-col gap-6">
+          {activeDivision ? (
+              <StrategyCalendar 
+                activeDivision={activeDivision}
+                onAddEvent={() => { setPrefilledEventTime(null); setEventModalOpen(true); }}
+                monthlyEvents={monthlyEvents.filter(event => !selectedMemberId || event.creatorId === selectedMemberId)}
+              currentDate={currentDate}
+                setCurrentDate={setCurrentDate}
+                onDayClick={handleDayClick}
+                onRefreshEvents={fetchMonthlyEvents}
+                isLoadingEvents={isLoadingEvents}
+                selectedMemberId={selectedMemberId}
+                onShowAll={() => setSelectedMemberId(null)}
+                onFindTime={handleFindBestTime}
+              />
+          ) : (
+            <div className="flex-grow flex items-center justify-center bg-slate-900/70 border border-slate-700 rounded-lg">
+              <p className="text-slate-400">Select a division to view its calendar, or form a new one.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <CreateDivisionModal isOpen={isCreateModalOpen} onClose={() => setCreateModalOpen(false)} onCreateDivision={handleCreateDivision} divisionCount={divisionCount} />
+      <InviteFriendModal isOpen={isInviteModalOpen} onClose={() => setInviteModalOpen(false)} friends={friendProfiles} divisionMembers={activeDivision?.members || {}} onInvite={handleInviteFriend} />
+      <AddEventModal isOpen={isEventModalOpen} onClose={() => setEventModalOpen(false)} onAddEvent={handleCreateEvent} activeDivision={activeDivision} assignments={assignments.filter(a => a.status !== 'Completed')} showMessageBox={showMessageBox} prefilledTime={prefilledEventTime} />
+      <OperationsRoomHelpModal isOpen={isHelpModalOpen} onClose={() => setHelpModalOpen(false)} />
+<FindTimeModal isOpen={isFindTimeModalOpen} onClose={() => setIsFindTimeModalOpen(false)} suggestions={timeSuggestions} onSchedule={handleScheduleFromSuggestion} onFind={handleFindBestTime} assignments={assignments.filter(a => a.status !== 'Completed')} />
+      <DayDetailModal 
+        isOpen={isDayDetailModalOpen} 
+        onClose={() => setIsDayDetailModalOpen(false)} 
+        dayData={selectedDayDetails}
+        divisionMembers={activeDivision ? Object.values(activeDivision.members) : []}
+        allAssignments={assignments}
+        user={user}
+        onRsvp={handleRsvp}
+        onDeleteEvent={handleDeleteEvent}
+        onVoteToDelete={handleVoteToDelete}
+        isRsvping={rsvpingEventId}
+      />
+    </div>
+  );
 };
 
 
 // Modal Component for adding new assignments
-const AddAssignmentModal = ({ isOpen, onClose, onSubmit }) => {
+const AddAssignmentModal = ({ isOpen, onClose, onSubmit, onScheduleLinkedOperation, showMessageBox }) => {
   const [newAssignment, setNewAssignment] = useState({
     class: '',
     assignment: '',
@@ -1170,6 +2307,7 @@ const AddAssignmentModal = ({ isOpen, onClose, onSubmit }) => {
     recurrenceType: 'none',
     recurrenceEndDate: '',
     tags: [], // New: tags array
+    pinned: false,
   });
   const [isEpic, setIsEpic] = useState(false);
 
@@ -1205,6 +2343,19 @@ const AddAssignmentModal = ({ isOpen, onClose, onSubmit }) => {
     });
     setIsEpic(false);
     onClose();
+  };
+
+  const handleAddAndSchedule = (e) => {
+    e.preventDefault();
+    const assignmentTitle = newAssignment.assignment.trim();
+    if (!assignmentTitle) {
+      showMessageBox("Assignment name is required to schedule an operation.", "error");
+      return;
+    }
+    // First, submit the assignment to be created
+    handleSubmit(e);
+    // Then, trigger the scheduling flow
+    onScheduleLinkedOperation(assignmentTitle);
   };
 
   if (!isOpen) return null;
@@ -1370,6 +2521,13 @@ return (
               className="bg-slate-600 text-slate-300 px-5 py-2 rounded-md hover:bg-slate-500 transition-colors duration-200"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleAddAndSchedule}
+              className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition-colors duration-200 shadow-md"
+            >
+              Add & Schedule Session
             </button>
             <button
               type="submit"
@@ -1776,6 +2934,39 @@ const GachaAnimationModal = ({ isOpen, onAnimationComplete, result }) => {
   );
 };
 // In App.js, right after the closing of the Projectile component definition
+const commanderDefinitions = {
+  default: { // For players who haven't started the dungeon
+    abilities: [
+      { id: 'inspire', name: 'Inspire', icon: '🗣️', cooldown: 60, description: 'Temporarily doubles the attack speed of towers in an aura.', effect: { type: 'aura_buff', radius: 3, duration: 10, attackSpeedMultiplier: 2 } },
+      { id: 'barricade', name: 'Barricade', icon: '🧱', cooldown: 90, description: 'Summons a temporary barricade on the path with 100 HP.', effect: { type: 'summon', unit: 'barricade', hp: 100 } },
+    ]
+  },
+  warrior: {
+    abilities: [
+      { id: 'inspire', name: 'Inspire', icon: '🗣️', cooldown: 60, description: 'Temporarily doubles the attack speed of towers in an aura.', effect: { type: 'aura_buff', radius: 3, duration: 10, attackSpeedMultiplier: 2 } },
+      { id: 'barricade', name: 'Barricade', icon: '🧱', cooldown: 90, description: 'Summons a temporary barricade on the path with 100 HP.', effect: { type: 'summon', unit: 'barricade', hp: 100 } },
+    ]
+  },
+  mage: {
+    abilities: [
+      { id: 'meteor', name: 'Meteor Strike', icon: '☄️', cooldown: 75, description: 'Calls down a meteor, dealing 50 damage in an area.', effect: { type: 'aoe_damage', radius: 2.5, damage: 50 } },
+      { id: 'stasis', name: 'Stasis Field', icon: '❄️', cooldown: 100, description: 'Freezes all enemies in a target area for 5 seconds.', effect: { type: 'aoe_status', radius: 3, status: 'frozen', duration: 5 } },
+    ]
+  },
+  archer: {
+     abilities: [
+      { id: 'mark', name: 'Mark for Death', icon: '🎯', cooldown: 45, description: 'Marks a single enemy. All attacks against it are critical hits for 10 seconds.', effect: { type: 'single_target_debuff', debuff: 'marked', duration: 10 } },
+      { id: 'hail', name: 'Hail of Arrows', icon: '🏹', cooldown: 80, description: 'Showers an area with arrows, dealing 20 damage and slowing enemies.', effect: { type: 'aoe_damage', radius: 3, damage: 20, status: 'slowed', duration: 5 } },
+    ]
+  },
+  tank: {
+    abilities: [
+      { id: 'taunt_banner', name: 'Taunting Banner', icon: '🚩', cooldown: 70, description: 'Places a banner that taunts enemies, drawing their fire.', effect: { type: 'summon', unit: 'banner', hp: 150 } },
+      { id: 'reinforce', name: 'Reinforce', icon: '🛡️', cooldown: 120, description: 'Grants all towers in an aura a shield that absorbs 50 damage.', effect: { type: 'aura_buff', radius: 4, shield: 50 } },
+    ]
+  }
+};
+
 const Particle = ({ onComplete }) => {  useEffect(() => {
     const timer = setTimeout(onComplete, 500); // Animation duration
     return () => clearTimeout(timer);
@@ -2151,6 +3342,8 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   const [sessionGold, setSessionGold] = useState(stats.dungeon_gold || 0);
   
   const dungeonStateRef = useRef(localDungeonState);
+  const debouncedSaveRef = useRef(null);
+
   useEffect(() => {
     dungeonStateRef.current = localDungeonState;
   }, [localDungeonState]);
@@ -2285,14 +3478,23 @@ const DungeonCrawler = ({ stats, updateStatsInFirestore, showMessageBox, getFull
   // The component now correctly manages its own state after initialization.
   
   useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
-      if (localDungeonState && localDungeonState.phase === 'playing' && !localDungeonState.gameOver) {
-        saveGame(localDungeonState);
-        showMessageBox("Game progress auto-saved!", "info", 1500);
+    // This effect now debounces the save operation.
+    // Any change to localDungeonState will reset the timer.
+    if (localDungeonState && localDungeonState.phase === 'playing' && !localDungeonState.gameOver) {
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
       }
-    }, 600000); // Auto-save every 10 minutes
-
-    return () => clearInterval(autoSaveInterval);
+      debouncedSaveRef.current = setTimeout(() => {
+        saveGame(dungeonStateRef.current); // Use ref to save the absolute latest state
+        showMessageBox("Dungeon progress auto-saved!", "info", 1500);
+      }, 30000); // Save 30 seconds after the last action
+    }
+    
+    return () => {
+      if (debouncedSaveRef.current) {
+        clearTimeout(debouncedSaveRef.current);
+      }
+    };
   }, [localDungeonState, saveGame]);
 
   const dungeonDefinitions = {
@@ -4622,34 +5824,26 @@ const handleAttack = (actorType, targetEnemy, attackId = 'primary') => {
 };
 
 const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, actionLock, processAchievement }) => {
-
   const { lab_state } = stats;
-
   const [localSciencePoints, setLocalSciencePoints] = useState(lab_state?.sciencePoints || 0);
   const sciencePerSecond = useRef(0);
   const hasRunOfflineCalc = useRef(false);
   const PRESTIGE_THRESHOLD = 1e12; // 1 Trillion
-
-  // NEW: Create refs to hold the most up-to-date state without causing effects to re-run.
   const localSciencePointsRef = useRef(localSciencePoints);
   const labStateRef = useRef(lab_state);
 
-    // This effect keeps our refs synchronized with the latest state from props and local state.
-    useEffect(() => {
-      localSciencePointsRef.current = localSciencePoints;
-      labStateRef.current = lab_state;
-    }, [localSciencePoints, lab_state]);
-
+  useEffect(() => {
+    localSciencePointsRef.current = localSciencePoints;
+    labStateRef.current = lab_state;
+  }, [localSciencePoints, lab_state]);
 
   const formatNumber = (num) => {
-
     if (num < 1000) return num.toFixed(1);
     if (num < 1e6) return `${(num / 1e3).toFixed(2)}K`;
     if (num < 1e9) return `${(num / 1e6).toFixed(2)}M`;
     if (num < 1e12) return `${(num / 1e9).toFixed(2)}B`;
     return `${(num / 1e12).toFixed(2)}T`;
   };
-  
 
   const { totalSPS, totalClickPower, prestigeBonus } = useMemo(() => {
     if (!lab_state) return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
@@ -4657,12 +5851,9 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
     let clickPower = 0;
     const prestigeLevel = lab_state.prestigeLevel || 0;
     const prestigeBonusMultiplier = 1 + prestigeLevel * 0.10;
-
-    // FIX: Add a guard clause to prevent crash if labEquipment hasn't loaded
     if (!lab_state.labEquipment) {
-        return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
+      return { totalSPS: 0, totalClickPower: 0, prestigeBonus: 1 };
     }
-
     for (const key in lab_state.labEquipment) {
       const definition = labEquipmentDefinitions[key];
       const count = lab_state.labEquipment[key] || 0;
@@ -4677,10 +5868,8 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
         clickPower += itemClickPower * count;
       }
     }
-
     const finalSPS = sps * prestigeBonusMultiplier;
     const finalClickPower = clickPower * prestigeBonusMultiplier;
-
     sciencePerSecond.current = finalSPS;
     return { totalSPS: finalSPS, totalClickPower: finalClickPower, prestigeBonus: prestigeBonusMultiplier };
   }, [lab_state]);
@@ -4692,57 +5881,54 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
     return () => clearInterval(gameLoop);
   }, []);
 
-// WITH THIS SINGLE, MORE EFFICIENT useEffect BLOCK
-  // EFFICIENT OFFLINE & SAVE LOGIC: This single effect runs only once when the
-  // component mounts. It calculates offline progress and saves it immediately.
-  useEffect(() => {
-    // FIX: Add a type check to ensure lastLogin is a valid Firestore Timestamp
-    // before calling .toDate(). This prevents crashes for new users where the
-    // serverTimestamp() might not be resolved on the initial data snapshot.
-    if (lab_state && lab_state.lastLogin && typeof lab_state.lastLogin.toDate === 'function' && !hasRunOfflineCalc.current) {
-      hasRunOfflineCalc.current = true; // Prevent re-running
+  const handleSaveProgress = useCallback(() => actionLock(async () => {
+    const currentPoints = localSciencePointsRef.current;
+    await updateStatsInFirestore({
+      'lab_state.sciencePoints': currentPoints,
+      'lab_state.lastLogin': serverTimestamp()
+    });
+    showMessageBox('Lab progress saved!', 'info');
+  }), [actionLock, updateStatsInFirestore, showMessageBox]);
 
-      const lastLoginTime = lab_state.lastLogin.toDate();
-      const currentTime = new Date();
-      const timeDifferenceSeconds = Math.round((currentTime - lastLoginTime) / 1000);
-      
-      // We only calculate if the user has been away for more than a minute.
-      if (timeDifferenceSeconds > 60) {
-        const pointsEarned = timeDifferenceSeconds * sciencePerSecond.current;
-        
-        if (pointsEarned > 0) {
-          const newTotalPoints = (lab_state.sciencePoints || 0) + pointsEarned;
-          
-          // Perform a single, efficient write to save the new total.
-          updateStatsInFirestore({
-            lab_state: {
-              ...lab_state,
-              sciencePoints: newTotalPoints,
-              lastLogin: serverTimestamp(),
-            },
-          }).then(() => {
-            // Update local state *after* successful save to ensure sync.
-            setLocalSciencePoints(newTotalPoints);
-            showMessageBox(
-              `Welcome back! You generated ${formatNumber(pointsEarned)} Science Points.`,
-              'info',
-              5000,
-            );
-            // Process achievements after the update is confirmed.
-            processAchievement('sciencePoints', newTotalPoints);
-          });
-        }
-      }
+  const handleCalculateOfflineEarnings = useCallback(() => {
+    if (hasRunOfflineCalc.current) {
+      showMessageBox("Offline earnings already calculated for this session.", "info");
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lab_state?.lastLogin]); // This dependency ensures the effect runs when login data is available.
+    const lastLoginTime = labStateRef.current?.lastLogin?.toDate();
+    if (!lastLoginTime) {
+      showMessageBox("No previous session found to calculate earnings from.", "info");
+      hasRunOfflineCalc.current = true;
+      return;
+    }
+    const currentTime = new Date();
+    const timeDifferenceSeconds = Math.round((currentTime - lastLoginTime) / 1000);
 
+    if (timeDifferenceSeconds > 60) {
+      const pointsEarned = timeDifferenceSeconds * sciencePerSecond.current;
+      if (pointsEarned > 0) {
+        const newTotalPoints = localSciencePointsRef.current + pointsEarned;
+        setLocalSciencePoints(newTotalPoints);
+        updateStatsInFirestore({
+          'lab_state.sciencePoints': newTotalPoints,
+          'lab_state.lastLogin': serverTimestamp()
+        }).then(() => {
+          processAchievement('sciencePoints', newTotalPoints);
+        });
+        showMessageBox(`You generated ${formatNumber(pointsEarned)} Science Points while you were away!`, 'info', 5000);
+      } else {
+        showMessageBox("No significant offline earnings to collect.", "info");
+      }
+    } else {
+      showMessageBox("You haven't been away long enough to generate significant offline earnings.", "info");
+    }
+    hasRunOfflineCalc.current = true;
+  }, [updateStatsInFirestore, showMessageBox, processAchievement]);
 
-
-  // FIX: This now returns JSX, preventing conditional hook calls
   if (!lab_state) {
     return <div className="text-center p-10 text-xl text-slate-400">Loading Science Lab...</div>;
   }
+
   const handleManualClick = () => {
     setLocalSciencePoints(prev => prev + totalClickPower);
   };
@@ -4764,9 +5950,9 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
     const definition = labEquipmentDefinitions[key];
     if (stats.totalXP >= definition.xpUpgrade.cost && !(lab_state.labXpUpgrades && lab_state.labXpUpgrades[key])) {
       const newXpUpgrades = { ...(lab_state.labXpUpgrades || {}), [key]: true };
-      updateStatsInFirestore({ 
-          totalXP: stats.totalXP - definition.xpUpgrade.cost,
-          lab_state: { ...lab_state, labXpUpgrades: newXpUpgrades }
+      updateStatsInFirestore({
+        totalXP: stats.totalXP - definition.xpUpgrade.cost,
+        lab_state: { ...lab_state, labXpUpgrades: newXpUpgrades }
       });
       showMessageBox(`${definition.name} production doubled!`, 'info');
     }
@@ -4793,7 +5979,7 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
           lastLogin: serverTimestamp(),
         };
         
-        transaction.update(statsDocRef, { 
+        transaction.update(statsDocRef, {
           lab_state: newLabState,
           lastActionTimestamp: serverTimestamp(),
           cooldowns: { ...(serverStats.cooldowns || {}), prestigeLab: serverTimestamp() }
@@ -4807,12 +5993,6 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
       showMessageBox(errorMsg, "error");
     }
   });
-
-  const scienceShopItems = [
-    { id: 'avatar_dragon', cost: 1e7, ...cosmeticItems.avatars.find(i => i.id === 'avatar_dragon') },
-    { id: 'banner_galaxy', cost: 5e7, ...cosmeticItems.banners.find(i => i.id === 'banner_galaxy') },
-    { id: 'bg_aurora', cost: 1e9, ...cosmeticItems.backgrounds.find(i => i.id === 'bg_aurora') },
-  ];
 
   return (
     <div>
@@ -4831,6 +6011,16 @@ const ScienceLab = ({ stats, userId, updateStatsInFirestore, showMessageBox, act
                 <p className="text-purple-400 font-semibold text-sm mt-1">Prestige Bonus: +{((prestigeBonus - 1) * 100).toFixed(0)}%</p>
              )}
           </div>
+
+          <div className="bg-slate-800/50 p-4 rounded-2xl shadow-xl flex flex-col gap-3">
+            <button onClick={handleSaveProgress} className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+              Save Progress
+            </button>
+            <button onClick={handleCalculateOfflineEarnings} disabled={hasRunOfflineCalc.current} className="w-full bg-slate-600 text-white font-bold py-3 rounded-lg hover:bg-slate-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed transition-colors">
+              {hasRunOfflineCalc.current ? 'Offline Earnings Calculated' : 'Calculate Offline Earnings'}
+            </button>
+          </div>
+          
           <div 
              onClick={handleManualClick}
              className="bg-slate-800/50 p-6 rounded-2xl shadow-xl text-center flex-grow flex flex-col justify-center items-center cursor-pointer hover:bg-slate-800/80 transition-colors"
@@ -4896,13 +6086,17 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
     waveInProgress: false,
     enemies: [],
     towers: [], // This holds the snapshot of towers for the current wave
-    soldiers: [], // NEW: Add soldiers to the wave state
+    soldiers: [],
+    summonedUnits: [], // For barricades, banners, etc.
+    visualEffects: [], // For explosions, auras, etc.
   });
   // This local state is for managing the UI and pre-wave setup
   const [localUIState, setLocalUIState] = useState({
     selectedTile: null,
     selectedTower: null,
     shopOpen: false,
+    isMovingCommander: false,
+    targetingAbility: null,
   });
 
   // Get persistent state from props
@@ -4926,6 +6120,17 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
   // that would wipe out local state changes (like placing a tower) before they are saved.
   const stringifiedTowers = useMemo(() => JSON.stringify(stats?.td_towers), [stats?.td_towers]);
   const stringifiedTowerUpgrades = useMemo(() => JSON.stringify(stats?.td_towerUpgrades), [stats?.td_towerUpgrades]);
+  const commanderRef = useRef(stats?.td_commander);
+
+  useEffect(() => {
+    commanderRef.current = stats?.td_commander;
+  }, [stats?.td_commander]);
+
+  const commanderAbilities = useMemo(() => {
+    const playerClass = stats?.dungeon_state?.playerClass;
+    return commanderDefinitions[playerClass] || commanderDefinitions.default;
+  }, [stats?.dungeon_state?.playerClass]);
+
 
   // Sync local towers ONLY when the actual saved data from Firestore changes.
   useEffect(() => {
@@ -4948,6 +6153,13 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
         onResetGame();
     }
   }, [td_path, td_wave, td_gameOver, td_gameWon, onResetGame, showMessageBox]);
+
+  const addVisualEffect = useCallback((effect) => {
+    setLocalWaveState(prev => ({
+      ...prev,
+      visualEffects: [...prev.visualEffects, { ...effect, id: Date.now() + Math.random() }]
+    }));
+  }, []);
 
   // Local state for tracking health BETWEEN saves, initialized from props
   const [sessionHealth, setSessionHealth] = useState(stats?.td_castleHealth);
@@ -5027,14 +6239,18 @@ const TowerDefenseGame = ({ stats, updateStatsInFirestore, showMessageBox, onRes
 
 const towerUpgrades = {
   archer: [
-    { id: 'archer_damage', name: 'Sharper Arrows', cost: 300, effect: { damage: 7 } },
-    { id: 'archer_range', name: 'Longbow', cost: 450, effect: { range: 7 } },
-    { id: 'archer_speed', name: 'Quick Draw', cost: 520, effect: { attackSpeed: 1.5 } },
+    { id: 'archer_damage_1', name: 'Sharper Arrows', cost: 150, effect: { damage: 4 }, level: 1 },
+    { id: 'archer_speed_1', name: 'Quick Draw', cost: 200, effect: { attackSpeed: 1.2 }, level: 1 },
+    // Specializations - require at least one level 1 upgrade
+    { id: 'archer_spec_sharpshooter', name: 'Spec: Sharpshooter', cost: 400, effect: { damage: 15 }, level: 2, description: "Massive damage bonus. Excels at eliminating high-value targets." },
+    { id: 'archer_spec_marksman', name: 'Spec: Marksman', cost: 400, effect: { ricochet: { targets: 2, damageFalloff: 0.5, range: 3 } }, level: 2, description: "Arrows bounce to 2 nearby enemies for 50% damage." },
   ],
   cannon: [
-    { id: 'cannon_damage', name: 'Bigger Cannonballs', cost: 500, effect: { damage: 13 } },
-    { id: 'cannon_aoe', name: 'Explosive Shells', cost: 200, effect: { aoe: 1 } },
-    { id: 'cannon_speed', name: 'Auto-loader', cost: 180, effect: { attackSpeed: 0.8 } },
+    { id: 'cannon_damage_1', name: 'Bigger Cannonballs', cost: 250, effect: { damage: 8 }, level: 1 },
+    { id: 'cannon_aoe_1', name: 'Explosive Shells', cost: 300, effect: { aoe: 1.5 }, level: 1 },
+    // Specializations
+    { id: 'cannon_spec_siege', name: 'Spec: Siege Engine', cost: 500, effect: { damage: 25, attackSpeed: 0.25 }, level: 2, description: "Huge damage, larger AoE, but very slow fire rate." },
+    { id: 'cannon_spec_mortar', name: 'Spec: Mortar', cost: 500, effect: { canIgnoreObstacles: true, status: { type: 'stun', duration: 1000, chance: 0.5 } }, level: 2, description: "Can fire over obstacles. Shots have a 50% chance to stun enemies for 1s." },
   ],
   icemage: [
     { id: 'icemage_slow', name: 'Deeper Freeze', cost: 400, effect: { slow: 0.65 } },
@@ -5098,14 +6314,19 @@ const towerUpgrades = {
 
   const enemyTypes = {
     normal: [
-      { id: 'goblin', name: 'Goblin', health: 10, speed: 0.1 },
-      { id: 'shieldbearer', name: 'Shieldbearer', health: 20, speed: 0.08, armor: 2 },
-      { id: 'runner', name: 'Runner', health: 5, speed: 0.5 },
-      { id: 'healer', name: 'Healer', health: 15, speed: 0.1, heal: 2 },
-      { id: 'flyer', name: 'Flyer', health: 12, speed: 0.4, flying: true },
+      { id: 'goblin', name: 'Goblin', health: 10, speed: 0.1, priority: 1 },
+      { id: 'shieldbearer', name: 'Shieldbearer', health: 20, speed: 0.08, armor: 2, priority: 5 },
+      { id: 'runner', name: 'Runner', health: 5, speed: 0.5, priority: 2 },
+      { id: 'healer', name: 'Acolyte', health: 25, speed: 0.09, armor: 1, isHealer: true, healAmount: 5, healRadius: 3, healCooldown: 3000, lastHeal: 0, priority: 10 },
+      { id: 'disruptor', name: 'Disruptor', health: 30, speed: 0.1, armor: 3, isDisruptor: true, disruptRadius: 3, disruptAmount: 0.5, priority: 8 },
+      { id: 'summoner', name: 'Summoner', health: 40, speed: 0.07, armor: 2, isSummoner: true, summonCooldown: 5000, lastSummon: 0, priority: 9 },
+      { id: 'flyer', name: 'Flyer', health: 12, speed: 0.4, flying: true, priority: 3 },
+    ],
+    special: [
+        { id: 'minion', name: 'Minion', health: 3, speed: 0.6, priority: 1, isSummoned: true },
     ],
     juggernaut: [
-      { id: 'ogre', name: 'Ogre', health: 100, speed: 0.08, loot: { id: 'ingredientEyeballs', chance: 0.3 } },
+      { id: 'ogre', name: 'Ogre', health: 100, speed: 0.08, loot: { id: 'ingredientEyeballs', chance: 0.3 }, priority: 6 },
       { id: 'siege_engine', name: 'Siege Engine', health: 150, speed: 0.01 },
       { id: 'necromancer', name: 'Necromancer', health: 80, speed: 0.2, spawn: 2, loot: { id: 'ingredientDemonicBook', chance: 0.4 } },
       { id: 'dragon', name: 'Dragon', health: 200, speed: 0.08, flying: true, loot: { id: 'dragon_scale', chance: 0.5 } },
@@ -5123,14 +6344,67 @@ const towerUpgrades = {
 
   const handleTileClick = (x, y) => {
     if (localWaveState.waveInProgress || td_gameOver || td_gameWon) return;
+    if (localUIState.isMovingCommander) {
+      handleMoveCommander(x, y);
+      return;
+    }
+    if (localUIState.targetingAbility) {
+      handleUseCommanderAbility(x, y);
+      return;
+    }
     if (td_path.some(tile => tile.x === x && tile.y === y)) return;
     const existingTower = localTowers.find(t => t.x === x && t.y === y);
-    setLocalUIState(prev => ({ ...prev, selectedTile: { x, y }, selectedTower: existingTower || null }));
+    setLocalUIState(prev => ({ ...prev, selectedTile: { x, y }, selectedTower: existingTower || null, isMovingCommander: false, targetingAbility: null }));
+  };
+
+  const handleMoveCommander = (x, y) => {
+    const commander = commanderRef.current;
+    if (Date.now() - (commander.lastMove || 0) < 2000) {
+      showMessageBox("Commander repositioning is on cooldown.", "error");
+      return;
+    }
+    updateStatsInFirestore({ 'td_commander.x': x, 'td_commander.y': y, 'td_commander.lastMove': serverTimestamp() });
+    setLocalUIState(prev => ({ ...prev, isMovingCommander: false }));
+  };
+
+  const handleUseCommanderAbility = (x, y) => {
+    const ability = localUIState.targetingAbility;
+    if (!ability) return;
+
+    const commander = commanderRef.current;
+    const cooldowns = commander.abilityCooldowns || {};
+
+    if ((cooldowns[ability.id] || 0) > Date.now()) {
+      showMessageBox("Ability is still on cooldown.", "error");
+      return;
+    }
+    
+    // Apply effect locally first for responsiveness
+    addVisualEffect({ type: 'ability_impact', x, y, radius: ability.effect.radius, color: 'rgba(255, 204, 0, 0.7)', duration: 500 });
+
+    setLocalWaveState(prev => {
+      let newEnemies = [...prev.enemies];
+      if (ability.effect.type === 'aoe_damage') {
+        newEnemies.forEach(enemy => {
+          if (Math.hypot(enemy.x - x, enemy.y - y) <= ability.effect.radius) {
+            enemy.health -= ability.effect.damage;
+          }
+        });
+      }
+      return { ...prev, enemies: newEnemies.filter(e => e.health > 0) };
+    });
+    
+    // Update firestore state
+    updateStatsInFirestore({
+      [`td_commander.abilityCooldowns.${ability.id}`]: Date.now() + ability.cooldown * 1000,
+    });
+    
+    setLocalUIState(prev => ({ ...prev, targetingAbility: null }));
   };
 
   const handleTowerSelect = (tower) => {
     if (!localUIState.selectedTile || stats.totalXP < tower.cost) return;
-    const newTower = { ...tower, id: `${tower.id}_${Date.now()}`, x: localUIState.selectedTile.x, y: localUIState.selectedTile.y, lastAttack: 0 };
+    const newTower = { ...tower, id: `${tower.id}_${Date.now()}`, x: localUIState.selectedTile.x, y: localUIState.selectedTile.y, lastAttack: 0, targetPriority: 'first' };
     
     // XP update is immediate and correct.
     updateStatsInFirestore({ totalXP: stats.totalXP - tower.cost });
@@ -5160,22 +6434,12 @@ const startWave = () => {
     const waveNumber = td_wave + 1;
     const newEnemies = generateWave(waveNumber);
     
-        let updateData = { 
+    // Save is now debounced and handled by placing/upgrading towers.
+    // This just updates the wave number.
+    updateStatsInFirestore({ 
         td_wave: waveNumber,
         'cooldowns.startWave': serverTimestamp()
-    };
-
-    // CHECKPOINT LOGIC: Save tower configuration every 3 waves
-    if (waveNumber % 3 === 0) {
-        updateData.td_towers = localTowers;
-        updateData.td_towerUpgrades = localTowerUpgrades;
-        showMessageBox(`Checkpoint reached! Tower configuration saved (Wave ${waveNumber}).`, 'info', 3000);
-    } else {
-        // If not a checkpoint wave, just acknowledge the wave start locally/in database for progress
-        showMessageBox(`Starting Wave ${waveNumber}. Next checkpoint at Wave ${Math.ceil(waveNumber / 3) * 3}.`, 'info', 1500);
-    }
-
-    updateStatsInFirestore(updateData);
+    });
     
     // This now fully resets the transient state for the new wave.
     setLocalWaveState(prev => ({ 
@@ -5194,13 +6458,32 @@ const startWave = () => {
   const generateWave = (waveNumber) => {
     const enemies = [];
     const isJuggernautWave = waveNumber % 10 === 0;
+
+    let availableEnemyTypes = [...enemyTypes.normal];
+    // Introduce healers starting from wave 4
+    if (waveNumber < 4) {
+      availableEnemyTypes = availableEnemyTypes.filter(e => !e.isHealer);
+    }
+
     if (isJuggernautWave) {
       const type = enemyTypes.juggernaut[Math.min(Math.floor(waveNumber / 10) - 1, enemyTypes.juggernaut.length - 1)];
-      enemies.push({ ...type, id: `${type.id}_${Date.now()}`, health: type.health * (1 + waveNumber / 20), x: 0, y: 0, progress: 0 });
+      enemies.push({ ...type, id: `${type.id}_${Date.now()}`, maxHealth: type.health * (1 + waveNumber / 20), health: type.health * (1 + waveNumber / 20), x: 0, y: 0, progress: 0 });
     } else {
-      for (let i = 0; i < 5 + waveNumber * 2; i++) {
-        const type = enemyTypes.normal[Math.floor(Math.random() * enemyTypes.normal.length)];
-        enemies.push({ ...type, id: `${type.id}_${i}_${Date.now()}`, health: type.health * (1 + waveNumber / 50), x: 0, y: 0, progress: -i * 0.2 });
+      const enemyCount = 5 + waveNumber * 2;
+      for (let i = 0; i < enemyCount; i++) {
+        // Occasionally spawn a healer with a high-HP unit
+        if (waveNumber >= 4 && i > 0 && i % 5 === 0 && Math.random() < 0.5) {
+            const healerType = enemyTypes.normal.find(e => e.isHealer);
+            const shieldBearerType = enemyTypes.normal.find(e => e.id === 'shieldbearer');
+            if (healerType && shieldBearerType) {
+                 enemies.push({ ...shieldBearerType, id: `${shieldBearerType.id}_${i}_${Date.now()}`, maxHealth: shieldBearerType.health * (1 + waveNumber / 50), health: shieldBearerType.health * (1 + waveNumber / 50), x: 0, y: 0, progress: -i * 0.2 });
+                 enemies.push({ ...healerType, id: `${healerType.id}_${i}_${Date.now()}`, maxHealth: healerType.health * (1 + waveNumber / 50), health: healerType.health * (1 + waveNumber / 50), x: 0, y: 0, progress: -i * 0.2 - 0.1 });
+                 i++; // a_spec_marksman
+                 continue;
+            }
+        }
+        const type = availableEnemyTypes[Math.floor(Math.random() * availableEnemyTypes.length)];
+        enemies.push({ ...type, id: `${type.id}_${i}_${Date.now()}`, maxHealth: type.health * (1 + waveNumber / 50), health: type.health * (1 + waveNumber / 50), x: 0, y: 0, progress: -i * 0.2 });
       }
     }
     return enemies;
@@ -5234,8 +6517,45 @@ const startWave = () => {
         // This variable now only tracks damage for the CURRENT 100ms tick.
         let damageThisTick = 0;
 
-        // --- 1. Update Tower States (e.g., Barracks Spawning) ---
+        // --- 1. Enemy Special Abilities (e.g., Healing, Summoning) ---
+        newEnemies.forEach(enemy => {
+          // Healer Logic
+          if (enemy.isHealer && Date.now() - enemy.lastHeal > enemy.healCooldown) {
+            let targetToHeal = null;
+            let lowestHealthRatio = 1;
+            
+            newEnemies.forEach(potentialTarget => {
+              if (!potentialTarget.isHealer && potentialTarget.health < potentialTarget.maxHealth) {
+                if (Math.hypot(enemy.x - potentialTarget.x, enemy.y - potentialTarget.y) <= enemy.healRadius) {
+                  const healthRatio = potentialTarget.health / potentialTarget.maxHealth;
+                  if (healthRatio < lowestHealthRatio) {
+                    lowestHealthRatio = healthRatio;
+                    targetToHeal = potentialTarget;
+                  }
+                }
+              }
+            });
+
+            if (targetToHeal) {
+              targetToHeal.health = Math.min(targetToHeal.maxHealth, targetToHeal.health + enemy.healAmount);
+              enemy.lastHeal = Date.now();
+              addVisualEffect({ type: 'heal_effect', x: targetToHeal.x, y: targetToHeal.y, color: 'rgba(74, 222, 128, 0.7)', radius: 0.5, duration: 800 });
+            }
+          }
+          // Summoner Logic
+          if (enemy.isSummoner && Date.now() - enemy.lastSummon > enemy.summonCooldown) {
+              const minionType = enemyTypes.special.find(e => e.id === 'minion');
+              for (let i = 0; i < 3; i++) {
+                  newEnemies.push({ ...minionType, id: `minion_${enemy.id}_${i}_${Date.now()}`, maxHealth: minionType.health, health: minionType.health, x: enemy.x, y: enemy.y, progress: enemy.progress - (i * 0.05) });
+              }
+              enemy.lastSummon = Date.now();
+              addVisualEffect({ type: 'summon_effect', x: enemy.x, y: enemy.y, color: 'rgba(192, 132, 252, 0.7)', radius: 1, duration: 1000 });
+          }
+        });
+
+        // --- 2. Update Tower States (e.g., Barracks Spawning, Auras) ---
         newTowers = newTowers.map(tower => {
+          // Barracks
           if (tower.id.startsWith('barracks') && Date.now() - (tower.lastSpawn || 0) > (tower.spawnRate * 1000)) {
             newSoldiers.push({
               id: `soldier_${Date.now()}`, x: tower.x, y: tower.y,
@@ -5278,6 +6598,9 @@ const startWave = () => {
           if (enemy.slowedUntil && Date.now() < enemy.slowedUntil) {
             currentSpeed *= (1 - enemy.slowAmount);
           }
+          if (enemy.stunnedUntil && Date.now() < enemy.stunnedUntil) {
+              currentSpeed = 0; // Stunned enemies don't move
+          }
           const newProgress = enemy.progress + currentSpeed * 0.1 * gameSpeed;
           if (newProgress >= 1) { damageThisTick++; return null; }
           const path = pathRef.current;
@@ -5288,10 +6611,37 @@ const startWave = () => {
 
         // --- 4. Tower Targeting & Firing ---
         newTowers = newTowers.map(tower => {
-          if (tower.id.startsWith('barracks') || Date.now() - tower.lastAttack < 1000 / tower.attackSpeed) return tower;
-          const target = newEnemies.find(e => (tower.canHitFlying || !e.flying) && Math.hypot(e.x - tower.x, e.y - tower.y) <= tower.range && e.progress >= 0);
+          let effectiveAttackSpeed = tower.attackSpeed;
+          // Disruptor Aura check
+          newEnemies.forEach(enemy => {
+              if (enemy.isDisruptor && Math.hypot(tower.x - enemy.x, tower.y - enemy.y) <= enemy.disruptRadius) {
+                  effectiveAttackSpeed *= enemy.disruptAmount;
+              }
+          });
+
+          if (tower.id.startsWith('barracks') || Date.now() - tower.lastAttack < 1000 / effectiveAttackSpeed) return tower;
+          
+          let possibleTargets = newEnemies.filter(e => 
+              (tower.canHitFlying || !e.flying) && 
+              e.progress >= 0 &&
+              (tower.canIgnoreObstacles || Math.hypot(e.x - tower.x, e.y - tower.y) <= tower.range)
+          );
+
+          let target = null;
+          if (possibleTargets.length > 0) {
+              switch (tower.targetPriority) {
+                  case 'first': target = possibleTargets.sort((a,b) => b.progress - a.progress)[0]; break;
+                  case 'last': target = possibleTargets.sort((a,b) => a.progress - b.progress)[0]; break;
+                  case 'strongest': target = possibleTargets.sort((a,b) => (b.health + b.armor) - (a.health + a.armor))[0]; break;
+                  case 'weakest': target = possibleTargets.sort((a,b) => (a.health + a.armor) - (b.health + b.armor))[0]; break;
+                  case 'highest_priority': target = possibleTargets.sort((a,b) => b.priority - a.priority)[0]; break;
+                  default: target = possibleTargets[0];
+              }
+          }
+          
           if (target) {
-            newProjectiles.push({ id: `p_${Date.now()}_${Math.random()}`, from: { x: tower.x, y: tower.y }, to: { x: target.x, y: target.y }, type: tower.projectileType, expires: Date.now() + 300, towerData: tower });
+            const projectileTo = tower.canIgnoreObstacles ? { x: target.x, y: target.y } : { x: target.x, y: target.y };
+            newProjectiles.push({ id: `p_${Date.now()}_${Math.random()}`, from: { x: tower.x, y: tower.y }, to: projectileTo, type: tower.projectileType, expires: Date.now() + 300, towerData: tower });
             return { ...tower, lastAttack: Date.now() };
           }
           return tower;
@@ -5300,13 +6650,47 @@ const startWave = () => {
         // --- 5. Projectile Collision & Effects ---
         newProjectiles.forEach(proj => {
           if (Date.now() > proj.expires - 100) {
+             // Handle mortar stun effect at impact location
+            if (proj.towerData.status?.type === 'stun' && Math.random() < proj.towerData.status.chance) {
+                newEnemies.forEach(enemy => {
+                    if (Math.hypot(enemy.x - proj.to.x, enemy.y - proj.to.y) < 1) {
+                        enemy.stunnedUntil = Date.now() + proj.towerData.status.duration;
+                    }
+                });
+            }
             newEnemies.forEach(enemy => {
               if (Math.hypot(enemy.x - proj.to.x, enemy.y - proj.to.y) < 1) {
-                const damage = proj.towerData.damage - (enemy.armor || 0);
+                // Apply tower shield damage first
+                let tower = newTowers.find(t => t.id === proj.towerData.id);
+                if (tower && tower.shield && tower.shield > 0) {
+                    tower.shield -= 1; // Each hit depletes shield
+                }
+                let damage = proj.towerData.damage;
+                if (proj.towerData.ricochet && proj.isRicochet) {
+                    damage *= proj.towerData.ricochet.damageFalloff;
+                }
+                damage -= (enemy.armor || 0);
                 enemy.health -= Math.max(1, damage);
+                
                 if (proj.towerData.slow) { enemy.slowedUntil = Date.now() + 1000; enemy.slowAmount = proj.towerData.slow; }
+                
+                // NEW: Ricochet logic
+                if (proj.towerData.ricochet && !proj.isRicochet) {
+                  const otherEnemies = newEnemies.filter(e => 
+                    e.id !== enemy.id && 
+                    Math.hypot(e.x - enemy.x, e.y - enemy.y) <= proj.towerData.ricochet.range
+                  ).slice(0, proj.towerData.ricochet.targets);
+
+                  otherEnemies.forEach(target => {
+                    addVisualEffect({ type: 'ricochet_spark', fromX: enemy.x, fromY: enemy.y, toX: target.x, toY: target.y, color: 'rgba(255, 255, 0, 0.8)', duration: 300 });
+                    const ricochetDamage = (proj.towerData.damage * proj.towerData.ricochet.damageFalloff) - (target.armor || 0);
+                    target.health -= Math.max(1, ricochetDamage);
+                  });
+                }
+                
                 if (proj.towerData.aoe) {
                   newEnemies.forEach(otherEnemy => {
+
                     if (otherEnemy.id !== enemy.id && Math.hypot(otherEnemy.x - enemy.x, otherEnemy.y - enemy.y) <= proj.towerData.aoe) {
                       otherEnemy.health -= Math.max(1, (proj.towerData.damage / 2) - (otherEnemy.armor || 0));
                     }
@@ -5339,13 +6723,22 @@ const startWave = () => {
         const isGameWon = waveRef.current >= 50 && remainingEnemies.length === 0 && !isGameOver;
         const isWaveOver = !isGameOver && !isGameWon && prev.enemies.length > 0 && remainingEnemies.length === 0;
 
-        if (isGameOver || isGameWon || isWaveOver) {
+if (isGameOver || isGameWon || isWaveOver) {
           setSessionHealth(newSessionHealth);
           let update = {};
           // CORE FIX: Use the accumulator to determine if an update is needed
           if (waveDamageAccumulator.current > 0) update.td_castleHealth = newSessionHealth;
-          if (isGameOver) update.td_gameOver = true;
-          if (isGameWon) { update.td_gameWon = true; update.td_wins = winsRef.current + 1; }
+          if (isGameOver) {
+            update.td_gameOver = true;
+            // Also reset commander cooldowns on loss
+            update['td_commander.abilityCooldowns'] = {};
+          }
+          if (isGameWon) { 
+            update.td_gameWon = true; 
+            update.td_wins = winsRef.current + 1; 
+            // Also reset commander cooldowns on win
+            update['td_commander.abilityCooldowns'] = {};
+          }
           
           // NEW: Loot Drop on Boss Wave & Victory
           if (isWaveOver && waveRef.current > 0 && waveRef.current % 10 === 0) {
@@ -5408,12 +6801,15 @@ const startWave = () => {
           // Use the unified 'currentTowers' list for all rendering logic.
           const tower = currentTowers.find(t => t.x === x && t.y === y);
           const isAttacking = tower && Date.now() - tower.lastAttack < 300;
+          const isCommanderMoveTarget = localUIState.isMovingCommander && !td_path.some(p => p.x === x && p.y === y) && !tower;
+          const isAbilityTarget = localUIState.targetingAbility && (!localUIState.targetingAbility.effect.target || localUIState.targetingAbility.effect.target !== 'unit');
+
 
           return (
             <div
               key={x}
               onClick={() => handleTileClick(x, y)}
-              className={`w-10 h-10 border border-slate-600 flex items-center justify-center relative ${td_path.some(p => p.x === x && p.y === y) ? 'bg-slate-700' : 'bg-slate-800'} ${localUIState.selectedTile?.x === x && localUIState.selectedTile?.y === y ? 'ring-2 ring-indigo-500' : ''}`}
+              className={`w-10 h-10 border border-slate-600 flex items-center justify-center relative ${td_path.some(p => p.x === x && p.y === y) ? 'bg-slate-700' : 'bg-slate-800'} ${localUIState.selectedTile?.x === x && localUIState.selectedTile?.y === y ? 'ring-2 ring-indigo-500' : ''} ${isCommanderMoveTarget ? 'bg-green-500/30 cursor-pointer' : ''} ${isAbilityTarget ? 'bg-yellow-500/30 cursor-pointer' : ''}`}
             >
               {tower && <div className={`text-lg transition-transform duration-200 ${isAttacking ? 'tower-attack' : ''}`}>{getTowerEmoji(tower.id)}</div>}
             </div>
@@ -5476,23 +6872,70 @@ const startWave = () => {
       return (
         <div className="text-white">
           <h3 className="text-xl font-bold mb-2">{towerAtTile.name}</h3>
+          {towerAtTile.shield && towerAtTile.shield > 0 && <p>Shield: <span className="text-cyan-300">{towerAtTile.shield.toFixed(0)}</span></p>}
           <p>Damage: {towerAtTile.damage}</p>
           <p>Range: {towerAtTile.range}</p>
           <p>Attack Speed: {towerAtTile.attackSpeed}/s</p>
+           <div className="mt-4">
+            <label htmlFor="targetPriority" className="block text-sm font-bold text-slate-400 mb-1">Target Priority</label>
+            <select
+              id="targetPriority"
+              value={towerAtTile.targetPriority || 'first'}
+              onChange={(e) => setLocalTowers(prev => prev.map(t => t.id === towerAtTile.id ? {...t, targetPriority: e.target.value} : t))}
+              className="w-full p-2 bg-slate-800 rounded-md border border-slate-600 focus:ring-2 focus:ring-green-500 font-mono"
+            >
+              <option value="first">First</option>
+              <option value="last">Last</option>
+              <option value="strongest">Strongest</option>
+              <option value="weakest">Weakest</option>
+              <option value="highest_priority">Highest Priority</option>
+            </select>
+          </div>
           <div className="mt-4">
             <h4 className="font-bold mb-2">Upgrades</h4>
-            {(towerUpgrades[towerAtTile.id.split('_')[0]] || []).map(upgrade => {
-              const isPurchased = localTowerUpgrades[towerAtTile.id]?.includes(upgrade.id);
+            {(() => {
+              const towerIdBase = towerAtTile.id.split('_')[0];
+              const upgradesForTower = towerUpgrades[towerIdBase] || [];
+              const purchasedUpgrades = localTowerUpgrades[towerAtTile.id] || [];
+              
+              const hasLevel1Upgrade = purchasedUpgrades.some(id => upgradesForTower.find(u => u.id === id)?.level === 1);
+              const hasSpecialization = purchasedUpgrades.some(id => upgradesForTower.find(u => u.id === id)?.level === 2);
+
               return (
-                <div key={upgrade.id} className="mb-2 p-2 bg-slate-700/50 rounded">
-                  <p className="font-medium">{upgrade.name}</p>
-                  <p className="text-sm text-slate-400">Cost: {upgrade.cost} XP</p>
-                  <button onClick={() => handleUpgradeTower(towerAtTile.id, upgrade)} disabled={isPurchased || stats.totalXP < upgrade.cost} className={`mt-1 px-2 py-1 text-sm rounded w-full ${isPurchased ? 'bg-green-800' : stats.totalXP >= upgrade.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-600 text-slate-400'}`}>
-                    {isPurchased ? 'Purchased' : 'Buy Upgrade'}
-                  </button>
+                <div className="space-y-3">
+                  {/* Level 1 Upgrades */}
+                  {upgradesForTower.filter(u => u.level === 1).map(upgrade => {
+                    const isPurchased = purchasedUpgrades.includes(upgrade.id);
+                    return (
+                      <div key={upgrade.id} className="p-2 bg-slate-700/50 rounded">
+                        <p className="font-medium">{upgrade.name}</p>
+                        <button onClick={() => handleUpgradeTower(towerAtTile.id, upgrade)} disabled={isPurchased || stats.totalXP < upgrade.cost} className={`mt-1 px-2 py-1 text-sm rounded w-full ${isPurchased ? 'bg-green-800' : stats.totalXP >= upgrade.cost ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-600 text-slate-400'}`}>
+                          {isPurchased ? 'Purchased' : `Buy (${upgrade.cost} XP)`}
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {/* Specializations */}
+                  {hasLevel1Upgrade && (
+                    <div className="pt-2 border-t border-slate-600">
+                      <h5 className="font-semibold text-indigo-300 mb-2">Specialization</h5>
+                      {upgradesForTower.filter(u => u.level === 2).map(upgrade => {
+                        const isPurchased = purchasedUpgrades.includes(upgrade.id);
+                        return(
+                          <div key={upgrade.id} className="p-2 bg-slate-700/50 rounded mb-2">
+                            <p className="font-medium">{upgrade.name}</p>
+                            <p className="text-xs text-slate-400 mb-1">{upgrade.description}</p>
+                            <button onClick={() => handleUpgradeTower(towerAtTile.id, upgrade)} disabled={isPurchased || hasSpecialization || stats.totalXP < upgrade.cost} className={`mt-1 px-2 py-1 text-sm rounded w-full ${isPurchased ? 'bg-green-800' : hasSpecialization ? 'bg-slate-600' : stats.totalXP >= upgrade.cost ? 'bg-purple-600 hover:bg-purple-700' : 'bg-slate-600 text-slate-400'}`}>
+                              {isPurchased ? 'Chosen' : hasSpecialization ? 'Path Chosen' : `Specialize (${upgrade.cost} XP)`}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
-            })}
+            })()}
           </div>
           <button onClick={sellTower} className="mt-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 w-full">
             Sell for {Math.floor(towerAtTile.cost * (petEffectsApplied.sellRefund || 0.15))} XP
@@ -5540,10 +6983,46 @@ const startWave = () => {
           <div className="p-2 bg-slate-900/50 border border-slate-700 rounded-lg inline-block relative">
             {renderBoard()}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+              {/* Commander is rendered here */}
+              {stats.td_commander && (
+                  <div className="absolute text-3xl z-20" style={{ top: stats.td_commander.y * 40 + 4, left: stats.td_commander.x * 40 + 4, transition: 'top 0.3s, left 0.3s' }}>
+                      💂
+                  </div>
+              )}
+              {localWaveState.visualEffects.map(effect => {
+                if (effect.type === 'ricochet_spark') {
+                  return <svg key={effect.id} className="absolute inset-0 pointer-events-none" style={{ animation: `fade-out-fast ${effect.duration}ms ease-out forwards` }}><line x1={effect.fromX * 40 + 20} y1={effect.fromY * 40 + 20} x2={effect.toX * 40 + 20} y2={effect.toY * 40 + 20} stroke={effect.color} strokeWidth="2" /></svg>;
+                }
+                return <div key={effect.id} className="absolute rounded-full" style={{ top: effect.y * 40 + 20, left: effect.x * 40 + 20, width: effect.radius * 80, height: effect.radius * 80, background: effect.color, transform: 'translate(-50%, -50%)', animation: `particle-burst ${effect.duration}ms ease-out forwards` }} />
+              })}
               {renderEnemies()}
               {renderSoldiers()}
               {localWaveState.projectiles.map(p => <Projectile key={p.id} from={p.from} to={p.to} type={p.type} />)}
             </div>
+          </div>
+          {/* Commander UI */}
+          <div className="mt-4 bg-slate-800/50 p-4 rounded-lg flex items-center gap-4">
+              <button onClick={() => setLocalUIState(prev => ({...prev, isMovingCommander: !prev.isMovingCommander, targetingAbility: null}))} className={`p-3 rounded-lg font-semibold ${localUIState.isMovingCommander ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}>Move Commander</button>
+              <div className="flex-grow flex justify-around items-center gap-2">
+                {commanderAbilities.abilities.map(ability => {
+                  const cooldown = stats.td_commander?.abilityCooldowns?.[ability.id] || 0;
+                  const isReady = Date.now() > cooldown;
+                  const secondsLeft = isReady ? 0 : Math.ceil((cooldown - Date.now())/1000);
+                  return (
+                    <button 
+                      key={ability.id}
+                      onClick={() => { if(isReady) setLocalUIState(prev => ({...prev, isMovingCommander: false, targetingAbility: ability}))}}
+                      disabled={!isReady}
+                      className={`relative w-20 h-20 rounded-lg flex flex-col items-center justify-center p-2 text-center transition-colors ${localUIState.targetingAbility?.id === ability.id ? 'bg-yellow-600' : isReady ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-slate-600 text-slate-400'}`}
+                      title={ability.description}
+                    >
+                      <span className="text-3xl">{ability.icon}</span>
+                      <span className="text-xs font-bold leading-tight">{ability.name}</span>
+                      {!isReady && <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-2xl font-bold">{secondsLeft}</div>}
+                    </button>
+                  );
+                })}
+              </div>
           </div>
           <div className="mt-4 flex gap-4">
             <button onClick={startWave} disabled={localWaveState.waveInProgress || td_gameOver || td_gameWon} className={`flex-grow px-4 py-3 rounded-lg text-lg font-bold transition-colors ${localWaveState.waveInProgress || td_gameOver || td_gameWon ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{localWaveState.waveInProgress ? 'Wave In Progress' : td_wave === 0 ? 'Start Wave 1' : `Start Wave ${td_wave + 1}`}</button>
@@ -5841,282 +7320,459 @@ const starChartData = {
   ]
 };
 
-// Component for the Sanctum
-const Sanctum = ({ stats, completedAssignments, updateStatsInFirestore, showMessageBox, getFullCosmeticDetails, getItemStyle, processAchievement }) => {  const [editMode, setEditMode] = useState(false);
-  const [selectedItemForPlacing, setSelectedItemForPlacing] = useState(null);  const [ghostPosition, setGhostPosition] = useState(null);
-  const [selectedPlacedItem, setSelectedPlacedItem] = useState(null);
-  const [showTrophyModal, setShowTrophyModal] = useState(false);
-  const [showFunFactModal, setShowFunFactModal] = useState(false);
-  const [currentFunFact, setCurrentFunFact] = useState('');
-  const [petPosition, setPetPosition] = useState({ x: 1, y: 1 });
+// Generated code
+// Generated code
+const SanctumEditor = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, onExit }) => {
+  const [savedState, setSavedState] = useState(stats.sanctumCanvas);
+  const [draftState, setDraftState] = useState(stats.sanctumCanvas);
+  const [activeLayerIndex, setActiveLayerIndex] = useState(0);
+  const [activeTool, setActiveTool] = useState('brush');
+  const [activeTileId, setActiveTileId] = useState(1);
+  const [history, setHistory] = useState([stats.sanctumCanvas]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const canvasRef = useRef(null);
+  const lastPaintedTile = useRef(null);
+  const [isPainting, setIsPainting] = useState(false);
+  const [editingLayer, setEditingLayer] = useState(null);
+  const [isGridVisible, setIsGridVisible] = useState(true);
+  const [brushSize, setBrushSize] = useState(1); // NEW: Brush size state
 
-  const GRID_COLS = 20;
-  const GRID_ROWS = 12;
+  const hasUnsavedChanges = useMemo(() => JSON.stringify(savedState) !== JSON.stringify(draftState), [savedState, draftState]);
 
-  const motivationalQuotes = [
-    "The secret of getting ahead is getting started.",
-    "The only way to do great work is to love what you do.",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-    "Don't watch the clock; do what it does. Keep going.",
-    "Believe you can and you're halfway there.",
-    "The future depends on what you do today.",
-    "Well done is better than well said."
-  ];
+  useMemo(initializeTileRegistry, []);
 
-  const equippedWallpaper = getFullCosmeticDetails(stats?.equippedItems?.wallpaper, 'wallpapers');
-  const wallStyle = equippedWallpaper?.style || { background: 'linear-gradient(to bottom, #475569, #334155)' };
+  const unlockedTilesets = useMemo(() => {
+    const unlockedIds = new Set(stats.unlockedTilesets || []);
+    return Object.entries(tilesetData)
+      .filter(([key, data]) => data.isDefault || unlockedIds.has(data.unlockId))
+      .map(([key, data]) => ({ key, name: data.name }));
+  }, [stats.unlockedTilesets]);
 
-  const getFurnitureDef = (itemId) => Object.values(furnitureDefinitions).flat().find(f => f.id === itemId);
+  const [activeTilesetKey, setActiveTilesetKey] = useState(unlockedTilesets[0]?.key || '');
 
-  const placedItems = stats?.sanctumLayout?.placedItems || [];
+  const activeTileset = tilesetData[activeTilesetKey];
 
-  // Pet Roaming Logic
-  useEffect(() => {
-    if (stats?.currentPet && !editMode) {
-      const isOccupied = (x, y) => {
-        return placedItems.some(item => {
-          const def = getFurnitureDef(item.id);
-          if (!def || !def.isObstacle) return false;
-          return x >= item.x && x < item.x + def.width && y >= item.y && y < item.y + def.height;
-        });
-      };
-
-      const interval = setInterval(() => {
-        setPetPosition(currentPos => {
-          let newX, newY, attempts = 0;
-          do {
-            newX = Math.floor(Math.random() * GRID_COLS);
-            newY = Math.floor(Math.random() * GRID_ROWS);
-            attempts++;
-          } while (isOccupied(newX, newY) && attempts < 50); // Try 50 times to find a free spot
-
-          return attempts < 50 ? { x: newX, y: newY } : currentPos; // If no spot found, stay put
-        });
-      }, 7000); // Move every 7 seconds
-
-      return () => clearInterval(interval);
-    }
-  }, [stats?.currentPet, editMode, placedItems]);
-
-    const ownedFurnitureDetails = useMemo(() => {
-    return (stats?.ownedFurniture || []).map(id => getFurnitureDef(id)).filter(Boolean);
-  }, [stats?.ownedFurniture]);
-
-  const updateLayout = (newPlacedItems) => {
-    updateStatsInFirestore({ sanctumLayout: { ...(stats?.sanctumLayout || { placedItems: [] }), placedItems: newPlacedItems } });
+  const recordHistory = (newState) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newState);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
   };
 
-
-  const handleSelectForPlacing = (item) => {
-    setSelectedItemForPlacing(item);
-    setSelectedPlacedItem(null);
-  };
-
-  const handleGridCellHover = (x, y) => {
-    if (editMode && selectedItemForPlacing) {
-      setGhostPosition({ x, y });
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setDraftState(history[newIndex]);
     }
   };
 
-  const handleGridClick = (x, y) => {
-    if (!editMode) return;
-    
-    if (selectedItemForPlacing) {
-        const inventoryItem = selectedItemForPlacing;
-        const newItemRect = { x, y, width: inventoryItem.width, height: inventoryItem.height };
-        
-        if (newItemRect.x + newItemRect.width > GRID_COLS || newItemRect.y + newItemRect.height > GRID_ROWS) {
-            showMessageBox("Item cannot be placed out of bounds.", "error");
-            return;
-        }
-
-        const isOccupied = placedItems.some(item => {
-            const def = getFurnitureDef(item.id);
-            if (!def || !def.isObstacle) return false;
-            const existingItemRect = { x: item.x, y: item.y, width: def.width, height: def.height };
-            return (
-                newItemRect.x < existingItemRect.x + existingItemRect.width &&
-                newItemRect.x + newItemRect.width > existingItemRect.x &&
-                newItemRect.y < existingItemRect.y + existingItemRect.height &&
-                newItemRect.y + newItemRect.height > existingItemRect.y
-            );
-        });
-
-        if (isOccupied) {
-            showMessageBox("This space is occupied by an obstacle.", "error");
-            return;
-        }
-        
-        const newItem = { instanceId: `${inventoryItem.id}_${Date.now()}`, id: inventoryItem.id, x, y };
-        updateLayout([...placedItems, newItem]);
-        processAchievement('furniturePlaced');
-        setSelectedItemForPlacing(null);
-        setGhostPosition(null);
-    } else {
-      setSelectedPlacedItem(null);
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setDraftState(history[newIndex]);
     }
-  };
-
-  const handleItemClick = (e, item) => {
-    e.stopPropagation();
-    if (editMode) {
-      setSelectedPlacedItem(item);
-      setSelectedItemForPlacing(null);
-      setGhostPosition(null);
-    } else if (item.id.includes('trophy_case')) {
-      setShowTrophyModal(true);
-    } else if (item.id.includes('computer_setup')) {
-      setCurrentFunFact(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-      setShowFunFactModal(true);
-    }
-  };
-
-  const handleRemoveItem = () => {
-    if (!selectedPlacedItem) return;
-    const newItems = placedItems.filter(item => item.instanceId !== selectedPlacedItem.instanceId);
-    updateLayout(newItems);
-    setSelectedPlacedItem(null);
   };
   
-  const handleExitEditMode = () => {
-    setEditMode(false);
-    setSelectedItemForPlacing(null);
-    setSelectedPlacedItem(null);
-    setGhostPosition(null);
+  const handleAddLayer = () => {
+    if ((draftState.layers?.length || 0) >= 5) {
+      showMessageBox("Maximum of 5 layers reached.", "error");
+      return;
+    }
+    const newLayer = Array(CANVAS_DIMS.width * CANVAS_DIMS.height).fill(0).join(',');
+    const newState = {
+      ...draftState,
+      layers: [...(draftState.layers || []), newLayer],
+      layerNames: [...(draftState.layerNames || []), `Layer ${(draftState.layers?.length || 0) + 1}`],
+      layerVisibility: [...(draftState.layerVisibility || []), true],
+    };
+    setDraftState(newState);
+    recordHistory(newState);
+    setActiveLayerIndex(draftState.layers?.length || 0);
+  };
+
+  const handleDeleteLayer = () => {
+    if (draftState.layers.length <= 1) {
+      showMessageBox("Cannot delete the last layer.", "error");
+      return;
+    }
+    const newLayers = draftState.layers.filter((_, i) => i !== activeLayerIndex);
+    const newNames = draftState.layerNames.filter((_, i) => i !== activeLayerIndex);
+    const newVis = draftState.layerVisibility.filter((_, i) => i !== activeLayerIndex);
+    const newState = { ...draftState, layers: newLayers, layerNames: newNames, layerVisibility: newVis };
+    
+    setDraftState(newState);
+    recordHistory(newState);
+    setActiveLayerIndex(Math.max(0, activeLayerIndex - 1));
+  };
+  
+  const handleToggleLayerVisibility = (index) => {
+    const newVis = [...draftState.layerVisibility];
+    newVis[index] = !newVis[index];
+    const newState = { ...draftState, layerVisibility: newVis };
+    setDraftState(newState);
+  };
+
+  const handleRenameLayer = () => {
+    if (!editingLayer || editingLayer.name.trim() === '') {
+      setEditingLayer(null);
+      return;
+    }
+    const newLayerNames = [...draftState.layerNames];
+    newLayerNames[editingLayer.index] = editingLayer.name.trim();
+    const newState = { ...draftState, layerNames: newLayerNames };
+    setDraftState(newState);
+    setEditingLayer(null);
+  };
+  
+  // MODIFIED: This function now handles different brush sizes
+  const handleCanvasAction = (tileIndex, tool) => {
+    const newLayers = [...draftState.layers];
+    let layerToEdit = newLayers[activeLayerIndex].split(',').map(Number);
+    let stateChanged = false;
+    
+    const applyTool = (index) => {
+      if (tool === 'brush' && layerToEdit[index] !== activeTileId) {
+        layerToEdit[index] = activeTileId;
+        stateChanged = true;
+      } else if (tool === 'eraser' && layerToEdit[index] !== 0) {
+        layerToEdit[index] = 0;
+        stateChanged = true;
+      }
+    };
+
+    if (brushSize > 1 && (tool === 'brush' || tool === 'eraser')) {
+      const startX = (tileIndex % CANVAS_DIMS.width) - Math.floor(brushSize / 2);
+      const startY = Math.floor(tileIndex / CANVAS_DIMS.width) - Math.floor(brushSize / 2);
+      
+      for (let y = 0; y < brushSize; y++) {
+        for (let x = 0; x < brushSize; x++) {
+          const currentX = startX + x;
+          const currentY = startY + y;
+          if (currentX >= 0 && currentX < CANVAS_DIMS.width && currentY >= 0 && currentY < CANVAS_DIMS.height) {
+            const currentIndex = currentY * CANVAS_DIMS.width + currentX;
+            applyTool(currentIndex);
+          }
+        }
+      }
+    } else if (tool === 'brush' || tool === 'eraser') {
+      applyTool(tileIndex);
+    } else if (tool === 'colorize') {
+        let foundTileId = 0;
+        for (let i = draftState.layers.length - 1; i >= 0; i--) {
+            if (draftState.layerVisibility[i]) {
+                const layer = draftState.layers[i].split(',').map(Number);
+                if (layer[tileIndex] !== 0) {
+                    foundTileId = layer[tileIndex];
+                    break;
+                }
+            }
+        }
+        if (foundTileId !== 0) {
+          setActiveTileId(foundTileId);
+          setActiveTool('brush');
+        }
+        return; // No state change to record
+    } else if (tool === 'format_color_fill') {
+        const targetTile = layerToEdit[tileIndex];
+        if (targetTile === activeTileId) return;
+        const queue = [tileIndex];
+        const visited = new Set([tileIndex]);
+        
+        while(queue.length > 0) {
+            const current = queue.shift();
+            layerToEdit[current] = activeTileId;
+            stateChanged = true;
+            const x = current % CANVAS_DIMS.width;
+            const y = Math.floor(current / CANVAS_DIMS.width);
+            const neighbors = [{nx: x, ny: y - 1}, {nx: x, ny: y + 1}, {nx: x - 1, ny: y}, {nx: x + 1, ny: y}];
+            for (const n of neighbors) {
+                if (n.nx >= 0 && n.nx < CANVAS_DIMS.width && n.ny >= 0 && n.ny < CANVAS_DIMS.height) {
+                    const nIndex = n.ny * CANVAS_DIMS.width + n.nx;
+                    if (layerToEdit[nIndex] === targetTile && !visited.has(nIndex)) {
+                        visited.add(nIndex);
+                        queue.push(nIndex);
+                    }
+                }
+            }
+        }
+    }
+    
+    if (stateChanged) {
+      newLayers[activeLayerIndex] = layerToEdit.join(',');
+      const newState = { ...draftState, layers: newLayers };
+      setDraftState(newState);
+      if (tool === 'format_color_fill') recordHistory(newState);
+      processAchievement('sanctumTilesPlaced');
+    }
+  };
+  
+  const handleMouseDown = (e) => {
+    if (e.button !== 0 || !canvasRef.current) return;
+    setIsPainting(true);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+    const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+    if (x >= 0 && x < CANVAS_DIMS.width && y >= 0 && y < CANVAS_DIMS.height) {
+      const tileIndex = y * CANVAS_DIMS.width + x;
+      lastPaintedTile.current = tileIndex;
+      handleCanvasAction(tileIndex, activeTool);
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isPainting || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+    const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+    if (x >= 0 && x < CANVAS_DIMS.width && y >= 0 && y < CANVAS_DIMS.height) {
+      const tileIndex = y * CANVAS_DIMS.width + x;
+      if (lastPaintedTile.current !== tileIndex && (activeTool === 'brush' || activeTool === 'eraser')) {
+        lastPaintedTile.current = tileIndex;
+        handleCanvasAction(tileIndex, activeTool);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isPainting) recordHistory(draftState);
+    setIsPainting(false);
+    lastPaintedTile.current = null;
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      await updateStatsInFirestore({ sanctumCanvas: draftState });
+      setSavedState(draftState);
+      showMessageBox("Sanctum saved successfully!", "info");
+    } catch (error) {
+      showMessageBox("Failed to save Sanctum.", "error");
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setDraftState(savedState);
+    setHistory([savedState]);
+    setHistoryIndex(0);
+    showMessageBox("Changes discarded.", "info");
+  };
+
+  const handleExitEditor = () => {
+    if (hasUnsavedChanges) {
+      if (window.confirm("You have unsaved changes that will be lost. Are you sure you want to exit?")) {
+        handleDiscardChanges();
+        onExit();
+      }
+    } else {
+      onExit();
+    }
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-neutral-900 z-50 theme-webcrumbs">
+      <div id="webcrumbs" className="h-full">
+        <div className="bg-neutral-900 h-full flex flex-col text-neutral-200 font-['Inter',sans-serif]">
+          <main className="flex-1 grid grid-cols-[280px_1fr] overflow-hidden">
+            {/* --- LEFT SIDEBAR (GRID ITEM) --- */}
+            <aside className="bg-neutral-800/95 backdrop-blur-sm border-r border-neutral-700 flex flex-col p-4 overflow-hidden">
+              <div className="flex-shrink-0 mb-4">
+                <h2 className="text-sm uppercase tracking-wider text-neutral-400 mb-2">Toolbar</h2>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    {id: 'brush', icon: 'brush'}, {id: 'eraser', icon: 'ink_eraser'}, {id: 'format_color_fill', icon: 'format_color_fill'}, {id: 'colorize', icon: 'colorize'}, 
+                    {id: 'undo', icon: 'undo'}, {id: 'redo', icon: 'redo'},
+                    {id: 'toggle_grid', icon: isGridVisible ? 'grid_off' : 'grid_on'}
+                  ].map(tool => (
+                      <button 
+                          key={tool.id} 
+                          onClick={
+                            tool.id === 'undo' ? handleUndo : 
+                            tool.id === 'redo' ? handleRedo :
+                            tool.id === 'toggle_grid' ? () => setIsGridVisible(v => !v) : 
+                            () => setActiveTool(tool.id)
+                          } 
+                          className={`w-10 h-10 flex items-center justify-center rounded-md transition-all group ${activeTool === tool.id ? 'bg-indigo-500' : 'hover:bg-neutral-700'}`} 
+                          title={tool.id.charAt(0).toUpperCase() + tool.id.slice(1).replace(/_/g, ' ')}
+                      >
+                        <span className="material-symbols-outlined text-neutral-200 group-hover:scale-110 transition-transform">{tool.icon}</span>
+                      </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* NEW: Brush Size Selector */}
+              <div className="flex-shrink-0 mb-4">
+                <h2 className="text-sm uppercase tracking-wider text-neutral-400 mb-2">Brush Size</h2>
+                <div className="flex gap-2">
+                  {[1, 3, 5].map(size => (
+                    <button 
+                      key={size}
+                      onClick={() => setBrushSize(size)}
+                      className={`w-10 h-10 flex items-center justify-center rounded-md transition-all font-bold ${brushSize === size ? 'bg-indigo-500' : 'bg-neutral-700 hover:bg-neutral-600'}`}
+                      title={`${size}x${size} Brush`}
+                    >
+                      {size}x{size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex-shrink-0">
+                  <h2 className="text-sm uppercase tracking-wider text-neutral-400 mb-2">Tile Palette</h2>
+                  <div className="mb-4">
+                    <select value={activeTilesetKey} onChange={(e) => setActiveTilesetKey(e.target.value)} className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-md text-white">
+                      {unlockedTilesets.map(ts => <option key={ts.key} value={ts.key}>{ts.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="mb-4 bg-neutral-700/50 border border-neutral-700 rounded-md p-3">
+                    <h3 className="text-xs text-neutral-400 mb-2">Active Tile</h3>
+                    <div className="w-16 h-16 rounded-md mb-1 overflow-hidden bg-neutral-900" style={getSanctumTileStyle(activeTileId)}></div>
+                    <div className="text-xs text-neutral-400">Global ID: {activeTileId}</div>
+                  </div>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto pr-2 min-h-0">
+                  {activeTileset && (
+                    <div className="grid grid-cols-5 gap-1">
+                      {Array.from({ length: activeTileset.usableTileCount }).map((_, i) => {
+                        const globalId = activeTileset.offset + i;
+                        return (
+                          <div key={globalId} onClick={() => setActiveTileId(globalId)} className={`aspect-square rounded hover:ring-2 ring-indigo-500 transition-all cursor-pointer ${activeTileId === globalId ? 'ring-2 ring-indigo-500' : ''}`} style={getSanctumTileStyle(globalId)} />
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            {/* --- MAIN CONTENT AREA (GRID ITEM) --- */}
+            <div className="grid grid-cols-[1fr_240px] overflow-hidden">
+              <div className="bg-[#1a1a1a] relative overflow-hidden">
+                <div className="absolute inset-0 overflow-auto p-8 flex justify-center items-start">
+                  <div
+                    ref={canvasRef}
+                    className="relative grid shadow-lg overflow-hidden cursor-crosshair flex-shrink-0"
+                    style={{
+                      gridTemplateColumns: `repeat(${CANVAS_DIMS.width}, ${TILE_SIZE}px)`,
+                      width: `${CANVAS_DIMS.width * TILE_SIZE}px`,
+                      height: `${CANVAS_DIMS.height * TILE_SIZE}px`,
+                      backgroundColor: isGridVisible ? '#3f3f46' : '#27272a',
+                      backgroundImage: isGridVisible 
+                        ? 'linear-gradient(45deg, #3f3f46 25%, transparent 25%), linear-gradient(-45deg, #3f3f46 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #3f3f46 75%), linear-gradient(-45deg, transparent 75%, #3f3f46 75%)'
+                        : 'none',
+                      backgroundSize: '32px 32px'
+                    }}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    {draftState.layers.map((layerStr, layerIndex) => {
+                      if (!draftState.layerVisibility[layerIndex]) return null;
+                      const tiles = layerStr.split(',').map(Number);
+                      return (
+                        <div key={layerIndex} className="absolute inset-0 grid pointer-events-none" style={{ zIndex: layerIndex, gridTemplateColumns: `repeat(${CANVAS_DIMS.width}, 1fr)`}}>
+                          {tiles.map((tileId, tileIndex) => (
+                            <div key={tileIndex} style={getSanctumTileStyle(tileId)} />
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 bg-neutral-800/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex gap-6 text-sm">
+                  <button onClick={handleSaveChanges} disabled={!hasUnsavedChanges} className="px-4 py-1.5 bg-green-600 hover:bg-green-500 rounded-full transition-colors flex items-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed"><span className="material-symbols-outlined text-sm">save</span>Save Canvas</button>
+                  <button onClick={handleDiscardChanges} disabled={!hasUnsavedChanges} className="px-4 py-1.5 bg-neutral-700 hover:bg-neutral-600 rounded-full transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><span className="material-symbols-outlined text-sm">refresh</span>Discard</button>
+                  <button onClick={handleExitEditor} className="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded-full transition-colors flex items-center gap-2"><span className="material-symbols-outlined text-sm">close</span>Exit Editor</button>
+                </div>
+              </div>
+
+              <aside className="bg-neutral-800/95 backdrop-blur-sm border-l border-neutral-700 p-4 flex flex-col overflow-y-auto shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm uppercase tracking-wider text-neutral-400">Layers</h2>
+                  <div className="flex gap-2">
+                    <button onClick={handleAddLayer} className="w-8 h-8 flex items-center justify-center hover:bg-neutral-700 rounded transition-all" title="Add New Layer"><span className="material-symbols-outlined text-neutral-400 hover:text-neutral-300">add</span></button>
+                    <button onClick={handleDeleteLayer} className="w-8 h-8 flex items-center justify-center hover:bg-neutral-700 rounded transition-all" title="Delete Selected Layer"><span className="material-symbols-outlined text-neutral-400 hover:text-neutral-300">delete</span></button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {(draftState.layerNames || []).map((name, index) => (
+                    <div key={index} onClick={() => setActiveLayerIndex(index)} onDoubleClick={() => setEditingLayer({ index, name })} className={`p-2 rounded flex items-center justify-between group transition-all cursor-pointer ${activeLayerIndex === index ? 'bg-indigo-500/20 border border-indigo-500/30' : 'bg-neutral-700/50 hover:bg-neutral-700'}`}>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleLayerVisibility(index); }} className="text-sm text-neutral-300 flex-shrink-0"><span className="material-symbols-outlined">{draftState.layerVisibility[index] ? 'visibility' : 'visibility_off'}</span></button>
+                        {editingLayer?.index === index ? (
+                          <input type="text" value={editingLayer.name} onChange={(e) => setEditingLayer({ ...editingLayer, name: e.target.value })} onBlur={handleRenameLayer} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameLayer(); if (e.key === 'Escape') setEditingLayer(null); }} autoFocus className="bg-neutral-900 text-sm text-white rounded px-1 -my-1 w-full"/>
+                        ) : (
+                          <span className="text-sm text-neutral-200 truncate">{name}</span>
+                        )}
+                      </div>
+                      <span className="material-symbols-outlined text-sm text-neutral-400 group-hover:text-neutral-300">drag_indicator</span>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+const Sanctum = ({ stats, setEditMode }) => {
+  const renderStaticCanvas = () => {
+    const state = stats.sanctumCanvas || defaultStats.sanctumCanvas;
+    return (
+      <div 
+        className="relative grid bg-neutral-700 rounded-md shadow-lg overflow-hidden" 
+        style={{
+          gridTemplateColumns: `repeat(${CANVAS_DIMS.width}, ${TILE_SIZE}px)`,
+          width: `${CANVAS_DIMS.width * TILE_SIZE}px`,
+          height: `${CANVAS_DIMS.height * TILE_SIZE}px`,
+          backgroundImage: 'linear-gradient(45deg, #3f3f46 25%, transparent 25%), linear-gradient(-45deg, #3f3f46 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #3f3f46 75%), linear-gradient(-45deg, transparent 75%, #3f3f46 75%)',
+          backgroundSize: '32px 32px'
+        }}
+      >
+         {state.layers.map((layerStr, layerIndex) => {
+            if (!state.layerVisibility[layerIndex]) return null;
+            const tiles = layerStr.split(',').map(Number);
+            return (
+              <div 
+                key={layerIndex} 
+                className="absolute inset-0 grid pointer-events-none"
+                style={{ zIndex: layerIndex, gridTemplateColumns: `repeat(${CANVAS_DIMS.width}, 1fr)`}}
+              >
+                {tiles.map((tileId, tileIndex) => (
+                  <div key={tileIndex} style={getSanctumTileStyle(tileId)} />
+                ))}
+              </div>
+            );
+          })}
+      </div>
+    );
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-white">My Sanctum</h2>
-          <p className="text-slate-400">Your personal space to decorate and display achievements.</p>
+          <h2 className="text-3xl font-bold text-white">The Creator's Canvas</h2>
+          <p className="text-slate-400">Your personal space to design and create.</p>
         </div>
-        <button
-          onClick={() => editMode ? handleExitEditMode() : setEditMode(true)}
-          className={`px-5 py-2 rounded-lg font-semibold transition-colors z-30 ${editMode ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-        >
-          {editMode ? 'Exit Edit Mode' : 'Edit Sanctum'}
+        <button onClick={() => setEditMode(true)} className="px-5 py-2 rounded-lg font-semibold bg-indigo-600 text-white hover:bg-indigo-700">
+          Edit Sanctum
         </button>
       </div>
-
-      <div className="flex flex-col xl:flex-row gap-6">
-        <div 
-            className="flex-grow w-full bg-slate-900 border border-slate-700 rounded-2xl shadow-xl relative min-h-[500px] overflow-hidden" 
-            style={{ perspective: '1200px' }}
-        >
-            <div className="absolute top-0 left-0 w-full h-[60%]" style={wallStyle} />
-            <div 
-              className="absolute top-[60%] left-0 w-full h-full" 
-              style={{ 
-                  transform: 'rotateX(60deg)', 
-                  transformOrigin: 'top center', 
-                  transformStyle: 'preserve-3d',
-              }}
-            >
-                {/* Main Grid for Interaction */}
-                <div 
-                    className="absolute inset-0 grid" 
-                    style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`, gridTemplateRows: `repeat(${GRID_ROWS}, 1fr)` }}
-                    onMouseLeave={() => setGhostPosition(null)}
-                >
-                    {Array.from({ length: GRID_COLS * GRID_ROWS }).map((_, i) => {
-                        const x = i % GRID_COLS;
-                        const y = Math.floor(i / GRID_COLS);
-                        return <div key={i} onMouseEnter={() => handleGridCellHover(x, y)} onClick={() => handleGridClick(x, y)} className={`border-r border-b border-slate-600/10 ${editMode ? 'hover:bg-indigo-500/20' : ''}`} />;
-                    })}
-                </div>
-
-                {/* Placed Items */}
-                {placedItems
-                    .map(item => ({...item, def: getFurnitureDef(item.id)}))
-                    .filter(item => item.def)
-                    .sort((a, b) => (a.y + a.def.height) - (b.y + b.def.height))
-                    .map(item => (
-                      <div key={item.instanceId} onClick={(e) => handleItemClick(e, item)} className={`absolute transition-all duration-200 ${editMode ? 'cursor-pointer hover:brightness-110' : ''} ${selectedPlacedItem?.instanceId === item.instanceId ? 'ring-2 ring-red-500' : ''}`} style={{ left: `${(item.x / GRID_COLS) * 100}%`, top: `${(item.y / GRID_ROWS) * 100}%`, width: `${(item.def.width / GRID_COLS) * 100}%`, height: `${(item.def.height / GRID_ROWS) * 100}%`, transform: `translateZ(5px)`, transformStyle: 'preserve-3d' }}>
-                        <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 w-4/5 h-2/5" style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '50%', filter: 'blur(12px)', transform: 'scaleY(0.4) translateZ(-1px)' }} />
-                        <div className="w-full h-full drop-shadow-lg" style={{ transform: 'rotateX(-60deg)', transformOrigin: 'bottom center' }} dangerouslySetInnerHTML={{ __html: item.def.display }} />
-                      </div>
-                    ))
-                }
-
-                {/* Roaming Pet */}
-                {stats?.currentPet && !editMode && (
-                  <div className="absolute transition-all duration-1000 ease-in-out" style={{ left: `${(petPosition.x / GRID_COLS) * 100}%`, top: `${(petPosition.y / GRID_ROWS) * 100}%`, width: `${(1 / GRID_COLS) * 100}%`, height: `${(1 / GRID_ROWS) * 100}%`, transform: 'translateZ(10px)', zIndex: 50 }}>
-                    <div className="w-full h-full text-2xl" style={{ transform: 'rotateX(-60deg) scale(1.5)', transformOrigin: 'bottom center' }}>
-                      {stats.currentPet.display}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Ghost Placement Preview */}
-                {editMode && ghostPosition && selectedItemForPlacing && (
-                    <div className="absolute bg-green-500/30 border-2 border-dashed border-green-400 pointer-events-none" style={{ left: `${(ghostPosition.x / GRID_COLS) * 100}%`, top: `${(ghostPosition.y / GRID_ROWS) * 100}%`, width: `${(selectedItemForPlacing.width / GRID_COLS) * 100}%`, height: `${(selectedItemForPlacing.height / GRID_ROWS) * 100}%`, zIndex: 999 }} />
-                )}
-            </div>
-        </div>
-
-        {editMode && (
-          <div className="xl:w-80 flex-shrink-0">
-            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-4 flex flex-col gap-4">
-              {selectedPlacedItem ? (
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">{getFurnitureDef(selectedPlacedItem.id)?.name}</h3>
-                  <p className="text-sm text-slate-400 capitalize mb-3">Rarity: {getFurnitureDef(selectedPlacedItem.id)?.rarity}</p>
-                  <button onClick={handleRemoveItem} className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Remove Item</button>
-                  <button onClick={() => setSelectedPlacedItem(null)} className="w-full mt-2 bg-slate-600 text-white px-4 py-2 rounded-md hover:bg-slate-500">Deselect</button>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">My Furniture</h3>
-                  <p className="text-sm text-slate-400 mb-4">{selectedItemForPlacing ? `Placing: ${selectedItemForPlacing.name}` : "Select an item to place."}</p>
-                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                    {ownedFurnitureDetails.map(item => (
-                      <div key={item.id} onClick={() => handleSelectForPlacing(item)} className={`bg-slate-700/80 p-3 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-slate-700 ${selectedItemForPlacing?.id === item.id ? 'ring-2 ring-indigo-500' : ''}`}>
-                        <div className="w-12 h-12 bg-slate-800 rounded flex-shrink-0 flex items-center justify-center p-1" dangerouslySetInnerHTML={{ __html: item.display }}></div>
-                        <div>
-                          <p className="font-semibold text-white">{item.name}</p>
-                          <p className="text-xs text-slate-400">{item.width}x{item.height} | {item.rarity}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {ownedFurnitureDetails.length === 0 && <p className="text-center text-slate-500">Buy furniture from the shop!</p>}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+      <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-4 flex items-center justify-center">
+         {renderStaticCanvas()}
       </div>
-      
-      {showTrophyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={() => setShowTrophyModal(false)}>
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-xl p-8 w-full max-w-3xl max-h-[80vh] flex flex-col text-white" onClick={e => e.stopPropagation()}>
-            <h3 className="text-2xl font-bold mb-6 text-center">My Trophy Wall</h3>
-            <div className="overflow-y-auto pr-2 space-y-4">
-              {completedAssignments.length > 0 ? completedAssignments.map(trophy => (
-                <div key={trophy.id} className="bg-slate-700/50 p-4 rounded-lg">
-                  <p className="font-bold text-lg text-yellow-400">{trophy.assignment}</p>
-                  <p className="text-sm text-slate-300">Class: {trophy.class}</p>
-                  <p className="text-sm text-slate-400">Completed on: {new Date(trophy.dateCompleted).toLocaleDateString()}</p>
-                </div>
-              )) : <p className="text-slate-400 text-center">No trophies earned yet.</p>}
-            </div>
-          </div>
-        </div>
-      )}
-      {showFunFactModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={() => setShowFunFactModal(false)}>
-          <div className="bg-slate-800 border border-indigo-500 rounded-2xl shadow-xl p-8 w-full max-w-md text-white text-center" onClick={e => e.stopPropagation()}>
-            <h3 className="text-2xl font-bold mb-4 text-indigo-300">A Quick Byte of Motivation!</h3>
-            <p className="text-lg text-slate-300 mb-6">"{currentFunFact}"</p>
-            <button onClick={() => setShowFunFactModal(false)} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
+
 // NEW: Component for the "Mission Control" Modal
 const MissionControlModal = ({ isOpen, onClose, assignment, unlockedLocations, onLaunchMission }) => {
   const [departure, setDeparture] = useState(null);
@@ -7777,19 +9433,29 @@ const FriendProfileModal = ({ profile, onClose, getFullCosmeticDetails, getItemS
 };
 
 // Main App Component
+// NEW: Custom hook to debounce a value
 const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
-    const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
+    // Set debouncedValue to value (passed in) after the specified delay
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
+
+    // Return a cleanup function that will be called every time ...
+    // ... useEffect is re-called. useEffect will only be re-called ...
+    // ... if value changes (see the dependency array below).
+    // This is how we prevent debouncedValue from changing if value is ...
+    // ... changed within the delay period. Timeout gets cleared and restarted.
     return () => {
       clearTimeout(handler);
     };
-  }, [value, delay]);
+  }, [value, delay]); // Only re-call effect if value or delay changes
+
   return debouncedValue;
 };
+
 const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
@@ -7805,15 +9471,23 @@ const useWindowSize = () => {
   }, []);
   return windowSize;
 };
+
+// --- ROBUST CACHING FUNCTIONS ---
 const cacheData = (key, data) => {
+  if (!window.sessionStorage) return;
   const item = {
     data: data,
     timestamp: Date.now(),
   };
-  sessionStorage.setItem(key, JSON.stringify(item));
+  try {
+    sessionStorage.setItem(key, JSON.stringify(item));
+  } catch (error) {
+    console.warn("Could not cache data:", error);
+  }
 };
 
-const getCachedData = (key, maxAgeSeconds) => {
+const getCachedData = (key, maxAgeSeconds = 60) => {
+  if (!window.sessionStorage) return null;
   const itemStr = sessionStorage.getItem(key);
   if (!itemStr) return null;
 
@@ -7824,9 +9498,20 @@ const getCachedData = (key, maxAgeSeconds) => {
       sessionStorage.removeItem(key);
       return null;
     }
-    return item.data;
+    // IMPORTANT: Revive Date and Timestamp objects from their string representations
+    const revivedData = JSON.parse(JSON.stringify(item.data), (k, v) => {
+        if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v)) {
+            return new Date(v);
+        }
+        if (typeof v === 'object' && v !== null && v.seconds && v.nanoseconds) {
+            return new Date(v.seconds * 1000 + v.nanoseconds / 1000000);
+        }
+        return v;
+    });
+    return revivedData;
   } catch (error) {
     console.error("Failed to parse cached data:", error);
+    sessionStorage.removeItem(key);
     return null;
   }
 };
@@ -7866,10 +9551,22 @@ const AuthComponent = () => {
 
             const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
             const usernameDocRef = doc(db, `usernames/${defaultUsername.toLowerCase()}`);
+            const publicProfileDocRef = doc(db, `publicProfiles`, user.uid);
             
             try {
               // Create the private stats document
               await setDoc(statsDocRef, newUserData);
+
+              // Create the public profile document with only non-sensitive info
+              await setDoc(publicProfileDocRef, {
+                username: newUserData.username,
+                totalXP: newUserData.totalXP,
+                currentLevel: newUserData.currentLevel,
+                equippedItems: newUserData.equippedItems,
+                assignmentsCompleted: newUserData.assignmentsCompleted,
+                dungeon_floor: newUserData.dungeon_floor,
+              });
+
               // Create the public username document so the user is searchable immediately
               await setDoc(usernameDocRef, { userId: user.uid });
             } catch (dbError) {
@@ -7920,46 +9617,10 @@ const AuthComponent = () => {
   };
 
 // Component for Assignment Tracker Sheet
-const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleCompletedToggle, addAssignmentToFirestore, updateAssignmentInFirestore, deleteAssignmentFromFirestore, isAddModalOpen, promptMissionStart, isMobile, updateStatsInFirestore }) => {
+const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleCompletedToggle, updateAssignmentInFirestore, deleteAssignmentFromFirestore, promptMissionStart, isMobile, onLoadMore, hasMore, onTogglePin, updateStatsInFirestore }) => {
     const [expandedAssignmentId, setExpandedAssignmentId] = useState(null);
     const [editingAssignmentData, setEditingAssignmentData] = useState(null);
     const [newSubtaskName, setNewSubtaskName] = useState('');
-
-    const handleAddAssignment = async (newAssignmentData) => {
-      if (!newAssignmentData.assignment) {
-        showMessageBox("Assignment Name is required.", "error");
-        return;
-      }
-
-      let subtasks = [];
-      if (newAssignmentData.isEpic) {
-        subtasks = [
-          { name: 'Research & Outline', completed: false },
-          { name: 'Complete First Draft', completed: false },
-          { name: 'Review & Edit Pass', completed: false },
-          { name: 'Final Submission Prep', completed: false }
-        ];
-      }
-
-      const assignmentToSave = {
-        ...newAssignmentData,
-        isEpicQuest: newAssignmentData.isEpic || false,
-        dueDate: newAssignmentData.dueDate ? new Date(newAssignmentData.dueDate) : null,
-        timeEstimate: parseFloat(newAssignmentData.timeEstimate) || 0,
-        pointsEarned: parseFloat(newAssignmentData.pointsEarned) || 0,
-        pointsMax: parseFloat(newAssignmentData.pointsMax) || 0,
-        recurrenceType: newAssignmentData.recurrenceType || 'none',
-        recurrenceEndDate: newAssignmentData.recurrenceEndDate ? new Date(newAssignmentData.recurrenceEndDate) : null,
-        tags: newAssignmentData.tags || [],
-        dateCompleted: null,
-        subtasks: subtasks,
-      };
-      delete assignmentToSave.isEpic; // clean up temp flag
-
-
-      await addAssignmentToFirestore(assignmentToSave);
-      showMessageBox("Assignment added successfully!", "info");
-    };
 
     const handleToggleDetails = (assignment) => {
       if (expandedAssignmentId === assignment.id) {
@@ -8074,18 +9735,6 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
             <span>Add New</span>
           </button>
         </div>
-        <AddAssignmentModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handleAddAssignment}
-        />
-
-        <AddAssignmentModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handleAddAssignment}
-        />
-
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-white">
@@ -8107,7 +9756,7 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
                   
                   return (
                     <React.Fragment key={assignment.id}>
-                      <tr className={`border-b border-slate-700 hover:bg-slate-800/70 ${assignment.isEpicQuest ? 'bg-indigo-900/30' : ''}`}>
+                      <tr className={`border-b border-slate-700 hover:bg-slate-800/70 transition-colors ${assignment.isEpicQuest ? 'bg-indigo-900/30' : ''} ${assignment.pinned ? 'bg-amber-900/20 border-l-4 border-amber-500' : ''}`}>
                         <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left whitespace-nowrap`}>{assignment.class || '⚠️'}</td>
                         <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-left`}>
                           <div className="flex items-center">
@@ -8149,6 +9798,9 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
                         </td>}
                         <td className={`py-3 ${isMobile ? 'px-2' : 'px-6'} text-center`}>
                           <div className="flex items-center justify-center gap-2">
+                             <button onClick={() => onTogglePin(assignment.id, assignment.pinned)} className={`p-1 ${assignment.pinned ? 'text-yellow-400' : 'text-slate-500 hover:text-yellow-300'}`} title={assignment.pinned ? "Unpin" : "Pin to Top"}>
+                              📌
+                            </button>
                             {assignment.status !== 'Completed' && (
                               <button onClick={() => promptMissionStart(assignment)} className="text-cyan-400 hover:text-cyan-300 p-1 text-xl" title="Start Focus Mission">
                                 🚀
@@ -8243,6 +9895,13 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
                 })}
               </tbody>
             </table>
+            {hasMore && (
+              <div className="p-4 text-center">
+                <button onClick={onLoadMore} className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-5 py-2 rounded-lg">
+                  Load More
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -8250,13 +9909,65 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
   };
     
 // Component for My Profile Sheet
-const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement, calculateLevelInfo }) => {
-  // Create a unified draft state from the incoming props
+const AvailabilityPreferencesModal = ({ isOpen, onClose, currentPrefs, onSave }) => {
+  const [prefs, setPrefs] = useState(currentPrefs || { primeTimes: [], unavailableDays: [] });
+
+  useEffect(() => {
+    if (isOpen) {
+      setPrefs(currentPrefs || { primeTimes: [], unavailableDays: [] });
+    }
+  }, [isOpen, currentPrefs]);
+
+  const handlePrimeTimeChange = (time) => {
+    setPrefs(p => ({ ...p, primeTimes: p.primeTimes.includes(time) ? p.primeTimes.filter(t => t !== time) : [...p.primeTimes, time] }));
+  };
+  
+  const handleDayChange = (dayIndex) => {
+    setPrefs(p => ({ ...p, unavailableDays: p.unavailableDays.includes(dayIndex) ? p.unavailableDays.filter(d => d !== dayIndex) : [...p.unavailableDays, dayIndex] }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-lg shadow-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Set Availability</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-slate-400 mb-2">Prime Times (When you prefer to collaborate)</label>
+            <div className="flex gap-2">
+              {['mornings', 'afternoons', 'evenings'].map(time => (
+                <button key={time} onClick={() => handlePrimeTimeChange(time)} className={`px-4 py-2 rounded-md capitalize ${prefs.primeTimes.includes(time) ? 'bg-green-600' : 'bg-slate-700'}`}>{time}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-400 mb-2">Generally Unavailable Days</label>
+            <div className="flex gap-2">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                <button key={day} onClick={() => handleDayChange(index)} className={`px-4 py-2 rounded-md ${prefs.unavailableDays.includes(index) ? 'bg-red-600' : 'bg-slate-700'}`}>{day}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-4 pt-4 mt-4 border-t border-slate-700">
+          <button onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
+          <button onClick={() => onSave(prefs)} className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Component for My Profile Sheet
+const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePet, getFullPetDetails, getFullCosmeticDetails, getItemStyle, db, appId, showMessageBox, actionLock, processAchievement, calculateLevelInfo, onAcceptInvite, onDeclineInvite, divisionData, friendProfiles }) => {
   const [draftState, setDraftState] = useState({ ...stats });
   const [activeTab, setActiveTab] = useState('collections');
   const [friendUsernameInput, setFriendUsernameInput] = useState('');
-  const [friendProfiles, setFriendProfiles] = useState({});
+  const [friendUidInput, setFriendUidInput] = useState('');
+  const [addFriendMethod, setAddFriendMethod] = useState('username');
   const [viewingFriendProfile, setViewingFriendProfile] = useState(null);
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   
   const [usernameInput, setUsernameInput] = useState(stats.username || '');
 
@@ -8273,44 +9984,6 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
   useEffect(() => {
     setUsernameInput(draftState.username || '');
   }, [draftState.username]);
-  
-  useEffect(() => {
-    if (!db || !stats.friends || stats.friends.length === 0) {
-      setFriendProfiles({}); // Clear profiles if no friends
-      return;
-    }
-
-    const fetchFriendProfiles = async () => {
-      try {
-        const statsCollectionRef = collection(db, `artifacts/${appId}/public/data/stats`);
-        const friendIds = stats.friends;
-        const profiles = {};
-        const batches = [];
-
-        // Firestore 'in' query is limited to 30 items, so we batch requests
-        for (let i = 0; i < friendIds.length; i += 30) {
-          const batchIds = friendIds.slice(i, i + 30);
-          if (batchIds.length > 0) {
-            batches.push(getDocs(query(statsCollectionRef, where(document.Id, 'in', batchIds))));
-          }
-        }
-        
-        const querySnapshotsArray = await Promise.all(batches);
-
-        querySnapshotsArray.forEach(snapshot => {
-          snapshot.forEach(doc => {
-            profiles[doc.id] = { id: doc.id, ...doc.data() };
-          });
-        });
-
-        setFriendProfiles(profiles);
-      } catch (error) {
-        console.error("Error fetching friend profiles:", error);
-      }
-    };
-
-    fetchFriendProfiles();
-  }, [db, stats.friends, appId]);
   
   // Check for unsaved changes by comparing the draft to the original props
   const hasUnsavedChanges = useMemo(() => {
@@ -8399,18 +10072,22 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
         const serverStats = statsDoc.data();
 
         if (serverStats.totalXP < item.cost) throw new Error("Not enough XP.");
-        // FIX: Provide a fallback empty array to prevent .includes() on undefined
-        if ((serverStats.ownedItems || []).includes(item.id) || (serverStats.ownedFurniture || []).includes(item.id)) throw new Error("Already owned.");
-
-        const isFurniture = item.type === 'furniture';
         
+        const isTilesetUnlock = item.type === 'tileset_unlock';
+        if (!isTilesetUnlock && (serverStats.ownedItems || []).includes(item.id)) throw new Error("Already owned.");
+        if (isTilesetUnlock && (serverStats.unlockedTilesets || []).includes(item.id)) throw new Error("Already owned.");
+
         const updateData = {
-            totalXP: serverStats.totalXP - item.cost,
-            cooldowns: { ...(serverStats.cooldowns || {}), buyShopItem: serverTimestamp() },
-            // FIX: Use fallback arrays here as well to safely add the new item
-            ownedItems: !isFurniture ? [...(serverStats.ownedItems || []), item.id] : (serverStats.ownedItems || []),
-            ownedFurniture: isFurniture ? [...(serverStats.ownedFurniture || []), item.id] : (serverStats.ownedFurniture || []),
+            totalXP: increment(-item.cost),
+            'cooldowns.buyShopItem': serverTimestamp()
         };
+
+        if (isTilesetUnlock) {
+            updateData.unlockedTilesets = arrayUnion(item.id);
+        } else {
+            updateData.ownedItems = arrayUnion(item.id);
+        }
+        
         transaction.update(statsDocRef, updateData);
       });
       showMessageBox(`Purchased ${item.name}!`, 'info');
@@ -8478,7 +10155,13 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
     setDraftState(prev => ({ ...prev, currentPet: pet }));
   };
   
-     const handleAddFriendByUsername = () => {
+  const handleSaveAvailability = (prefs) => {
+    updateStatsInFirestore({ availabilityPreferences: prefs });
+    setIsAvailabilityModalOpen(false);
+    showMessageBox("Availability preferences saved!", "info");
+  };
+
+  const handleAddFriendByUsername = () => {
     actionLock(async () => {
       const username = friendUsernameInput.trim();
       if (!username) { showMessageBox('Username cannot be empty.', 'error'); return; }
@@ -8516,6 +10199,39 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
     setDraftState(prev => ({ ...prev, friends: prev.friends.filter(id => id !== friendId) }));
   };
 
+  const handleAddFriendByUserId = () => actionLock(async () => {
+    const uid = friendUidInput.trim();
+    if (!uid) { showMessageBox('User ID cannot be empty.', 'error'); return; }
+    if (uid === user.uid) { showMessageBox("You can't add yourself.", 'error'); return; }
+    if (draftState.friends.includes(uid)) {
+      showMessageBox(`This user is already your friend.`, 'error');
+      return;
+    }
+
+    try {
+      // FIX: Query the public `usernames` collection instead of the private `stats` doc.
+      const usernamesCollectionRef = collection(db, 'usernames');
+      const q = query(usernamesCollectionRef, where("userId", "==", uid));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+          showMessageBox(`User with ID "${uid}" not found.`, "error");
+          return;
+      }
+
+      // The username is the ID of the document in this collection.
+      const friendUsername = querySnapshot.docs[0].id;
+      
+      setDraftState(prev => ({ ...prev, friends: [...prev.friends, uid] }));
+      setFriendUidInput('');
+      showMessageBox(`Added ${friendUsername} as a friend! Remember to save changes.`, 'info');
+
+    } catch (error) {
+        console.error("Error adding friend by User ID:", error);
+        showMessageBox("An error occurred while trying to add friend.", "error");
+    }
+  });
+
   const copyUserIdToClipboard = () => {
     navigator.clipboard.writeText(userId).then(() => showMessageBox('User ID copied!', 'info'), () => showMessageBox('Failed to copy.', 'error'));
   };
@@ -8525,6 +10241,8 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
       {children}
     </button>
   );
+
+  const pendingInvites = (stats.squadInvites || []).map(id => divisionData[id]).filter(Boolean);
 
   // Read from the `stats` prop for things the user owns.
   const ownedAvatars = stats.ownedItems.map(id => getFullCosmeticDetails(id, 'avatars')).filter(Boolean);
@@ -8547,9 +10265,32 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
           <TabButton tabName="shop">Shop</TabButton>
           <TabButton tabName="crafting">Crafting</TabButton>
           <TabButton tabName="friends">Friends</TabButton>
+          <TabButton tabName="invites">Invites ({pendingInvites.length})</TabButton>
+          <TabButton tabName="settings">Settings</TabButton>
         </div>
         
         <div className="p-6">
+          {activeTab === 'invites' && (
+            <div>
+              <h3 className="text-2xl font-semibold text-white mb-4">Division Invites</h3>
+              <div className="space-y-3">
+                {pendingInvites.length > 0 ? pendingInvites.map(invite => (
+                  <div key={invite.id} className="bg-slate-700/50 p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                      <p className="font-bold">{invite.squadName}</p>
+                      <p className="text-xs text-slate-400">Led by: {Object.values(invite.members).find(m => m.uid === invite.leaderId)?.username || '...'} | Members: {Object.keys(invite.members).length}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => onDeclineInvite(invite.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Decline</button>
+                      <button onClick={() => onAcceptInvite(invite.id)} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Accept</button>
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-slate-500 text-center">No pending invites.</p>
+                )}
+              </div>
+            </div>
+          )}
           {activeTab === 'collections' && (
             <div className="space-y-8">
               <h3 className="text-2xl font-semibold text-white">Your Items</h3>
@@ -8609,8 +10350,42 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-semibold text-white mb-3">Furniture Shop</h3>
-                {Object.entries(furnitureDefinitions).map(([category, items]) => (<div key={category}><h4 className="text-xl font-semibold text-indigo-300 capitalize mb-3">{category}</h4><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{items.map(item => { const isOwned = stats.ownedFurniture.includes(item.id); const canAfford = stats.totalXP >= item.cost; return (<div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col items-center text-center"><div className="w-24 h-24 mb-2 flex items-center justify-center text-slate-300"><div className="w-16 h-16" dangerouslySetInnerHTML={{ __html: item.display }} /></div><p className="font-semibold text-white flex-grow">{item.name}</p><p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p><button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button></div>);})}</div></div>))}
+                <h3 className="text-2xl font-semibold text-white mb-3">Tile Schematics</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {/* THIS IS THE FIX */}
+                    {cosmeticItems.tileset_unlocks.filter(item => item.cost > 0).map(item => {
+                        const isOwned = (stats.unlockedTilesets || []).includes(item.id);
+                        const canAfford = stats.totalXP >= item.cost;
+                        
+                        // Find a representative tile for the preview
+                        const previewTilesetKey = Object.keys(tilesetDefinitions).find(key => tilesetDefinitions[key].unlockId === item.id);
+                        let previewStyle = {};
+                        if (previewTilesetKey && tilesetData) {
+                            const tilesetMeta = tilesetData[previewTilesetKey];
+                            if (tilesetMeta) {
+                                // FIX: Instead of the first tile (which might be empty), pick a more representative one.
+                                // The second tile (offset + 1) is a safe choice. Handle edge case of 1-tile sheets.
+                                const previewTileId = tilesetMeta.totalTiles > 1 ? tilesetMeta.offset + 1 : tilesetMeta.offset;
+                                previewStyle = getSanctumTileStyle(previewTileId);
+                            }
+                        }
+                        
+                        // Extract a category name from the item name for clarity
+                        const category = item.name.replace("Schematics", "").replace("Guide", "").replace("Catalog", "").replace("Blueprints", "").replace("Pack", "").trim();
+
+                        return (
+                            <div key={item.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex flex-col text-center">
+                                <div className="w-full h-20 mb-3 rounded bg-slate-700 flex items-center justify-center overflow-hidden" style={{ backgroundImage: 'linear-gradient(45deg, #3f3f46 25%, transparent 25%), linear-gradient(-45deg, #3f3f46 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #3f3f46 75%), linear-gradient(-45deg, transparent 75%, #3f3f46 75%)', backgroundSize: '32px 32px' }}>
+                                  <div className="w-16 h-16" style={previewStyle} />
+                                </div>
+                                <p className="font-semibold text-white flex-grow">{item.name}</p>
+                                <p className="text-xs text-slate-400 capitalize mb-1">Unlocks: {category}</p>
+                                <p className="text-xs text-slate-400 capitalize mb-3">{item.rarity}</p>
+                                <button onClick={() => handleBuyItem(item)} disabled={isOwned || !canAfford} className={`w-full px-3 py-1.5 rounded text-sm font-semibold transition-colors ${isOwned ? 'bg-green-500/20 text-green-400 cursor-default' : !canAfford ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{isOwned ? 'Owned' : `${item.cost} XP`}</button>
+                            </div>
+                        );
+                    })}
+                </div>
               </div>
               <div>
                 <h3 className="text-2xl font-semibold text-white mb-3">Tower Defense Skins</h3>
@@ -8658,6 +10433,18 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
               </div>
             </div>
           )}
+          {activeTab === 'settings' && (
+            <div>
+              <h3 className="text-2xl font-semibold text-white mb-4">User Settings</h3>
+              <div className="bg-slate-900/50 p-4 rounded-lg">
+                <h4 className="text-lg font-semibold text-white mb-2">Scheduling Preferences</h4>
+                <p className="text-sm text-slate-400 mb-3">Help the Strategic Opportunity Finder by setting your preferred collaboration times.</p>
+                <button onClick={() => setIsAvailabilityModalOpen(true)} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">
+                  Edit Availability
+                </button>
+              </div>
+            </div>
+          )}
           {activeTab === 'friends' && (
             <div>
               <h3 className="text-2xl font-semibold text-white mb-4">Profile & Friends</h3>
@@ -8670,7 +10457,26 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
                 <p className="text-xs text-slate-500 mt-2">This will appear on leaderboards. Changes are not saved until you hit "Save Changes" at the bottom.</p>
               </div>
               <h4 className="text-lg font-semibold text-white mb-2">Friend Management</h4>
-              <div className="flex flex-col md:flex-row gap-4"><div className="flex-grow"><label className="text-sm text-slate-400 block mb-1">Your User ID (for sharing)</label><div onClick={copyUserIdToClipboard} className="p-3 bg-slate-700 border border-slate-600 rounded-md cursor-pointer truncate">{userId}</div></div><div className="flex-grow"><label htmlFor="friendUsername" className="text-sm text-slate-400 block mb-1">Add Friend by Username</label><div className="flex gap-2"><input id="friendUsername" type="text" value={friendUsernameInput} onChange={(e) => setFriendUsernameInput(e.target.value)} placeholder="Enter friend's username" className="flex-grow p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"/><button onClick={handleAddFriendByUsername} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">Add</button></div></div></div>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-grow"><label className="text-sm text-slate-400 block mb-1">Your User ID (for sharing)</label><div onClick={copyUserIdToClipboard} className="p-3 bg-slate-700 border border-slate-600 rounded-md cursor-pointer truncate">{userId}</div></div>
+                <div className="flex-grow">
+                  <div className="flex border-b border-slate-600 mb-2">
+                    <button onClick={() => setAddFriendMethod('username')} className={`px-3 py-1 text-sm ${addFriendMethod === 'username' ? 'border-b-2 border-indigo-400 text-white' : 'text-slate-400'}`}>Add by Username</button>
+                    <button onClick={() => setAddFriendMethod('uid')} className={`px-3 py-1 text-sm ${addFriendMethod === 'uid' ? 'border-b-2 border-indigo-400 text-white' : 'text-slate-400'}`}>Add by User ID</button>
+                  </div>
+                  {addFriendMethod === 'username' ? (
+                    <div className="flex gap-2">
+                      <input id="friendUsername" type="text" value={friendUsernameInput} onChange={(e) => setFriendUsernameInput(e.target.value)} placeholder="Enter friend's username" className="flex-grow p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"/>
+                      <button onClick={handleAddFriendByUsername} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">Add</button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input id="friendUid" type="text" value={friendUidInput} onChange={(e) => setFriendUidInput(e.target.value)} placeholder="Enter friend's User ID" className="flex-grow p-3 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500"/>
+                      <button onClick={handleAddFriendByUserId} className="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700">Add</button>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="mt-6">
                   <h4 className="text-lg font-semibold text-white mb-2">Friend List</h4>
                   {draftState.friends && draftState.friends.length > 0 ? (<ul className="space-y-2 max-h-48 overflow-y-auto pr-2">{draftState.friends.map(friendId => (<li key={friendId} className="flex items-center justify-between bg-slate-700/50 p-3 rounded-lg"><span className="font-semibold text-sm text-slate-300 truncate">{friendProfiles[friendId]?.username || 'Loading...'}</span><div className="flex items-center gap-2"><button onClick={() => setViewingFriendProfile(friendProfiles[friendId])} className="text-cyan-400 hover:text-cyan-300 text-sm font-semibold" disabled={!friendProfiles[friendId]}>View</button><button onClick={() => handleRemoveFriend(friendId)} className="text-red-400 hover:text-red-600 text-sm font-semibold">Remove</button></div></li>))}</ul>) : (<p className="text-slate-500">You haven't added any friends yet.</p>)}
@@ -8701,6 +10507,12 @@ const MyProfile = ({ stats, user, userId, updateStatsInFirestore, handleEvolvePe
           calculateLevelInfo={calculateLevelInfo}
         />
       )}
+      <AvailabilityPreferencesModal
+        isOpen={isAvailabilityModalOpen}
+        onClose={() => setIsAvailabilityModalOpen(false)}
+        currentPrefs={stats.availabilityPreferences}
+        onSave={handleSaveAvailability}
+      />
     </div>
   );
 };
@@ -10085,6 +11897,8 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeSheet, setActiveSheet] = useState('Stats + XP Tracker');
+  const [isScheduleLinkedOperationModalOpen, setIsScheduleLinkedOperationModalOpen] = useState(false);
+  const [linkedAssignmentTitle, setLinkedAssignmentTitle] = useState('');
   const dungeonXpRef = useRef(null);
 
   // --- NEW: Triage State ---
@@ -10100,6 +11914,14 @@ const App = () => {
   const { width } = useWindowSize();
   const isMobile = width < 768; // Tailwind's `md` breakpoint
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const [sanctumEditMode, setSanctumEditMode] = useState(false);
+  const [divisionData, setDivisionData] = useState({});
+  const [divisionListeners, setDivisionListeners] = useState({});
+  const [friendProfiles, setFriendProfiles] = useState({});
+
+  const [lastVisibleAssignment, setLastVisibleAssignment] = useState(null);
+  const [hasMoreAssignments, setHasMoreAssignments] = useState(true);
+  const pinCooldownsRef = useRef({});
 
   // Effect to handle sidebar state when resizing across the breakpoint
   useEffect(() => {
@@ -10148,16 +11970,42 @@ const App = () => {
     statsRef.current = stats;
   }, [stats]);
 
-  // REFACTORED: Single update function for the consolidated stats document
+    // REFACTORED: Single update function for the consolidated stats document
   const updateStatsInFirestore = useCallback(async (dataToUpdate) => {
     if (!db || !user) return;
+
+    // Client-side cooldown check for a generic 'last action'
+    const lastActionTime = statsRef.current.lastActionTimestamp?.toDate()?.getTime();
+    if (lastActionTime && Date.now() - lastActionTime < 150) { // 750ms global cooldown
+      showMessageBox("You're acting too quickly!", "error");
+      return Promise.reject(new Error('COOLDOWN_ACTIVE'));
+    }
+    
     const docRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
     const finalData = { ...dataToUpdate, lastActionTimestamp: serverTimestamp() };
     try {
-      // FIX: Use updateDoc instead of setDoc with merge. This correctly handles
-      // dot notation for nested fields (like 'dungeon_wingmen.roster') and
-      // sentinel values like increment().
-      await updateDoc(docRef, finalData);
+      // Atomically update both the private stats and public profile
+      const publicProfileRef = doc(db, 'publicProfiles', user.uid);
+      const publicFields = ['username', 'totalXP', 'currentLevel', 'equippedItems', 'assignmentsCompleted', 'dungeon_floor'];
+      const publicDataToUpdate = {};
+      
+      Object.keys(dataToUpdate).forEach(key => {
+        // Handle dot notation for nested fields like 'equippedItems.avatar'
+        const baseKey = key.split('.')[0];
+        if (publicFields.includes(baseKey)) {
+          publicDataToUpdate[key] = dataToUpdate[key];
+        }
+      });
+      
+      const batch = writeBatch(db);
+      batch.update(docRef, finalData);
+      if (Object.keys(publicDataToUpdate).length > 0) {
+        // FIX: Use set with merge:true to create the document if it doesn't exist (for old users)
+        // or update it if it does. This is called an "upsert".
+        batch.set(publicProfileRef, publicDataToUpdate, { merge: true });
+      }
+      await batch.commit();
+
     } catch (error) {
       console.error("Firestore Write Error (Stats):", error);
       showMessageBox(`Failed to update stats.`, "error");
@@ -10286,28 +12134,21 @@ const App = () => {
   useEffect(() => {
     if (!isAuthReady || !user) return;
     const userId = user.uid;
+    let unsubStats, unsubAssignments;
 
-    const cached = getCachedData('statsCache', 60);
-    if (cached) {
-      setStats(cached);
-    }
+    const attachListeners = () => {
+      console.log("%c[LISTENERS] Attaching real-time listeners.", "color: #c084fc;");
+      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, userId);
+      unsubStats = onSnapshot(statsDocRef, (docSnap) => {
+        const data = docSnap.exists()
+          ? { ...defaultStats, ...docSnap.data(), username: docSnap.data().username || user.email.split('@')[0] }
+          : { ...defaultStats, username: user.email.split('@')[0] };
+        setStats(data);
+        cacheData(`statsCache_${userId}`, data);
+      });
 
-    // --- Single Listener for all stats ---
-    const docRef = doc(db, `artifacts/${appId}/public/data/stats`, userId);
-    const unsubStats = onSnapshot(docRef, (docSnap) => {
-      // MERGE Firestore data with a complete default structure.
-      // This prevents crashes if a user's document is missing a newer field.
-      // It now correctly uses the globally defined `defaultStats`.
-      const data = docSnap.exists() 
-        ? { ...defaultStats, ...docSnap.data(), username: docSnap.data().username || user.email.split('@')[0] } 
-        : { ...defaultStats, username: user.email.split('@')[0] };
-      setStats(data);
-      cacheData('statsCache', data);
-    }, (error) => console.error(`Error listening to stats:`, error));
-    
-    // --- Listener for assignments (separate collection) ---
-    const assignmentsQuery = query(collection(db, `artifacts/${appId}/public/data/assignmentTracker`), where("userId", "==", userId), orderBy("dueDate", "asc"), limit(50));
-    const unsubAssignments = onSnapshot(assignmentsQuery, (snapshot) => {
+      const assignmentsQueryRT = query(collection(db, `artifacts/${appId}/public/data/assignmentTracker`), where("userId", "==", userId), orderBy("dueDate", "asc"), limit(50));
+      unsubAssignments = onSnapshot(assignmentsQueryRT, (snapshot) => {
         const fetchedAssignments = snapshot.docs.map(doc => ({
             id: doc.id, ...doc.data(),
             dueDate: doc.data().dueDate?.toDate(),
@@ -10316,16 +12157,292 @@ const App = () => {
             recurrenceType: doc.data().recurrenceType || 'none',
             recurrenceEndDate: doc.data().recurrenceEndDate?.toDate(),
             tags: doc.data().tags || [],
-            isEpicQuest: doc.data().isEpicQuest || false, // Explicitly check for the new flag
+            isEpicQuest: doc.data().isEpicQuest || false,
         }));
         setAssignments(fetchedAssignments);
-    });
-
-    return () => {
-      unsubStats();
-      unsubAssignments();
+        cacheData(`assignmentsCache_${userId}`, fetchedAssignments);
+      });
     };
+
+    const cachedStats = getCachedData(`statsCache_${userId}`);
+    const cachedAssignments = getCachedData(`assignmentsCache_${userId}`);
+
+    if (cachedStats && cachedAssignments) {
+      console.log("%c[CACHE HIT] Loading initial data from session storage.", "color: #f59e0b;");
+      setStats(cachedStats);
+      setAssignments(cachedAssignments);
+      
+      // LAZY LOAD LISTENERS: Attach listeners after a short delay to prevent reads on refresh spam.
+      const listenerTimer = setTimeout(attachListeners, 1500);
+      return () => {
+        clearTimeout(listenerTimer);
+        if (unsubStats) unsubStats();
+        if (unsubAssignments) unsubAssignments();
+      };
+    } else {
+      console.log("%c[CACHE MISS] Fetching fresh data from Firestore.", "color: #ef4444;");
+      // If cache is stale, fetch immediately and then attach listeners.
+      const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, userId);
+      getDoc(statsDocRef).then(docSnap => {
+        const data = docSnap.exists()
+          ? { ...defaultStats, ...docSnap.data(), username: docSnap.data().username || user.email.split('@')[0] }
+          : { ...defaultStats, username: user.email.split('@')[0] };
+        setStats(data);
+        cacheData(`statsCache_${userId}`, data);
+      });
+      // Assignments are handled by the real-time listener which fires immediately.
+      attachListeners();
+      return () => {
+        if (unsubStats) unsubStats();
+        if (unsubAssignments) unsubAssignments();
+      };
+    }
   }, [user, isAuthReady, appKey]);
+
+  const handleTogglePin = async (assignmentId, isPinned) => {
+    const now = Date.now();
+    const COOLDOWN_MS = 2000; // 2 second cooldown
+    const lastPinTime = pinCooldownsRef.current[assignmentId] || 0;
+
+    if (now - lastPinTime < COOLDOWN_MS) {
+      showMessageBox("You're toggling this pin too quickly.", "error");
+      return;
+    }
+
+    const pinnedCount = assignments.filter(a => a.pinned).length;
+    if (!isPinned && pinnedCount >= 5) {
+      showMessageBox("You can only pin a maximum of 5 assignments.", "error");
+      return;
+    }
+
+    pinCooldownsRef.current[assignmentId] = now;
+
+    try {
+      await updateAssignmentInFirestore(assignmentId, { pinned: !isPinned });
+    } catch (error) {
+      console.error("Error toggling pin:", error);
+      // Reset cooldown on failure so user can try again
+      pinCooldownsRef.current[assignmentId] = 0;
+    }
+  };
+
+  const loadMoreAssignments = async () => {
+    if (!hasMoreAssignments || !lastVisibleAssignment) return;
+
+    const assignmentsQuery = query(
+      collection(db, `artifacts/${appId}/public/data/assignmentTracker`),
+      where("userId", "==", user.uid),
+      where("status", "!=", "Completed"),
+      where("pinned", "==", false),
+      orderBy("dueDate", "asc"),
+      startAfter(lastVisibleAssignment),
+      limit(20)
+    );
+
+    const documentSnapshots = await getDocs(assignmentsQuery);
+    const newAssignments = documentSnapshots.docs.map(doc => ({
+        id: doc.id, ...doc.data(),
+        dueDate: doc.data().dueDate?.toDate(),
+        dateCompleted: doc.data().dateCompleted?.toDate(),
+    }));
+
+    setLastVisibleAssignment(documentSnapshots.docs[documentSnapshots.docs.length-1]);
+    setAssignments(prev => [...prev, ...newAssignments]);
+    if (documentSnapshots.docs.length < 20) {
+      setHasMoreAssignments(false);
+    }
+  };
+
+  const handleScheduleLinkedOperation = async (eventData) => {
+    const { divisionId, ...restOfEventData } = eventData;
+    if (!divisionId) {
+      showMessageBox("Error: No division was selected for the operation.", "error");
+      return;
+    }
+    
+    const eventCollectionRef = collection(db, `squads/${divisionId}/events`);
+    const newEventData = {
+      ...restOfEventData,
+      creatorId: user.uid,
+      creatorUsername: stats.username,
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      await addDoc(eventCollectionRef, newEventData);
+      showMessageBox(`Operation "${eventData.title}" scheduled in division!`, "info");
+      setIsScheduleLinkedOperationModalOpen(false);
+    } catch (error) {
+      console.error("Error creating linked event:", error);
+      showMessageBox("Failed to schedule the operation.", "error");
+    }
+  };
+
+  const openScheduleLinkedOperationModal = (assignmentTitle) => {
+setLinkedAssignmentTitle(assignmentTitle);
+    setIsScheduleLinkedOperationModalOpen(true);
+  };
+
+  const handleAcceptInvite = async (squadId) => {
+    if ((stats.squads || []).length >= 3) {
+      showMessageBox("You cannot be in more than 3 divisions.", "error");
+      return;
+    }
+    const batch = writeBatch(db);
+    const squadRef = doc(db, 'squads', squadId);
+    batch.update(squadRef, {
+      [`members.${user.uid}`]: { username: stats.username, color: '#f87171' }, // Default color, can be randomized later
+      pendingInvites: arrayRemove(user.uid)
+    });
+    const userStatsRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
+    batch.update(userStatsRef, {
+      squads: arrayUnion(squadId),
+      squadInvites: arrayRemove(squadId)
+    });
+    await batch.commit();
+    showMessageBox("Joined division!", "info");
+  };
+  
+  const handleDeclineInvite = async (squadId) => {
+    const batch = writeBatch(db);
+    const squadRef = doc(db, 'squads', squadId);
+    batch.update(squadRef, { pendingInvites: arrayRemove(user.uid) });
+    const userStatsRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
+    batch.update(userStatsRef, { squadInvites: arrayRemove(squadId) });
+    await batch.commit();
+    showMessageBox("Invite declined.", "info");
+  };
+
+
+
+  const handleAddAssignment = async (newAssignmentData) => {
+    if (!newAssignmentData.assignment) {
+      showMessageBox("Assignment Name is required.", "error");
+      return;
+    }
+
+    let subtasks = [];
+    if (newAssignmentData.isEpic) {
+      subtasks = [
+        { name: 'Research & Outline', completed: false },
+        { name: 'Complete First Draft', completed: false },
+        { name: 'Review & Edit Pass', completed: false },
+        { name: 'Final Submission Prep', completed: false }
+      ];
+    }
+
+    const assignmentToSave = {
+      ...newAssignmentData,
+      isEpicQuest: newAssignmentData.isEpic || false,
+      dueDate: newAssignmentData.dueDate ? new Date(newAssignmentData.dueDate) : null,
+      timeEstimate: parseFloat(newAssignmentData.timeEstimate) || 0,
+      pointsEarned: parseFloat(newAssignmentData.pointsEarned) || 0,
+      pointsMax: parseFloat(newAssignmentData.pointsMax) || 0,
+      recurrenceType: newAssignmentData.recurrenceType || 'none',
+      recurrenceEndDate: newAssignmentData.recurrenceEndDate ? new Date(newAssignmentData.recurrenceEndDate) : null,
+      tags: newAssignmentData.tags || [],
+      dateCompleted: null,
+      subtasks: subtasks,
+    };
+    delete assignmentToSave.isEpic; // clean up temp flag
+
+
+    await addAssignmentToFirestore(assignmentToSave);
+    showMessageBox("Assignment added successfully!", "info");
+  };
+
+
+  // NEW: Real-time listener for Division data
+  useEffect(() => {
+    if (!user || !db || !stats.squads) {
+      // Clean up if user logs out or has no divisions
+      Object.values(divisionListeners).forEach(unsubscribe => unsubscribe());
+      setDivisionListeners({});
+      setDivisionData({});
+      return;
+    }
+  
+    const divisionIds = stats.squads || [];
+    const currentListeners = { ...divisionListeners };
+  
+    // Unsubscribe from divisions the user is no longer a part of
+    Object.keys(currentListeners).forEach(divisionId => {
+      if (!divisionIds.includes(divisionId)) {
+        currentListeners[divisionId](); // Call the unsubscribe function
+        delete currentListeners[divisionId];
+      }
+    });
+  
+    // Subscribe to new divisions
+    divisionIds.forEach(divisionId => {
+      if (!currentListeners[divisionId]) {
+        console.log(`%c[Firestore LISTEN] Subscribing to division: ${divisionId}`, 'color: #8b5cf6; font-weight: bold;');
+        const squadRef = doc(db, 'squads', divisionId); // Firestore collection is still 'squads'
+        currentListeners[divisionId] = onSnapshot(squadRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setDivisionData(prev => ({ ...prev, [divisionId]: { id: docSnap.id, ...docSnap.data() } }));
+          } else {
+            // Division was deleted, handle this by removing it from local state
+            setDivisionData(prev => {
+              const newData = { ...prev };
+              delete newData[divisionId];
+              return newData;
+            });
+            // Optional: Also remove the stale ID from the user's stats
+            updateStatsInFirestore({ squads: stats.squads.filter(id => id !== divisionId) });
+          }
+        });
+      }
+    });
+  
+    setDivisionListeners(currentListeners);
+  
+    // Cleanup on unmount
+    return () => {
+      Object.values(currentListeners).forEach(unsubscribe => unsubscribe());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, db, stats.squads]); // Rerun ONLY when the list of division IDs changes
+
+  // NEW: Fetches full profiles for friends to be used in various components
+  useEffect(() => {
+    if (!db || !stats.friends || stats.friends.length === 0) {
+      setFriendProfiles({}); // Clear profiles if no friends
+      return;
+    }
+
+    const fetchFriendProfiles = async () => {
+      try {
+        // FIX: Read from the publicly accessible 'publicProfiles' collection
+        const publicProfilesCollectionRef = collection(db, 'publicProfiles');
+        const friendIds = stats.friends;
+        const profiles = {};
+        const batches = [];
+
+        for (let i = 0; i < friendIds.length; i += 30) {
+          const batchIds = friendIds.slice(i, i + 30);
+          if (batchIds.length > 0) {
+            const q = query(publicProfilesCollectionRef, where('__name__', 'in', batchIds));
+            batches.push(getDocs(q));
+          }
+        }
+        
+        const querySnapshotsArray = await Promise.all(batches);
+
+        querySnapshotsArray.forEach(snapshot => {
+          snapshot.forEach(doc => {
+            profiles[doc.id] = { id: doc.id, ...doc.data() };
+          });
+        });
+
+        setFriendProfiles(profiles);
+      } catch (error) {
+        console.error("Error fetching friend profiles:", error);
+      }
+    };
+
+    fetchFriendProfiles();
+  }, [db, stats.friends, appId]);
 
     // NEW: Effect to check for and generate new daily/weekly quests on load
     useEffect(() => {
@@ -11224,7 +13341,7 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
   }
   return (
     <>
-                        {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
+            {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
       <WeeklyTriageModal
         isOpen={triageState.isOpen}
         onClose={() => setTriageState({ isOpen: false, needsSetup: false })}
@@ -11233,16 +13350,34 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
         onSaveSettings={handleSaveTriageSettings}
         onCompleteTriage={handleCompleteTriage}
       />
+      <AddAssignmentModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddAssignment}
+        onScheduleLinkedOperation={openScheduleLinkedOperationModal}
+        showMessageBox={showMessageBox}
+      />
       <MissionControlModal 
         isOpen={missionControlState.isOpen}
         onClose={() => setMissionControlState({ isOpen: false, assignment: null })}
         assignment={missionControlState.assignment}
-        unlockedLocations={stats.focusNavigator?.unlockedLocations || ['genesis_prime']}
         onLaunchMission={launchMission}
       />
-      <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 relative ${equippedFontStyle || 'font-inter'} ${activeMissionState.isActive ? 'pointer-events-none' : ''}`}>
-      <style>{`
-          /* All your @import and CSS variables... */
+
+      {/* --- THE MASTER SWITCH for the Sanctum Editor --- */}
+      {sanctumEditMode && (
+        <SanctumEditor 
+          stats={stats} 
+          updateStatsInFirestore={updateStatsInFirestore} 
+          showMessageBox={showMessageBox} 
+          processAchievement={processAchievement}
+          onExit={() => setSanctumEditMode(false)}
+        />
+      )}
+      
+      {/* The normal app layout is rendered when not in edit mode */}
+      <div className={`min-h-screen font-inter text-slate-300 flex bg-slate-900 relative ${equippedFontStyle || 'font-inter'} ${activeMissionState.isActive ? 'pointer-events-none' : ''} ${sanctumEditMode ? 'hidden' : ''}`}>
+        <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Inter:wght@400;700&family=Oswald&family=Permanent+Marker&family=Playfair+Display&family=Press+Start+2P&family=Roboto+Slab&family=Space+Mono&family=Cinzel+Decorative&family=Comic+Neue&family=Libre+Baskerville&family=Lato&family=Merriweather&family=Raleway&family=Ubuntu&display=swap');
           :root { --primary-color: #4f46e5; --accent-color: #818cf8; --text-color: #ffffff; transition: --primary-color 0.3s, --accent-color 0.3s; }
           @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -11354,6 +13489,7 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
             { name: 'Achievements', sheet: 'Achievements', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" /></svg> },
             { name: 'Sanctum', sheet: 'Sanctum', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4a1 1 0 112 0v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V7H8a1 1 0 010-2h1V4z" /></svg> },
             { name: 'Alchemist\'s Workshop', sheet: 'Alchemist\'s Workshop', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a1 1 0 000 2c5.523 0 10 4.477 10 10a1 1 0 102 0C17 8.373 11.627 3 5 3z" /><path d="M4 9a1 1 0 011-1 7 7 0 017 7 1 1 0 11-2 0 5 5 0 00-5-5 1 1 0 01-1-1z" /></svg>},
+            { name: 'Operations Room', sheet: 'Operations Room', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>},
             { name: 'Calendar', sheet: 'Calendar View', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg> },
             { name: 'Dungeon Crawler', sheet: 'Dungeon Crawler', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M1.5 6.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM6 11a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h4a1 1 0 100-2H7zM2 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM2.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2zM14 2.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5h-2zM13.5 14a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v2a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5v-2z" clipRule="evenodd"/></svg>},
             { name: 'Tower Defense', sheet: 'Tower Defense', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 3a1 1 0 011-1h8a1 1 0 011 1v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h1V3zm3 4a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" /></svg>},
@@ -11385,19 +13521,22 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
-        {activeSheet === 'Assignment Tracker' && <AssignmentTracker stats={stats} assignments={assignments.filter(a => a.status !== 'Completed')} isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} addAssignmentToFirestore={addAssignmentToFirestore} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} handleCompletedToggle={handleCompletedToggle} promptMissionStart={promptMissionStart} isMobile={isMobile} updateStatsInFirestore={updateStatsInFirestore} />}               {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
-        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} shouldPromptForTriage={shouldShowTriageBanner} onStartTriage={() => setTriageState({ isOpen: true, needsSetup: !stats.triageSettings })} onAcceptContract={handleAcceptContract} />}        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} />}
-        {activeSheet === 'Sanctum' && <Sanctum stats={stats} completedAssignments={completedAssignments} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} processAchievement={processAchievement} />}
-
-        {activeSheet === 'Why' && <WhyTab />}
+        {activeSheet === 'Stats + XP Tracker' && <StatsXPTracker stats={stats} assignments={assignments} completedAssignments={completedAssignments} handleRefresh={handleRefreshAllData} isRefreshing={isRefreshing} getProductivityPersona={getProductivityPersona} calculateLevelInfo={calculateLevelInfo} getStartOfWeek={getStartOfWeek} collectFirstEgg={collectFirstEgg} hatchEgg={hatchEgg} collectNewEgg={collectNewEgg} spinProductivitySlotMachine={spinProductivitySlotMachine} shouldPromptForTriage={shouldShowTriageBanner} onStartTriage={() => setTriageState({ isOpen: true, needsSetup: !stats.triageSettings })} onAcceptContract={handleAcceptContract} />}
+        {activeSheet === 'Assignment Tracker' && <AssignmentTracker stats={stats} assignments={assignments} setIsAddModalOpen={setIsAddModalOpen} handleCompletedToggle={handleCompletedToggle} updateAssignmentInFirestore={updateAssignmentInFirestore} deleteAssignmentFromFirestore={deleteAssignmentFromFirestore} promptMissionStart={promptMissionStart} isMobile={isMobile} onLoadMore={loadMoreAssignments} hasMore={hasMoreAssignments} onTogglePin={handleTogglePin} updateStatsInFirestore={updateStatsInFirestore} />}
+        {activeSheet === 'Achievements' && <AchievementsComponent gameProgress={stats} />}
+        {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} onAcceptInvite={handleAcceptInvite} onDeclineInvite={handleDeclineInvite} divisionData={divisionData} friendProfiles={friendProfiles} />}
+        {activeSheet === 'Sanctum' && <Sanctum stats={stats} setEditMode={setSanctumEditMode} />}
+        {activeSheet === 'Alchemist\'s Workshop' && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Operations Room' && <OperationsRoom stats={stats} user={user} updateStatsInFirestore={updateStatsInFirestore} assignments={assignments} divisionData={divisionData} friendProfiles={Object.values(friendProfiles)} showMessageBox={showMessageBox} />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'Dungeon Crawler' && <DungeonCrawler key={dungeonResetKey} stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
         {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
-        {activeSheet === "Alchemist's Workshop" && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Why' && <WhyTab />}
       </main>
-    </div>
+      </div>
+      )
     </>
   );
 }
