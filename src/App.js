@@ -1,5 +1,5 @@
 //used libraries: React, Recharts, TailwindCSS, Firebase, Babel or similar, PostCSS
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, useReducer } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { 
@@ -8,7 +8,7 @@ import {
   collection, serverTimestamp, runTransaction as originalRunTransaction, query, where, 
   getDocs as originalGetDocs, orderBy, limit, increment, arrayUnion, writeBatch, deleteField, arrayRemove, startAfter
 } from 'firebase/firestore';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 // Asset Imports for Focus Navigator
 import cockpitImage from './assets/images/Space_Focus_Timer/Cockpit_View.png';
@@ -2542,29 +2542,23 @@ return (
   );
 };
 
-// SlotMachine Animation Modal Component (CSGO Style - With XP Fillers)
-// PASTE THIS
 const SlotMachineAnimationModal = ({ isOpen, onClose, onAnimationComplete }) => {
-  const [animationItems, setAnimationItems] = useState([]);
-  const [animationState, setAnimationState] = useState('idle');
-  const [finalReward, setFinalReward] = useState(null);
+  const [reelItems, setReelItems] = useState([]);
+  const [animationState, setAnimationState] = useState('idle'); // idle, spinning, finished
+  const [finalPrize, setFinalPrize] = useState(null);
   const reelRef = useRef(null);
 
-  const itemWidth = 100;
-  const itemMargin = 2;
-  const totalItemWidth = itemWidth + itemMargin * 2;
-  const animationDuration = 7;
+  const ITEM_WIDTH = 100;
+  const ITEM_MARGIN = 4;
+  const TOTAL_ITEM_WIDTH = ITEM_WIDTH + ITEM_MARGIN * 2;
+  const REEL_LENGTH = 100;
+  const PRIZE_INDEX = 90;
 
   useEffect(() => {
     if (isOpen) {
-      const reelLength = 150;
-      const rewardIndex = 140;
-      const reel = Array.from({ length: reelLength }, () => slotMachineFillerItems[Math.floor(Math.random() * slotMachineFillerItems.length)]);
-
-      let prize;
       const spinCost = 50;
       const roll = Math.random();
-
+      let prize;
       if (roll < 0.65) {
         const lossPercentage = 0.3 + Math.random() * 0.5;
         const amount = -Math.floor(spinCost * lossPercentage);
@@ -2575,49 +2569,50 @@ const SlotMachineAnimationModal = ({ isOpen, onClose, onAnimationComplete }) => 
       } else {
         prize = { ...allRollableItems[Math.floor(Math.random() * allRollableItems.length)] };
       }
+      setFinalPrize(prize);
 
-      reel[rewardIndex] = prize;
+      const reel = Array.from({ length: REEL_LENGTH }, () => slotMachineFillerItems[Math.floor(Math.random() * slotMachineFillerItems.length)]);
+      reel[PRIZE_INDEX] = prize;
+      setReelItems(reel);
 
-      setFinalReward(prize);
-      setAnimationItems(reel);
-      setAnimationState('preparing');
+      setTimeout(() => setAnimationState('spinning'), 50);
 
     } else {
-      setAnimationItems([]);
       setAnimationState('idle');
-      setFinalReward(null);
+      setReelItems([]);
+      setFinalPrize(null);
+      if (reelRef.current) {
+        reelRef.current.style.transition = 'none';
+        reelRef.current.style.transform = 'translateX(0px)';
+      }
     }
   }, [isOpen]);
 
   useEffect(() => {
-    if (!reelRef.current) return;
+    if (animationState !== 'spinning' || !reelRef.current) return;
 
-    if (animationState === 'preparing') {
-      reelRef.current.style.transition = 'none';
-      reelRef.current.style.transform = 'translateX(0px)';
-      const timeoutId = setTimeout(() => setAnimationState('spinning'), 50);
-      return () => clearTimeout(timeoutId);
-    }
+    const reelElement = reelRef.current;
+    const containerWidth = reelElement.parentElement.offsetWidth;
+    const centerOffset = (containerWidth / 2) - (TOTAL_ITEM_WIDTH / 2);
+    const finalPosition = -(PRIZE_INDEX * TOTAL_ITEM_WIDTH) + centerOffset;
 
-    if (animationState === 'spinning') {
-      const rewardIndex = 140;
-      const containerWidth = reelRef.current.parentElement.offsetWidth;
-      const centerOffset = (containerWidth / 2) - (totalItemWidth / 2);
-      const randomJitter = (Math.random() - 0.5) * (totalItemWidth * 0.8);
-      const finalTranslateX = -(rewardIndex * totalItemWidth) + centerOffset + randomJitter;
+    // Set the transition and transform in one go.
+    reelElement.style.transition = `transform 7s cubic-bezier(0.1, 0.7, 0.3, 1)`;
+    reelElement.style.transform = `translateX(${finalPosition}px)`;
 
-      reelRef.current.style.transition = `transform ${animationDuration}s cubic-bezier(0.15, 0.5, 0.25, 1)`;
-      reelRef.current.style.transform = `translateX(${finalTranslateX}px)`;
+    const finishTimer = setTimeout(() => {
+      setAnimationState('finished');
+    }, 7000);
 
-      const timeoutId = setTimeout(() => setAnimationState('finished'), animationDuration * 1000);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [animationState, totalItemWidth]);
+    return () => {
+      clearTimeout(finishTimer);
+    };
+  }, [animationState]);
 
   if (!isOpen) return null;
 
   const showResult = animationState === 'finished';
-  const isCosmeticWin = finalReward && finalReward.type !== 'xp_gain' && finalReward.type !== 'xp_loss';
+  const isCosmeticWin = finalPrize && finalPrize.type !== 'xp_gain' && finalPrize.type !== 'xp_loss';
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -2638,16 +2633,23 @@ const SlotMachineAnimationModal = ({ isOpen, onClose, onAnimationComplete }) => 
             <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 border-x-8 border-x-transparent border-t-[12px] border-t-red-500 z-20"></div>
             <div className="w-full h-full overflow-hidden">
               <div ref={reelRef} className="flex h-full items-center" style={{ willChange: 'transform' }}>
-                {animationItems.map((item, index) => {
+                {reelItems.map((item, index) => {
                   const rarityColors = { common: 'border-gray-500', rare: 'border-blue-500', epic: 'border-purple-500', legendary: 'border-orange-500', mythic: 'border-red-600' };
                   const borderColor = item.rarity ? rarityColors[item.rarity] : 'border-transparent';
+                  const isXpItem = item.type === 'xp_gain' || item.type === 'xp_loss';
+                  
                   return (
-                    <div key={`${item.id}-${index}`} className={`flex-shrink-0 w-[100px] h-24 flex flex-col items-center justify-center m-1 rounded-lg shadow-md border-b-4 ${borderColor} transition-all duration-300 ${showResult && index === 140 ? 'scale-110' : ''} ${item.type === 'xp_gain' ? 'bg-green-800 text-white text-3xl font-bold' : item.type === 'xp_loss' ? 'bg-red-800 text-white text-3xl font-bold' : item.type === 'avatar' ? 'bg-slate-700 text-white text-5xl' : item.type === 'banner' ? item.style : item.type === 'font' ? 'bg-slate-700 text-white text-sm text-center px-1' : item.type === 'background' ? `${item.style} text-black text-sm text-center px-1` : item.type === 'animation' ? 'bg-slate-700 text-white text-sm text-center px-1' : item.type === 'title' ? 'bg-slate-700 text-white text-sm text-center px-1' : 'bg-gray-700 text-gray-300'}`}>
-                      {(item.type === 'xp_gain' || item.type === 'xp_loss' || item.type === 'avatar') && <span>{item.display}</span>}
-                      {item.type === 'banner' && <span className="text-sm text-center px-1">{item.name}</span>}
-                      {item.type === 'font' && <span className={`text-lg text-center px-1 ${item.style}`}>{item.name}</span>}
-                      {(item.type === 'background' || item.type === 'animation' || item.type === 'title') && <span className="text-sm text-center px-1">{item.name}</span>}
-                      {!item.type && <span className="text-sm">?</span>}
+                    <div key={`${item.id}-${index}`} className={`flex-shrink-0 w-[100px] h-24 flex flex-col items-center justify-center m-1 rounded-lg shadow-md border-b-4 ${borderColor} ${
+                        item.type === 'xp_gain' ? 'bg-green-800 text-white text-xl font-bold' :
+                        item.type === 'xp_loss' ? 'bg-red-800 text-white text-xl font-bold' :
+                        item.type === 'avatar' ? 'bg-slate-700 text-white text-5xl' : 
+                        item.type === 'banner' ? item.style : 
+                        'bg-gray-700 text-gray-300'
+                      }`}>
+                      {isXpItem ? <span className="flex items-center justify-center h-full">{item.display}</span> : 
+                       item.type === 'avatar' ? <span>{item.display}</span> :
+                       <span className="text-sm text-center px-1">{item.name}</span>
+                      }
                     </div>
                   );
                 })}
@@ -2656,16 +2658,16 @@ const SlotMachineAnimationModal = ({ isOpen, onClose, onAnimationComplete }) => 
             <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 border-x-8 border-x-transparent border-b-[12px] border-b-red-500 z-20"></div>
         </div>
 
-        {showResult && finalReward && (
+        {showResult && finalPrize && (
           <div className="mt-8 text-center animate-fade-in">
             <h4 className="text-2xl font-bold text-white mb-2">
               {isCosmeticWin ? "Congratulations! You received:" : "Result:"}
             </h4>
-            <div className={`inline-flex items-center justify-center p-4 rounded-lg shadow-lg min-w-[200px] text-4xl ${finalReward.type === 'xp_gain' ? 'bg-green-500 text-white' : finalReward.type === 'xp_loss' ? 'bg-red-500 text-white' : finalReward.type === 'avatar' ? 'bg-blue-600 text-white text-6xl' : finalReward.type === 'banner' ? `${finalReward.style}` : finalReward.type === 'font' ? `bg-purple-600 text-white ${finalReward.style}` : finalReward.type === 'background' ? `${finalReward.style} text-white` : finalReward.type === 'animation' ? `bg-indigo-600 text-white` : finalReward.type === 'title' ? `bg-red-600 text-white` : 'bg-gray-500 text-white'}`}>
-              {finalReward.type === 'avatar' ? finalReward.display : finalReward.name}
+            <div className={`inline-flex items-center justify-center p-4 rounded-lg shadow-lg min-w-[200px] text-4xl ${finalPrize.type === 'xp_gain' ? 'bg-green-500 text-white' : finalPrize.type === 'xp_loss' ? 'bg-red-500 text-white' : finalPrize.type === 'avatar' ? 'bg-blue-600 text-white text-6xl' : finalPrize.type === 'banner' ? `${finalPrize.style}` : 'bg-gray-500 text-white'}`}>
+              {finalPrize.type === 'avatar' ? finalPrize.display : finalPrize.name}
             </div>
             <button
-              onClick={() => onAnimationComplete(finalReward)}
+              onClick={() => onAnimationComplete(finalPrize)}
               className="mt-8 bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-lg text-lg"
             >
               Continue
@@ -2933,7 +2935,6 @@ const GachaAnimationModal = ({ isOpen, onAnimationComplete, result }) => {
     </div>
   );
 };
-// In App.js, right after the closing of the Projectile component definition
 const commanderDefinitions = {
   default: { // For players who haven't started the dungeon
     abilities: [
@@ -9431,7 +9432,129 @@ const FriendProfileModal = ({ profile, onClose, getFullCosmeticDetails, getItemS
     </div>
   );
 };
+// --- NEW: High-Entropy Break Passcode Generator ---
 
+const generateBreakPasscode = () => {
+  const LOWERCASE_CHARS = 'abcdefghijklmnopqrstuvwxyz';
+  const UPPERCASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const DIGIT_CHARS = '0123456789';
+  const SPECIAL_CHARS = '!@#$%^&*()_+-=[]{};:,.<>/?`~';
+  
+  const ALL_CHARS = LOWERCASE_CHARS + UPPERCASE_CHARS + DIGIT_CHARS + SPECIAL_CHARS;
+  
+  const PASSWORD_LENGTH = 20; // A longer password increases uniqueness dramatically
+
+  // Helper to get a random character from a string
+  const getRandomChar = (str) => str[Math.floor(Math.random() * str.length)];
+
+  // Helper to shuffle an array (Fisher-Yates shuffle)
+  const shuffleArray = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  // Helper to check for more than 2 consecutive identical characters (e.g., "aaa")
+  const containsTripleChars = (str) => {
+    for (let i = 0; i < str.length - 2; i++) {
+      if (str[i] === str[i + 1] && str[i] === str[i + 2]) {
+        return true;
+      }
+    }
+    return false;
+  };
+  
+  // Helper to check for sequential characters (e.g., "abc" or "123")
+  const containsSequentialChars = (str) => {
+    for (let i = 0; i < str.length - 2; i++) {
+      const c1 = str.charCodeAt(i);
+      const c2 = str.charCodeAt(i + 1);
+      const c3 = str.charCodeAt(i + 2);
+      if (c2 === c1 + 1 && c3 === c2 + 1) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Keep generating passwords until one passes all validation checks
+  let candidatePassword = '';
+  let attempts = 0;
+  while (true) {
+    attempts++;
+    if (attempts > 50) { // Failsafe to prevent infinite loops
+      console.error("Failed to generate a valid password after 50 attempts.");
+      return "generation-error-please-retry";
+    }
+
+    // 1. Ensure all required character types are present
+    let passwordChars = [
+      getRandomChar(LOWERCASE_CHARS),
+      getRandomChar(UPPERCASE_CHARS),
+      getRandomChar(DIGIT_CHARS),
+      getRandomChar(SPECIAL_CHARS),
+    ];
+
+    // 2. Fill the rest of the password with random characters
+    for (let i = passwordChars.length; i < PASSWORD_LENGTH; i++) {
+      passwordChars.push(getRandomChar(ALL_CHARS));
+    }
+
+    // 3. Shuffle to ensure requirements aren't just at the beginning
+    passwordChars = shuffleArray(passwordChars);
+    candidatePassword = passwordChars.join('');
+
+    // 4. Validate against complex rules
+    if (!containsTripleChars(candidatePassword) && !containsSequentialChars(candidatePassword)) {
+      // If it passes our local checks, it's good to go.
+      // Its high randomness makes it extremely unlikely to fail the Python script's historical checks.
+      return candidatePassword;
+    }
+  }
+};
+// --- NEW: Component to Display the Break Passcode Reward ---
+
+const BreakPasscodeRewardModal = ({ isOpen, onClose, passcode }) => {
+  if (!isOpen) return null;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(passcode).then(() => {
+      showMessageBox("Passcode copied to clipboard!", "info");
+    }).catch(err => {
+      showMessageBox("Failed to copy passcode.", "error");
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] p-4">
+      <div className="bg-slate-900 border-2 border-indigo-500 rounded-2xl shadow-2xl p-8 w-full max-w-lg text-center text-white">
+        <h2 className="text-3xl font-bold text-green-400 mb-4">Reward Unlocked!</h2>
+        <p className="text-slate-300 mb-6">You've earned a break! Use this passcode in the blocker's 'stop.py' script to pause it.</p>
+        
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6 font-mono text-lg break-all">
+          {passcode}
+        </div>
+
+        <div className="flex justify-center gap-4">
+          <button 
+            onClick={handleCopy}
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition-colors"
+          >
+            Copy Passcode
+          </button>
+          <button 
+            onClick={onClose}
+            className="px-6 py-3 bg-slate-600 hover:bg-slate-500 rounded-lg font-semibold transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 // Main App Component
 // NEW: Custom hook to debounce a value
 const useDebounce = (value, delay) => {
@@ -10573,366 +10696,247 @@ const QuestsComponent = ({ quests }) => {
   );
 };
 // Component for Stats + XP Tracker Sheet
-  const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine, shouldPromptForTriage, onStartTriage, onAcceptContract }) => {
+const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefresh, isRefreshing, getProductivityPersona, calculateLevelInfo, getStartOfWeek, collectFirstEgg, hatchEgg, collectNewEgg, spinProductivitySlotMachine, shouldPromptForTriage, onStartTriage, onAcceptContract }) => {
+    
+    // --- Data Calculation Hooks ---
     const persona = getProductivityPersona();
+    const levelInfo = calculateLevelInfo(stats.totalXP);
     const currentLevelBasedTitle = levelTitles.slice().reverse().find(t => stats.currentLevel >= t.level) || { title: 'Novice Learner' };
     const currentTitle = stats?.equippedItems?.title ? cosmeticItems.titles.find(t => t.id === stats.equippedItems.title)?.name : currentLevelBasedTitle.title;
 
-    const completedAssignmentsWithScores = completedAssignments.filter(t =>
-      t.pointsEarned !== undefined && t.pointsEarned !== null &&
-      t.pointsMax !== undefined && t.pointsMax !== null && t.pointsMax > 0
-    );
-
-    const tagAnalytics = {};
-    assignmentTags.forEach(tag => {
-      tagAnalytics[tag] = {
-        totalPointsEarned: 0,
-        totalPointsMax: 0,
-        totalTimeSpent: 0,
-        assignmentCount: 0,
-      };
-    });
-
-    completedAssignmentsWithScores.forEach(t => {
-      const assignmentDate = new Date(t.dateCompleted);
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-      if (assignmentDate >= oneYearAgo && t.tags && t.tags.length > 0) {
-        t.tags.forEach(tag => {
-          if (tagAnalytics[tag]) {
-            tagAnalytics[tag].totalPointsEarned += t.pointsEarned;
-            tagAnalytics[tag].totalPointsMax += t.pointsMax;
-            tagAnalytics[tag].totalTimeSpent += t.timeEstimate || 0;
-            tagAnalytics[tag].assignmentCount++;
-          }
+    const cumulativeXPGainData = useMemo(() => {
+        const xpGainData = assignments
+            .filter(a => a.status === 'Completed' && a.dateCompleted)
+            .sort((a, b) => a.dateCompleted.getTime() - b.dateCompleted.getTime())
+            .reduce((acc, assignment) => {
+                const dateString = assignment.dateCompleted.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const existing = acc.find(item => item.date === dateString);
+                const points = assignment.pointsEarned || 0;
+                if (existing) existing.xp += points;
+                else acc.push({ date: dateString, xp: points });
+                return acc;
+            }, []);
+        
+        let cumulativeXP = 0;
+        return xpGainData.map(data => {
+            cumulativeXP += data.xp;
+            return { date: data.date, cumulativeXP: cumulativeXP };
         });
-      }
-    });
-
-    const getFormattedAnalytics = (tag) => {
-      const data = tagAnalytics[tag];
-      const avgTime = data.assignmentCount > 0 ? (data.totalTimeSpent / data.assignmentCount).toFixed(1) : 'N/A';
-      return { avgTime };
-    };
-
-    const calculateStressRisk = useCallback(() => {
-      let totalStressScore = 0;
-      const now = new Date();
-      const upcomingAssignments = assignments.filter(a =>
-        a.status !== 'Completed' && a.dueDate && a.dueDate > now && (a.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24) <= 14
-      ).sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
-
-      const difficultyMap = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
-      const timeEstimateWeight = 0.5;
-      const proximityWeight = 10;
-
-      upcomingAssignments.forEach(assignment => {
-        const difficultyFactor = difficultyMap[assignment.difficulty] || 1;
-        const timeFactor = assignment.timeEstimate || 1;
-        const daysUntilDue = Math.ceil((assignment.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        let assignmentStress = (difficultyFactor * 5) + (timeFactor * timeEstimateWeight);
-        if (daysUntilDue <= 3) assignmentStress += (3 - daysUntilDue + 1) * 10;
-        else if (daysUntilDue <= 7) assignmentStress += (7 - daysUntilDue + 1) * 5;
-        totalStressScore += assignmentStress;
-      });
-
-      for (let i = 0; i < upcomingAssignments.length; i++) {
-        for (let j = i + 1; j < upcomingAssignments.length; j++) {
-          const diffDays = Math.abs(upcomingAssignments[i].dueDate.getTime() - upcomingAssignments[j].dueDate.getTime()) / (1000 * 60 * 60 * 24);
-          if (diffDays <= 2) totalStressScore += proximityWeight;
-        }
-      }
-
-      const maxPossibleStress = 500;
-      return Math.max(0, Math.min(100, (totalStressScore / maxPossibleStress) * 100));
     }, [assignments]);
 
-    const stressRisk = calculateStressRisk();
-    const stressEmoji = stressRisk <= 20 ? stressEmojis[0] : stressRisk <= 40 ? stressEmojis[1] : stressRisk <= 60 ? stressEmojis[2] : stressRisk <= 80 ? stressEmojis[3] : stressEmojis[4];
+    const predictedHoursGraphData = useMemo(() => {
+        const predictedHoursData = assignments
+            .filter(a => a.status !== 'Completed')
+            .reduce((acc, assignment) => {
+                const classCategory = assignment.class || 'Uncategorized';
+                acc[classCategory] = (acc[classCategory] || 0) + (assignment.timeEstimate || 0);
+                return acc;
+            }, {});
+        return Object.keys(predictedHoursData).map(key => ({ class: key, hours: predictedHoursData[key] }));
+    }, [assignments]);
+    
+    const hoursSpentWorkingGraphData = useMemo(() => {
+        const hoursSpentWorkingData = {};
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+        assignments
+            .filter(a => a.status === 'Completed' && a.dateCompleted && a.dateCompleted >= oneMonthAgo)
+            .forEach(assignment => {
+                const weekStart = getStartOfWeek(assignment.dateCompleted);
+                const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                hoursSpentWorkingData[weekKey] = (hoursSpentWorkingData[weekKey] || 0) + (assignment.timeEstimate || 0);
+            });
+        return Object.keys(hoursSpentWorkingData)
+            .map(weekKey => ({ week: weekKey, hours: hoursSpentWorkingData[weekKey], sortDate: new Date(weekKey) }))
+            .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
+    }, [assignments, getStartOfWeek]);
 
-    // Data for XP Gain graph
-    const xpGainData = assignments
-      .filter(a => a.status === 'Completed' && a.dateCompleted)
-      .sort((a, b) => a.dateCompleted.getTime() - b.dateCompleted.getTime())
-      .reduce((acc, assignment) => {
-        const dateString = assignment.dateCompleted.toLocaleDateString();
-        const existing = acc.find(item => item.date === dateString);
-        const points = assignment.pointsEarned || 0;
-        if (existing) existing.xp += points;
-        else acc.push({ date: dateString, xp: points });
-        return acc;
-      }, []);
+    const tagAnalytics = useMemo(() => {
+        const analytics = {};
+        assignmentTags.forEach(tag => {
+            analytics[tag] = { totalTimeSpent: 0, assignmentCount: 0 };
+        });
+        completedAssignments.forEach(t => {
+            if (t.tags && t.tags.length > 0) {
+                t.tags.forEach(tag => {
+                    if (analytics[tag]) {
+                        analytics[tag].totalTimeSpent += t.timeEstimate || 0;
+                        analytics[tag].assignmentCount++;
+                    }
+                });
+            }
+        });
+        return analytics;
+    }, [completedAssignments]);
 
-    let cumulativeXP = 0;
-    const cumulativeXPGainData = xpGainData.map(data => {
-      cumulativeXP += data.xp;
-      return { date: data.date, cumulativeXP: cumulativeXP };
-    });
+    const stressRisk = useMemo(() => {
+        let totalStressScore = 0;
+        const now = new Date();
+        const upcomingAssignments = assignments.filter(a => a.status !== 'Completed' && a.dueDate && a.dueDate > now && (a.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24) <= 14);
+        const difficultyMap = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+        upcomingAssignments.forEach(assignment => {
+            const daysUntilDue = Math.ceil((assignment.dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            let assignmentStress = (difficultyMap[assignment.difficulty] || 1) * 5 + (assignment.timeEstimate || 1) * 0.5;
+            if (daysUntilDue <= 3) assignmentStress += (3 - daysUntilDue + 1) * 10;
+            totalStressScore += assignmentStress;
+        });
+        return Math.min(100, (totalStressScore / 500) * 100);
+    }, [assignments]);
 
-    // Data for Predicted Hours graph
-    const predictedHoursData = assignments
-      .filter(a => a.status !== 'Completed')
-      .reduce((acc, assignment) => {
-        const classCategory = assignment.class || 'Uncategorized';
-        acc[classCategory] = (acc[classCategory] || 0) + (assignment.timeEstimate || 0);
-        return acc;
-      }, {});
-    const predictedHoursGraphData = Object.keys(predictedHoursData).map(key => ({
-      class: key,
-      hours: predictedHoursData[key],
-    }));
-      
-    // Data for Hours Spent graph
-    const hoursSpentWorkingData = {};
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
-    assignments
-      .filter(a => a.status === 'Completed' && a.dateCompleted && a.dateCompleted >= oneMonthAgo)
-      .forEach(assignment => {
-        const weekStart = getStartOfWeek(assignment.dateCompleted);
-        const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        hoursSpentWorkingData[weekKey] = (hoursSpentWorkingData[weekKey] || 0) + (assignment.timeEstimate || 0);
-      });
-    const hoursSpentWorkingGraphData = Object.keys(hoursSpentWorkingData)
-      .map(weekKey => ({ week: weekKey, hours: hoursSpentWorkingData[weekKey], sortDate: new Date(weekKey) }))
-      .sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
+    const stressDisplay = useMemo(() => {
+        if (stressRisk <= 33) return { text: 'Low', color: 'text-green-400', emoji: '😊' };
+        if (stressRisk <= 66) return { text: 'Medium', color: 'text-yellow-400', emoji: '😐' };
+        return { text: 'High', color: 'text-red-400', emoji: '💀' };
+    }, [stressRisk]);
 
     return (
-      <div>
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-white">Dashboard</h2>
-            <p className="text-slate-400">Your productivity at a glance.</p>
-          </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-500 transition-colors flex items-center space-x-2"
-          >
-            <svg className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M4 4l1.5 1.5A9 9 0 0120.5 10.5M20 20l-1.5-1.5A9 9 0 013.5 13.5" />
-            </svg>
-            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
-          </button>
-        </div>
+    <div className="grid flex-1 gap-8 md:grid-cols-3 lg:grid-cols-4">
+        <div className="flex flex-col gap-8 md:col-span-2 lg:col-span-3">
+            {/* --- HEADER --- */}
+            <div className="flex justify-between items-center px-4">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tighter text-white">Welcome back, {stats.username}</h2>
+                    <p className="text-white/60">Here's your productivity overview.</p>
+                </div>
+                <button onClick={handleRefresh} disabled={isRefreshing} className="bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-500 transition-colors flex items-center space-x-2">
+                    <svg className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M4 4l1.5 1.5A9 9 0 0120.5 10.5M20 20l-1.5-1.5A9 9 0 013.5 13.5" /></svg>
+                    <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+                </button>
+            </div>
+
+            {/* --- TOP STAT CARDS --- */}
+            <div className="grid gap-4 sm:grid-cols-3">
+                <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                    <p className="text-sm font-medium text-white/70">Total XP</p>
+                    <p className="text-4xl font-bold text-white">{stats.totalXP.toLocaleString()}</p>
+                </div>
+                <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                    <p className="text-sm font-medium text-white/70">Current Level</p>
+                    <p className="text-4xl font-bold text-white">Level {levelInfo.level}</p>
+                    <div className="mt-1 h-2 w-full rounded-full bg-white/10">
+                        <div className="h-2 rounded-full bg-primary" style={{ width: `${(levelInfo.xpProgressInLevel / levelInfo.xpNeededForLevelUp) * 100}%`, boxShadow: '0 0 8px var(--primary-color)' }}></div>
+                    </div>
+                </div>
+                <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                    <p className="text-sm font-medium text-white/70">Title</p>
+                    <p className="text-4xl font-bold text-white truncate">{currentTitle}</p>
+                </div>
+            </div>
+
+            {/* --- ALERT BANNERS --- */}
+            <div className="flex flex-col gap-4">
                 {shouldPromptForTriage && (
-          <div className="mb-8 p-6 bg-indigo-900/50 border-2 border-indigo-700 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-2xl font-bold text-white">✨ It's Time for Your Weekly Triage!</h3>
-              <p className="text-indigo-300">Plan your week in 5 minutes to earn the powerful 'Clarity' buff.</p>
-            </div>
-            <button onClick={onStartTriage} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg flex-shrink-0">
-              Start Planning
-            </button>
-          </div>
-        )}
-
-        {stats.contract && (
-          <div className={`mb-8 p-6 border-2 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 ${stats.contract.status === 'offered' ? 'bg-slate-800/80 border-yellow-600/80' : 'bg-slate-800/50 border-slate-700'}`}>
-            <div>
-              <h3 className="text-2xl font-bold text-white">
-                {stats.contract.status === 'offered' ? '📜 New Contract Available!' : 'Active Contract'}
-              </h3>
-              <p className="text-yellow-300 font-semibold">{stats.contract.name}</p>
-              <p className="text-slate-400">{stats.contract.description}</p>
-            </div>
-            {stats.contract.status === 'offered' ? (
-              <button onClick={onAcceptContract} className="px-6 py-3 bg-yellow-600 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors shadow-lg flex-shrink-0">
-                Accept (Cost: {stats.contract.deposit} XP)
-              </button>
-            ) : (
-              <div className="text-center">
-                <p className="text-slate-300 font-semibold">Contract is active.</p>
-                <p className="text-xs text-slate-500">Time Limit: {stats.contract.timeLimitHours} hours</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Top Stat Cards */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
-            <p className="text-slate-400">Total XP</p>
-            <p className="text-4xl font-bold text-white mt-2">{stats.totalXP}</p>
-          </div>
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
-            <div className="flex justify-between items-baseline">
-                <p className="text-slate-400">Current Level</p>
-                <p className="text-sm text-slate-400">
-                    {calculateLevelInfo(stats.totalXP).xpProgressInLevel.toLocaleString()} / {calculateLevelInfo(stats.totalXP).xpNeededForLevelUp.toLocaleString()} XP
-                </p>
-            </div>
-            <p className="text-4xl font-bold text-white mt-1">{stats.currentLevel}</p>
-            <div className="w-full bg-slate-700 rounded-full h-2.5 mt-4">
-                <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(calculateLevelInfo(stats.totalXP).xpProgressInLevel / calculateLevelInfo(stats.totalXP).xpNeededForLevelUp) * 100}%` }}></div>
-            </div>
-          </div>
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl transition-transform duration-200 hover:-translate-y-1">
-            <p className="text-slate-400">Title</p>
-            <p className="text-2xl font-bold text-accent mt-2">{currentTitle}</p>
-          </div>
-        </div>
-        
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column (Graphs & Table) */}
-            <div className="lg:col-span-2">
-              <div className="flex flex-col gap-6">
-                  {/* XP Gain Graph */}
-                  <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                      <h3 className="text-xl font-semibold text-white mb-4">XP Gain Over Time</h3>
-                      <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={cumulativeXPGainData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                          <XAxis dataKey="date" tick={{ fill: '#94a3b8' }} />
-                          <YAxis tick={{ fill: '#94a3b8' }}/>
-                          <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                          <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                          <Line type="monotone" dataKey="cumulativeXP" stroke="#818cf8" strokeWidth={2} activeDot={{ r: 8 }} name="Cumulative XP" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                  </div>
-                  {/* Two bottom graphs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-semibold text-white mb-4">Predicted Workload</h3>
-                          <ResponsiveContainer width="100%" height={250}>
-                              <LineChart data={predictedHoursGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                                  <XAxis dataKey="class" tick={{ fill: '#94a3b8' }}/>
-                                  <YAxis tick={{ fill: '#94a3b8' }}/>
-                                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                                  <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                                  <Line type="monotone" dataKey="hours" stroke="#34d399" activeDot={{ r: 8 }} name="Predicted Hours" />
-                              </LineChart>
-                          </ResponsiveContainer>
-                      </div>
-                      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-semibold text-white mb-4">Hours Worked (Weekly)</h3>
-                          <ResponsiveContainer width="100%" height={250}>
-                              <LineChart data={hoursSpentWorkingGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#475569"/>
-                                  <XAxis dataKey="week" tick={{ fill: '#94a3b8' }}/>
-                                  <YAxis tick={{ fill: '#94a3b8' }}/>
-                                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}/>
-                                  <Legend wrapperStyle={{ color: '#94a3b8' }} />
-                                  <Line type="monotone" dataKey="hours" stroke="#facc15" activeDot={{ r: 8 }} name="Hours Worked" />
-                              </LineChart>
-                          </ResponsiveContainer>
-                      </div>
-                  </div>
-              </div>
-              
-              {/* Analytics Table with corrected margin */}
-              <div className="mt-8 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl overflow-hidden">
-                  <h3 className="text-xl font-bold text-white p-6">Analytics by Tag (Last Year)</h3>
-                  <div className="overflow-x-auto">
-                      <table className="min-w-full text-white">
-                      <thead>
-                          <tr className="text-slate-400 uppercase text-sm leading-normal border-b-2 border-slate-700">
-                          <th className="py-3 px-6 text-left">Tag</th>
-                          <th className="py-3 px-6 text-center">Assignments</th>
-                          <th className="py-3 px-6 text-center">Avg Time (hrs)</th>
-                          </tr>
-                      </thead>
-                      <tbody className="text-slate-300 text-sm font-light">
-                          {assignmentTags.map(tag => {
-                          const analytics = getFormattedAnalytics(tag);
-                          const data = tagAnalytics[tag];
-                          return (
-                              <tr key={tag} className="border-b border-slate-700 hover:bg-slate-800/70">
-                              <td className="py-4 px-6 text-left font-medium">{tag}</td>
-                              <td className="py-4 px-6 text-center">{data.assignmentCount}</td>
-                              <td className="py-4 px-6 text-center">{analytics.avgTime}</td>
-                              </tr>
-                          );
-                          })}
-                      </tbody>
-                      </table>
-                  </div>
-              </div>
-            </div>
-
-                        {/* Right Column (Widgets) */}
-            <div className="flex flex-col gap-6">
-                <QuestsComponent quests={stats.quests} />
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                  <h3 className="text-xl font-semibold text-white mb-3 flex items-center space-x-2">
-                    <span>🔥</span>
-                    <span>Explorer's Streak</span>
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <p className="text-4xl font-bold text-orange-400">{stats.focusNavigator?.explorerStreak || 0} Days</p>
-                    <p className="text-slate-400 text-sm font-semibold">
-                      Today: {(stats.focusNavigator?.dailyFocusMinutes || 0)} / 45 min
-                    </p>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2.5 mt-3">
-                    <div 
-                      className="bg-orange-500 h-2.5 rounded-full" 
-                      style={{ width: `${Math.min(100, ((stats.focusNavigator?.dailyFocusMinutes || 0) / 45) * 100)}%` }}>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-semibold text-white mb-3">Your Work Style</h3>
-                    <div className="flex items-center space-x-4">
-                        <span className="text-5xl">{persona.icon}</span>
-                        <div>
-                            <p className="text-lg font-bold text-white">{persona.name}</p>
-                            <p className="text-sm text-slate-400">{persona.description}</p>
+                    <div className="bg-glass flex items-center gap-6 rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                        <div className="flex-grow">
+                            <p className="text-sm font-bold text-primary" style={{ textShadow: '0 0 2px var(--primary-color)' }}>✨ New Triage</p>
+                            <h3 className="text-lg font-bold text-white">Weekly Review</h3>
+                            <p className="text-sm text-white/70">Review your weekly tasks and prioritize for optimal productivity.</p>
                         </div>
+                        <button onClick={onStartTriage} className="px-5 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors">Start Planning</button>
                     </div>
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-semibold text-white mb-3">Productivity Pet</h3>
-                      {stats.petStatus === 'none' ? (
-                        <button onClick={collectFirstEgg} className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 w-full">Get First Egg</button>
-                      ) : stats.petStatus === 'egg' ? (
-                        <>
-                          <div className="text-center text-5xl mb-2">🥚</div>
-                          <p className="text-slate-400 mb-2 text-center">
-                            {stats.assignmentsToHatch > 0 ? `${stats.assignmentsToHatch} more to hatch!` : "Ready to hatch!"}
-                          </p>
-                          <div className="w-full bg-slate-700 rounded-full h-4 mb-2">
-                            <div className="bg-purple-500 h-4 rounded-full" style={{ width: `${((EGG_REQUIREMENT - stats.assignmentsToHatch) / EGG_REQUIREMENT) * 100}%` }}/>
-                          </div>
-                          {stats.assignmentsToHatch <= 0 && <button onClick={hatchEgg} className="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full">Hatch Now!</button>}
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center space-x-4 mb-2">
-                            <span className="text-6xl">{stats.currentPet?.display}</span>
-                            <div>
-                              <p className="text-lg font-semibold text-white">{stats.currentPet?.name}</p>
-                              <p className="text-sm text-green-400">+{(stats.currentPet?.xpBuff * 100).toFixed(0)}% XP</p>
-                            </div>
-                          </div>
-                          <button onClick={collectNewEgg} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">Find New Egg</button>
-                        </>
-                      )}
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-semibold text-white mb-3 flex items-center space-x-2">
-                        <span>Stress Risk</span>
-                        <span className="text-2xl">{stressEmoji}</span>
-                    </h3>
-                    <p className="text-3xl font-bold text-red-400">{stressRisk.toFixed(0)}%</p>
-                    <div className="w-full bg-slate-700 rounded-full h-2.5 mt-2">
-                        <div className={`h-2.5 rounded-full ${stressRisk <= 33 ? 'bg-green-500' : stressRisk <= 66 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${stressRisk}%` }}></div>
+                )}
+                {stats.contract && (
+                    <div className="bg-glass flex items-center gap-6 rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                        <div className="flex-grow">
+                            <p className="text-sm font-bold text-yellow-400" style={{ textShadow: '0 0 5px #facc15' }}>{stats.contract.status === 'offered' ? '📜 New Contract' : 'Active Contract'}</p>
+                            <h3 className="text-lg font-bold text-white">{stats.contract.name}</h3>
+                            <p className="text-sm text-white/70">{stats.contract.description}</p>
+                        </div>
+                        {stats.contract.status === 'offered' && (
+                            <button onClick={onAcceptContract} className="px-5 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition-colors">Accept ({stats.contract.deposit} XP)</button>
+                        )}
                     </div>
-                </div>
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-2xl shadow-xl">
-                    <h3 className="text-xl font-semibold text-white mb-3">Slot Machine</h3>
-                    <p className="text-slate-400 mb-4 text-sm">Spin for 50 XP for a chance to win cosmetics or more XP!</p>
-                    <button onClick={spinProductivitySlotMachine} className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg w-full transition-colors hover:bg-indigo-700">Spin Now</button>
+                )}
+            </div>
+
+                        {/* --- GRAPHS --- */}
+            <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                <h3 className="text-lg font-bold text-white mb-4">XP Gain Over Time</h3>
+                <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={cumulativeXPGainData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <defs><linearGradient id="xpGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.8}/><stop offset="95%" stopColor="#0bda73" stopOpacity={0.8}/></linearGradient></defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                            <XAxis dataKey="date" tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                            <Tooltip contentStyle={{ backgroundColor: 'rgba(25, 16, 34, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)' }}/>
+                            <Line type="monotone" dataKey="cumulativeXP" stroke="url(#xpGradient)" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#fff' }} name="Cumulative XP" />
+                        </LineChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
+            <div className="grid gap-4 md:grid-cols-2">
+<div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                    <h3 className="text-lg font-bold text-white mb-4">Predicted Workload</h3>
+                    <div className="h-48">
+                        {predictedHoursGraphData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={predictedHoursGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                                    <XAxis dataKey="class" tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                    <Tooltip contentStyle={{ backgroundColor: 'rgba(25, 16, 34, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)' }} cursor={{fill: 'rgba(255, 255, 255, 0.1)'}}/>
+                                    <Legend wrapperStyle={{ color: '#ffffff99', fontSize: 12 }} />
+                                    <Bar dataKey="hours" fill="#34d399" name="Predicted Hours" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-center text-white/50">
+                                <div>
+                                    <p className="font-semibold">No data to display.</p>
+                                    <p className="text-xs mt-1">Add upcoming assignments with a time estimate to see your workload.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                    <h3 className="text-lg font-bold text-white mb-4">Hours Worked (Weekly)</h3>
+                    <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={hoursSpentWorkingGraphData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)"/>
+                                <XAxis dataKey="week" tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <YAxis tick={{ fill: '#ffffff99', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <Tooltip contentStyle={{ backgroundColor: 'rgba(25, 16, 34, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)' }}/>
+                                <Line type="monotone" dataKey="hours" stroke="#facc15" strokeWidth={3} dot={{ fill: '#facc15' }} activeDot={{ r: 6, fill: '#fff' }} name="Hours Worked" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- ANALYTICS TABLE --- */}
+            <div className="bg-glass rounded-xl shadow-lg ring-1 ring-white/10">
+                <h3 className="border-b border-white/10 p-4 text-lg font-bold text-white">Analytics by Tag</h3>
+                <div className="overflow-x-auto"><table className="w-full text-left"><thead><tr className="border-b border-white/10 text-xs uppercase text-white/60"><th className="px-4 py-3 font-medium">Tag</th><th className="px-4 py-3 font-medium text-center">Assignments</th><th className="px-4 py-3 font-medium text-center">Avg Time (hrs)</th></tr></thead><tbody className="divide-y divide-white/10 text-sm">{assignmentTags.map(tag => { const data = tagAnalytics[tag]; const avgTime = data.assignmentCount > 0 ? (data.totalTimeSpent / data.assignmentCount).toFixed(1) : 'N/A'; return (<tr key={tag}><td className="px-4 py-3 text-white">{tag}</td><td className="px-4 py-3 text-center text-white/70">{data.assignmentCount}</td><td className="px-4 py-3 text-center text-white/70">{avgTime}</td></tr>);})}</tbody></table></div>
+            </div>
         </div>
-      </div>
+
+        {/* --- SIDEBAR WIDGETS --- */}
+        <aside className="flex flex-col gap-8 md:col-span-1 lg:col-span-1">
+            <div className="bg-glass flex flex-col gap-4 rounded-xl p-4 shadow-lg ring-1 ring-white/10"><QuestsComponent quests={stats.quests} /></div>
+<div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                <h3 className="text-lg font-bold text-white">Explorer's Streak</h3>
+                <p className="text-3xl font-bold text-primary" style={{ textShadow: '0 0 3px var(--primary-color)' }}>{stats.focusNavigator?.explorerStreak || 0} Days</p>
+            </div>
+            <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10"><h3 className="text-lg font-bold text-white">Work Style: {persona.name} {persona.icon}</h3><p className="text-sm text-white/70">{persona.description}</p></div>
+            <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10">
+                <h3 className="text-lg font-bold text-white">Productivity Pet</h3>
+                {stats.petStatus === 'none' && <button onClick={collectFirstEgg} className="mt-2 w-full rounded-lg bg-primary py-2 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105">Get First Egg</button>}
+                {stats.petStatus === 'egg' && (<div className="text-center mt-2"><p className="text-5xl">🥚</p><p className="text-sm text-white/70">{stats.assignmentsToHatch > 0 ? `${stats.assignmentsToHatch} more to hatch!` : "Ready to hatch!"}</p>{stats.assignmentsToHatch <= 0 && <button onClick={hatchEgg} className="mt-2 w-full rounded-lg bg-primary py-2 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105">Hatch Now!</button>}</div>)}
+                {stats.petStatus === 'hatched' && stats.currentPet && (<div className="mt-2 text-center"><p className="text-5xl">{stats.currentPet.display}</p><p className="font-bold">{stats.currentPet.name}</p><p className="text-sm text-green-400">+{stats.currentPet.xpBuff * 100}% XP</p><button onClick={collectNewEgg} className="mt-2 w-full rounded-lg bg-primary/50 py-2 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105">Find New Egg</button></div>)}
+            </div>
+            <div className="bg-glass rounded-xl p-4 shadow-lg ring-1 ring-white/10"><h3 className="text-lg font-bold text-white">Stress Risk</h3><p className={`text-3xl font-bold ${stressDisplay.color}`}>{stressDisplay.text} {stressDisplay.emoji}</p></div>
+            <div className="bg-glass flex flex-col items-center gap-4 rounded-xl p-4 text-center shadow-lg ring-1 ring-white/10">
+                <h3 className="text-lg font-bold text-white">Slot Machine</h3>
+                <p className="text-sm text-white/70">Spin for a random reward!</p>
+                <button onClick={spinProductivitySlotMachine} className="w-full rounded-lg bg-primary py-2 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105" style={{ boxShadow: '0 0 15px var(--primary-color)' }}>Spin</button>
+            </div>
+        </aside>
+    </div>
     );
-  };
+};
 
   // Component for Badge System Sheet (No longer a top-level tab, but keeping for reference of badge definitions)
   const BadgeSystem = () => {
@@ -11069,7 +11073,7 @@ const QuestsComponent = ({ quests }) => {
 
 // NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
 const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
-    const [activeTab, setActiveTab] = useState('game');
+    const [activeTab, setActiveTab] = useState('flashcards');
     const [isStudying, setIsStudying] = useState(false);
     const studyZoneState = stats?.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
     
@@ -11093,11 +11097,13 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchie
       </div>
       <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl">
         <div className="relative z-10 flex border-b border-slate-700">
-          <StudyZoneTabButton tabName="game">Platformer Game</StudyZoneTabButton>
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
+          <StudyZoneTabButton tabName="fortress">Flashcard Fortress</StudyZoneTabButton>
+          <StudyZoneTabButton tabName="platformer">Platformer Game</StudyZoneTabButton>
         </div>
         <div className="p-6">
-          {activeTab === 'game' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
+          {activeTab === 'platformer' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
+          {activeTab === 'fortress' && <FlashcardFortressGame stats={stats} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
           {activeTab === 'flashcards' && (
             isStudying ? 
             <FlashcardSession studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
@@ -11109,6 +11115,770 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchie
   );
 };
 
+// --- NEW: Flashcard Fortress Upgrade Definitions ---
+const fortressUpgradeDefinitions = {
+  common: [
+    { id: 'player_speed', name: 'Momentum', description: 'Increases your movement speed by 15%.', maxLevel: 5 },
+    { id: 'drop_magnet', name: 'Drop Magnetism', description: 'Increases gold and XP collection radius by 30%.', maxLevel: 5 },
+    { id: 'focused_power', name: 'Focused Power', description: 'Increases your projectile damage by 2.', maxLevel: 5 },
+  ],
+  rare: [
+    { id: 'xp_boost', name: 'Learning Algorithm', description: 'Gain 25% more XP from defeated enemies.', maxLevel: 3 },
+    { id: 'gold_boost', name: 'Efficient Looting', description: 'Enemies drop 20% more gold.', maxLevel: 3 },
+    { id: 'piercing_shot', name: 'Piercing Shot', description: 'Your projectiles pierce through 1 additional enemy.', maxLevel: 3 },
+    { id: 'tower_discount', name: 'Engineering Degree', description: 'Reduces the cost of building and upgrading towers by 10%.', maxLevel: 3 },
+  ],
+  epic: [
+    { id: 'quick_recovery', name: 'Quick Recovery', description: 'Reduces the attack cooldown from an incorrect answer by 20%.', maxLevel: 2 },
+    { id: 'multishot', name: 'Multishot', description: 'Fire two additional projectiles in a cone.', maxLevel: 1 },
+    { id: 'tower_overclock', name: 'Tower Overclock', description: 'All towers fire 15% faster.', maxLevel: 2 },
+    { id: 'reinforced_construction', name: 'Reinforced Construction', description: 'All towers are built with 25% more health.', maxLevel: 2 },
+  ],
+};
+// --- NEW: Flashcard Survivor (Kingshot style) Gameplay Definitions ---
+
+const survivorEnemyDefinitions = {
+  scamp: { name: 'Scamp', health: 8, speed: 0.12, type: 'runner', gold: 8, visual: '👹' },
+  ogre: { name: 'Ogre', health: 100, speed: 0.015, type: 'brute', gold: 40, visual: '👾' },
+  shaman: { name: 'Shaman', health: 40, speed: 0.04, type: 'healer', gold: 30, healPower: 5, healRadius: 100, healCooldown: 5000, lastHeal: 0, visual: '🧙' },
+  specter: { name: 'Specter', health: 35, speed: 0.05, type: 'bypass', gold: 20, isEthereal: true, visual: '👻' },
+  sapper: { name: 'Sapper', health: 15, speed: 35, type: 'tower-buster', gold: 15, damage: 45, visual: '💣' },
+  default: { name: 'Term', health: 15, speed: 0.05, type: 'normal', gold: 10, visual: '❓' }
+};
+
+const survivorTowerDefinitions = {
+  sentry: {
+    name: 'Sentry Turret',
+    baseCost: 50,
+    base: { damage: 2, fireRate: 1, range: 150, maxHealth: 100, projectileType: 'sentry_bullet' },
+    upgrades: {
+      tier1: [
+        { id: 'sentry_dmg1', name: 'Damage I', cost: 75, effect: { damage: 2 }, description: "+2 Damage" },
+        { id: 'sentry_spd1', name: 'Speed I', cost: 100, effect: { fireRate: 1.5 }, description: "x1.5 Fire Rate" },
+      ],
+      tier2: [
+        { id: 'sentry_spec_gatling', name: 'Spec: Gatling Gun', cost: 300, path: 'gatling', requires: ['sentry_spd1'], effect: { fireRate: 2.5 }, description: "Massively increases fire rate again." },
+        { id: 'sentry_spec_heavy', name: 'Spec: Heavy Caliber', cost: 300, path: 'heavy', requires: ['sentry_dmg1'], effect: { damage: 8 }, description: "Massively increases damage." },
+      ],
+      tier3: [
+        { id: 'sentry_gatling_dmg', name: 'Gatling Damage', cost: 250, requires: ['sentry_spec_gatling'], effect: { damage: 3 }, description: "+3 Damage" },
+        { id: 'sentry_heavy_spd', name: 'Heavy Speed', cost: 250, requires: ['sentry_spec_heavy'], effect: { fireRate: 1.3 }, description: "x1.3 Fire Rate" },
+      ]
+    }
+  },
+  cannon: {
+    name: 'Cannon Tower',
+    baseCost: 125,
+    base: { damage: 10, fireRate: 0.4, range: 120, maxHealth: 150, projectileType: 'cannonball', aoeRadius: 40 },
+    upgrades: {
+      tier1: [
+        { id: 'cannon_dmg1', name: 'Damage I', cost: 150, effect: { damage: 8 }, description: "+8 Damage" },
+        { id: 'cannon_aoe1', name: 'Wider Blast', cost: 200, effect: { aoeRadius: 20 }, description: "+20 Blast Radius" },
+      ]
+    }
+  },
+  mage: {
+    name: 'Mage Tower',
+    baseCost: 150,
+    base: { damage: 5, fireRate: 0.8, range: 160, maxHealth: 80, canHitEthereal: true, slow: { amount: 0.3, duration: 1500 } },
+    upgrades: {
+      tier1: [
+        { id: 'mage_dmg1', name: 'Power I', cost: 175, effect: { damage: 4 }, description: "+4 Damage" },
+        { id: 'mage_slow1', name: 'Deeper Freeze', cost: 225, effect: { slow: { amount: 0.2 } }, description: "+20% Slow" },
+      ]
+    }
+  },
+  sniper: {
+    name: 'Sniper Tower',
+    baseCost: 250,
+    base: { damage: 25, fireRate: 0.2, range: 300, maxHealth: 75, targetPriority: 'strongest' },
+    upgrades: {
+      tier1: [
+        { id: 'sniper_dmg1', name: 'Heavy Caliber', cost: 300, effect: { damage: 25 }, description: "+25 Damage" },
+      ]
+    }
+  },
+  bank: {
+    name: 'Bank',
+    baseCost: 75,
+    base: { income: 2, fireRate: 1, maxHealth: 50 },
+    upgrades: {
+      tier1: [
+        { id: 'bank_inc1', name: 'Interest I', cost: 100, effect: { income: 2 }, description: "+2 Gold/sec" },
+        { id: 'bank_inc2', name: 'Interest II', cost: 250, effect: { income: 4 }, description: "+4 Gold/sec" },
+      ]
+    }
+  },
+};
+
+const survivorBuffDefinitions = {
+  rapid_fire: { name: 'Rapid Fire', cost: 100, duration: 10000 },
+  gold_rush: { name: 'Gold Rush', cost: 250, duration: 15000 },
+};
+
+
+// --- NEW: Flashcard Fortress Quiz Modal ---
+const FlashcardFortressQuizModal = ({ card, allCards, onAnswer, onClose }) => {
+  const [options, setOptions] = useState([]);
+
+  useEffect(() => {
+    if (card && allCards.length > 0) {
+      const correctOption = card.back;
+      let wrongOptions = allCards
+        .filter(c => c.id !== card.id) // Ensure we don't pick the same card
+        .map(c => c.back);
+      
+      // Shuffle wrong options to get a random set
+      for (let i = wrongOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [wrongOptions[i], wrongOptions[j]] = [wrongOptions[j], wrongOptions[i]];
+      }
+      // Get 2 unique wrong answers
+      wrongOptions = [...new Set(wrongOptions)].slice(0, 2);
+
+      const finalOptions = [correctOption, ...wrongOptions];
+      
+      // Shuffle the final options so the correct answer isn't always first
+      for (let i = finalOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [finalOptions[i], finalOptions[j]] = [finalOptions[j], finalOptions[i]];
+      }
+      setOptions(finalOptions);
+    }
+  }, [card, allCards]);
+
+  if (!card) return null;
+
+  return (
+    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-30 p-4">
+      <div className="bg-slate-800 border-2 border-slate-700 p-8 rounded-lg w-full max-w-2xl text-center">
+        <p className="text-slate-400">TERM:</p>
+        <h3 className="text-3xl font-bold text-white mb-6">{card.front}</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {options.map((option, i) => (
+            <button key={i} onClick={() => onAnswer(option === card.back)} className="w-full text-lg p-4 bg-slate-700 hover:bg-indigo-600 rounded-md transition-colors">
+              {option}
+            </button>
+          ))}
+        </div>
+        <button onClick={onClose} className="mt-6 text-sm text-slate-500 hover:text-white">Cancel Attack</button>
+      </div>
+    </div>
+  );
+};
+
+// --- NEW: Flashcard Fortress Level Up Modal ---
+const FlashcardFortressLevelUpModal = ({ onSelectUpgrade, upgrades }) => {
+  if (!upgrades || upgrades.length === 0) return null;
+  return (
+    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-30 p-4">
+      <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-lg w-full max-w-4xl text-center">
+        <h2 className="text-4xl font-bold text-yellow-400 mb-2">LEVEL UP!</h2>
+        <p className="text-slate-300 mb-6">Choose a temporary upgrade for this run.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {upgrades.map((upgrade, i) => (
+            <button key={i} onClick={() => onSelectUpgrade(upgrade)} className="p-6 bg-slate-800 border border-slate-700 rounded-lg text-left hover:bg-indigo-900/50 hover:border-indigo-600 transition-all transform hover:scale-105">
+              <h3 className="text-xl font-bold text-white">
+                {upgrade.name} 
+                {upgrade.maxLevel > 1 && (
+                  <span className="text-base font-medium text-slate-400 ml-2">({(upgrade.currentLevel || 0) + 1}/{upgrade.maxLevel})</span>
+                )}
+              </h3>
+              <p className="text-slate-400 text-sm mt-2">{upgrade.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+// --- NEW: SVG Icon Components for Flashcard Fortress ---
+
+const PlayerIcon = () => (
+  <svg viewBox="0 0 32 40" className="w-full h-full">
+    <path d="M16 4 A 8 8 0 0 1 16 20 A 8 8 0 0 1 16 4" fill="#4f46e5" stroke="#c7d2fe" strokeWidth="1.5"/>
+    <rect x="11" y="10" width="4" height="6" rx="2" fill="white"/>
+    <rect x="17" y="10" width="4" height="6" rx="2" fill="white"/>
+    <rect x="13" y="12" width="2" height="3" rx="1" fill="black"/>
+    <rect x="19" y="12" width="2" height="3" rx="1" fill="black"/>
+    <path d="M4 38 L4 24 A 4 4 0 0 1 8 20 L24 20 A 4 4 0 0 1 28 24 L28 38 Z" fill="#312e81"/>
+    <rect x="10" y="22" width="12" height="14" fill="#4338ca"/>
+  </svg>
+);
+
+const TowerIcons = ({ type }) => {
+  const icons = {
+    sentry: <path d="M12 20 L28 20 L28 32 L12 32 Z M20 12 L20 20 M14 12 L26 12" stroke="#94a3b8" strokeWidth="4" fill="none" strokeLinecap="round" />,
+    cannon: <><circle cx="20" cy="20" r="14" fill="#475569" /><path d="M20 20 L38 12" stroke="#1e293b" strokeWidth="8" fill="none" strokeLinecap="round" /></>,
+    mage: <><path d="M20 2 L 38 38 L 2 38 Z" fill="#7c3aed" /><circle cx="20" cy="14" r="6" fill="#c4b5fd" /></>,
+    sniper: <><rect x="4" y="18" width="32" height="4" fill="#334155" /><circle cx="10" cy="20" r="8" fill="#475569" /></>,
+    bank: <><circle cx="20" cy="20" r="16" fill="#ca8a04" /><text x="20" y="28" fontSize="24" fill="#fefce8" textAnchor="middle">$</text></>,
+    gold_magnet: <><path d="M10 10 C 10 30, 30 30, 30 10" fill="none" stroke="#f59e0b" strokeWidth="4" /><path d="M15 15 C 15 28, 25 28, 25 15" fill="none" stroke="#f59e0b" strokeWidth="3" /><path d="M4 38 L 36 38 L 20 28 Z" fill="#475569" /></>,
+  };
+  return <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-lg">{icons[type] || <circle cx="20" cy="20" r="15" fill="#64748b"/>}</svg>;
+};
+
+const EnemyIcons = ({ type }) => {
+  const icons = {
+    scamp: <path d="M20,5 C30,5 35,15 35,20 S30,35 20,35 S5,25 5,20 S10,5 20,5 M15,15 L15,22 M25,15 L25,22 M12,30 Q20,25 28,30" stroke="#dc2626" strokeWidth="3" fill="none" strokeLinecap="round" />,
+    ogre: <><rect x="4" y="10" width="32" height="26" rx="8" fill="#166534" /><circle cx="14" cy="18" r="3" fill="white" /><circle cx="26" cy="18" r="3" fill="white" /><rect x="12" y="28" width="16" height="4" fill="#dcfce7" /></>,
+    shaman: <><path d="M20 2 L 35 38 L 5 38 Z" fill="#581c87" /><path d="M20 12 L15 22 L25 22 Z" fill="#e9d5ff" /></>,
+    specter: <path d="M10 38 Q 20 28 30 38 Q 35 20 20 5 Q 5 20 10 38" fill="#4f46e5" opacity="0.7" />,
+    sapper: <><circle cx="20" cy="20" r="14" fill="#1e293b" /><path d="M15 10 L25 10 M20 5 L20 15 M10 20 L30 20" stroke="#ef4444" strokeWidth="4" /><circle cx="20" cy="20" r="4" fill="#f87171" className="animate-pulse" /></>,
+    default: <circle cx="20" cy="20" r="15" fill="#701a75" />,
+  };
+  return <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-lg">{icons[type] || <circle cx="20" cy="20" r="15" fill="#be185d"/>}</svg>;
+};
+
+const ProjectileVisuals = ({ type }) => {
+  const visuals = {
+    sentry_bullet: <rect x="-4" y="-1" width="8" height="2" fill="#fde047" />,
+    cannonball: <circle cx="0" cy="0" r="6" fill="#475569" />,
+    magic_bolt: <path d="M-8 0 L8 0 M-6 -4 L0 0 L-6 4" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />,
+    sniper_bullet: <rect x="-6" y="-1" width="12" height="2" fill="white" />,
+    player_bullet: <circle cx="0" cy="0" r="5" fill="#60a5fa" stroke="white" strokeWidth="1.5" />,
+  };
+  return <svg viewBox="-10 -10 20 20">{visuals[type] || <circle cx="0" cy="0" r="3" fill="white"/>}</svg>;
+};
+// --- NEW: Flashcard Survivor Game (Kingshot Style) ---
+// NEW: More reliable S-curve path generation
+// NEW: Robust Waypoint-based Path Generation
+const generateSurvivorPath = () => {
+  const GAME_WIDTH = 960;
+  const GAME_HEIGHT = 540;
+  const path = [];
+  const segmentsPerWaypoint = 25; // Controls the smoothness of corners
+
+  // Define a series of waypoints for the path to follow
+  const waypoints = [
+    { x: -20, y: Math.random() * 200 + 100 }, // Start off-screen left
+    { x: GAME_WIDTH * 0.2 + Math.random() * 80, y: Math.random() * (GAME_HEIGHT - 250) + 100 },
+    { x: GAME_WIDTH * 0.5 + (Math.random() - 0.5) * 100, y: Math.random() * (GAME_HEIGHT - 250) + 100 },
+    { x: GAME_WIDTH * 0.8 + Math.random() * 80, y: Math.random() * (GAME_HEIGHT - 250) + 100 },
+    { x: GAME_WIDTH - 50, y: GAME_HEIGHT - 150 } // End near the castle area
+  ];
+
+  for (let i = 0; i < waypoints.length - 1; i++) {
+    const start = waypoints[i];
+    const end = waypoints[i+1];
+    for (let j = 0; j <= segmentsPerWaypoint; j++) {
+      const t = j / segmentsPerWaypoint;
+      // Simple linear interpolation creates a predictable and solid path
+      const x = start.x + (end.x - start.x) * t;
+      const y = start.y + (end.y - start.y) * t;
+      path.push({ x, y });
+    }
+  }
+  
+  return path;
+};
+// NEW: Deterministic function to generate build slots near the path
+const generateBuildSlots = (path, count = 5, offset = 80) => {
+  const slots = [];
+  const pathLength = path.length;
+  // Ensure we have a valid path and count to prevent errors
+  if (pathLength < 2 || count === 0) return [];
+  
+  // Calculate evenly spaced indices along the path. We divide by (count + 1) 
+  // to create segments and place slots in the middle of them, avoiding the very start and end.
+  const interval = Math.floor(pathLength / (count + 1));
+  
+  for (let i = 1; i <= count; i++) {
+    const pathIndex = i * interval;
+    if (pathIndex >= pathLength) continue;
+
+    const anchorPoint = path[pathIndex];
+    
+    // Alternate placing slots above and below the path for visual variety.
+    const yOffset = (i % 2 === 0) ? offset : -offset;
+    
+    const newSlot = {
+      x: anchorPoint.x,
+      y: anchorPoint.y + yOffset,
+      towerId: null
+    };
+    
+    // Simple boundary check to keep slots on screen
+    if (newSlot.y > 40 && newSlot.y < 460 && newSlot.x > 40 && newSlot.x < 920) {
+        slots.push(newSlot);
+    }
+  }
+  return slots;
+};
+const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, showMessageBox, processAchievement }) => {
+  const GAME_WIDTH = 960;
+  const GAME_HEIGHT = 540;
+  
+  const [gameState, setGameState] = useState({ mode: 'menu' });
+  
+  const keysRef = useRef({});
+  const gameLoopRef = useRef(null);
+  const lastTimeRef = useRef(0);
+  const gameAreaRef = useRef(null);
+
+  const pathRef = useRef(generateSurvivorPath());
+  const buildSlotsRef = useRef([]);
+
+  const parsedFlashcards = useMemo(() => {
+    return (studyZoneState.flashcardsText || '').split('\n')
+      .map((line, index) => {
+          const parts = line.split(/→|>>|-/);
+          if(parts.length >= 2) return { id: index, front: parts[0].trim(), back: parts.slice(1).join('').trim()};
+          return null;
+      }).filter(Boolean);
+  }, [studyZoneState.flashcardsText]);
+
+  const resetGame = useCallback(() => {
+    pathRef.current = generateSurvivorPath();
+    buildSlotsRef.current = generateBuildSlots(pathRef.current, 5, 80);
+    setGameState({
+      mode: 'playing',
+      gameTimer: 600000,
+      castleHealth: 10,
+      score: 0,
+      gold: 150,
+      level: 1,
+      xp: 0,
+      xpToNextLevel: 10,
+      combo: 0,
+      comboTimeout: 0,
+      markedTargetId: null,
+      nemesisTargetId: null, // For Nemesis System
+      
+      player: { 
+        x: GAME_WIDTH / 2,
+        y: GAME_HEIGHT - 30,
+        attackCooldown: 0,
+        collectionRadius: 60,
+        activeBuffs: {},
+      },
+      playerUpgrades: [],
+      
+      enemies: [],
+      towers: [],
+      projectiles: [],
+      goldDrops: [],
+      xpFragmentDrops: [],
+      visualEffects: [],
+      
+      enemySpawnTimer: 3000,
+      wave: 1,
+      
+      quizTarget: null,
+      levelUpOptions: [],
+      buildSlotMenu: null,
+      upgradeTarget: null,
+      quizFirePosition: null,
+    });
+  }, []);
+
+  const handleSelectUpgrade = useCallback((upgrade) => {
+    setGameState(s => ({ ...s, mode: 'playing', level: s.level + 1, xp: 0, xpToNextLevel: Math.floor(s.xpToNextLevel * 1.5), playerUpgrades: [...s.playerUpgrades, upgrade.id] }));
+  }, []);
+
+  useEffect(() => {
+    const handleKey = e => { keysRef.current[e.key.toLowerCase()] = e.type === 'keydown'; };
+    const handleRightClick = e => { e.preventDefault(); };
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    window.addEventListener('contextmenu', handleRightClick);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+      window.removeEventListener('contextmenu', handleRightClick);
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (gameState.mode !== 'playing') {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+      lastTimeRef.current = 0;
+      return;
+    }
+
+    const gameLoop = (timestamp) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
+      let dt = timestamp - lastTimeRef.current;
+      lastTimeRef.current = timestamp;
+      if (dt > 100) dt = 16.67;
+
+      setGameState(s => {
+        if (s.mode !== 'playing') return s;
+        let newState = JSON.parse(JSON.stringify(s));
+
+        newState.gameTimer -= dt;
+        newState.enemySpawnTimer -= dt;
+        if (newState.player.attackCooldown > 0) newState.player.attackCooldown -= dt;
+        if (newState.comboTimeout > 0) newState.comboTimeout -= dt;
+        if (newState.comboTimeout <= 0 && newState.combo > 0) newState.combo = 0;
+        Object.keys(newState.player.activeBuffs || {}).forEach(buffId => {
+          newState.player.activeBuffs[buffId] -= dt;
+          if (newState.player.activeBuffs[buffId] <= 0) delete newState.player.activeBuffs[buffId];
+        });
+        newState.visualEffects = newState.visualEffects.filter(effect => Date.now() - effect.createdAt < effect.duration);
+        
+        const speedLevels = newState.playerUpgrades.filter(u => u === 'player_speed').length;
+        const currentSpeed = 250 * Math.pow(1.15, speedLevels);
+        let vx = 0;
+        if (keysRef.current['a'] || keysRef.current['arrowleft']) vx -= 1;
+        if (keysRef.current['d'] || keysRef.current['arrowright']) vx += 1;
+        newState.player.x += vx * currentSpeed * (dt / 1000);
+        newState.player.x = Math.max(20, Math.min(GAME_WIDTH - 20, newState.player.x));
+
+        if (newState.enemySpawnTimer <= 0) {
+            const enemyTypes = ['scamp', 'ogre', 'shaman', 'specter', 'sapper'];
+            const typeKey = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            const def = survivorEnemyDefinitions[typeKey] || survivorEnemyDefinitions.default;
+            const timeElapsed = 600 - (newState.gameTimer / 1000);
+            const healthMultiplier = 1 + timeElapsed / 50;
+            const speedMultiplier = 1 + timeElapsed / 200;
+            const newEnemy = { ...def, id: Math.random(), iconKey: typeKey, x: pathRef.current[0].x, y: pathRef.current[0].y, speed: def.speed * (def.type === 'tower-buster' ? speedMultiplier : 1), progress: 0, health: def.health * healthMultiplier, maxHealth: def.health * healthMultiplier, card: parsedFlashcards[Math.floor(Math.random()*parsedFlashcards.length)], slowTimer: 0, slowAmount: 0, isEnraged: false };
+            newState.enemies.push(newEnemy);
+            newState.enemySpawnTimer = Math.max(400, 2500 / (1 + timeElapsed/45));
+        }
+
+        newState.enemies.forEach(enemy => {
+            if (enemy.type === 'healer' && Date.now() - (enemy.lastHeal || 0) > enemy.healCooldown) {
+                newState.enemies.forEach(target => { if (target.id !== enemy.id && target.health < target.maxHealth && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.healRadius) { target.health = Math.min(target.maxHealth, target.health + enemy.healPower); } });
+                enemy.lastHeal = Date.now();
+            }
+            if (enemy.type === 'tower-buster') {
+                let closestTower = null, minDist = Infinity;
+                newState.towers.forEach(t => { const dist = Math.hypot(t.x - enemy.x, t.y - enemy.y); if (dist < minDist) { minDist = dist; closestTower = t; } });
+                if (closestTower) {
+                    if (minDist < 20) {
+                      closestTower.health -= enemy.damage; 
+                      enemy.health = 0;
+                      newState.visualEffects.push({ id: Math.random(), type: 'explosion', x: enemy.x, y: enemy.y, size: 80, duration: 400, createdAt: Date.now() });
+                    } else { 
+                      enemy.x += (closestTower.x - enemy.x) / minDist * enemy.speed * (dt/1000); 
+                      enemy.y += (closestTower.y - enemy.y) / minDist * enemy.speed * (dt/1000); 
+                    }
+                }
+            } else {
+              let currentSpeed = enemy.speed;
+              if (enemy.isEnraged) currentSpeed *= 1.5; // Nemesis speed boost
+              if (enemy.slowTimer > 0) { enemy.slowTimer -= dt; currentSpeed *= (1 - enemy.slowAmount); }
+              enemy.progress += currentSpeed * (dt / 1000);
+              if (enemy.progress >= 1) { newState.castleHealth -= 1; enemy.health = 0; } 
+              else {
+                const path = pathRef.current;
+                const pathIndexFloat = enemy.progress * (path.length - 1);
+                let pathIndex = Math.round(pathIndexFloat);
+                pathIndex = Math.max(0, Math.min(path.length - 1, pathIndex));
+                const targetPoint = path[pathIndex];
+                if (targetPoint) { enemy.x = targetPoint.x; enemy.y = targetPoint.y; }
+              }
+            }
+        });
+        
+        newState.towers = newState.towers.filter(t => {
+            if (t.health <= 0 && !t.isDestroyed) {
+                t.isDestroyed = true;
+                newState.visualEffects.push({ id: Math.random(), type: 'explosion', x: t.x, y: t.y, size: 40, duration: 400, createdAt: Date.now() });
+            }
+            return !t.isDestroyed;
+        });
+
+        const overclockLevels = newState.playerUpgrades.filter(u => u === 'tower_overclock').length;
+        const fireRateMultiplier = Math.pow(1.15, overclockLevels);
+
+        newState.towers.forEach(tower => {
+            if (tower.isDestroyed) return;
+            if (tower.type === 'bank') {
+                if (Date.now() - (tower.lastFire || 0) > 1000 / tower.fireRate) { newState.gold += tower.income; tower.lastFire = Date.now(); }
+                return;
+            }
+            if (Date.now() - (tower.lastFire || 0) > 1000 / (tower.fireRate * fireRateMultiplier)) {
+                let target = null;
+                if (newState.markedTargetId) {
+                    const marked = newState.enemies.find(e => e.id === newState.markedTargetId);
+                    if (marked && Math.hypot(marked.x - tower.x, marked.y - tower.y) <= tower.range) target = marked;
+                }
+                if (!target) {
+                  let bestTarget = null, bestMetric = tower.targetPriority === 'strongest' ? 0 : Infinity;
+                  newState.enemies.forEach(e => {
+                    const dist = Math.hypot(e.x - tower.x, e.y - tower.y);
+                    if (dist <= tower.range && (!e.isEthereal || tower.canHitEthereal)) {
+                      let metric = tower.targetPriority === 'strongest' ? e.health : e.progress;
+                      if (tower.targetPriority === 'strongest' ? metric > bestMetric : metric < bestMetric) { bestMetric = metric; bestTarget = e; }
+                    }
+                  });
+                  target = bestTarget;
+                }
+                if (target) {
+                    tower.lastFire = Date.now();
+                    const angle = Math.atan2(target.y - tower.y, target.x - tower.x);
+                    newState.projectiles.push({ id: Math.random(), x: tower.x, y: tower.y, angle, fromTower: true, ...tower });
+                }
+            }
+        });
+
+        newState.projectiles = newState.projectiles.filter(proj => {
+            const speed = proj.fromTower ? 600 : 900;
+            proj.x += Math.cos(proj.angle) * speed * (dt / 1000); proj.y += Math.sin(proj.angle) * speed * (dt / 1000);
+            for (const enemy of newState.enemies) {
+                if (proj.hitEnemies?.includes(enemy.id)) continue;
+                if ((enemy.isEthereal && !proj.canHitEthereal) && !proj.fromPlayer) continue;
+                if (Math.hypot(proj.x - enemy.x, proj.y - enemy.y) < 16) {
+                    enemy.health -= proj.damage;
+                    if (proj.slow) { enemy.slowTimer = proj.slow.duration; enemy.slowAmount = proj.slow.amount; }
+                    if (proj.aoeRadius) { newState.enemies.forEach(other => { if (other.id !== enemy.id && Math.hypot(other.x - enemy.x, other.y - enemy.y) < proj.aoeRadius) { other.health -= proj.damage / 2; } }); }
+                    if (proj.pierce > 0) { proj.pierce--; if (!proj.hitEnemies) proj.hitEnemies = []; proj.hitEnemies.push(enemy.id); } else return false;
+                }
+            }
+            return proj.x > -20 && proj.x < GAME_WIDTH + 20 && proj.y > -20 && proj.y < GAME_HEIGHT + 20;
+        });
+        
+        const magnetLevels = newState.playerUpgrades.filter(u => u === 'drop_magnet').length;
+        const collectionRadius = newState.player.collectionRadius * Math.pow(1.3, magnetLevels);
+        newState.goldDrops = newState.goldDrops.filter(d => { if(Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) { newState.gold += d.amount; return false; } return true; });
+        newState.xpFragmentDrops = newState.xpFragmentDrops.filter(d => { if(Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) { newState.xp += d.amount; return false; } return true; });
+        
+        newState.enemies = newState.enemies.filter(e => {
+            if (e.health <= 0) {
+                if (e.id === newState.nemesisTargetId) newState.nemesisTargetId = null;
+                const dropY = GAME_HEIGHT - 60;
+                const comboMultiplier = 1 + (newState.combo * 0.05);
+                const goldRushMultiplier = newState.player.activeBuffs?.gold_rush > 0 ? 2 : 1;
+                const goldBoostLevels = newState.playerUpgrades.filter(u => u === 'gold_boost').length;
+                const goldMultiplier = Math.pow(1.2, goldBoostLevels);
+                let goldAmount = Math.round((e.gold || 10) * comboMultiplier * goldRushMultiplier * goldMultiplier);
+                newState.goldDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: goldAmount });
+                const xpBoostLevels = newState.playerUpgrades.filter(u => u === 'xp_boost').length;
+                const xpMultiplier = Math.pow(1.25, xpBoostLevels);
+                let xpAmount = 1 * comboMultiplier * xpMultiplier;
+                newState.xpFragmentDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: xpAmount });
+                return false;
+            }
+            return true;
+        });
+
+        if (newState.xp >= newState.xpToNextLevel) {
+          newState.mode = 'levelup';
+          const allUpgrades = [...fortressUpgradeDefinitions.common, ...fortressUpgradeDefinitions.rare, ...fortressUpgradeDefinitions.epic];
+          const upgradeCounts = newState.playerUpgrades.reduce((acc, id) => { acc[id] = (acc[id] || 0) + 1; return acc; }, {});
+          const available = allUpgrades.filter(u => (upgradeCounts[u.id] || 0) < u.maxLevel);
+          for (let i = available.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [available[i], available[j]] = [available[j], available[i]]; }
+          const choices = [];
+          for (let i = 0; i < 3 && i < available.length; i++) { const choice = available[i]; choices.push({ ...choice, currentLevel: upgradeCounts[choice.id] || 0 }); }
+          newState.levelUpOptions = choices;
+        }
+
+        if (newState.gameTimer <= 0) newState.mode = 'won'; else if (newState.castleHealth <= 0) newState.mode = 'gameover';
+        return newState;
+      });
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    };
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+  }, [gameState.mode, parsedFlashcards]);
+
+  const handleAnswer = (isCorrect) => {
+    if (isCorrect) {
+        setGameState(s => {
+          const { player, playerUpgrades, quizFirePosition } = s;
+          if (!quizFirePosition) return { ...s, mode: 'playing' };
+          const angle = Math.atan2(quizFirePosition.y - player.y, quizFirePosition.x - player.x);
+          const pierceLevels = playerUpgrades.filter(u => u === 'piercing_shot').length;
+          const damageLevels = playerUpgrades.filter(u => u === 'focused_power').length;
+          const hasMultishot = playerUpgrades.includes('multishot');
+          const baseDamage = 5 + (damageLevels * 2) + (s.combo * 0.5);
+          let projectilesToAdd = [{ id: Math.random(), projectileType: 'player_bullet', x: player.x, y: player.y, angle, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true }];
+          if (hasMultishot) {
+            projectilesToAdd.push({ id: Math.random() + 1, projectileType: 'player_bullet', x: player.x, y: player.y, angle: angle - 0.2, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true });
+            projectilesToAdd.push({ id: Math.random() + 2, projectileType: 'player_bullet', x: player.x, y: player.y, angle: angle + 0.2, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true });
+          }
+          return { ...s, mode: 'playing', combo: s.combo + 1, comboTimeout: 3000, projectiles: [...s.projectiles, ...projectilesToAdd] };
+        });
+    } else {
+        setGameState(s => {
+          const recoveryLevels = s.playerUpgrades.filter(u => u === 'quick_recovery').length;
+          const cooldownMultiplier = Math.pow(0.8, recoveryLevels);
+          if (s.player.activeBuffs?.rapid_fire > 0) return { ...s, mode: 'playing', combo: 0 }; 
+
+          // --- NEMESIS SYSTEM ACTIVATION ---
+          const newEnemies = s.enemies.map(e => e.id === s.quizTarget.id ? {...e, isEnraged: true} : e);
+          const newVisualEffects = [...s.visualEffects, {
+            id: Math.random(),
+            type: 'correctAnswerFlash',
+            x: s.quizTarget.x,
+            y: s.quizTarget.y,
+            text: s.quizTarget.card.back,
+            duration: 2000,
+            createdAt: Date.now()
+          }];
+          showMessageBox("You must defeat your Nemesis!", "error");
+          return { ...s, mode: 'playing', combo: 0, player: {...s.player, attackCooldown: 1500 * cooldownMultiplier }, nemesisTargetId: s.quizTarget.id, enemies: newEnemies, visualEffects: newVisualEffects };
+        });
+    }
+  };
+
+  const handleBuildTower = (towerType) => {
+    setGameState(s => {
+      const def = survivorTowerDefinitions[towerType];
+      const discountLevels = s.playerUpgrades.filter(u => u === 'tower_discount').length;
+      const costMultiplier = Math.pow(0.9, discountLevels);
+      const finalCost = Math.round(def.baseCost * costMultiplier);
+      if (s.gold < finalCost) return s;
+      const constructionLevels = s.playerUpgrades.filter(u => u === 'reinforced_construction').length;
+      const healthMultiplier = Math.pow(1.25, constructionLevels);
+      const finalMaxHealth = Math.round(def.base.maxHealth * healthMultiplier);
+      const newTower = { id: Math.random(), type: towerType, x: s.buildSlotMenu.slot.x, y: s.buildSlotMenu.slot.y, purchasedUpgrades: [], health: finalMaxHealth, maxHealth: finalMaxHealth, ...def.base };
+      return {...s, mode: 'playing', gold: s.gold - finalCost, towers: [...s.towers, newTower]};
+    });
+  };
+
+  const handleTowerClick = (tower) => {
+    setGameState(s => ({...s, mode: 'upgrade', upgradeTarget: tower, quizFirePosition: null}));
+  };
+
+  const handlePurchaseTowerUpgrade = (upgrade) => {
+    setGameState(s => {
+      const discountLevels = s.playerUpgrades.filter(u => u === 'tower_discount').length;
+      const costMultiplier = Math.pow(0.9, discountLevels);
+      const finalCost = Math.round(upgrade.cost * costMultiplier);
+      if (s.gold < finalCost) { showMessageBox("Not enough gold!", "error"); return s; }
+      const newTowers = s.towers.map(t => {
+        if (t.id === s.upgradeTarget.id) {
+          let newTower = { ...t, purchasedUpgrades: [...(t.purchasedUpgrades || []), upgrade.id] };
+          if (upgrade.path) newTower.path = upgrade.path;
+          for (const key in upgrade.effect) {
+             if (key === 'fireRate') newTower.fireRate *= upgrade.effect.fireRate;
+             else newTower[key] = (newTower[key] || 0) + upgrade.effect[key];
+          }
+          return newTower;
+        }
+        return t;
+      });
+      return { ...s, mode: 'playing', gold: s.gold - finalCost, towers: newTowers, upgradeTarget: null };
+    });
+    showMessageBox(`Upgraded tower!`, "info");
+  };
+
+  const handleActivateBuff = (buffId) => {
+    const def = survivorBuffDefinitions[buffId];
+    if (!def) return;
+    setGameState(s => {
+      if (s.gold < def.cost || s.player.activeBuffs?.[buffId] > 0) return s;
+      const newActiveBuffs = { ...s.player.activeBuffs, [buffId]: def.duration };
+      return { ...s, gold: s.gold - def.cost, player: { ...s.player, activeBuffs: newActiveBuffs } };
+    });
+    showMessageBox(`${def.name} activated!`, 'info', 2000);
+  };
+
+  const handlePlayerActionClick = (e) => {
+      e.preventDefault();
+      if (gameState.mode !== 'playing' || !gameAreaRef.current) return;
+      const rect = gameAreaRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left; const clickY = e.clientY - rect.top;
+      let target = null; let minDist = 80;
+      gameState.enemies.forEach(enemy => { const dist = Math.hypot(enemy.x - clickX, enemy.y - clickY); if (dist < minDist) { minDist = dist; target = enemy; } });
+      
+      if (e.button === 2) { setGameState(s => ({...s, markedTargetId: target ? target.id : null })); return; }
+      
+      // NEMESIS SYSTEM: Target locking
+      if (gameState.nemesisTargetId && target?.id !== gameState.nemesisTargetId) {
+        showMessageBox("You must defeat your Nemesis first!", "error");
+        return;
+      }
+
+      if (gameState.player.attackCooldown > 0) { showMessageBox("Reloading...", "error", 1000); return; }
+      if (target) {setGameState(s => ({...s, mode: 'quiz', quizTarget: target, quizFirePosition: { x: clickX, y: clickY } }));
+      };
+    };
+
+  const xpPercentage = (gameState.xp / gameState.xpToNextLevel) * 100;
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex w-full max-w-4xl justify-between mb-2 text-white text-lg font-bold">
+        <span>Time: {gameState.gameTimer ? `${Math.floor(gameState.gameTimer / 60000)}:${(Math.floor(gameState.gameTimer / 1000) % 60).toString().padStart(2, '0')}` : '10:00'}</span>
+        <span>🏰 {gameState.castleHealth || 10}</span>
+        <span>💰 {gameState.gold || 0}</span>
+        <span className="text-yellow-400">Combo: x{gameState.combo || 0}</span>
+      </div>
+       <div className="w-full max-w-4xl mb-2 h-4 bg-slate-700 rounded-full"><div className="h-full bg-yellow-400 rounded-full transition-width duration-300" style={{ width: `${xpPercentage}%`}}></div></div>
+      <div ref={gameAreaRef} onClick={handlePlayerActionClick} onContextMenu={handlePlayerActionClick} className="relative bg-gray-900 border-4 border-slate-900 rounded-lg overflow-hidden cursor-crosshair" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
+        {gameState.mode === 'menu' && ( <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-20 space-y-4 text-center p-4"><h3 className="text-4xl text-white font-bold mb-2 drop-shadow-lg">Flashcard Fortress</h3><p className="text-slate-300 max-w-md">Survive the horde of terms for 10 minutes. Answer questions correctly to shoot. Build towers with gold to defend your castle.</p><button onClick={resetGame} className="mt-4 px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600 shadow-xl">Start Survival</button><p className="text-slate-400">High Score: {studyZoneState.platformerHighScore || 0}</p></div> )}
+        {gameState.mode !== 'menu' && (
+          <>
+            <svg className="absolute inset-0 pointer-events-none z-0" viewBox="-20 0 960 540"><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#3f3f46" strokeWidth="35" strokeLinejoin="round" fill="none" /><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#71717a" strokeWidth="25" strokeLinejoin="round" fill="none" /></svg>
+            <div className="absolute text-6xl z-10 pointer-events-none" style={{ transform: `translate(${pathRef.current[pathRef.current.length - 1].x - 40}px, ${pathRef.current[pathRef.current.length - 1].y - 30}px)`}}>🏰</div>
+            {buildSlotsRef.current.map((slot, i) => <div key={i} onClick={(e) => {e.stopPropagation(); setGameState(s => ({...s, mode: 'build', buildSlotMenu: {slot, index: i}}))}} className="absolute w-12 h-12 bg-black/30 border-2 border-dashed border-slate-500 rounded-full cursor-pointer hover:bg-slate-600/50" style={{transform: `translate(${slot.x-24}px, ${slot.y-24}px)`}}/>)}
+            {gameState.goldDrops?.map(d => <div key={d.id} className="absolute text-yellow-400 font-bold text-lg" style={{transform: `translate(${d.x}px, ${d.y}px)`}}>💰</div>)}
+            {gameState.xpFragmentDrops?.map(d => <div key={d.id} className="absolute w-3 h-3 bg-cyan-400 rounded-full" style={{transform: `translate(${d.x-6}px, ${d.y-6}px)`}} />)}
+            <div className="absolute z-20" style={{ width: 32, height: 40, transform: `translate(${gameState.player.x-16}px, ${gameState.player.y-20}px)`}} ><PlayerIcon /></div>
+            {gameState.towers?.map(t => (
+              <button key={t.id} onClick={(e) => {e.stopPropagation(); handleTowerClick(t)}} className="absolute z-10" style={{transform: `translate(${t.x-20}px, ${t.y-20}px)`}}>
+                <div className={`w-10 h-10 transition-opacity ${t.isDestroyed ? 'opacity-0' : 'opacity-100'}`}><TowerIcons type={t.type} /></div>
+                {!t.isDestroyed && <div className="absolute -bottom-3 w-10 h-2 bg-slate-700 rounded-full shadow-inner"><div className="h-full bg-green-500 rounded-full" style={{width: `${(t.health / t.maxHealth) * 100}%`}} /></div>}
+              </button>
+            ))}
+            {gameState.enemies?.map(e => (
+              <div key={e.id} className="absolute z-10" style={{transform: `translate(${e.x - 20}px, ${e.y - 20}px)`}}>
+                <div className={`w-10 h-10 flex items-center justify-center relative ${e.isEnraged ? 'nemesis-aura rounded-full' : ''}`}><EnemyIcons type={e.iconKey} /></div>
+                <div className="absolute -bottom-2 w-10 h-2 bg-slate-700 rounded-full shadow-inner"><div className="h-full bg-red-500 rounded-full" style={{width: `${(e.health / e.maxHealth) * 100}%`}} /></div>
+                {e.id === gameState.markedTargetId && <div className="absolute -inset-1 border-2 border-red-500 rounded-full animate-pulse"/>}
+              </div>
+            ))}
+            {gameState.projectiles?.map(p => <div key={p.id} className="absolute w-4 h-4" style={{ transform: `translate(${p.x-8}px, ${p.y-8}px) rotate(${p.angle}rad)`}} ><ProjectileVisuals type={p.projectileType} /></div>)}
+            {gameState.visualEffects?.map(effect => {
+              if (effect.type === 'explosion') return <div key={effect.id} className="absolute rounded-full bg-orange-500/80 animate-explosion" style={{ left: effect.x, top: effect.y, width: effect.size, height: effect.size, transform: 'translate(-50%, -50%)' }} />;
+              if (effect.type === 'correctAnswerFlash') return <div key={effect.id} className="absolute bg-green-500 text-white font-bold text-sm px-3 py-1 rounded-lg shadow-lg correct-answer-popup" style={{ left: effect.x, top: effect.y - 40 }}>{effect.text}</div>;
+              return null;
+            })}
+          </>
+        )}
+        {gameState.mode === 'quiz' && <FlashcardFortressQuizModal card={gameState.quizTarget.card} allCards={parsedFlashcards} onAnswer={handleAnswer} onClose={() => setGameState(s => ({...s, mode: 'playing'}))} />}
+        {gameState.mode === 'levelup' && <FlashcardFortressLevelUpModal upgrades={gameState.levelUpOptions} onSelectUpgrade={handleSelectUpgrade} />}
+        {gameState.mode === 'build' && ( <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-30" onClick={() => setGameState(s => ({...s, mode: 'playing'}))}><div className="bg-slate-800 p-4 rounded-lg flex flex-wrap gap-4 justify-center max-w-md" onClick={e => e.stopPropagation()}>{Object.entries(survivorTowerDefinitions).map(([key, def]) => { const discountLevels = gameState.playerUpgrades.filter(u => u === 'tower_discount').length; const finalCost = Math.round(def.baseCost * Math.pow(0.9, discountLevels)); return ( <button key={key} onClick={() => handleBuildTower(key)} disabled={gameState.gold < finalCost} className="p-3 bg-slate-700 rounded hover:bg-indigo-600 disabled:bg-slate-900 disabled:text-slate-600 text-center w-32"><p className="text-lg font-bold">{def.name}</p><p className="text-sm">Cost: {finalCost}g</p></button> )})}</div></div> )}
+        {gameState.mode === 'upgrade' && (() => {
+          const tower = gameState.upgradeTarget;
+          const def = survivorTowerDefinitions[tower.type];
+          return (
+            <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-30" onClick={() => setGameState(s => ({...s, mode: 'playing'}))}>
+              <div className="bg-slate-800 p-4 rounded-lg flex flex-col gap-2 justify-center max-w-lg" onClick={e => e.stopPropagation()}>
+                <h3 className="w-full text-center text-xl font-bold mb-2">Upgrades for {def.name}</h3>
+                {Object.entries(def.upgrades).map(([tier, upgrades]) => (
+                  <div key={tier}>
+                    <h4 className="font-semibold text-indigo-300 mb-1 capitalize">{tier.replace('tier', 'Tier ')}</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {upgrades.map(upgrade => {
+                        const isPurchased = tower.purchasedUpgrades?.includes(upgrade.id);
+                        const hasPrereq = !upgrade.requires || upgrade.requires.every(req => tower.purchasedUpgrades?.includes(req));
+                        const hasChosenPath = upgrade.path && tower.path && tower.path !== upgrade.path;
+                        const discountLevels = gameState.playerUpgrades.filter(u => u === 'tower_discount').length;
+                        const finalCost = Math.round(upgrade.cost * Math.pow(0.9, discountLevels));
+                        return (
+                          <button key={upgrade.id} onClick={() => handlePurchaseTowerUpgrade(upgrade)} disabled={isPurchased || gameState.gold < finalCost || !hasPrereq || hasChosenPath} className="p-3 bg-slate-700 rounded hover:bg-indigo-600 disabled:bg-slate-900 disabled:text-slate-600 text-center w-40">
+                            <p className="text-md font-bold">{upgrade.name}</p>
+                            <p className="text-xs text-slate-400 h-8">{upgrade.description}</p>
+                            <p className="text-sm mt-1">{isPurchased ? 'Purchased' : !hasPrereq ? 'Locked' : hasChosenPath ? 'Wrong Path' : `Cost: ${finalCost}g`}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+        {(gameState.mode === 'gameover' || gameState.mode === 'won') && ( <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-20"><h3 className={`text-4xl font-bold mb-2 ${gameState.mode === 'won' ? 'text-green-400' : 'text-red-500'}`}>{gameState.mode === 'won' ? 'Victory!' : 'Game Over!'}</h3><p className="text-2xl text-white mb-4">Final Score: {gameState.score}</p><button onClick={() => setGameState(s => ({...s, mode: 'menu'}))} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-2xl hover:bg-blue-600 shadow-xl">Main Menu</button></div> )}
+      </div>
+      <div className="w-full max-w-4xl mt-3 p-3 bg-slate-900/50 border border-slate-700 rounded-lg flex justify-center items-center gap-4">
+        <p className="text-sm font-bold text-slate-400 mr-4">Temporary Buffs:</p>
+        {Object.entries(survivorBuffDefinitions).map(([key, def]) => {
+          const isActive = gameState.player?.activeBuffs?.[key] > 0;
+          const canAfford = (gameState.gold || 0) >= def.cost;
+          return ( <button key={key} onClick={() => handleActivateBuff(key)} disabled={isActive || !canAfford || gameState.mode !== 'playing'} className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-indigo-600 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed transition-colors"><p className="font-semibold">{def.name}</p><p className="text-xs">{isActive ? `Active (${Math.ceil((gameState.player.activeBuffs[key] || 0) / 1000)}s)` : `Cost: ${def.cost}g`}</p></button> );
+        })}
+      </div>
+      <p className="text-slate-500 mt-2 text-sm">Controls: A/D or ⬅️➡️ to move. Left-click to shoot. Right-click to mark a target., your progress will NOT be saved.</p>
+    </div>
+  );
+};
 
 // --- Sub-components for Study Zone ---
 
@@ -11258,13 +12028,15 @@ const FlashcardSession = ({ studyZoneState, updateStudyZoneState, onSessionEnd }
         return { ...cardData, repetition, easinessFactor, interval, nextReviewDate: nextReviewDate.setHours(0,0,0,0) };
     };
 
-    const handleRating = (quality) => {
+const handleRating = (quality) => {
         const cardToUpdate = studyQueue[currentIndex];
         const updatedSRSData = calculateSRS(cardToUpdate, quality);
         
-        const { front, back, ...srsData } = updatedSRSData;
-        const newFlashcardData = { ...studyZoneState.flashcardData, [cardToUpdate.front]: srsData };
+        // FIX: Destructure 'front' but keep 'back' and all other SRS properties together.
+        const { front, ...srsDataWithBack } = updatedSRSData;
+        const newFlashcardData = { ...studyZoneState.flashcardData, [cardToUpdate.front]: srsDataWithBack };
         
+        // When updating, we only need to send the changed part of the studyZone state
         updateStudyZoneState({ flashcardData: newFlashcardData });
 
         if (currentIndex + 1 >= studyQueue.length) {
@@ -11740,7 +12512,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
             <button onClick={() => setGameState('menu')} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-2xl hover:bg-blue-600 shadow-xl">Main Menu</button>
           </div>
         )}
-        {uiGameState === 'quiz' && <FlashcardQuizModal cards={parsedFlashcards} onComplete={handleQuizComplete} />}
+        {uiGameState === 'quiz' && <PlatformerQuizModal cards={parsedFlashcards} onComplete={handleQuizComplete} />}
         
         {uiGameState === 'playing' && (
           <GameRenderer 
@@ -11794,7 +12566,7 @@ const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE,
 
 
 
-const FlashcardQuizModal = ({ cards, onComplete }) => {
+const PlatformerQuizModal = ({ cards, onComplete }) => {
   const [streak, setStreak] = useState(0);
   const [currentCard, setCurrentCard] = useState(null);
   const [userAnswer, setUserAnswer] = useState('');
@@ -11849,7 +12621,7 @@ const FlashcardQuizModal = ({ cards, onComplete }) => {
 
       <div className={`p-8 rounded-lg w-full max-w-lg text-center transition-colors ${feedback === 'correct' ? 'bg-green-800' : feedback === 'incorrect' ? 'bg-red-800' : 'bg-slate-700'}`}>
         <p className="text-slate-400 mb-2">FRONT</p>
-        <p className="text-3xl font-bold mb-6 h-10">{currentCard ? currentCard.front : "..."}</p>
+        <p className="text-3xl text-center font-bold text-white h-10">{currentCard ? currentCard.front : "..."}</p>
         
         <form onSubmit={handleSubmit}>
           <input
@@ -11900,6 +12672,12 @@ const App = () => {
   const [isScheduleLinkedOperationModalOpen, setIsScheduleLinkedOperationModalOpen] = useState(false);
   const [linkedAssignmentTitle, setLinkedAssignmentTitle] = useState('');
   const dungeonXpRef = useRef(null);
+
+  // --- NEW: State for Break Passcode Rewards ---
+  const [tasksForReward, setTasksForReward] = useState(0);
+  const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+  const [generatedPasscode, setGeneratedPasscode] = useState('');
+  const TASKS_PER_REWARD = 3; // How many tasks to complete to get a passcode
 
   // --- NEW: Triage State ---
   // NEW: Triage State ---
@@ -12853,7 +13631,9 @@ const spinProductivitySlotMachine = useCallback(() => {
 
 const handleSlotAnimationComplete = useCallback(async (reward) => {
     setIsSlotAnimationOpen(false);
-    if (!db || !user) return;
+    // The 'reward' object is now the single source of truth, passed directly from the animation modal.
+    if (!db || !user || !reward) return;
+    
     const statsDocRef = doc(db, `artifacts/${appId}/public/data/stats`, user.uid);
 
     try {
@@ -12869,11 +13649,14 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
             let newOwnedItems = [...(serverStats.ownedItems || [])];
             let isNewItem = false;
 
-            if (reward.type === 'xp_gain') xpChange = reward.amount;
-            else if (reward.type === 'xp_loss') xpChange = reward.amount;
-            else if (reward.id) { // It's a cosmetic item
+            if (reward.type === 'xp_gain') {
+                xpChange = reward.amount;
+            } else if (reward.type === 'xp_loss') {
+                xpChange = reward.amount;
+            } else if (reward.id) { // It's a cosmetic item
                 if (!newOwnedItems.includes(reward.id)) {
-                    newOwnedItems.push(reward.id); isNewItem = true;
+                    newOwnedItems.push(reward.id);
+                    isNewItem = true;
                 } else {
                     const rarityShardMap = { common: 2, rare: 5, epic: 15, legendary: 30, mythic: 75 };
                     shardChange = rarityShardMap[reward.rarity] || 2;
@@ -12905,7 +13688,7 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         if (e.message === "INSUFFICIENT_XP") showMessageBox("Not enough XP.", "error");
         else showMessageBox(e.message.includes('permission-denied') ? "You're spinning too fast! Please wait a moment." : "Server error. XP not spent.", "error");
     }
-}, [user, db, appId, calculateLevelInfo]);
+}, [user, db, appId, calculateLevelInfo, showMessageBox]);
 
   const hatchEgg = useCallback(async () => actionLock(async () => {
     if (!db || !user) return;
@@ -13132,7 +13915,19 @@ const handleSlotAnimationComplete = useCallback(async (reward) => {
         if (primeAudioRef.current) { primeAudioRef.current(); setXpAnimationOriginEvent(e.currentTarget); }
         await processCompletionRewards({ ...currentAssignment, dateCompleted: completionDate, daysEarly });
 
-        // Handle recurrence after the original task is successfully completed
+        // --- NEW: Break Passcode Reward Logic ---
+          const newTasksCount = tasksForReward + 1;
+          if (newTasksCount >= TASKS_PER_REWARD) {
+            const passcode = generateBreakPasscode();
+            setGeneratedPasscode(passcode);
+            setIsRewardModalOpen(true);
+            setTasksForReward(0); // Reset the counter
+          } else {
+            setTasksForReward(newTasksCount);
+            showMessageBox(`${TASKS_PER_REWARD - newTasksCount} more task(s) until your next break!`, 'info');
+          }
+
+          // Handle recurrence after the original task is successfully completed
         if (currentAssignment.recurrenceType && currentAssignment.recurrenceType !== 'none' && currentAssignment.dueDate) {
           let nextDueDate = new Date(currentAssignment.dueDate);
           if (currentAssignment.recurrenceType === 'daily') nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -13339,8 +14134,13 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
   if (!user) {
     return <AuthComponent />;
   }
-  return (
+return (
     <>
+      <BreakPasscodeRewardModal 
+        isOpen={isRewardModalOpen} 
+        onClose={() => setIsRewardModalOpen(false)}
+        passcode={generatedPasscode}
+      />
             {activeMissionState.isActive && <CockpitView mission={activeMissionState} onMissionComplete={handleMissionComplete} isMobile={isMobile} />}
       <WeeklyTriageModal
         isOpen={triageState.isOpen}
@@ -13454,6 +14254,28 @@ const handleAcceptContract = useCallback(() => actionLock(async () => {
           }
           .animate-fade-out-fast {
             animation: fade-out-fast 1.5s ease-in-out forwards;
+          }
+          @keyframes explosion-effect {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+          }
+          .animate-explosion {
+            animation: explosion-effect 0.4s ease-out forwards;
+          }
+          @keyframes nemesis-glow {
+            0%, 100% { box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 20px 8px rgba(239, 68, 68, 0.9); }
+          }
+          .nemesis-aura {
+            animation: nemesis-glow 1.5s infinite;
+          }
+          @keyframes correct-answer-pop {
+            0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            20%, 80% { transform: translate(-50%, -20px) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -40px) scale(0.5); opacity: 0; }
+          }
+          .correct-answer-popup {
+            animation: correct-answer-pop 2s ease-out forwards;
           }
       `}</style>
 
