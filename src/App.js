@@ -27,6 +27,13 @@ import starfieldVideo from './assets/videos/Space Focus Timer/Animated_Starfield
 import hologramScreen from './assets/images/Space_Focus_Timer/hologram_screen_2.png';
 import spaceshipIcon from './assets/images/Space_Focus_Timer/spaceship.png';
 import hologramButton from './assets/images/Space_Focus_Timer/hologram_button.png';
+// --- NEW: Asset Imports for Flashcard Fortress ---
+import enemyScampIcon from './assets/images/FlashcardFortress/enemy_scamp.png';
+import enemyOgreIcon from './assets/images/FlashcardFortress/enemy_ogre.png';
+import enemyShamanIcon from './assets/images/FlashcardFortress/enemy_shaman.png';
+import enemySpecterIcon from './assets/images/FlashcardFortress/enemy_specter.png';
+import enemySapperIcon from './assets/images/FlashcardFortress/enemy_sapper.png';
+import enemyDefaultIcon from './assets/images/FlashcardFortress/enemy_default.png';
 
 import wingmenSpriteSheet from './assets/images/Dungeon/Wingmen_icon_sheet.png';
 // --- NEW: Sanctum Tile Editor Assets ---
@@ -1260,7 +1267,15 @@ const defaultStats = {
       { plantId: null, plantedAt: null, stage: 0 }
     ],
   },
-  studyZone: { flashcardsText: '', platformerHighScore: 0, flashcardData: {} },
+  studyZone: {
+    platformerHighScore: 0,
+    // NEW STRUCTURE
+    deckHierarchy: [], // Stores { id, name, type: 'folder' | 'deck', parentId, childrenIds: [] }
+    cardData: {},      // Stores { [deckId]: [{ id, front, back, ...srsData }] }
+    // Legacy fields for migration
+    flashcardsText: '', 
+    flashcardData: {},
+  },
   achievements: { assignmentsCompleted: { tier: 0, progress: 0 }, hardAssignmentsCompleted: { tier: 0, progress: 0 }, sanctumTilesPlaced: { tier: 0, progress: 0 } },
   quests: generateQuests(),
   contract: null,
@@ -7989,12 +8004,12 @@ const CockpitView = ({ mission, onMissionComplete, isMobile }) => {
       {/* MASTER CONTAINER */}
       <div className={`relative w-full max-w-[1920px] ${isMobile && isPortrait ? 'invisible' : ''}`} style={{ aspectRatio: '1920 / 1080' }}>
         <video src={starfieldVideo} autoPlay loop muted playsInline className="absolute top-0 left-0 w-full h-full object-cover" />
-        <img src={cockpitImage} alt="Cockpit View" className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-10" />
+        <img src={cockpitImage} loading="lazy" alt="Cockpit View" className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none z-10" />
 
         {/* --- DIEGETIC UI ELEMENTS (Positioned relative to the master container) --- */}
         <div className="absolute z-0 pointer-events-none" style={{ top: '23%', left: '33%', width: '34%', height: '40%' }}>
             <div className="absolute top-1/2" style={{ left: `${mainViewProgressPercent}%`, transform: `translate(-50%, -50%) translateY(${verticalArc}px)` }}>
-                <img src={spaceshipIcon} alt="Scholar Ship" className="w-10 h-10" />
+                <img src={spaceshipIcon} alt="Scholar Ship" loading="lazy" className="w-10 h-10" />
             </div>
         </div>
         
@@ -8213,7 +8228,7 @@ const StoreroomModal = ({ stats, onClose }) => {
         <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-b-lg grid grid-cols-2 md:grid-cols-4 gap-4">
           {categorized[activeTab].map(item => (
             <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col" title={item.description}>
-              <img src={item.icon} alt={item.name} className="w-16 h-16 mx-auto object-contain" />
+              <img src={item.icon} alt={item.name} loading="lazy" className="w-16 h-16 mx-auto object-contain" />
               <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{item.name}</p>
               <p className="text-lg font-mono text-black">x{item.count}</p>
             </div>
@@ -8396,7 +8411,7 @@ const AlchemyBenchModal = ({ stats, updateStatsInFirestore, onClose, showMessage
             <div className="flex-grow bg-black/10 overflow-y-auto p-4 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-4">
               {processableItems.map(item => (
                 <button key={item.id} onClick={() => startProcessing(item)} className="bg-amber-200/40 p-2 rounded-md hover:bg-amber-300/60 transition-colors">
-                  <img src={item.icon} alt={item.name} className="w-16 h-16 mx-auto" />
+                  <img src={item.icon} alt={item.name} loading="lazy" className="w-16 h-16 mx-auto" />
                   <p className="text-sm font-bold text-amber-900 mt-1">{item.name}</p>
                   <p className="text-xs text-black">x{inventory[item.id]}</p>
                 </button>
@@ -8408,7 +8423,7 @@ const AlchemyBenchModal = ({ stats, updateStatsInFirestore, onClose, showMessage
 
         {gameState === 'processing' && (
           <div className="flex flex-col items-center justify-center flex-grow">
-            <img src={currentItem.icon} alt={currentItem.name} className="w-20 h-20 mb-4" />
+            <img src={currentItem.icon} alt={currentItem.name} loading="lazy" className="w-20 h-20 mb-4" />
             <div className="w-full bg-slate-400 rounded-full h-8 border-2 border-slate-600 relative overflow-hidden">
               <div className="absolute top-0 bottom-0 bg-red-600/50" style={{ left: '0%', width: `${70 - ((benchLevel - 1) * 5)}%` }}></div>
               <div className="absolute top-0 bottom-0 bg-green-600/50" style={{ left: `${70 - ((benchLevel - 1) * 5)}%`, width: '20%' }}></div>
@@ -8564,7 +8579,7 @@ const CauldronModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox 
                   <div className="flex gap-2 flex-wrap justify-center">
                     {cauldronSlots.map((ing, i) => (
                       <button key={i} onClick={() => removeIngredientFromCauldron(i)} className="p-1 bg-slate-800 rounded-md">
-                        <img src={ing.def.icon} alt={ing.def.name} className="w-10 h-10" />
+                        <img src={ing.def.icon} alt={ing.def.name} loading="lazy" className="w-10 h-10" />
                       </button>
                     ))}
                     {Array.from({ length: selectedRecipe.recipe.length - cauldronSlots.length }).map((_, i) => (
@@ -8576,7 +8591,7 @@ const CauldronModal = ({ stats, updateStatsInFirestore, onClose, showMessageBox 
                 <div className="h-40 mt-4 overflow-y-auto bg-slate-200/30 p-2 rounded-lg grid grid-cols-5 gap-2">
                    {processedInventory.length > 0 ? processedInventory.map(ing => (
                       <button key={ing.id} onClick={() => addIngredientToCauldron(ing)} className="p-1 bg-amber-200/50 rounded-md flex flex-col items-center justify-between hover:bg-amber-300/80">
-                         <img src={ing.def.icon} alt={ing.def.name} className="w-10 h-10" />
+                         <img src={ing.def.icon} alt={ing.def.name} loading="lazy" className="w-10 h-10" />
                          <p className="text-xs text-black">x{ing.count - cauldronSlots.filter(slot => slot.id === ing.id).length}</p>
                       </button>
                    )) : <p className="col-span-full text-center text-slate-500 self-center">No processed ingredients.</p>}
@@ -8709,7 +8724,7 @@ const AlchemyShopModal = ({ stats, updateStatsInFirestore, onClose, showMessageB
                 const ingDef = alchemyIngredients[def.yields];
                 return (
                   <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
-                    <img src={ingDef.icon} alt={def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <img src={ingDef.icon} alt={def.name} loading="lazy" className="w-16 h-16 mx-auto object-contain" />
                     <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{def.name}</p>
                     <button onClick={() => handleTransaction(item, 'buy_seed')} className="mt-2 w-full bg-green-700 text-white text-sm py-1 rounded hover:bg-green-800 disabled:bg-slate-500" disabled={gold < item.cost}>
                       Buy ({item.cost}g)
@@ -8725,7 +8740,7 @@ const AlchemyShopModal = ({ stats, updateStatsInFirestore, onClose, showMessageB
                 const def = alchemyIngredients[item.id];
                 return (
                   <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
-                    <img src={def.icon} alt={def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <img src={def.icon} alt={def.name} loading="lazy" className="w-16 h-16 mx-auto object-contain" />
                     <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{def.name}</p>
                     <button onClick={() => handleTransaction(item, 'buy_ingredient')} className="mt-2 w-full bg-green-700 text-white text-sm py-1 rounded hover:bg-green-800 disabled:bg-slate-500" disabled={gold < item.cost}>
                       Buy ({item.cost}g)
@@ -8739,7 +8754,7 @@ const AlchemyShopModal = ({ stats, updateStatsInFirestore, onClose, showMessageB
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                {sellablePotions.map(item => (
                   <div key={item.id} className="bg-amber-200/40 p-2 rounded-md text-center flex flex-col">
-                    <img src={item.def.icon} alt={item.def.name} className="w-16 h-16 mx-auto object-contain" />
+                    <img src={item.def.icon} alt={item.def.name} loading="lazy" className="w-16 h-16 mx-auto object-contain" />
                     <p className="text-sm font-bold text-amber-900 mt-2 flex-grow">{item.def.name} (x{item.count})</p>
                     <button onClick={() => handleTransaction(item, 'sell_potion')} className="mt-2 w-full bg-yellow-700 text-white text-sm py-1 rounded hover:bg-yellow-800">
                       Sell ({Math.round(item.def.goldValue * 0.75)}g)
@@ -9199,7 +9214,7 @@ const SeedSelectionModal = ({ stats, onClose, onSelectSeed }) => {
                             onClick={() => onSelectSeed(seed.id)}
                             className="p-2 bg-amber-200/50 rounded-md hover:bg-amber-300/80 transition-colors"
                         >
-                            <img src={alchemyIngredients[seed.def.yields].icon} alt={seed.def.name} className="w-12 h-12 mx-auto" />
+                            <img src={alchemyIngredients[seed.def.yields].icon} alt={seed.def.name} loading="lazy" className="w-12 h-12 mx-auto" />
                             <p className="text-xs font-bold mt-1">{seed.def.name}</p>
                             <p className="text-xs">x{seed.count}</p>
                         </button>
@@ -11071,15 +11086,64 @@ const StatsXPTracker = ({ stats, assignments, completedAssignments, handleRefres
     );
   };
 
-// NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
-const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
+ // NEW FEATURE: Study Zone (Platformer + Flashcards) with SRS
+const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchievement, isMobile, actionLock }) => {
     const [activeTab, setActiveTab] = useState('flashcards');
     const [isStudying, setIsStudying] = useState(false);
-    const studyZoneState = stats?.studyZone || { flashcardsText: '', platformerHighScore: 0, flashcardData: {} };
+    const [studyQueue, setStudyQueue] = useState([]);
     
+    // This is our single source of truth for all study zone data.
+    const studyZoneState = stats?.studyZone || { platformerHighScore: 0, deckHierarchy: [], cardData: {} };
+    
+    // This function will now handle all updates to the studyZone object.
     const updateStudyZoneState = useCallback((newState) => {
-        updateStatsInFirestore({ studyZone: { ...studyZoneState, ...newState } });
+        const updatedStudyZone = { ...studyZoneState, ...newState };
+        // Return the promise from the parent update function for actionLock
+        return updateStatsInFirestore({ studyZone: updatedStudyZone });
     }, [studyZoneState, updateStatsInFirestore]);
+    
+    // --- ONE-TIME MIGRATION ---
+    useEffect(() => {
+        // Check if old data exists and new structure doesn't
+        if (studyZoneState.flashcardsText && (!studyZoneState.deckHierarchy || studyZoneState.deckHierarchy.length === 0)) {
+            console.log("Performing one-time migration of old flashcard data...");
+            const parsedCards = (studyZoneState.flashcardsText || '').split('\n')
+                .map((line, index) => {
+                    const parts = line.split(/→|>>|-/);
+                    if (parts.length >= 2) {
+                        const front = parts[0].trim();
+                        const back = parts.slice(1).join('').trim();
+                        const srsData = studyZoneState.flashcardData?.[front] || { repetition: 0, easinessFactor: 2.5, interval: 0, nextReviewDate: new Date().setHours(0,0,0,0) };
+                        return { id: `card_${Date.now()}_${index}`, front, back, ...srsData };
+                    }
+                    return null;
+                }).filter(Boolean);
+
+            if (parsedCards.length > 0) {
+                const defaultDeckId = `deck_${Date.now()}`;
+                const newHierarchy = [{ id: defaultDeckId, name: "My First Deck", type: "deck", parentId: "root" }];
+                const newCardData = { [defaultDeckId]: parsedCards };
+
+                // Update firestore and clear out old fields
+                updateStudyZoneState({
+                    deckHierarchy: newHierarchy,
+                    cardData: newCardData,
+                    flashcardsText: deleteField(), // Use deleteField to remove old data
+                    flashcardData: deleteField(),
+                });
+                showMessageBox("Your flashcards have been migrated to the new deck system!", "info");
+            }
+        }
+    }, [studyZoneState, updateStudyZoneState]);
+
+    const handleStartStudy = (cardQueue) => {
+        if (cardQueue.length === 0) {
+            showMessageBox("No cards are due for review in this selection.", "info");
+            return;
+        }
+        setStudyQueue(cardQueue);
+        setIsStudying(true);
+    };
 
     const StudyZoneTabButton = ({ tabName, children }) => (
       <button onClick={() => setActiveTab(tabName)} className={`px-4 py-2 text-lg font-semibold transition-colors ${activeTab === tabName ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-slate-400 hover:text-white'}`}>
@@ -11092,28 +11156,470 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchie
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-3xl font-bold text-white">Study Zone</h2>
-          <p className="text-slate-400">Play a game and review your flashcards to boost your learning.</p>
+          <p className="text-slate-400">Create decks, organize with folders, and use SRS to master your material.</p>
         </div>
       </div>
       <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl">
         <div className="relative z-10 flex border-b border-slate-700">
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
+          <StudyZoneTabButton tabName="arcade">Study Arcade</StudyZoneTabButton>
           <StudyZoneTabButton tabName="fortress">Flashcard Fortress</StudyZoneTabButton>
           <StudyZoneTabButton tabName="platformer">Platformer Game</StudyZoneTabButton>
         </div>
         <div className="p-6">
+          {activeTab === 'arcade' && <StudyArcade studyZoneState={studyZoneState} showMessageBox={showMessageBox} stats={stats} />}
           {activeTab === 'platformer' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
           {activeTab === 'fortress' && <FlashcardFortressGame stats={stats} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
           {activeTab === 'flashcards' && (
             isStudying ? 
-            <FlashcardSession studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
-            <FlashcardManager studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onStartStudy={() => setIsStudying(true)} />
+            <FlashcardSession studyQueue={studyQueue} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onSessionEnd={() => setIsStudying(false)} /> :
+            <FlashcardSystem studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} onStartStudy={handleStartStudy} showMessageBox={showMessageBox} actionLock={actionLock} />
           )}
         </div>
       </div>
     </div>
   );
 };
+
+// --- NEW: Flashcard Deck Management Components ---
+
+const CreateItemModal = ({ isOpen, onClose, onSubmit, itemType, parentId }) => {
+  const [name, setName] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (name.trim()) {
+      onSubmit(name.trim(), itemType, parentId);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70]" onClick={onClose}>
+      <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <h3 className="text-xl font-bold mb-4">Create New {itemType === 'deck' ? 'Deck' : 'Folder'}</h3>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={`${itemType === 'deck' ? 'Deck' : 'Folder'} Name`}
+            className="w-full p-2 bg-slate-800 rounded border border-slate-600"
+            autoFocus
+          />
+          <div className="flex justify-end gap-3 mt-4">
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-600 rounded">Cancel</button>
+            <button type="submit" className="px-4 py-2 bg-indigo-600 rounded">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const DeleteFolderModal = ({ isOpen, onClose, onConfirmDelete }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70]" onClick={onClose}>
+      <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-xl font-bold text-red-400 mb-4">Confirm Deletion</h3>
+        <p className="text-slate-300 mb-6">How do you want to handle the items inside this folder?</p>
+        <div className="flex justify-around gap-4">
+          <button onClick={() => onConfirmDelete(true)} className="flex-1 px-4 py-3 bg-red-800 rounded hover:bg-red-700">
+            <p className="font-bold">Delete Everything</p>
+            <p className="text-xs text-red-200">Deletes the folder and all decks/folders inside it permanently.</p>
+          </button>
+          <button onClick={() => onConfirmDelete(false)} className="flex-1 px-4 py-3 bg-slate-600 rounded hover:bg-slate-500">
+            <p className="font-bold">Keep Contents</p>
+            <p className="text-xs text-slate-300">Deletes the folder but moves its contents up one level.</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- NEW: Flashcard System (Replaces old Manager) ---
+const FlashcardSystem = ({ studyZoneState, updateStudyZoneState, onStartStudy, showMessageBox, actionLock }) => {
+  const [activeDeckId, setActiveDeckId] = useState(null);
+  const [editMode, setEditMode] = useState('structured'); // 'structured' or 'bulk'
+  const [deckContent, setDeckContent] = useState({ cards: [], text: '' });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [modalState, setModalState] = useState({ type: null, parentId: null });
+  const [deleteTarget, setDeleteTarget] = useState(null); // { id, type }
+
+  const hierarchy = studyZoneState.deckHierarchy || [];
+  const cardData = studyZoneState.cardData || {};
+
+  // Effect to load deck content when activeDeckId changes
+  useEffect(() => {
+    if (activeDeckId) {
+      if (hasUnsavedChanges && !window.confirm("You have unsaved changes. Are you sure you want to switch decks? Your changes will be lost.")) {
+        // Revert activeDeckId if user cancels
+        setActiveDeckId(prevId => prevId); // This is a bit tricky, might need a better state management for prevId
+        return;
+      }
+      const cards = cardData[activeDeckId] || [];
+      const text = cards.map(c => `${c.front} → ${c.back}`).join('\n');
+      setDeckContent({ cards, text });
+      setHasUnsavedChanges(false);
+    } else {
+      setDeckContent({ cards: [], text: '' });
+      setHasUnsavedChanges(false);
+    }
+  }, [activeDeckId, cardData, hasUnsavedChanges]);
+
+  const handleSaveChanges = () => actionLock(async () => {
+    if (!activeDeckId) return;
+    let cardsToSave = [];
+    if (editMode === 'bulk') {
+      // Parse text back into structured cards, preserving SRS data
+      const oldCardsMap = new Map((cardData[activeDeckId] || []).map(c => [c.front, c]));
+      cardsToSave = deckContent.text.split('\n').filter(Boolean).map((line, index) => {
+        const parts = line.split(/→|>>|-/);
+        const front = parts[0]?.trim();
+        const back = parts.slice(1).join('→').trim();
+        if (!front || !back) return null;
+        const existingData = oldCardsMap.get(front);
+        return {
+          id: existingData?.id || `card_${Date.now()}_${index}`,
+          front,
+          back,
+          ...(existingData || { repetition: 0, easinessFactor: 2.5, interval: 0, nextReviewDate: new Date().setHours(0,0,0,0) })
+        };
+      }).filter(Boolean);
+    } else {
+      cardsToSave = deckContent.cards;
+    }
+    
+    await updateStudyZoneState({ cardData: { ...cardData, [activeDeckId]: cardsToSave } });
+    setHasUnsavedChanges(false);
+    showMessageBox("Deck saved successfully!", "info");
+  });
+
+  const handleCardChange = (index, field, value) => {
+    const newCards = [...deckContent.cards];
+    newCards[index][field] = value;
+    setDeckContent(prev => ({ ...prev, cards: newCards }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAddCard = () => {
+    const newCard = { id: `card_${Date.now()}`, front: '', back: '', repetition: 0, easinessFactor: 2.5, interval: 0, nextReviewDate: new Date().setHours(0,0,0,0) };
+    setDeckContent(prev => ({ ...prev, cards: [...prev.cards, newCard] }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteCard = (index) => {
+    const newCards = deckContent.cards.filter((_, i) => i !== index);
+    setDeckContent(prev => ({ ...prev, cards: newCards }));
+    setHasUnsavedChanges(true);
+  };
+  
+  const handleCreateItem = (name, type, parentId) => {
+    const newItem = { id: `${type}_${Date.now()}`, name, type, parentId: parentId || 'root' };
+    const newHierarchy = [...hierarchy, newItem];
+    updateStudyZoneState({ deckHierarchy: newHierarchy });
+    setModalState({ type: null });
+    if (type === 'deck') setActiveDeckId(newItem.id);
+  };
+  
+  const handleDeleteItem = (id, type) => {
+    if (type === 'deck') {
+      const newHierarchy = hierarchy.filter(item => item.id !== id);
+      const newCardData = { ...cardData };
+      delete newCardData[id];
+      updateStudyZoneState({ deckHierarchy: newHierarchy, cardData: newCardData });
+      if (activeDeckId === id) setActiveDeckId(null);
+    } else { // It's a folder
+      setDeleteTarget({ id, type });
+    }
+  };
+  
+  const handleConfirmDeleteFolder = (deleteContents) => {
+    let newHierarchy = [...hierarchy];
+    let newCardData = { ...cardData };
+    
+    const itemsToDelete = new Set();
+    const queue = [deleteTarget.id];
+    itemsToDelete.add(deleteTarget.id);
+    
+    while(queue.length > 0) {
+      const currentId = queue.shift();
+      const children = newHierarchy.filter(item => item.parentId === currentId);
+      children.forEach(child => {
+        itemsToDelete.add(child.id);
+        if (child.type === 'folder') queue.push(child.id);
+      });
+    }
+
+    if (deleteContents) {
+      newHierarchy = newHierarchy.filter(item => !itemsToDelete.has(item.id));
+      itemsToDelete.forEach(id => {
+        if (cardData[id]) delete newCardData[id];
+      });
+    } else {
+      const folderToDelete = newHierarchy.find(item => item.id === deleteTarget.id);
+      const newParentId = folderToDelete.parentId;
+      newHierarchy = newHierarchy.map(item => {
+        if (item.parentId === deleteTarget.id) {
+          return { ...item, parentId: newParentId };
+        }
+        return item;
+      }).filter(item => item.id !== deleteTarget.id);
+    }
+    
+    updateStudyZoneState({ deckHierarchy: newHierarchy, cardData: newCardData });
+    setDeleteTarget(null);
+  };
+
+  const calculateDueCards = (itemId, type) => {
+    const today = new Date().setHours(0, 0, 0, 0);
+    let dueCount = 0;
+    
+    if (type === 'deck') {
+      dueCount = (cardData[itemId] || []).filter(c => new Date(c.nextReviewDate).getTime() <= today).length;
+    } else { // folder
+      const queue = [itemId];
+      const visited = new Set([itemId]);
+      while(queue.length > 0) {
+        const currentId = queue.shift();
+        const children = hierarchy.filter(item => item.parentId === currentId);
+        children.forEach(child => {
+          if (!visited.has(child.id)) {
+            if (child.type === 'deck') {
+              dueCount += (cardData[child.id] || []).filter(c => new Date(c.nextReviewDate).getTime() <= today).length;
+            } else {
+              queue.push(child.id);
+            }
+            visited.add(child.id);
+          }
+        });
+      }
+    }
+    return dueCount;
+  };
+
+  const handleStudy = (itemId, type) => {
+    const today = new Date().setHours(0, 0, 0, 0);
+    let cardQueue = [];
+
+    if (type === 'deck') {
+      cardQueue = (cardData[itemId] || []).filter(c => new Date(c.nextReviewDate).getTime() <= today);
+    } else { // folder
+       const queue = [itemId];
+       const visited = new Set([itemId]);
+       while(queue.length > 0) {
+         const currentId = queue.shift();
+         const children = hierarchy.filter(item => item.parentId === currentId);
+         children.forEach(child => {
+           if (!visited.has(child.id)) {
+             if (child.type === 'deck') {
+               cardQueue.push(...(cardData[child.id] || []).filter(c => new Date(c.nextReviewDate).getTime() <= today));
+             } else {
+               queue.push(child.id);
+             }
+             visited.add(child.id);
+           }
+         });
+       }
+    }
+    onStartStudy(cardQueue);
+  };
+
+  const renderHierarchy = (parentId = 'root', level = 0) => {
+    return hierarchy
+      .filter(item => item.parentId === parentId)
+      .map(item => (
+        <div key={item.id}>
+          <div 
+            onClick={() => item.type === 'deck' && setActiveDeckId(item.id)}
+            className={`flex items-center justify-between p-2 rounded cursor-pointer group ${activeDeckId === item.id ? 'bg-indigo-600/50' : 'hover:bg-slate-700/50'}`}
+            style={{ paddingLeft: `${level * 16 + 8}px` }}
+          >
+            <span className="flex items-center gap-2 text-sm">
+              {item.type === 'folder' ? '📁' : '📄'} {item.name}
+            </span>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+              <button onClick={(e) => { e.stopPropagation(); handleStudy(item.id, item.type);}} className="text-xs bg-green-600 px-2 py-0.5 rounded">Study ({calculateDueCards(item.id, item.type)})</button>
+              {item.type === 'folder' && <button onClick={(e) => { e.stopPropagation(); setModalState({ type: 'deck', parentId: item.id })}} className="text-xs bg-slate-600 px-2 py-0.5 rounded">+</button>}
+              <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id, item.type)}} className="text-xs bg-red-600 px-2 py-0.5 rounded">🗑️</button>
+            </div>
+          </div>
+          {item.type === 'folder' && level < 2 && renderHierarchy(item.id, level + 1)}
+        </div>
+      ));
+  };
+
+  return (
+    <div className="flex gap-6 h-[70vh]">
+      <CreateItemModal isOpen={modalState.type !== null} onClose={() => setModalState({ type: null })} onSubmit={handleCreateItem} itemType={modalState.type} parentId={modalState.parentId} />
+      <DeleteFolderModal isOpen={deleteTarget !== null} onClose={() => setDeleteTarget(null)} onConfirmDelete={handleConfirmDeleteFolder} />
+      {/* Left Sidebar */}
+      <div className="w-1/3 bg-slate-900/50 rounded-lg p-3 flex flex-col">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-bold text-white">Decks & Folders</h3>
+          <div className="flex gap-2">
+            <button onClick={() => setModalState({ type: 'deck', parentId: 'root' })} className="px-2 py-1 text-xs bg-slate-700 rounded hover:bg-slate-600">New Deck</button>
+            <button onClick={() => setModalState({ type: 'folder', parentId: 'root' })} className="px-2 py-1 text-xs bg-slate-700 rounded hover:bg-slate-600">New Folder</button>
+          </div>
+        </div>
+        <div className="flex-grow overflow-y-auto space-y-1 pr-2">
+          {renderHierarchy()}
+        </div>
+      </div>
+
+      {/* Right Content */}
+      <div className="w-2/3 bg-slate-900/50 rounded-lg p-4 flex flex-col">
+        {activeDeckId ? (
+          <>
+            <div className="flex justify-between items-center mb-3 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <button onClick={() => setEditMode('structured')} className={`px-3 py-1 text-sm rounded ${editMode === 'structured' ? 'bg-indigo-600' : 'bg-slate-700'}`}>Structured</button>
+                <button onClick={() => setEditMode('bulk')} className={`px-3 py-1 text-sm rounded ${editMode === 'bulk' ? 'bg-indigo-600' : 'bg-slate-700'}`}>Bulk Edit</button>
+              </div>
+              <button onClick={handleSaveChanges} disabled={!hasUnsavedChanges} className="px-4 py-2 bg-green-600 rounded disabled:bg-slate-600">Save</button>
+            </div>
+            <div className="flex-grow overflow-y-auto pr-2">
+              {editMode === 'structured' ? (
+                <div className="space-y-3">
+                  {deckContent.cards.map((card, index) => (
+                    <div key={card.id} className="flex gap-2 items-start">
+                      <input type="text" value={card.front} onChange={e => handleCardChange(index, 'front', e.target.value)} placeholder="Front" className="flex-1 p-2 bg-slate-700 rounded" />
+                      <input type="text" value={card.back} onChange={e => handleCardChange(index, 'back', e.target.value)} placeholder="Back" className="flex-1 p-2 bg-slate-700 rounded" />
+                      <button onClick={() => handleDeleteCard(index)} className="p-2 bg-red-800 rounded">🗑️</button>
+                    </div>
+                  ))}
+                  <button onClick={handleAddCard} className="w-full p-2 mt-3 bg-slate-700 rounded hover:bg-slate-600">Add Card</button>
+                </div>
+              ) : (
+                <textarea
+                  value={deckContent.text}
+                  onChange={e => { setDeckContent(prev => ({...prev, text: e.target.value})); setHasUnsavedChanges(true); }}
+                  className="w-full h-full p-3 bg-slate-800 rounded font-mono"
+                  placeholder="Front → Back"
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full text-slate-500">Select a deck to view or edit its contents.</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+const FlashcardSession = ({ studyQueue, studyZoneState, updateStudyZoneState, onSessionEnd }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isFlipped, setIsFlipped] = useState(false);
+
+    const calculateSRS = (cardData, quality) => {
+        let { repetition, easinessFactor, interval } = cardData;
+
+        if (quality < 3) {
+            repetition = 0;
+            interval = 1;
+        } else {
+            repetition += 1;
+            easinessFactor = Math.max(1.3, easinessFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+            if (repetition === 1) interval = 1;
+            else if (repetition === 2) interval = 6;
+            else interval = Math.ceil(interval * easinessFactor);
+        }
+
+        const nextReviewDate = new Date();
+        nextReviewDate.setDate(nextReviewDate.getDate() + interval);
+        
+        return { ...cardData, repetition, easinessFactor, interval, nextReviewDate: nextReviewDate.setHours(0,0,0,0) };
+    };
+
+    const handleRating = (quality) => {
+      const cardToUpdate = studyQueue[currentIndex];
+      const updatedSRSData = calculateSRS(cardToUpdate, quality);
+      
+      const { front, ...srsDataWithBack } = updatedSRSData;
+  
+      // Find which deck this card belongs to
+      let targetDeckId = null;
+      for (const deckId in studyZoneState.cardData) {
+          if (studyZoneState.cardData[deckId].some(c => c.id === cardToUpdate.id)) {
+              targetDeckId = deckId;
+              break;
+          }
+      }
+  
+      if (targetDeckId) {
+          const newDeckCards = studyZoneState.cardData[targetDeckId].map(c => 
+              c.id === cardToUpdate.id ? { ...c, ...srsDataWithBack } : c
+          );
+          const newCardData = { ...studyZoneState.cardData, [targetDeckId]: newDeckCards };
+          updateStudyZoneState({ cardData: newCardData });
+      }
+
+      if (currentIndex + 1 >= studyQueue.length) {
+          onSessionEnd();
+      } else {
+          setCurrentIndex(i => i + 1);
+          setIsFlipped(false);
+      }
+    };
+
+    if (!studyQueue || studyQueue.length === 0) {
+        return (
+            <div className="text-center">
+                <h3 className="text-2xl font-semibold text-white mb-2">All Done!</h3>
+                <p className="text-slate-400 mb-4">You've reviewed all your due cards for today. Great work!</p>
+                <button onClick={onSessionEnd} className="bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700">Back to Manager</button>
+            </div>
+        );
+    }
+    
+    const currentCard = studyQueue[currentIndex];
+    const progressPercent = ((currentIndex + 1) / studyQueue.length) * 100;
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-semibold text-white">Study Session</h3>
+                <button onClick={onSessionEnd} className="text-sm text-slate-400 hover:text-white">End Session</button>
+            </div>
+            
+            <div className="w-full bg-slate-700 rounded-full h-2.5 mb-6">
+              <div className="bg-indigo-500 h-2.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+            </div>
+
+            <div className="relative w-full h-64 perspective-1000">
+                <div className={`absolute w-full h-full transition-transform duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4">
+                        <p className="text-slate-400 mb-2">FRONT</p>
+                        <p className="text-3xl text-center font-bold text-white">{currentCard.front}</p>
+                    </div>
+                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4 rotate-y-180">
+                        <p className="text-slate-400 mb-2">BACK</p>
+                        <p className="text-3xl text-center font-bold text-white">{currentCard.back}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-6">
+                {!isFlipped ? (
+                    <button onClick={() => setIsFlipped(true)} className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-blue-700">Show Answer</button>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onClick={() => handleRating(0)} className="py-3 bg-red-800 hover:bg-red-700 rounded-lg">Forgot</button>
+                        <button onClick={() => handleRating(3)} className="py-3 bg-orange-700 hover:bg-orange-600 rounded-lg">Hard</button>
+                        <button onClick={() => handleRating(4)} className="py-3 bg-green-700 hover:bg-green-600 rounded-lg">Good</button>
+                        <button onClick={() => handleRating(5)} className="py-3 bg-sky-600 hover:bg-sky-500 rounded-lg">Easy</button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}; 
 
 // --- NEW: Flashcard Fortress Upgrade Definitions ---
 const fortressUpgradeDefinitions = {
@@ -11138,12 +11644,12 @@ const fortressUpgradeDefinitions = {
 // --- NEW: Flashcard Survivor (Kingshot style) Gameplay Definitions ---
 
 const survivorEnemyDefinitions = {
-  scamp: { name: 'Scamp', health: 8, speed: 0.12, type: 'runner', gold: 8, visual: '👹' },
-  ogre: { name: 'Ogre', health: 100, speed: 0.015, type: 'brute', gold: 40, visual: '👾' },
-  shaman: { name: 'Shaman', health: 40, speed: 0.04, type: 'healer', gold: 30, healPower: 5, healRadius: 100, healCooldown: 5000, lastHeal: 0, visual: '🧙' },
-  specter: { name: 'Specter', health: 35, speed: 0.05, type: 'bypass', gold: 20, isEthereal: true, visual: '👻' },
-  sapper: { name: 'Sapper', health: 15, speed: 35, type: 'tower-buster', gold: 15, damage: 45, visual: '💣' },
-  default: { name: 'Term', health: 15, speed: 0.05, type: 'normal', gold: 10, visual: '❓' }
+  scamp: { name: 'Scamp', health: 8, speed: 0.09, type: 'runner', gold: 8, icon: enemyScampIcon }, // Was 0.12
+  ogre: { name: 'Ogre', health: 100, speed: 0.011, type: 'brute', gold: 40, icon: enemyOgreIcon }, // Was 0.015
+  shaman: { name: 'Shaman', health: 40, speed: 0.03, type: 'healer', gold: 30, healPower: 10, healRadius: 100, healCooldown: 5000, lastHeal: 0, icon: enemyShamanIcon }, // Was 0.04
+  specter: { name: 'Specter', health: 35, speed: 0.04, type: 'bypass', gold: 20, isEthereal: true, icon: enemySpecterIcon }, // Was 0.05
+  sapper: { name: 'Sapper', health: 5, speed: 50, type: 'tower-buster', gold: 15, damage: 75, icon: enemySapperIcon }, // Was 35
+  default: { name: 'Term', health: 15, speed: 0.04, type: 'normal', gold: 10, icon: enemyDefaultIcon } // Was 0.05
 };
 
 const survivorTowerDefinitions = {
@@ -11210,7 +11716,20 @@ const survivorTowerDefinitions = {
     }
   },
 };
-
+const fortressBossDefinitions = {
+  juggernaut: {
+    name: 'The Juggernaut',
+    health: 5000,
+    speed: 0.01,
+    gold: 500,
+    xp: 5,
+    icon: enemyOgreIcon,
+    abilities: [
+      { id: 'tower_stun', cooldown: 10000, lastUse: 0, description: 'Disables a random tower.' },
+      { id: 'spawn_minions', cooldown: 15000, lastUse: 0, description: 'Spawns a group of Scamps.' },
+    ]
+  }
+};
 const survivorBuffDefinitions = {
   rapid_fire: { name: 'Rapid Fire', cost: 100, duration: 10000 },
   gold_rush: { name: 'Gold Rush', cost: 250, duration: 15000 },
@@ -11270,6 +11789,330 @@ const FlashcardFortressQuizModal = ({ card, allCards, onAnswer, onClose }) => {
 // --- NEW: Flashcard Fortress Level Up Modal ---
 const FlashcardFortressLevelUpModal = ({ onSelectUpgrade, upgrades }) => {
   if (!upgrades || upgrades.length === 0) return null;
+// --- NEW: Definition Descent Game Component ---
+// --- NEW: Definition Descent Game Component ---
+const DefinitionDescent = ({ flashcards, showMessageBox }) => {
+  const GAME_WIDTH = 600;
+  const GAME_HEIGHT = 800;
+  const GRAVITY = 0.3;
+  const JUMP_BOOST = -13;
+  const WEAK_JUMP_BOOST = -4;
+  const PLAYER_WIDTH = 40;
+  const PLAYER_HEIGHT = 40;
+  const PLATFORM_WIDTH = 120;
+  const PLATFORM_HEIGHT = 20;
+
+  const gameAreaRef = useRef(null);
+  const gameLoopRef = useRef(null);
+  const lastTimeRef = useRef(0);
+  const keysRef = useRef({});
+  const mouseXRef = useRef(GAME_WIDTH / 2);
+  const inputModeRef = useRef('mouse'); // NEW: Track input type
+
+  const [uiState, setUiState] = useState({
+    mode: 'menu',
+    score: 0,
+    prompt: '',
+    highScore: 0
+  });
+
+  const playerRef = useRef({ x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100, vx: 0, vy: 0 });
+  const platformsRef = useRef([]);
+  const cameraYRef = useRef(0);
+  const currentProblemRef = useRef(null);
+  const scoreRef = useRef(0);
+
+  const generateNewProblem = useCallback(() => {
+    if (flashcards.length < 3) return null;
+    let available = [...flashcards];
+    const correctIndex = Math.floor(Math.random() * available.length);
+    const correctCard = available.splice(correctIndex, 1)[0];
+
+    let distractors = [];
+    for (let i = 0; i < 2; i++) {
+      if (available.length === 0) break;
+      const distractorIndex = Math.floor(Math.random() * available.length);
+      distractors.push(available.splice(distractorIndex, 1)[0]);
+    }
+    
+    currentProblemRef.current = { prompt: correctCard.back, correctAnswer: correctCard.front };
+    
+    setUiState(s => ({...s, prompt: correctCard.back }));
+
+    return {
+      correct: correctCard.front,
+      distractors: distractors.map(d => d.front)
+    };
+  }, [flashcards]);
+
+  const generatePlatforms = useCallback((startY, problem) => {
+    let newPlatforms = [];
+    let answers = [{ text: problem.correct, isCorrect: true }, ...problem.distractors.map(d => ({ text: d, isCorrect: false }))];
+    
+    // NEW: Make sure one platform is always reachable
+    const correctIndex = answers.findIndex(a => a.isCorrect);
+    const reachableX = playerRef.current.x + (Math.random() * 160 - 80); // within 80px of player's current x
+    
+    answers.forEach((ans, i) => {
+      const isReachableCorrect = i === correctIndex;
+      const yPos = startY - 140 - (Math.random() * 120); // Tighter vertical band
+      const xPos = isReachableCorrect ? Math.max(0, Math.min(GAME_WIDTH - PLATFORM_WIDTH, reachableX)) : (Math.random() * (GAME_WIDTH - PLATFORM_WIDTH));
+      
+      newPlatforms.push({
+        id: `plat_${Date.now()}_${i}`,
+        x: xPos,
+        y: yPos,
+        width: PLATFORM_WIDTH,
+        height: PLATFORM_HEIGHT,
+        text: ans.text,
+        isCorrect: ans.isCorrect,
+        isCrumbling: false,
+      });
+    });
+    
+    // Simple shuffle for other platforms
+    for (let i = newPlatforms.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newPlatforms[i].x, newPlatforms[j].x] = [newPlatforms[j].x, newPlatforms[i].x];
+    }
+
+    platformsRef.current.push(...newPlatforms);
+  }, []);
+
+  const resetGame = useCallback(() => {
+    playerRef.current = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 50, vx: 0, vy: -10 };
+    scoreRef.current = 0;
+    cameraYRef.current = 0;
+    
+    platformsRef.current = [{
+      id: 'start', x: GAME_WIDTH / 2 - PLATFORM_WIDTH / 2, y: GAME_HEIGHT - 30,
+      width: PLATFORM_WIDTH, height: PLATFORM_HEIGHT, text: 'Start', isCorrect: true,
+    }];
+    
+    const problem = generateNewProblem();
+    if(problem) {
+      generatePlatforms(GAME_HEIGHT - 200, problem);
+    }
+
+    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: currentProblemRef.current.prompt }));
+  }, [generateNewProblem, generatePlatforms]);
+
+  useEffect(() => {
+    const handleKeyDown = e => { keysRef.current[e.key.toLowerCase()] = true; inputModeRef.current = 'keyboard'; };
+    const handleKeyUp = e => { keysRef.current[e.key.toLowerCase()] = false; };
+    const handleMouseMove = e => { 
+      if (gameAreaRef.current) {
+        mouseXRef.current = e.clientX - gameAreaRef.current.getBoundingClientRect().left;
+        inputModeRef.current = 'mouse';
+      }
+    };
+    const handleTouchMove = e => { 
+      if (gameAreaRef.current) {
+        mouseXRef.current = e.touches[0].clientX - gameAreaRef.current.getBoundingClientRect().left;
+        inputModeRef.current = 'mouse';
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (uiState.mode !== 'playing') {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+      lastTimeRef.current = 0;
+      return;
+    }
+
+    const gameLoop = (timestamp) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
+      let dt = (timestamp - lastTimeRef.current) / 16.67;
+      lastTimeRef.current = timestamp;
+      if (dt > 3) dt = 1;
+
+      // Player Movement
+      if (inputModeRef.current === 'keyboard') {
+        let vx = 0;
+        if (keysRef.current['a'] || keysRef.current['arrowleft']) vx -= 6;
+        if (keysRef.current['d'] || keysRef.current['arrowright']) vx += 6;
+        playerRef.current.x += vx * dt;
+      } else {
+        const targetX = mouseXRef.current;
+        playerRef.current.x += (targetX - playerRef.current.x) * 0.5;
+      }
+      if (playerRef.current.x > GAME_WIDTH) playerRef.current.x = 0;
+      if (playerRef.current.x < 0) playerRef.current.x = GAME_WIDTH;
+
+      playerRef.current.vy += GRAVITY * dt;
+      playerRef.current.y += playerRef.current.vy * dt;
+      
+      if (playerRef.current.vy > 0) {
+        platformsRef.current.forEach(p => {
+          if (!p.isCrumbling &&
+              playerRef.current.x > p.x && playerRef.current.x < p.x + p.width &&
+              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 15) {
+            
+            if (p.isCorrect) {
+              playerRef.current.vy = JUMP_BOOST;
+              if (p.id !== 'start') {
+                const problem = generateNewProblem();
+                if (problem) generatePlatforms(p.y, problem);
+              }
+            } else {
+              playerRef.current.vy = WEAK_JUMP_BOOST;
+              p.isCrumbling = true;
+              p.crumbleTimer = 500;
+            }
+          }
+        });
+      }
+      
+      platformsRef.current.forEach(p => {
+        if(p.isCrumbling) {
+          p.crumbleTimer -= dt * 16.67;
+          if(p.crumbleTimer <= 0) p.y += 10 * dt;
+        }
+      });
+
+      if (playerRef.current.y < cameraYRef.current + GAME_HEIGHT / 2) {
+        cameraYRef.current = playerRef.current.y - GAME_HEIGHT / 2;
+      }
+      scoreRef.current = Math.max(scoreRef.current, -Math.floor(cameraYRef.current / 10));
+
+      platformsRef.current = platformsRef.current.filter(p => p.y < cameraYRef.current + GAME_HEIGHT + 50);
+
+      if (playerRef.current.y > cameraYRef.current + GAME_HEIGHT) {
+        setUiState(s => ({...s, mode: 'gameover'}));
+      }
+      
+      setUiState(s => ({...s, score: scoreRef.current}));
+
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    };
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+  }, [uiState.mode, generateNewProblem, generatePlatforms]);
+  
+  if (flashcards.length < 3) {
+     return <div className="text-center p-8 bg-slate-900 rounded-lg"><h3 className="text-2xl font-bold text-yellow-400">Not Enough Flashcards!</h3><p className="text-slate-300 mt-2">Definition Descent requires at least 3 flashcards to play.</p></div>;
+  }
+  
+  const playerX = playerRef.current.x - PLAYER_WIDTH / 2;
+  const playerY = playerRef.current.y;
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full max-w-lg flex justify-between mb-2 text-white font-bold text-lg">
+        <span>Height: {uiState.score}m</span>
+        <span>High Score: {uiState.highScore}m</span>
+      </div>
+      <div ref={gameAreaRef} className="relative border-4 border-slate-900 rounded-lg overflow-hidden select-none" style={{ width: GAME_WIDTH, height: GAME_HEIGHT, cursor: 'none' }}>
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-700 to-indigo-900"/>
+        
+        {uiState.mode === 'menu' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center" style={{cursor: 'default'}}>
+            <h3 className="text-4xl font-bold text-white mb-2">Definition Descent</h3>
+            <p className="text-slate-300 mb-6 max-w-md">Jump on the correct term to climb higher. Use A/D, arrow keys, or your mouse to steer.</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600">Start Climbing</button>
+          </div>
+        )}
+        {uiState.mode === 'gameover' && (
+           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10" style={{cursor: 'default'}}>
+            <h3 className="text-4xl font-bold text-red-500">Game Over</h3>
+            <p className="text-2xl text-white my-4">Final Height: {uiState.score}m</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-xl hover:bg-blue-600">Try Again</button>
+          </div>
+        )}
+
+        <div className="absolute inset-0" style={{ transform: `translateY(${-cameraYRef.current}px)` }}>
+          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20" style={{transform: `translateY(${cameraYRef.current}px)`}}>
+            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
+          </div>
+          <div className="player absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerX}px, ${playerY}px)` }}>
+            <div className="w-full h-full bg-yellow-400 rounded-full" />
+          </div>
+          {platformsRef.current.map(p => (
+            <div key={p.id} id={p.id} className={`absolute transition-opacity duration-300 ${p.isCrumbling ? 'opacity-0' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
+              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 text-white ${p.id === 'start' ? 'bg-indigo-600' : 'bg-slate-600'}`}>{p.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- NEW: Study Arcade Hub Component ---
+const StudyArcade = ({ studyZoneState, showMessageBox, stats }) => {
+  const [activeGame, setActiveGame] = useState('menu'); // 'menu', 'asteroid', 'descent', 'run'
+
+  const parsedFlashcards = useMemo(() => {
+    // NEW: Aggregate cards from all decks in the new data structure
+    if (!studyZoneState.cardData) return [];
+    return Object.values(studyZoneState.cardData).flat();
+  }, [studyZoneState.cardData]);
+
+  const GameCard = ({ title, description, onClick, disabled = false }) => (
+    <div className={`bg-slate-800/50 border border-slate-700 p-6 rounded-lg text-center flex flex-col ${disabled ? 'opacity-50' : 'hover:bg-slate-800/80 transition-colors'}`}>
+      <h4 className="text-2xl font-bold text-white">{title}</h4>
+      <p className="text-sm text-slate-400 mt-2 flex-grow">{description}</p>
+      {disabled ? (
+        <span className="mt-4 block w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg cursor-not-allowed">Coming Soon</span>
+      ) : (
+        <button onClick={onClick} className="mt-4 w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">
+          Play Now
+        </button>
+      )}
+    </div>
+  );
+
+  if (activeGame !== 'menu') {
+    return (
+      <div>
+        <button onClick={() => setActiveGame('menu')} className="mb-4 bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-500">
+          ← Back to Arcade Menu
+        </button>
+        {activeGame === 'asteroid' && <AsteroidAnnihilator flashcards={parsedFlashcards} showMessageBox={showMessageBox} />}
+        {/* Placeholders for other games */}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="text-center mb-8">
+        <h3 className="text-4xl font-bold text-white">Study Arcade</h3>
+        <p className="text-slate-400 mt-2">Quick, fun games to test your knowledge.</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <GameCard 
+          title="Asteroid Annihilator"
+          description="Shoot the correct asteroid that matches the definition. Drills rapid recognition under pressure."
+          onClick={() => setActiveGame('asteroid')}
+        />
+        <GameCard 
+          title="Definition Descent"
+          description="Jump your way up an endless tower of platforms by landing on the correct term."
+          disabled={true}
+        />
+        <GameCard 
+          title="Term-ple Run"
+          description="Switch lanes to run through the correct gate in a fast-paced, endless runner."
+          disabled={true}
+        />
+      </div>
+    </div>
+  );
+};
   return (
     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-30 p-4">
       <div className="bg-slate-900 border-2 border-slate-700 p-8 rounded-lg w-full max-w-4xl text-center">
@@ -11318,16 +12161,8 @@ const TowerIcons = ({ type }) => {
   return <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-lg">{icons[type] || <circle cx="20" cy="20" r="15" fill="#64748b"/>}</svg>;
 };
 
-const EnemyIcons = ({ type }) => {
-  const icons = {
-    scamp: <path d="M20,5 C30,5 35,15 35,20 S30,35 20,35 S5,25 5,20 S10,5 20,5 M15,15 L15,22 M25,15 L25,22 M12,30 Q20,25 28,30" stroke="#dc2626" strokeWidth="3" fill="none" strokeLinecap="round" />,
-    ogre: <><rect x="4" y="10" width="32" height="26" rx="8" fill="#166534" /><circle cx="14" cy="18" r="3" fill="white" /><circle cx="26" cy="18" r="3" fill="white" /><rect x="12" y="28" width="16" height="4" fill="#dcfce7" /></>,
-    shaman: <><path d="M20 2 L 35 38 L 5 38 Z" fill="#581c87" /><path d="M20 12 L15 22 L25 22 Z" fill="#e9d5ff" /></>,
-    specter: <path d="M10 38 Q 20 28 30 38 Q 35 20 20 5 Q 5 20 10 38" fill="#4f46e5" opacity="0.7" />,
-    sapper: <><circle cx="20" cy="20" r="14" fill="#1e293b" /><path d="M15 10 L25 10 M20 5 L20 15 M10 20 L30 20" stroke="#ef4444" strokeWidth="4" /><circle cx="20" cy="20" r="4" fill="#f87171" className="animate-pulse" /></>,
-    default: <circle cx="20" cy="20" r="15" fill="#701a75" />,
-  };
-  return <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-lg">{icons[type] || <circle cx="20" cy="20" r="15" fill="#be185d"/>}</svg>;
+const EnemyIcons = ({ iconSrc }) => {
+  return <img src={iconSrc} alt="Enemy" loading="lazy" className="w-full h-full object-contain drop-shadow-lg" />;
 };
 
 const ProjectileVisuals = ({ type }) => {
@@ -11336,9 +12171,14 @@ const ProjectileVisuals = ({ type }) => {
     cannonball: <circle cx="0" cy="0" r="6" fill="#475569" />,
     magic_bolt: <path d="M-8 0 L8 0 M-6 -4 L0 0 L-6 4" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />,
     sniper_bullet: <rect x="-6" y="-1" width="12" height="2" fill="white" />,
-    player_bullet: <circle cx="0" cy="0" r="5" fill="#60a5fa" stroke="white" strokeWidth="1.5" />,
+    player_bullet: (
+      <g>
+        <line x1="-12" x2="8" stroke="#D1D5DB" strokeWidth="2.5" />
+        <polygon fill="#D1D5DB" points="10 0, 4 4, 4 -4" />
+      </g>
+    ),
   };
-  return <svg viewBox="-10 -10 20 20">{visuals[type] || <circle cx="0" cy="0" r="3" fill="white"/>}</svg>;
+  return <svg viewBox="-15 -15 30 30" overflow="visible">{visuals[type] || <circle cx="0" cy="0" r="3" fill="white"/>}</svg>;
 };
 // --- NEW: Flashcard Survivor Game (Kingshot Style) ---
 // NEW: More reliable S-curve path generation
@@ -11415,20 +12255,37 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
   const gameLoopRef = useRef(null);
   const lastTimeRef = useRef(0);
   const gameAreaRef = useRef(null);
+  const enemySpawnIntervalRef = useRef(null);
+  const pathRef = useRef(generateSurvivorPath()); // FIX: Add pathRef definition
 
-  const pathRef = useRef(generateSurvivorPath());
+  // --- NEW: Refs and State for Aiming ---
+  const aimStateRef = useRef({
+    isAiming: false,
+    startPos: { x: 0, y: 0 },
+    angle: 0,
+    power: 0,
+    arcPath: "",
+  });
+  // We use a separate state for just the visual part of aiming to trigger re-renders
+  const [visualAimState, setVisualAimState] = useState({ angle: 0, power: 0, arcPath: "" });
   const buildSlotsRef = useRef([]);
 
   const parsedFlashcards = useMemo(() => {
-    return (studyZoneState.flashcardsText || '').split('\n')
-      .map((line, index) => {
-          const parts = line.split(/→|>>|-/);
-          if(parts.length >= 2) return { id: index, front: parts[0].trim(), back: parts.slice(1).join('').trim()};
-          return null;
-      }).filter(Boolean);
-  }, [studyZoneState.flashcardsText]);
+    // NEW: Aggregate cards from all decks in the new data structure
+    if (!studyZoneState.cardData) return [];
+    return Object.values(studyZoneState.cardData).flat();
+  }, [studyZoneState.cardData]);
+
+  const cardsRef = useRef(parsedFlashcards);
+  useEffect(() => { cardsRef.current = parsedFlashcards; }, [parsedFlashcards]);
 
   const resetGame = useCallback(() => {
+    if (parsedFlashcards.length < 4) {
+      showMessageBox("Please add at least 4 flashcards in the Study Zone before starting the game.", "error");
+      return; // Prevent game from starting
+    }
+
+    if (enemySpawnIntervalRef.current) clearInterval(enemySpawnIntervalRef.current);
     pathRef.current = generateSurvivorPath();
     buildSlotsRef.current = generateBuildSlots(pathRef.current, 5, 80);
     setGameState({
@@ -11443,17 +12300,13 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
       combo: 0,
       comboTimeout: 0,
       markedTargetId: null,
-      nemesisTargetId: null, // For Nemesis System
+      nemesisTargetId: null,
+      wave: 0,
+      isBetweenWaves: false, // Start the first wave immediately
+      boss: null,
       
-      player: { 
-        x: GAME_WIDTH / 2,
-        y: GAME_HEIGHT - 30,
-        attackCooldown: 0,
-        collectionRadius: 60,
-        activeBuffs: {},
-      },
+      player: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 30, attackCooldown: 0, collectionRadius: 60, activeBuffs: {} },
       playerUpgrades: [],
-      
       enemies: [],
       towers: [],
       projectiles: [],
@@ -11461,19 +12314,75 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
       xpFragmentDrops: [],
       visualEffects: [],
       
-      enemySpawnTimer: 3000,
-      wave: 1,
-      
       quizTarget: null,
+      aimTargetPos: null,
       levelUpOptions: [],
       buildSlotMenu: null,
       upgradeTarget: null,
-      quizFirePosition: null,
+    });
+  }, [parsedFlashcards, showMessageBox]);
+
+
+  const startNextWave = useCallback(() => {
+    setGameState(s => {
+      let newState = { ...s, isBetweenWaves: false, wave: s.wave + 1 };
+      const waveNumber = newState.wave;
+      const timeElapsed = 600 - (newState.gameTimer / 1000);
+
+      // Boss Wave Logic
+      if (waveNumber > 0 && waveNumber % 5 === 0) {
+        const bossDef = fortressBossDefinitions.juggernaut; // Only one boss for now
+        const healthMultiplier = 1 + (waveNumber / 5 - 1) * 0.5; // Boss gets 50% stronger each appearance
+        const boss = { 
+          ...bossDef, 
+          id: 'boss_juggernaut', 
+          x: pathRef.current[0].x, y: pathRef.current[0].y, 
+          progress: 0, 
+          health: bossDef.health * healthMultiplier,
+          maxHealth: bossDef.health * healthMultiplier,
+          abilities: bossDef.abilities.map(a => ({...a})), // Deep copy abilities
+        };
+        newState.boss = boss;
+        newState.enemies = [boss];
+        return newState;
+      }
+      
+      // Normal Wave Logic
+      const enemyCount = 5 + waveNumber * 2;
+      let enemiesToSpawn = [];
+      for (let i = 0; i < enemyCount; i++) {
+        const enemyTypes = ['scamp', 'ogre', 'shaman', 'specter', 'sapper'];
+        const typeKey = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        const def = survivorEnemyDefinitions[typeKey] || survivorEnemyDefinitions.default;
+        
+        const healthMultiplier = 1 + timeElapsed / 50;
+        const speedMultiplier = 1 + timeElapsed / 200;
+
+        const isElite = Math.random() < 0.1; // 10% chance to be elite
+        
+        let newEnemy = { 
+          ...def, 
+          id: `${typeKey}_${Date.now()}_${i}`,
+          isElite,
+          x: pathRef.current[0].x, y: pathRef.current[0].y, 
+          speed: def.speed * (def.type === 'tower-buster' ? speedMultiplier : 1), 
+          progress: -i * (0.5 / enemyCount), // Stagger spawn
+          health: def.health * healthMultiplier * (isElite ? 3 : 1), 
+          maxHealth: def.health * healthMultiplier * (isElite ? 3 : 1), 
+          gold: def.gold * (isElite ? 5 : 1),
+          xp: (def.xp || 1) * (isElite ? 5 : 1),
+          card: { ...cardsRef.current[Math.floor(Math.random() * cardsRef.current.length)] }, 
+          slowTimer: 0, slowAmount: 0, isEnraged: false 
+        };
+        enemiesToSpawn.push(newEnemy);
+      }
+      newState.enemies = enemiesToSpawn;
+      return newState;
     });
   }, []);
 
-  const handleSelectUpgrade = useCallback((upgrade) => {
-    setGameState(s => ({ ...s, mode: 'playing', level: s.level + 1, xp: 0, xpToNextLevel: Math.floor(s.xpToNextLevel * 1.5), playerUpgrades: [...s.playerUpgrades, upgrade.id] }));
+  const handleSelectUpgrade = useCallback((upgrade, isBossReward = false) => {
+    setGameState(s => ({ ...s, mode: 'playing', level: isBossReward ? s.level : s.level + 1, xp: 0, xpToNextLevel: Math.floor(s.xpToNextLevel * 1.5), playerUpgrades: [...s.playerUpgrades, upgrade.id] }));
   }, []);
 
   useEffect(() => {
@@ -11491,6 +12400,7 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
   }, []);
   
   useEffect(() => {
+    // PAUSE the game loop if not in 'playing' mode.
     if (gameState.mode !== 'playing') {
       if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
       lastTimeRef.current = 0;
@@ -11504,11 +12414,14 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
       if (dt > 100) dt = 16.67;
 
       setGameState(s => {
+        // Double-check mode inside the updater to prevent updates after mode changes.
         if (s.mode !== 'playing') return s;
         let newState = JSON.parse(JSON.stringify(s));
 
-        newState.gameTimer -= dt;
-        newState.enemySpawnTimer -= dt;
+        // Only count down the main timer when a wave is active
+        if (!newState.isBetweenWaves) {
+            newState.gameTimer -= dt;
+        }
         if (newState.player.attackCooldown > 0) newState.player.attackCooldown -= dt;
         if (newState.comboTimeout > 0) newState.comboTimeout -= dt;
         if (newState.comboTimeout <= 0 && newState.combo > 0) newState.combo = 0;
@@ -11525,20 +12438,31 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
         if (keysRef.current['d'] || keysRef.current['arrowright']) vx += 1;
         newState.player.x += vx * currentSpeed * (dt / 1000);
         newState.player.x = Math.max(20, Math.min(GAME_WIDTH - 20, newState.player.x));
-
-        if (newState.enemySpawnTimer <= 0) {
-            const enemyTypes = ['scamp', 'ogre', 'shaman', 'specter', 'sapper'];
-            const typeKey = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-            const def = survivorEnemyDefinitions[typeKey] || survivorEnemyDefinitions.default;
-            const timeElapsed = 600 - (newState.gameTimer / 1000);
-            const healthMultiplier = 1 + timeElapsed / 50;
-            const speedMultiplier = 1 + timeElapsed / 200;
-            const newEnemy = { ...def, id: Math.random(), iconKey: typeKey, x: pathRef.current[0].x, y: pathRef.current[0].y, speed: def.speed * (def.type === 'tower-buster' ? speedMultiplier : 1), progress: 0, health: def.health * healthMultiplier, maxHealth: def.health * healthMultiplier, card: parsedFlashcards[Math.floor(Math.random()*parsedFlashcards.length)], slowTimer: 0, slowAmount: 0, isEnraged: false };
-            newState.enemies.push(newEnemy);
-            newState.enemySpawnTimer = Math.max(400, 2500 / (1 + timeElapsed/45));
+        
+        // --- BOSS ABILITY LOGIC ---
+        if (newState.boss) {
+          newState.boss.abilities.forEach(ability => {
+            if (Date.now() - ability.lastUse > ability.cooldown) {
+              ability.lastUse = Date.now();
+              if (ability.id === 'tower_stun' && newState.towers.length > 0) {
+                const randomTower = newState.towers[Math.floor(Math.random() * newState.towers.length)];
+                if (randomTower) {
+                  randomTower.stunnedUntil = Date.now() + 5000; // Stun for 5s
+                  newState.visualEffects.push({ id: Math.random(), type: 'stun_effect', x: randomTower.x, y: randomTower.y, duration: 5000, createdAt: Date.now() });
+                }
+              }
+              if (ability.id === 'spawn_minions') {
+                for (let i = 0; i < 3; i++) {
+                  const def = survivorEnemyDefinitions.scamp;
+                  newState.enemies.push({ ...def, id: `minion_${Date.now()}_${i}`, x: newState.boss.x, y: newState.boss.y, progress: newState.boss.progress, health: def.health, maxHealth: def.health, card: { ...cardsRef.current[0] } });
+                }
+              }
+            }
+          });
         }
 
         newState.enemies.forEach(enemy => {
+            if(enemy.progress < 0) { enemy.progress += enemy.speed * (dt / 1000); return; }
             if (enemy.type === 'healer' && Date.now() - (enemy.lastHeal || 0) > enemy.healCooldown) {
                 newState.enemies.forEach(target => { if (target.id !== enemy.id && target.health < target.maxHealth && Math.hypot(target.x - enemy.x, target.y - enemy.y) < enemy.healRadius) { target.health = Math.min(target.maxHealth, target.health + enemy.healPower); } });
                 enemy.lastHeal = Date.now();
@@ -11558,7 +12482,7 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
                 }
             } else {
               let currentSpeed = enemy.speed;
-              if (enemy.isEnraged) currentSpeed *= 1.5; // Nemesis speed boost
+              if (enemy.isEnraged) currentSpeed *= 1.5;
               if (enemy.slowTimer > 0) { enemy.slowTimer -= dt; currentSpeed *= (1 - enemy.slowAmount); }
               enemy.progress += currentSpeed * (dt / 1000);
               if (enemy.progress >= 1) { newState.castleHealth -= 1; enemy.health = 0; } 
@@ -11576,16 +12500,18 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
         newState.towers = newState.towers.filter(t => {
             if (t.health <= 0 && !t.isDestroyed) {
                 t.isDestroyed = true;
+                t.destroyedAt = Date.now();
                 newState.visualEffects.push({ id: Math.random(), type: 'explosion', x: t.x, y: t.y, size: 40, duration: 400, createdAt: Date.now() });
             }
-            return !t.isDestroyed;
+            // Keep tower in state for a moment to play fade-out animation
+            return !t.isDestroyed || (Date.now() - t.destroyedAt < 500);
         });
 
         const overclockLevels = newState.playerUpgrades.filter(u => u === 'tower_overclock').length;
         const fireRateMultiplier = Math.pow(1.15, overclockLevels);
 
         newState.towers.forEach(tower => {
-            if (tower.isDestroyed) return;
+            if (tower.isDestroyed || (tower.stunnedUntil && Date.now() < tower.stunnedUntil)) return;
             if (tower.type === 'bank') {
                 if (Date.now() - (tower.lastFire || 0) > 1000 / tower.fireRate) { newState.gold += tower.income; tower.lastFire = Date.now(); }
                 return;
@@ -11614,31 +12540,104 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
                 }
             }
         });
+        
+        // --- NEW: Robust Damage Application Logic ---
+        const damageMap = {}; // { enemyId: totalDamage }
 
         newState.projectiles = newState.projectiles.filter(proj => {
-            const speed = proj.fromTower ? 600 : 900;
-            proj.x += Math.cos(proj.angle) * speed * (dt / 1000); proj.y += Math.sin(proj.angle) * speed * (dt / 1000);
+            // Player arrow physics
+            if (proj.fromPlayer) {
+              proj.vy += 0.3 * (dt / 16.67); // Gravity
+              proj.x += proj.vx * (dt / 16.67);
+              proj.y += proj.vy * (dt / 16.67);
+              proj.angle = Math.atan2(proj.vy, proj.vx);
+            } else { // Tower projectile physics
+              const speed = proj.fromTower ? 600 : 900;
+              proj.x += Math.cos(proj.angle) * speed * (dt / 1000); 
+              proj.y += Math.sin(proj.angle) * speed * (dt / 1000);
+            }
+
+            // Collision Detection
             for (const enemy of newState.enemies) {
                 if (proj.hitEnemies?.includes(enemy.id)) continue;
                 if ((enemy.isEthereal && !proj.canHitEthereal) && !proj.fromPlayer) continue;
                 if (Math.hypot(proj.x - enemy.x, proj.y - enemy.y) < 16) {
-                    enemy.health -= proj.damage;
+                    let finalDamage = proj.damage;
+                    
+                    // Record damage instead of applying it directly
+                    damageMap[enemy.id] = (damageMap[enemy.id] || 0) + finalDamage;
+                    
+                    // Handle AoE damage recording
+                    if (proj.aoeRadius) {
+                      newState.enemies.forEach(other => {
+                        if (other.id !== enemy.id && Math.hypot(other.x - enemy.x, other.y - enemy.y) < proj.aoeRadius) {
+                           damageMap[other.id] = (damageMap[other.id] || 0) + finalDamage / 2;
+                        }
+                      });
+                    }
+
+                    // Handle other on-hit effects
                     if (proj.slow) { enemy.slowTimer = proj.slow.duration; enemy.slowAmount = proj.slow.amount; }
-                    if (proj.aoeRadius) { newState.enemies.forEach(other => { if (other.id !== enemy.id && Math.hypot(other.x - enemy.x, other.y - enemy.y) < proj.aoeRadius) { other.health -= proj.damage / 2; } }); }
-                    if (proj.pierce > 0) { proj.pierce--; if (!proj.hitEnemies) proj.hitEnemies = []; proj.hitEnemies.push(enemy.id); } else return false;
+                    
+                    // Handle pierce
+                    if (proj.pierce > 0) {
+                      proj.pierce--;
+                      if (!proj.hitEnemies) proj.hitEnemies = [];
+                      proj.hitEnemies.push(enemy.id);
+                    } else {
+                      return false; // Remove projectile
+                    }
                 }
             }
             return proj.x > -20 && proj.x < GAME_WIDTH + 20 && proj.y > -20 && proj.y < GAME_HEIGHT + 20;
         });
+
+        // Apply all recorded damage and create visual effects in a clean step
+        if (Object.keys(damageMap).length > 0) {
+          newState.enemies.forEach(enemy => {
+            if (damageMap[enemy.id]) {
+              const damageTaken = Math.round(damageMap[enemy.id]);
+              enemy.health -= damageTaken;
+              // We can still check for crit on the projectile that caused the first hit in the map if we want
+              const isCrit = newState.projectiles.find(p => p.hitEnemies?.includes(enemy.id))?.isCrit || false;
+              newState.visualEffects.push({ id: Math.random(), type: 'damage_number', x: enemy.x, y: enemy.y, amount: damageTaken, isCrit: isCrit, duration: 1000, createdAt: Date.now() });
+            }
+          });
+        }
         
         const magnetLevels = newState.playerUpgrades.filter(u => u === 'drop_magnet').length;
         const collectionRadius = newState.player.collectionRadius * Math.pow(1.3, magnetLevels);
-        newState.goldDrops = newState.goldDrops.filter(d => { if(Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) { newState.gold += d.amount; return false; } return true; });
-        newState.xpFragmentDrops = newState.xpFragmentDrops.filter(d => { if(Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) { newState.xp += d.amount; return false; } return true; });
+        const magnetTowers = newState.towers.filter(t => t.type === 'gold_magnet' && !t.isDestroyed);
+        
+        newState.goldDrops = newState.goldDrops.filter(d => {
+          let collected = false;
+          if (Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) collected = true;
+          if (!collected) {
+            for (const magnet of magnetTowers) {
+              if (Math.hypot(magnet.x - d.x, magnet.y - d.y) < magnet.range) { collected = true; break; }
+            }
+          }
+          if (collected) { newState.gold += d.amount; return false; }
+          return true;
+        });
+        
+        newState.xpFragmentDrops = newState.xpFragmentDrops.filter(d => { 
+          if(Math.hypot(newState.player.x - d.x, newState.player.y - d.y) < collectionRadius) { 
+            newState.xp += d.amount; 
+            return false;
+          } 
+          return true; 
+        });
         
         newState.enemies = newState.enemies.filter(e => {
             if (e.health <= 0) {
                 if (e.id === newState.nemesisTargetId) newState.nemesisTargetId = null;
+                if (e.id === newState.boss?.id) {
+                  newState.mode = 'levelup';
+                  newState.boss = null;
+                  const epicUpgrades = [...fortressUpgradeDefinitions.epic];
+                  newState.levelUpOptions = [epicUpgrades[Math.floor(Math.random() * epicUpgrades.length)]];
+                }
                 const dropY = GAME_HEIGHT - 60;
                 const comboMultiplier = 1 + (newState.combo * 0.05);
                 const goldRushMultiplier = newState.player.activeBuffs?.gold_rush > 0 ? 2 : 1;
@@ -11648,12 +12647,16 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
                 newState.goldDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: goldAmount });
                 const xpBoostLevels = newState.playerUpgrades.filter(u => u === 'xp_boost').length;
                 const xpMultiplier = Math.pow(1.25, xpBoostLevels);
-                let xpAmount = 1 * comboMultiplier * xpMultiplier;
+                let xpAmount = (e.xp || 1) * comboMultiplier * xpMultiplier;
                 newState.xpFragmentDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: xpAmount });
                 return false;
             }
             return true;
         });
+
+        if (newState.enemies.length === 0 && !newState.isBetweenWaves && !newState.boss) {
+          newState.isBetweenWaves = true;
+        }
 
         if (newState.xp >= newState.xpToNextLevel) {
           newState.mode = 'levelup';
@@ -11666,51 +12669,46 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
           newState.levelUpOptions = choices;
         }
 
-        if (newState.gameTimer <= 0) newState.mode = 'won'; else if (newState.castleHealth <= 0) newState.mode = 'gameover';
+        if ((newState.gameTimer <= 0 || newState.castleHealth <= 0) && s.mode === 'playing') {
+            newState.mode = newState.castleHealth > 0 ? 'won' : 'gameover';
+            if (newState.score > (studyZoneState.platformerHighScore || 0)) {
+                updateStudyZoneState({ platformerHighScore: newState.score });
+                processAchievement('highScore', newState.score);
+                showMessageBox(`New High Score: ${newState.score}!`, 'info');
+            }
+        }
         return newState;
       });
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
     gameLoopRef.current = requestAnimationFrame(gameLoop);
+
   }, [gameState.mode, parsedFlashcards]);
 
   const handleAnswer = (isCorrect) => {
     if (isCorrect) {
-        setGameState(s => {
-          const { player, playerUpgrades, quizFirePosition } = s;
-          if (!quizFirePosition) return { ...s, mode: 'playing' };
-          const angle = Math.atan2(quizFirePosition.y - player.y, quizFirePosition.x - player.x);
-          const pierceLevels = playerUpgrades.filter(u => u === 'piercing_shot').length;
-          const damageLevels = playerUpgrades.filter(u => u === 'focused_power').length;
-          const hasMultishot = playerUpgrades.includes('multishot');
-          const baseDamage = 5 + (damageLevels * 2) + (s.combo * 0.5);
-          let projectilesToAdd = [{ id: Math.random(), projectileType: 'player_bullet', x: player.x, y: player.y, angle, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true }];
-          if (hasMultishot) {
-            projectilesToAdd.push({ id: Math.random() + 1, projectileType: 'player_bullet', x: player.x, y: player.y, angle: angle - 0.2, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true });
-            projectilesToAdd.push({ id: Math.random() + 2, projectileType: 'player_bullet', x: player.x, y: player.y, angle: angle + 0.2, damage: baseDamage, pierce: pierceLevels, hitEnemies: [], fromPlayer: true });
-          }
-          return { ...s, mode: 'playing', combo: s.combo + 1, comboTimeout: 3000, projectiles: [...s.projectiles, ...projectilesToAdd] };
-        });
+      // Correct answer: enter aiming mode
+      setGameState(s => {
+        return {
+          ...s,
+          mode: 'aiming',
+          aimTargetPos: { x: s.quizTarget.x, y: s.quizTarget.y },
+          quizTarget: null,
+          combo: s.combo + 1,
+          comboTimeout: 8000,
+        };
+      });
     } else {
-        setGameState(s => {
-          const recoveryLevels = s.playerUpgrades.filter(u => u === 'quick_recovery').length;
-          const cooldownMultiplier = Math.pow(0.8, recoveryLevels);
-          if (s.player.activeBuffs?.rapid_fire > 0) return { ...s, mode: 'playing', combo: 0 }; 
-
-          // --- NEMESIS SYSTEM ACTIVATION ---
-          const newEnemies = s.enemies.map(e => e.id === s.quizTarget.id ? {...e, isEnraged: true} : e);
-          const newVisualEffects = [...s.visualEffects, {
-            id: Math.random(),
-            type: 'correctAnswerFlash',
-            x: s.quizTarget.x,
-            y: s.quizTarget.y,
-            text: s.quizTarget.card.back,
-            duration: 2000,
-            createdAt: Date.now()
-          }];
-          showMessageBox("You must defeat your Nemesis!", "error");
-          return { ...s, mode: 'playing', combo: 0, player: {...s.player, attackCooldown: 1500 * cooldownMultiplier }, nemesisTargetId: s.quizTarget.id, enemies: newEnemies, visualEffects: newVisualEffects };
-        });
+      // Incorrect answer: apply penalty and return to playing
+      setGameState(s => {
+        const recoveryLevels = s.playerUpgrades.filter(u => u === 'quick_recovery').length;
+        const cooldownMultiplier = Math.pow(0.8, recoveryLevels);
+        if (s.player.activeBuffs?.rapid_fire > 0) return { ...s, mode: 'playing', combo: 0 };
+        const newEnemies = s.enemies.map(e => e.id === s.quizTarget.id ? { ...e, isEnraged: true } : e);
+        const newVisualEffects = [...s.visualEffects, { id: Math.random(), type: 'correctAnswerFlash', x: s.quizTarget.x, y: s.quizTarget.y, text: s.quizTarget.card.back, duration: 2000, createdAt: Date.now() }];
+        showMessageBox("Incorrect! Attack is on cooldown.", "error");
+        return { ...s, mode: 'playing', combo: 0, player: { ...s.player, attackCooldown: 1500 * cooldownMultiplier }, nemesisTargetId: s.quizTarget.id, enemies: newEnemies, visualEffects: newVisualEffects, quizTarget: null };
+      });
     }
   };
 
@@ -11767,24 +12765,144 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
     showMessageBox(`${def.name} activated!`, 'info', 2000);
   };
 
-  const handlePlayerActionClick = (e) => {
+  const getMouseSVG = (e) => {
+    if (!gameAreaRef.current) return { x: 0, y: 0 };
+    const rect = gameAreaRef.current.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  };
+
+  const handleAimStart = (e) => {
+    e.preventDefault();
+    if (gameState.mode !== 'aiming') return;
+
+    aimStateRef.current.isAiming = true;
+    aimStateRef.current.startPos = getMouseSVG(e);
+
+    const onAimMove = (moveEvent) => handleAimMove(moveEvent);
+    const onAimEnd = (endEvent) => handleAimEnd(endEvent);
+
+    window.addEventListener('mousemove', onAimMove);
+    window.addEventListener('mouseup', onAimEnd);
+    window.addEventListener('touchmove', onAimMove);
+    window.addEventListener('touchend', onAimEnd);
+
+    // Store cleanup functions
+    aimStateRef.current.cleanup = () => {
+      window.removeEventListener('mousemove', onAimMove);
+      window.removeEventListener('mouseup', onAimEnd);
+      window.removeEventListener('touchmove', onAimMove);
+      window.removeEventListener('touchend', onAimEnd);
+    };
+  };
+
+  const handleAimMove = (e) => {
+    if (!aimStateRef.current.isAiming) return;
+    e.preventDefault();
+
+    const currentPos = getMouseSVG(e);
+    const playerPos = gameState.player;
+    
+    const dx = currentPos.x - playerPos.x;
+    const dy = currentPos.y - playerPos.y;
+    
+    const angle = Math.atan2(dy, dx);
+    const power = Math.min(Math.hypot(dx, dy), 100);
+    
+    aimStateRef.current.angle = angle;
+    aimStateRef.current.power = power;
+
+    // --- FINAL, CORRECT ARC LOGIC ---
+    // This is a direct physics simulation that mirrors the projectile's movement in the game loop.
+    let path = `M${playerPos.x},${playerPos.y}`;
+    const simulationFrames = 60; // How many future frames to simulate for the preview
+    
+    // 1. Get the initial velocity, exactly as it's calculated in handleAimEnd
+    let simX = playerPos.x;
+    let simY = playerPos.y;
+    let simVx = Math.cos(angle) * power * 0.4;
+    let simVy = Math.sin(angle) * power * 0.4;
+
+    // 2. Loop through future frames and apply the exact same physics as the game loop
+    for (let i = 0; i < simulationFrames; i++) {
+      // Apply gravity (this constant matches the one in the main game loop's useEffect)
+      simVy += 0.3; 
+      
+      // Apply velocity
+      simX += simVx;
+      simY += simVy;
+      
+      // 3. Add a point to the path for EVERY simulated frame. This is the key to a smooth arc.
+      path += ` L${simX},${simY}`;
+      
+      // Stop the preview if it goes off-screen
+      if (simY > GAME_HEIGHT + 20 || simX < -20 || simX > GAME_WIDTH + 20) break;
+    }
+
+    aimStateRef.current.arcPath = path;
+    setVisualAimState({ angle: angle, power: power, arcPath: path });
+  };
+  
+  const handleAimEnd = (e) => {
+    if (!aimStateRef.current.isAiming) return;
+    e.preventDefault();
+    aimStateRef.current.isAiming = false;
+    if (aimStateRef.current.cleanup) aimStateRef.current.cleanup();
+
+    const { angle, power } = aimStateRef.current;
+    if (power < 10) { // Not drawn back enough, cancel shot
+        setGameState(s => ({ ...s, mode: 'playing', aimTargetPos: null }));
+        setVisualAimState({ angle: 0, power: 0, arcPath: "" });
+        return;
+    }
+
+    setGameState(s => {
+        const { player, playerUpgrades, combo } = s;
+        const pierceLevels = playerUpgrades.filter(u => u === 'piercing_shot').length;
+        const damageLevels = playerUpgrades.filter(u => u === 'focused_power').length;
+        const hasMultishot = playerUpgrades.includes('multishot');
+        const critChance = Math.min(0.5, combo * 0.05);
+        const isCrit = Math.random() < critChance;
+        let baseDamage = 5 + (damageLevels * 2) + (combo * 0.5);
+        if (isCrit) baseDamage *= 2;
+        
+        let projectilesToAdd = [];
+        const baseProjectile = { 
+            projectileType: 'player_bullet', 
+            x: player.x, y: player.y, 
+            damage: baseDamage, 
+            pierce: pierceLevels, 
+            hitEnemies: [], 
+            fromPlayer: true, 
+            isCrit,
+            vx: Math.cos(angle) * power * 0.4,
+            vy: Math.sin(angle) * power * 0.4,
+        };
+        projectilesToAdd.push({ ...baseProjectile, id: Math.random() });
+
+        if (hasMultishot) {
+          const angle1 = angle - 0.2;
+          const angle2 = angle + 0.2;
+          projectilesToAdd.push({ ...baseProjectile, id: Math.random() + 1, vx: Math.cos(angle1) * power * 0.4, vy: Math.sin(angle1) * power * 0.4 });
+          projectilesToAdd.push({ ...baseProjectile, id: Math.random() + 2, vx: Math.cos(angle2) * power * 0.4, vy: Math.sin(angle2) * power * 0.4 });
+        }
+        
+        return { ...s, mode: 'playing', aimTargetPos: null, projectiles: [...s.projectiles, ...projectilesToAdd] };
+    });
+
+    setVisualAimState({ angle: 0, power: 0, arcPath: "" });
+  };
+  
+  const handlePlayerActionClick = (e, targetEnemy) => {
       e.preventDefault();
       if (gameState.mode !== 'playing' || !gameAreaRef.current) return;
-      const rect = gameAreaRef.current.getBoundingClientRect();
-      const clickX = e.clientX - rect.left; const clickY = e.clientY - rect.top;
-      let target = null; let minDist = 80;
-      gameState.enemies.forEach(enemy => { const dist = Math.hypot(enemy.x - clickX, enemy.y - clickY); if (dist < minDist) { minDist = dist; target = enemy; } });
+      
+      const target = targetEnemy; // The enemy div itself is passed now
       
       if (e.button === 2) { setGameState(s => ({...s, markedTargetId: target ? target.id : null })); return; }
-      
-      // NEMESIS SYSTEM: Target locking
-      if (gameState.nemesisTargetId && target?.id !== gameState.nemesisTargetId) {
-        showMessageBox("You must defeat your Nemesis first!", "error");
-        return;
-      }
-
+      if (gameState.nemesisTargetId && target?.id !== gameState.nemesisTargetId) { showMessageBox("You must defeat your Nemesis first!", "error"); return; }
       if (gameState.player.attackCooldown > 0) { showMessageBox("Reloading...", "error", 1000); return; }
-      if (target) {setGameState(s => ({...s, mode: 'quiz', quizTarget: target, quizFirePosition: { x: clickX, y: clickY } }));
+      if (target) {setGameState(s => ({...s, mode: 'quiz', quizTarget: target }));
       };
     };
 
@@ -11792,23 +12910,53 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
   
   return (
     <div className="flex flex-col items-center">
+      <style>{`
+        #arc-gradient stop { stop-color: white; }
+        .player-bow { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+        .player-bow-wood { stroke: #ddd; }
+        .player-bow-string { fill: none; stroke: #88ce02; stroke-width: 3px; stroke-linecap: round; }
+        .aim-arrow-use { pointer-events: none; }
+      `}</style>
       <div className="flex w-full max-w-4xl justify-between mb-2 text-white text-lg font-bold">
         <span>Time: {gameState.gameTimer ? `${Math.floor(gameState.gameTimer / 60000)}:${(Math.floor(gameState.gameTimer / 1000) % 60).toString().padStart(2, '0')}` : '10:00'}</span>
+        <span>Wave: {gameState.wave || 0}</span>
         <span>🏰 {gameState.castleHealth || 10}</span>
         <span>💰 {gameState.gold || 0}</span>
         <span className="text-yellow-400">Combo: x{gameState.combo || 0}</span>
       </div>
        <div className="w-full max-w-4xl mb-2 h-4 bg-slate-700 rounded-full"><div className="h-full bg-yellow-400 rounded-full transition-width duration-300" style={{ width: `${xpPercentage}%`}}></div></div>
-      <div ref={gameAreaRef} onClick={handlePlayerActionClick} onContextMenu={handlePlayerActionClick} className="relative bg-gray-900 border-4 border-slate-900 rounded-lg overflow-hidden cursor-crosshair" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
-        {gameState.mode === 'menu' && ( <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-20 space-y-4 text-center p-4"><h3 className="text-4xl text-white font-bold mb-2 drop-shadow-lg">Flashcard Fortress</h3><p className="text-slate-300 max-w-md">Survive the horde of terms for 10 minutes. Answer questions correctly to shoot. Build towers with gold to defend your castle.</p><button onClick={resetGame} className="mt-4 px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600 shadow-xl">Start Survival</button><p className="text-slate-400">High Score: {studyZoneState.platformerHighScore || 0}</p></div> )}
+      <div 
+        ref={gameAreaRef} 
+        onMouseDown={gameState.mode === 'playing' ? (e) => handlePlayerActionClick(e, null) : handleAimStart}
+        onContextMenu={(e) => { e.preventDefault(); if (gameState.mode === 'playing') handlePlayerActionClick(e, null); }}
+        className="relative bg-gray-900 border-4 border-slate-900 rounded-lg overflow-hidden cursor-crosshair" 
+        style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}
+      >
+        {gameState.mode === 'menu' && ( <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-20 space-y-4 text-center p-4"><h3 className="text-4xl text-white font-bold mb-2 drop-shadow-lg">Flashcard Fortress</h3><p className="text-slate-300 max-w-md">Survive the horde of terms for 10 minutes. Click an enemy to answer a question, then aim and fire your bow!</p><button onClick={resetGame} className="mt-4 px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600 shadow-xl">Start Survival</button><p className="text-slate-400">High Score: {studyZoneState.platformerHighScore || 0}</p></div> )}
         {gameState.mode !== 'menu' && (
           <>
-            <svg className="absolute inset-0 pointer-events-none z-0" viewBox="-20 0 960 540"><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#3f3f46" strokeWidth="35" strokeLinejoin="round" fill="none" /><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#71717a" strokeWidth="25" strokeLinejoin="round" fill="none" /></svg>
+            {gameState.boss && (
+              <div className="absolute top-2 left-1/4 w-1/2 z-30">
+                <p className="text-center font-bold text-red-400">{gameState.boss.name}</p>
+                <div className="w-full bg-slate-700 rounded-full h-4 border-2 border-black"><div className="h-full bg-red-500 rounded-full" style={{width: `${(gameState.boss.health / gameState.boss.maxHealth) * 100}%`}} /></div>
+              </div>
+            )}
+            {gameState.isBetweenWaves && !gameState.boss && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-4">
+                {gameState.wave > 0 && (
+                  <h3 className="text-3xl font-bold text-green-400">Wave {gameState.wave} Cleared!</h3>
+                )}
+                <button onClick={startNextWave} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg text-lg hover:bg-indigo-700">
+                  Start Wave {gameState.wave + 1}
+                </button>
+              </div>
+            )}
+            <svg className="absolute inset-0 pointer-events-none z-0" viewBox={`0 0 ${GAME_WIDTH} ${GAME_HEIGHT}`}><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#3f3f46" strokeWidth="35" strokeLinejoin="round" fill="none" /><path d={`M ${pathRef.current.map(p => `${p.x} ${p.y}`).join(" L ")}`} stroke="#71717a" strokeWidth="25" strokeLinejoin="round" fill="none" /></svg>
             <div className="absolute text-6xl z-10 pointer-events-none" style={{ transform: `translate(${pathRef.current[pathRef.current.length - 1].x - 40}px, ${pathRef.current[pathRef.current.length - 1].y - 30}px)`}}>🏰</div>
             {buildSlotsRef.current.map((slot, i) => <div key={i} onClick={(e) => {e.stopPropagation(); setGameState(s => ({...s, mode: 'build', buildSlotMenu: {slot, index: i}}))}} className="absolute w-12 h-12 bg-black/30 border-2 border-dashed border-slate-500 rounded-full cursor-pointer hover:bg-slate-600/50" style={{transform: `translate(${slot.x-24}px, ${slot.y-24}px)`}}/>)}
             {gameState.goldDrops?.map(d => <div key={d.id} className="absolute text-yellow-400 font-bold text-lg" style={{transform: `translate(${d.x}px, ${d.y}px)`}}>💰</div>)}
             {gameState.xpFragmentDrops?.map(d => <div key={d.id} className="absolute w-3 h-3 bg-cyan-400 rounded-full" style={{transform: `translate(${d.x-6}px, ${d.y-6}px)`}} />)}
-            <div className="absolute z-20" style={{ width: 32, height: 40, transform: `translate(${gameState.player.x-16}px, ${gameState.player.y-20}px)`}} ><PlayerIcon /></div>
+            {gameState.mode !== 'aiming' && <div className="absolute z-20 pointer-events-none" style={{ width: 32, height: 40, transform: `translate(${gameState.player.x-16}px, ${gameState.player.y-20}px)`}} ><PlayerIcon /></div>}
             {gameState.towers?.map(t => (
               <button key={t.id} onClick={(e) => {e.stopPropagation(); handleTowerClick(t)}} className="absolute z-10" style={{transform: `translate(${t.x-20}px, ${t.y-20}px)`}}>
                 <div className={`w-10 h-10 transition-opacity ${t.isDestroyed ? 'opacity-0' : 'opacity-100'}`}><TowerIcons type={t.type} /></div>
@@ -11816,22 +12964,71 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
               </button>
             ))}
             {gameState.enemies?.map(e => (
-              <div key={e.id} className="absolute z-10" style={{transform: `translate(${e.x - 20}px, ${e.y - 20}px)`}}>
-                <div className={`w-10 h-10 flex items-center justify-center relative ${e.isEnraged ? 'nemesis-aura rounded-full' : ''}`}><EnemyIcons type={e.iconKey} /></div>
-                <div className="absolute -bottom-2 w-10 h-2 bg-slate-700 rounded-full shadow-inner"><div className="h-full bg-red-500 rounded-full" style={{width: `${(e.health / e.maxHealth) * 100}%`}} /></div>
+              <div key={e.id} onClick={(event) => {event.stopPropagation(); handlePlayerActionClick(event, e)}} className="absolute z-10" style={{transform: `translate(${e.x - 20}px, ${e.y - 20}px)`}}>
+                <div className={`flex items-center justify-center relative transition-all duration-300 ${e.isElite ? 'w-12 h-12 elite-glow' : 'w-10 h-10'} ${e.isEnraged ? 'nemesis-aura rounded-full' : ''}`}><EnemyIcons iconSrc={e.icon} /></div>
+                <div className={`absolute -bottom-2 w-full h-2 bg-slate-700 rounded-full shadow-inner ${e.isElite ? 'w-12' : 'w-10'}`}><div className="h-full bg-red-500 rounded-full" style={{width: `${(e.health / e.maxHealth) * 100}%`}} /></div>
                 {e.id === gameState.markedTargetId && <div className="absolute -inset-1 border-2 border-red-500 rounded-full animate-pulse"/>}
               </div>
             ))}
-            {gameState.projectiles?.map(p => <div key={p.id} className="absolute w-4 h-4" style={{ transform: `translate(${p.x-8}px, ${p.y-8}px) rotate(${p.angle}rad)`}} ><ProjectileVisuals type={p.projectileType} /></div>)}
+            {gameState.projectiles?.map(p => <div key={p.id} className="absolute pointer-events-none" style={{ transform: `translate(${p.x}px, ${p.y}px) rotate(${p.angle}rad)`}} ><div className="w-8 h-8 -translate-x-4 -translate-y-4"><ProjectileVisuals type={p.projectileType} /></div></div>)}
             {gameState.visualEffects?.map(effect => {
               if (effect.type === 'explosion') return <div key={effect.id} className="absolute rounded-full bg-orange-500/80 animate-explosion" style={{ left: effect.x, top: effect.y, width: effect.size, height: effect.size, transform: 'translate(-50%, -50%)' }} />;
               if (effect.type === 'correctAnswerFlash') return <div key={effect.id} className="absolute bg-green-500 text-white font-bold text-sm px-3 py-1 rounded-lg shadow-lg correct-answer-popup" style={{ left: effect.x, top: effect.y - 40 }}>{effect.text}</div>;
+              if (effect.type === 'damage_number') return <div key={effect.id} className={`absolute font-bold damage-number pointer-events-none ${effect.isCrit ? 'text-orange-400 text-lg' : 'text-white text-base'}`} style={{ left: effect.x, top: effect.y, textShadow:'1px 1px 2px black' }}>{effect.amount}</div>;
+              if (effect.type === 'stun_effect') return <div key={effect.id} className="absolute text-2xl font-bold text-yellow-300 animate-pulse" style={{ left: effect.x, top: effect.y - 30, transform: 'translateX(-50%)' }}>⚡</div>
               return null;
             })}
+            
+            {(gameState.mode === 'aiming' || aimStateRef.current.isAiming) && (
+              <svg className="absolute inset-0 pointer-events-none z-20" viewBox={`0 0 ${GAME_WIDTH} ${GAME_HEIGHT}`} overflow="visible">
+                <defs>
+                  {/* Arrow definition remains the same */}
+                  <g id="fortress-arrow">
+                    <line x2="30" stroke="#888" strokeWidth="2" />
+                    <polygon fill="#888" points="32 0 29 2 28 0 29 -2" />
+                    <polygon fill="#88ce02" points="1 -2 -2 -2 -0.5 0 -2 2 1 2 2.5 0" />
+                  </g>
+                </defs>
+
+                {/* The Arc Preview - Now a dashed white line for visibility */}
+                <path 
+                  id="arc" 
+                  d={visualAimState.arcPath} 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth={visualAimState.power > 10 ? 2 : 0} 
+                  strokeDasharray="5, 8"
+                  opacity="0.6"
+                />
+                
+                {/* NEW, ROBUST Aiming Visual Group */}
+                <g style={{ transform: `translate(${gameState.player.x}px, ${gameState.player.y}px) rotate(${visualAimState.angle * 180 / Math.PI}deg)` }}>
+                  {/* The Bow */}
+                  <path 
+                    d={`M0,-25 C 20, -15, 20, 15, 0, 25`}
+                    fill="none" 
+                    stroke="#ddd" 
+                    strokeWidth="3"
+                    style={{ transform: `scaleX(${1 + visualAimState.power / 150})`, transformOrigin: '0% 50%' }}
+                  />
+                  {/* The String */}
+                  <polyline
+                    points={`0,-25 ${-visualAimState.power},0 0,25`}
+                    fill="none"
+                    stroke="#88ce02"
+                    strokeWidth="2"
+                  />
+                  {/* The Arrow */}
+                  <g className="aim-arrow-use">
+                    <use xlinkHref="#fortress-arrow" x={-visualAimState.power} y="0"/>
+                  </g>
+                </g>
+              </svg>
+            )}
           </>
         )}
         {gameState.mode === 'quiz' && <FlashcardFortressQuizModal card={gameState.quizTarget.card} allCards={parsedFlashcards} onAnswer={handleAnswer} onClose={() => setGameState(s => ({...s, mode: 'playing'}))} />}
-        {gameState.mode === 'levelup' && <FlashcardFortressLevelUpModal upgrades={gameState.levelUpOptions} onSelectUpgrade={handleSelectUpgrade} />}
+        {gameState.mode === 'levelup' && <FlashcardFortressLevelUpModal upgrades={gameState.levelUpOptions} onSelectUpgrade={(u) => handleSelectUpgrade(u, gameState.boss !== null)} />}
         {gameState.mode === 'build' && ( <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-30" onClick={() => setGameState(s => ({...s, mode: 'playing'}))}><div className="bg-slate-800 p-4 rounded-lg flex flex-wrap gap-4 justify-center max-w-md" onClick={e => e.stopPropagation()}>{Object.entries(survivorTowerDefinitions).map(([key, def]) => { const discountLevels = gameState.playerUpgrades.filter(u => u === 'tower_discount').length; const finalCost = Math.round(def.baseCost * Math.pow(0.9, discountLevels)); return ( <button key={key} onClick={() => handleBuildTower(key)} disabled={gameState.gold < finalCost} className="p-3 bg-slate-700 rounded hover:bg-indigo-600 disabled:bg-slate-900 disabled:text-slate-600 text-center w-32"><p className="text-lg font-bold">{def.name}</p><p className="text-sm">Cost: {finalCost}g</p></button> )})}</div></div> )}
         {gameState.mode === 'upgrade' && (() => {
           const tower = gameState.upgradeTarget;
@@ -11875,230 +13072,553 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
           return ( <button key={key} onClick={() => handleActivateBuff(key)} disabled={isActive || !canAfford || gameState.mode !== 'playing'} className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-indigo-600 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed transition-colors"><p className="font-semibold">{def.name}</p><p className="text-xs">{isActive ? `Active (${Math.ceil((gameState.player.activeBuffs[key] || 0) / 1000)}s)` : `Cost: ${def.cost}g`}</p></button> );
         })}
       </div>
-      <p className="text-slate-500 mt-2 text-sm">Controls: A/D or ⬅️➡️ to move. Left-click to shoot. Right-click to mark a target., your progress will NOT be saved.</p>
+      <p className="text-slate-500 mt-2 text-sm">Controls: A/D or ⬅️➡️ to move. Click an enemy to answer a question. On correct, click and drag to aim and release to fire.</p>
+    </div>
+  );
+};
+// --- NEW: Study Arcade Hub Component ---
+// --- NEW: Definition Descent Game Component ---
+const DefinitionDescent = ({ flashcards, showMessageBox }) => {
+  const GAME_WIDTH = 600;
+  const GAME_HEIGHT = 800;
+  const GRAVITY = 0.3;
+  const JUMP_BOOST = -13; // Increased jump power
+  const WEAK_JUMP_BOOST = -4;
+  const PLAYER_WIDTH = 40;
+  const PLAYER_HEIGHT = 40;
+  const PLATFORM_WIDTH = 120;
+  const PLATFORM_HEIGHT = 20;
+
+  const gameAreaRef = useRef(null);
+  const gameLoopRef = useRef(null);
+  const lastTimeRef = useRef(0);
+  const keysRef = useRef({});
+  const mouseXRef = useRef(GAME_WIDTH / 2);
+
+  const [uiState, setUiState] = useState({
+    mode: 'menu',
+    score: 0,
+    prompt: '',
+    highScore: 0 // Will load from stats later
+  });
+
+  const playerRef = useRef({ x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100, vx: 0, vy: 0 });
+  const platformsRef = useRef([]);
+  const cameraYRef = useRef(0);
+  const currentProblemRef = useRef(null);
+  const scoreRef = useRef(0);
+
+  const generateNewProblem = useCallback(() => {
+    if (flashcards.length < 3) return null;
+    let available = [...flashcards];
+    const correctIndex = Math.floor(Math.random() * available.length);
+    const correctCard = available.splice(correctIndex, 1)[0];
+
+    let distractors = [];
+    for (let i = 0; i < 2; i++) {
+      if (available.length === 0) break;
+      const distractorIndex = Math.floor(Math.random() * available.length);
+      distractors.push(available.splice(distractorIndex, 1)[0]);
+    }
+    
+    currentProblemRef.current = { prompt: correctCard.back, correctAnswer: correctCard.front };
+    
+    setUiState(s => ({...s, prompt: correctCard.back }));
+
+    return {
+      correct: correctCard.front,
+      distractors: distractors.map(d => d.front)
+    };
+  }, [flashcards]);
+
+  const generatePlatforms = useCallback((startY, problem) => {
+    let newPlatforms = [];
+    let answers = [{ text: problem.correct, isCorrect: true }, ...problem.distractors.map(d => ({ text: d, isCorrect: false }))];
+    
+    for (let i = answers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [answers[i], answers[j]] = [answers[j], answers[i]];
+    }
+
+    answers.forEach((ans, i) => {
+      // NEW, more controlled placement logic
+      const yPos = startY - 120 - (i * 70) + (Math.random() * 30 - 15);
+      const xPos = (Math.random() * (GAME_WIDTH - PLATFORM_WIDTH));
+      
+      newPlatforms.push({
+        id: `plat_${Date.now()}_${i}`,
+        x: xPos,
+        y: yPos,
+        width: PLATFORM_WIDTH,
+        height: PLATFORM_HEIGHT,
+        text: ans.text,
+        isCorrect: ans.isCorrect,
+        isCrumbling: false,
+      });
+    });
+
+    platformsRef.current.push(...newPlatforms);
+  }, []);
+
+  const resetGame = useCallback(() => {
+    playerRef.current = { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 50, vx: 0, vy: -10 };
+    scoreRef.current = 0;
+    cameraYRef.current = 0;
+    
+    platformsRef.current = [{
+      id: 'start', x: GAME_WIDTH / 2 - PLATFORM_WIDTH / 2, y: GAME_HEIGHT - 30,
+      width: PLATFORM_WIDTH, height: PLATFORM_HEIGHT, text: 'Start', isCorrect: true,
+    }];
+    
+    const problem = generateNewProblem();
+    if(problem) {
+      generatePlatforms(GAME_HEIGHT - 200, problem);
+    }
+
+    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: currentProblemRef.current.prompt }));
+  }, [generateNewProblem, generatePlatforms]);
+
+  useEffect(() => {
+    const handleKey = e => { keysRef.current[e.key.toLowerCase()] = e.type === 'keydown'; };
+    const handleMouseMove = e => { if (gameAreaRef.current) mouseXRef.current = e.clientX - gameAreaRef.current.getBoundingClientRect().left; };
+    const handleTouchMove = e => { if (gameAreaRef.current) mouseXRef.current = e.touches[0].clientX - gameAreaRef.current.getBoundingClientRect().left; };
+
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove);
+
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (uiState.mode !== 'playing') {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+      lastTimeRef.current = 0;
+      return;
+    }
+
+    const gameLoop = (timestamp) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
+      let dt = (timestamp - lastTimeRef.current) / 16.67; // Normalize to 60 FPS
+      lastTimeRef.current = timestamp;
+      if (dt > 3) dt = 1;
+
+      let newState = { ...uiState }; // Use a mutable copy for this frame
+
+      // Player Movement
+      let targetX = playerRef.current.x;
+      if (keysRef.current['a'] || keysRef.current['arrowleft']) targetX -= 6 * dt;
+      if (keysRef.current['d'] || keysRef.current['arrowright']) targetX += 6 * dt;
+      if (!keysRef.current['a'] && !keysRef.current['arrowleft'] && !keysRef.current['d'] && !keysRef.current['arrowright']) {
+          targetX = mouseXRef.current;
+      }
+      playerRef.current.x += (targetX - playerRef.current.x) * 0.5;
+      if (playerRef.current.x > GAME_WIDTH) playerRef.current.x = 0;
+      if (playerRef.current.x < 0) playerRef.current.x = GAME_WIDTH;
+
+      // Player Physics
+      playerRef.current.vy += GRAVITY * dt;
+      playerRef.current.y += playerRef.current.vy * dt;
+      
+      // Collision
+      if (playerRef.current.vy > 0) {
+        platformsRef.current.forEach(p => {
+          if (!p.isCrumbling &&
+              playerRef.current.x > p.x && playerRef.current.x < p.x + p.width &&
+              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 15) {
+
+            if (p.isCorrect) {
+              playerRef.current.vy = JUMP_BOOST;
+              const problem = generateNewProblem();
+              if (problem) {
+                generatePlatforms(p.y, problem);
+              }
+            } else {
+              playerRef.current.vy = WEAK_JUMP_BOOST;
+              p.isCrumbling = true;
+              p.crumbleTimer = 500;
+            }
+          }
+        });
+      }
+      
+      platformsRef.current.forEach(p => {
+        if(p.isCrumbling) {
+          p.crumbleTimer -= dt * 16.67;
+          if(p.crumbleTimer <= 0) p.y += 10 * dt;
+        }
+      });
+
+      if (playerRef.current.y < cameraYRef.current + GAME_HEIGHT / 2) {
+        cameraYRef.current = playerRef.current.y - GAME_HEIGHT / 2;
+      }
+      scoreRef.current = Math.max(scoreRef.current, -Math.floor(cameraYRef.current / 10));
+
+      platformsRef.current = platformsRef.current.filter(p => p.y < cameraYRef.current + GAME_HEIGHT + 50);
+
+      if (playerRef.current.y > cameraYRef.current + GAME_HEIGHT) {
+        newState.mode = 'gameover';
+      }
+      
+      // Batch state updates
+      newState.score = scoreRef.current;
+      setUiState(newState);
+
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    };
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+  }, [uiState.mode, generateNewProblem, generatePlatforms]);
+  
+  if (flashcards.length < 3) {
+     return <div className="text-center p-8 bg-slate-900 rounded-lg"><h3 className="text-2xl font-bold text-yellow-400">Not Enough Flashcards!</h3><p className="text-slate-300 mt-2">Definition Descent requires at least 3 flashcards to play.</p></div>;
+  }
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full max-w-lg flex justify-between mb-2 text-white font-bold text-lg">
+        <span>Height: {uiState.score}m</span>
+        <span>High Score: {uiState.highScore}m</span>
+      </div>
+      <div className="relative border-4 border-slate-900 rounded-lg overflow-hidden select-none" style={{ width: GAME_WIDTH, height: GAME_HEIGHT, cursor: 'none' }}>
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-700 to-indigo-900"/>
+        
+        {uiState.mode === 'menu' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center" style={{cursor: 'default'}}>
+            <h3 className="text-4xl font-bold text-white mb-2">Definition Descent</h3>
+            <p className="text-slate-300 mb-6 max-w-md">Jump on the correct term to climb higher. Use A/D, arrow keys, or your mouse to steer.</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600">Start Climbing</button>
+          </div>
+        )}
+        {uiState.mode === 'gameover' && (
+           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10" style={{cursor: 'default'}}>
+            <h3 className="text-4xl font-bold text-red-500">Game Over</h3>
+            <p className="text-2xl text-white my-4">Final Height: {uiState.score}m</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-xl hover:bg-blue-600">Try Again</button>
+          </div>
+        )}
+
+        <div className="absolute inset-0" style={{ transform: `translateY(${-cameraYRef.current}px)` }}>
+          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20" style={{transform: `translateY(${cameraYRef.current}px)`}}>
+            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
+          </div>
+          <div className="player absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerRef.current.x - PLAYER_WIDTH/2}px, ${playerRef.current.y}px)` }}>
+            <div className="w-full h-full bg-yellow-400 rounded-full" />
+          </div>
+          {platformsRef.current.map(p => (
+            <div key={p.id} id={p.id} className={`absolute transition-opacity duration-300 ${p.isCrumbling ? 'opacity-0' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
+              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 text-white ${p.id === 'start' ? 'bg-indigo-600' : 'bg-slate-600'}`}>{p.text}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
-// --- Sub-components for Study Zone ---
+// --- NEW: Study Arcade Hub Component ---
+const StudyArcade = ({ studyZoneState, showMessageBox, stats }) => {
+  const [activeGame, setActiveGame] = useState('menu'); // 'menu', 'asteroid', 'descent', 'run'
 
-const FlashcardManager = ({ studyZoneState, updateStudyZoneState, onStartStudy }) => {
-  const [text, setText] = useState(studyZoneState.flashcardsText || '');
-  const [cardsToReview, setCardsToReview] = useState(0);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const parsedFlashcards = useMemo(() => {
+    // NEW: Aggregate cards from all decks in the new data structure
+    if (!studyZoneState.cardData) return [];
+    return Object.values(studyZoneState.cardData).flat();
+  }, [studyZoneState.cardData]);
 
-  const parseFlashcards = useCallback((rawText) => {
-    const lines = (rawText || '').split('\n').filter(line => line.trim() !== '');
-    const separators = ['→', '>>', '-'];
-    return lines.map(line => {
-      for (const sep of separators) {
-        if (line.includes(sep)) {
-          const parts = line.split(sep);
-          const front = parts[0].trim();
-          const back = parts.slice(1).join(sep).trim();
-          if (front && back) return { front, back };
-        }
-      }
-      return null;
-    }).filter(Boolean);
-  }, []);
+  const GameCard = ({ title, description, onClick, disabled = false }) => (
+    <div className={`bg-slate-800/50 border border-slate-700 p-6 rounded-lg text-center flex flex-col ${disabled ? 'opacity-50' : 'hover:bg-slate-800/80 transition-colors'}`}>
+      <h4 className="text-2xl font-bold text-white">{title}</h4>
+      <p className="text-sm text-slate-400 mt-2 flex-grow">{description}</p>
+      {disabled ? (
+        <span className="mt-4 block w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg cursor-not-allowed">Coming Soon</span>
+      ) : (
+        <button onClick={onClick} className="mt-4 w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">
+          Play Now
+        </button>
+      )}
+    </div>
+  );
 
-  const calculateReviewableCards = useCallback(() => {
-      const today = new Date().setHours(0, 0, 0, 0);
-      const reviewable = Object.values(studyZoneState.flashcardData || {}).filter(card => 
-          new Date(card.nextReviewDate).getTime() <= today
-      ).length;
-      setCardsToReview(reviewable);
-  }, [studyZoneState.flashcardData]);
-
-  // Effect to update the review count when data changes
-  useEffect(() => {
-    calculateReviewableCards();
-  }, [calculateReviewableCards]);
-  
-  // Effect to track unsaved changes
-  useEffect(() => {
-    setHasUnsavedChanges(text !== studyZoneState.flashcardsText);
-  }, [text, studyZoneState.flashcardsText]);
-
-  // Update local text when the source of truth from Firebase changes
-  useEffect(() => {
-    setText(studyZoneState.flashcardsText || '');
-  }, [studyZoneState.flashcardsText]);
-
-
-  const handleSave = async () => {
-    const parsedCards = parseFlashcards(text);
-    const oldData = studyZoneState.flashcardData || {};
-    const newData = {};
-    const today = new Date().setHours(0, 0, 0, 0);
-    const frontsFromText = new Set(parsedCards.map(c => c.front));
-
-    // 1. Carry over or update existing cards that are still in the text
-    parsedCards.forEach(card => {
-      const existing = oldData[card.front];
-      newData[card.front] = existing 
-        ? { ...existing, back: card.back } // Update back, keep SRS data
-        : { back: card.back, repetition: 0, easinessFactor: 2.5, interval: 0, nextReviewDate: today }; // New card
-    });
-    
-    // 2. Carry over old cards that were removed from the text (so SRS data isn't lost)
-    Object.keys(oldData).forEach(front => {
-        if (!frontsFromText.has(front)) {
-            newData[front] = oldData[front];
-        }
-    });
-
-    await updateStudyZoneState({ flashcardData: newData, flashcardsText: text });
-    showMessageBox("Flashcards saved!", "info");
-  };
+  if (activeGame !== 'menu') {
+    return (
+      <div>
+        <button onClick={() => setActiveGame('menu')} className="mb-4 bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-500">
+          ← Back to Arcade Menu
+        </button>
+        {activeGame === 'asteroid' && <AsteroidAnnihilator flashcards={parsedFlashcards} showMessageBox={showMessageBox} />}
+        {activeGame === 'descent' && <DefinitionDescent flashcards={parsedFlashcards} showMessageBox={showMessageBox} />}
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-        <div>
-          <h3 className="text-2xl font-semibold text-white">Manage Your Flashcards</h3>
-          <p className="text-slate-400">Enter cards as "Front → Back". Click Save to sync.</p>
-        </div>
-        <div className="flex items-center gap-2">
-           <button 
-            onClick={handleSave} 
-            disabled={!hasUnsavedChanges}
-            className="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
-          >
-            {hasUnsavedChanges ? "Save Changes" : "Saved"}
-          </button>
-          <button 
-            onClick={onStartStudy} 
-            disabled={cardsToReview === 0 || hasUnsavedChanges}
-            className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
-            title={hasUnsavedChanges ? "Save changes before studying" : ""}
-          >
-            Study ({cardsToReview} Due)
-          </button>
-        </div>
+      <div className="text-center mb-8">
+        <h3 className="text-4xl font-bold text-white">Study Arcade</h3>
+        <p className="text-slate-400 mt-2">Quick, fun games to test your knowledge.</p>
       </div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg text-slate-300 font-mono focus:ring-2 focus:ring-indigo-500"
-        placeholder={"Example:\nCapital of France → Paris\n2 + 2 - 4"}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <GameCard 
+          title="Asteroid Annihilator"
+          description="Shoot the correct asteroid that matches the definition. Drills rapid recognition under pressure."
+          onClick={() => setActiveGame('asteroid')}
+        />
+        <GameCard 
+          title="Definition Descent"
+          description="Jump your way up an endless tower of platforms by landing on the correct term."
+          onClick={() => setActiveGame('descent')}
+        />
+        <GameCard 
+          title="Term-ple Run"
+          description="Switch lanes to run through the correct gate in a fast-paced, endless runner."
+          disabled={true}
+        />
+      </div>
     </div>
   );
 };
 
-const FlashcardSession = ({ studyZoneState, updateStudyZoneState, onSessionEnd }) => {
-    const [studyQueue, setStudyQueue] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isFlipped, setIsFlipped] = useState(false);
 
-    useEffect(() => {
-        const today = new Date().setHours(0, 0, 0, 0);
-        const allCards = Object.entries(studyZoneState.flashcardData || {});
-        const reviewable = allCards
-            .filter(([front, data]) => new Date(data.nextReviewDate).getTime() <= today)
-            .map(([front, data]) => ({ front, ...data }));
+// --- NEW: Asteroid Annihilator Game Component ---
+const AsteroidAnnihilator = ({ flashcards, showMessageBox }) => {
+  const GAME_WIDTH = 960;
+  const GAME_HEIGHT = 540;
+  const gameAreaRef = useRef(null);
+  const gameLoopRef = useRef(null);
+  const lastTimeRef = useRef(0);
+  const keysRef = useRef({});
+  
+  const [gameState, setGameState] = useState({
+    mode: 'menu',
+    score: 0,
+    combo: 0,
+    prompt: null,
+    asteroids: [],
+    projectiles: [],
+    player: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 50, fireCooldown: 0 },
+    highScore: 0, // We'll need to load this from stats later
+  });
 
-        // Shuffle the queue
-        for (let i = reviewable.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [reviewable[i], reviewable[j]] = [reviewable[j], reviewable[i]];
-        }
-        setStudyQueue(reviewable);
-    }, [studyZoneState.flashcardData]);
+  const generateNewProblem = (currentCards) => {
+    if (currentCards.length < 4) return null;
 
-    const calculateSRS = (cardData, quality) => {
-        let { repetition, easinessFactor, interval } = cardData;
-
-        if (quality < 3) {
-            repetition = 0;
-            interval = 1;
-        } else {
-            repetition += 1;
-            easinessFactor = Math.max(1.3, easinessFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
-            if (repetition === 1) interval = 1;
-            else if (repetition === 2) interval = 6;
-            else interval = Math.ceil(interval * easinessFactor);
-        }
-
-        const nextReviewDate = new Date();
-        nextReviewDate.setDate(nextReviewDate.getDate() + interval);
-        
-        return { ...cardData, repetition, easinessFactor, interval, nextReviewDate: nextReviewDate.setHours(0,0,0,0) };
-    };
-
-const handleRating = (quality) => {
-        const cardToUpdate = studyQueue[currentIndex];
-        const updatedSRSData = calculateSRS(cardToUpdate, quality);
-        
-        // FIX: Destructure 'front' but keep 'back' and all other SRS properties together.
-        const { front, ...srsDataWithBack } = updatedSRSData;
-        const newFlashcardData = { ...studyZoneState.flashcardData, [cardToUpdate.front]: srsDataWithBack };
-        
-        // When updating, we only need to send the changed part of the studyZone state
-        updateStudyZoneState({ flashcardData: newFlashcardData });
-
-        if (currentIndex + 1 >= studyQueue.length) {
-            onSessionEnd();
-        } else {
-            setCurrentIndex(i => i + 1);
-            setIsFlipped(false);
-        }
-    };
-
-    if (studyQueue.length === 0) {
-        return (
-            <div className="text-center">
-                <h3 className="text-2xl font-semibold text-white mb-2">All Done!</h3>
-                <p className="text-slate-400 mb-4">You've reviewed all your due cards for today. Great work!</p>
-                <button onClick={onSessionEnd} className="bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700">Back to Manager</button>
-            </div>
-        );
+    let availableCards = [...currentCards];
+    const correctCardIndex = Math.floor(Math.random() * availableCards.length);
+    const correctCard = availableCards.splice(correctCardIndex, 1)[0];
+    
+    let distractors = [];
+    for (let i = 0; i < 3; i++) {
+      if (availableCards.length === 0) break;
+      const distractorIndex = Math.floor(Math.random() * availableCards.length);
+      distractors.push(availableCards.splice(distractorIndex, 1)[0]);
     }
     
-    const currentCard = studyQueue[currentIndex];
-    const progressPercent = ((currentIndex + 1) / studyQueue.length) * 100;
+    return {
+      prompt: correctCard.back,
+      correctAnswer: correctCard.front,
+      distractors: distractors.map(d => d.front),
+    };
+  };
 
+  const resetGame = () => {
+    setGameState(s => ({
+      ...s,
+      mode: 'playing',
+      score: 0,
+      combo: 0,
+      prompt: generateNewProblem(flashcards),
+      asteroids: [],
+      projectiles: [],
+      player: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 50, fireCooldown: 0 },
+    }));
+  };
+
+  useEffect(() => {
+    const handleKey = e => { keysRef.current[e.key.toLowerCase()] = e.type === 'keydown'; };
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (gameState.mode !== 'playing') {
+      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+      lastTimeRef.current = 0;
+      return;
+    }
+
+    const gameLoop = (timestamp) => {
+      if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
+      let dt = (timestamp - lastTimeRef.current) / 16.67; // Normalize to 60 FPS
+      lastTimeRef.current = timestamp;
+      if (dt > 3) dt = 1;
+
+      setGameState(s => {
+        if (s.mode !== 'playing') return s;
+        let newState = JSON.parse(JSON.stringify(s));
+
+        // Player Movement & Firing
+        if (newState.player.fireCooldown > 0) newState.player.fireCooldown -= dt;
+        if (keysRef.current['a'] || keysRef.current['arrowleft']) newState.player.x -= 5 * dt;
+        if (keysRef.current['d'] || keysRef.current['arrowright']) newState.player.x += 5 * dt;
+        newState.player.x = Math.max(25, Math.min(GAME_WIDTH - 25, newState.player.x));
+
+        if ((keysRef.current[' '] || keysRef.current['w']) && newState.player.fireCooldown <= 0) {
+          newState.projectiles.push({ id: Math.random(), x: newState.player.x, y: newState.player.y });
+          newState.player.fireCooldown = 20; // Cooldown frames
+        }
+        
+        // Projectile Movement
+        newState.projectiles = newState.projectiles.filter(p => {
+          p.y -= 8 * dt;
+          return p.y > -10;
+        });
+
+        // Asteroid Spawning (Staggered & Randomized)
+        if (newState.prompt && newState.asteroids.length === 0) {
+          let answers = [
+            { text: newState.prompt.correctAnswer, isCorrect: true },
+            ...newState.prompt.distractors.map(d => ({ text: d, isCorrect: false }))
+          ];
+
+          // --- THIS IS THE FIX: Shuffle the answers before creating asteroids ---
+          for (let i = answers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [answers[i], answers[j]] = [answers[j], answers[i]];
+          }
+
+          answers.forEach((answer, index) => {
+            newState.asteroids.push({
+              id: Math.random(),
+              text: answer.text,
+              isCorrect: answer.isCorrect,
+              x: Math.random() * (GAME_WIDTH - 100) + 50,
+              y: -50 - (index * 100), // Increased stagger distance for clarity
+              speed: 1 + (s.score / 2000),
+            });
+          });
+        }
+        
+        // Asteroid Movement & Loss Condition
+        let gameOver = false;
+        newState.asteroids.forEach(a => {
+          a.y += a.speed * dt;
+          if (a.isCorrect && a.y > GAME_HEIGHT) {
+            gameOver = true;
+          }
+        });
+        if (gameOver) {
+          showMessageBox("Game Over: Correct asteroid missed!", "error");
+          return { ...s, mode: 'gameover' };
+        }
+        newState.asteroids = newState.asteroids.filter(a => a.y < GAME_HEIGHT + 50);
+
+        // Collision Detection
+        let hitOccurred = false;
+        newState.projectiles = newState.projectiles.filter(p => {
+          for (let i = newState.asteroids.length - 1; i >= 0; i--) {
+            const a = newState.asteroids[i];
+            if (Math.hypot(p.x - a.x, p.y - a.y) < 40) {
+              if (a.isCorrect) {
+                newState.score += 100 + newState.combo * 10;
+                newState.combo += 1;
+                newState.asteroids = []; // Clear all asteroids
+                newState.prompt = generateNewProblem(flashcards);
+                hitOccurred = true;
+              } else {
+                showMessageBox("Game Over: Hit wrong asteroid!", "error");
+                newState.mode = 'gameover';
+              }
+              return false; // Remove projectile
+            }
+          }
+          return true; // Keep projectile
+        });
+        
+        if (hitOccurred) newState.projectiles = []; // Clear projectiles on correct hit
+
+        return newState;
+      });
+
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    };
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+
+  }, [gameState.mode, flashcards, showMessageBox]);
+
+  if (flashcards.length < 4) {
     return (
-        <div>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-semibold text-white">Study Session</h3>
-                <button onClick={onSessionEnd} className="text-sm text-slate-400 hover:text-white">End Session</button>
-            </div>
-            
-            <div className="w-full bg-slate-700 rounded-full h-2.5 mb-6">
-              <div className="bg-indigo-500 h-2.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
-            </div>
-
-            <div className="relative w-full h-64 perspective-1000">
-                <div className={`absolute w-full h-full transition-transform duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4">
-                        <p className="text-slate-400 mb-2">FRONT</p>
-                        <p className="text-3xl text-center font-bold text-white">{currentCard.front}</p>
-                    </div>
-                    <div className="absolute w-full h-full backface-hidden bg-slate-700 rounded-lg flex flex-col items-center justify-center p-4 rotate-y-180">
-                        <p className="text-slate-400 mb-2">BACK</p>
-                        <p className="text-3xl text-center font-bold text-white">{currentCard.back}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-6">
-                {!isFlipped ? (
-                    <button onClick={() => setIsFlipped(true)} className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-blue-700">Show Answer</button>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button onClick={() => handleRating(0)} className="py-3 bg-red-800 hover:bg-red-700 rounded-lg">Forgot</button>
-                        <button onClick={() => handleRating(3)} className="py-3 bg-orange-700 hover:bg-orange-600 rounded-lg">Hard</button>
-                        <button onClick={() => handleRating(4)} className="py-3 bg-green-700 hover:bg-green-600 rounded-lg">Good</button>
-                        <button onClick={() => handleRating(5)} className="py-3 bg-sky-600 hover:bg-sky-500 rounded-lg">Easy</button>
-                    </div>
-                )}
-            </div>
-        </div>
+      <div className="text-center p-8 bg-slate-900 rounded-lg">
+        <h3 className="text-2xl font-bold text-yellow-400">Not Enough Flashcards!</h3>
+        <p className="text-slate-300 mt-2">The Study Arcade requires a deck of at least 4 flashcards to play.</p>
+        <p className="text-slate-400">Please add more cards in the "Flashcard Deck" tab.</p>
+      </div>
     );
-}; 
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full max-w-4xl flex justify-between mb-2 text-white font-bold text-lg">
+        <span>Score: {gameState.score}</span>
+        <span>Combo: x{gameState.combo}</span>
+        <span>High Score: {gameState.highScore}</span>
+      </div>
+      <div
+        ref={gameAreaRef}
+        className="relative bg-black border-4 border-slate-900 rounded-lg overflow-hidden"
+        style={{ width: GAME_WIDTH, height: GAME_HEIGHT, background: '#0a0a1a' }}
+      >
+        {gameState.mode === 'menu' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center">
+            <h3 className="text-4xl font-bold text-white mb-2">Asteroid Annihilator</h3>
+            <p className="text-slate-300 mb-6 max-w-md">Shoot the asteroid that matches the definition. Don't hit the wrong one, and don't let the correct one pass!</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600">Start Game</button>
+          </div>
+        )}
+
+        {gameState.mode === 'gameover' && (
+           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
+            <h3 className="text-4xl font-bold text-red-500">Game Over</h3>
+            <p className="text-2xl text-white my-4">Final Score: {gameState.score}</p>
+            <button onClick={resetGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-xl hover:bg-blue-600">Play Again</button>
+          </div>
+        )}
+
+        {gameState.mode === 'playing' && (
+          <>
+            <div className="absolute top-0 left-0 right-0 p-4 bg-black/30 text-center">
+              <p className="text-xl font-semibold text-white">{gameState.prompt?.prompt}</p>
+            </div>
+            {/* Player */}
+            <div className="absolute w-12 h-12 bg-blue-500" style={{ transform: `translate(${gameState.player.x - 24}px, ${gameState.player.y - 24}px)` }} />
+            {/* Asteroids */}
+            {gameState.asteroids.map(a => (
+              <div key={a.id} className="absolute w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center text-center p-2" style={{ transform: `translate(${a.x - 40}px, ${a.y - 40}px)` }}>
+                <span className="text-white font-bold text-xs">{a.text}</span>
+              </div>
+            ))}
+            {/* Projectiles */}
+            {gameState.projectiles.map(p => (
+              <div key={p.id} className="absolute w-2 h-6 bg-yellow-400" style={{ transform: `translate(${p.x - 1}px, ${p.y - 3}px)` }} />
+            ))}
+          </>
+        )}
+      </div>
+      <p className="text-slate-500 mt-2 text-sm">Controls: A/D or ⬅️➡️ to move. W or Spacebar to shoot.</p>
+    </div>
+  );
+};
+
 const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateStatsInFirestore, showMessageBox, processAchievement, isMobile }) => {
   // --- Core Game Constants ---
   const GAME_WIDTH = 800;
@@ -12139,18 +13659,10 @@ const PlatformerGame = ({ stats, studyZoneState, updateStudyZoneState, updateSta
   };
 
   const parsedFlashcards = useMemo(() => {
-    const lines = (studyZoneState.flashcardsText || '').split('\n').filter(line => line.trim() !== '');
-    const separators = ['→', '>>', '-'];
-    return lines.map(line => {
-      for (const sep of separators) {
-        if (line.includes(sep)) {
-          const parts = line.split(sep);
-          return { front: parts[0].trim(), back: parts.slice(1).join(sep).trim() };
-        }
-      }
-      return null;
-    }).filter(Boolean);
-  }, [studyZoneState.flashcardsText]);
+    // NEW: Aggregate cards from all decks in the new data structure
+    if (!studyZoneState.cardData) return [];
+    return Object.values(studyZoneState.cardData).flat();
+  }, [studyZoneState.cardData]);
 
 const GameRenderer = React.memo(({ playerState, levelRef, cameraXRef, TILE_SIZE, PLAYER_WIDTH, PLAYER_HEIGHT }) => {
   cameraXRef.current = Math.max(0, playerState.current.x - GAME_WIDTH / 3);
@@ -14262,12 +15774,26 @@ return (
           .animate-explosion {
             animation: explosion-effect 0.4s ease-out forwards;
           }
-          @keyframes nemesis-glow {
+                    @keyframes nemesis-glow {
             0%, 100% { box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.7); }
             50% { box-shadow: 0 0 20px 8px rgba(239, 68, 68, 0.9); }
           }
           .nemesis-aura {
             animation: nemesis-glow 1.5s infinite;
+          }
+          @keyframes elite-glow {
+            0%, 100% { filter: drop-shadow(0 0 4px #facc15); }
+            50% { filter: drop-shadow(0 0 10px #facc15); }
+          }
+          .elite-glow {
+            animation: elite-glow 1.5s infinite;
+          }
+          @keyframes damage-popup {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+          }
+          .damage-number {
+            animation: damage-popup 1s ease-out forwards;
           }
           @keyframes correct-answer-pop {
             0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
@@ -14354,7 +15880,7 @@ return (
         {activeSheet === 'Dungeon Crawler' && <DungeonCrawler key={dungeonResetKey} stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Science Lab' && <ScienceLab stats={stats} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} />}
-        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
+        {activeSheet === 'Study Zone' && <StudyZone stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} actionLock={actionLock} />}
         {activeSheet === 'Why' && <WhyTab />}
       </main>
       </div>
