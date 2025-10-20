@@ -3719,7 +3719,8 @@ primaryWeapons: {
         id: 'keyholder_orc', name: 'Orc Keywarden',
         icon: (
           <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center">
-            <div className="w-10 h-10 text-emerald-500 drop-shadow-lg" dangerouslySetInnerHTML={{ __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor"><g><path d="M55.4,63.3c-0.1,0.2-0.3,0.4-0.4,0.6c0.2,0.7,0.6,1.9,1.5,3c1,1.1,2.1,1.7,2.6,1.9c0,0.5,0.1,1.5-0.4,2.6 c-0.7,1.7-1.9,2.6-2.4,2.8c0.7,1.2,1.7,3.2,2.2,5.7c0.7,4.1-0.2,7.4-0.8,8.9h19.3v-1.7c-1.8-0.4-4-1-6.4-2.1 c-1.5-0.7-2.8-1.4-3.9-2.1c1.5-1.6,3.7-4.6,5.1-8.7c0.8-2.4,1-4.5,1.1-6.2c-2.5-6.5-4.9-10-6.9-12c-0.3-0.3-0.7-0.7-1.2-1.4 c-1.8,1.1-3.6,2.4-5.2,3.9C58.1,59.9,56.6,61.5,55.4,63.3z"/><path d="M61.5,41.5c-0.4-1-0.6-2.1-0.7-3.2c-0.1-1.1,0.1-2.2,0.3-3.3c0.2-1.1,0.6-2.1,0.9-3.1c0.3-1,0.6-2,0.9-3.1 c0.3-1,0.6-2.1,0.9-3.1l1.6-6.2c-1.4,0-2.5,0.2-3.5,0.3c-0.3,1.8-0.8,3.5-1.3,5.2c-0.5,1.7-1.1,3.4-1.8,5.1 c-0.7,1.7-1.5,3.3-2.4,4.8c-0.9,1.6-1.8,3.1-2.8,4.6c-1,1.5-2.2,2.9-3.5,4.2c-1.3,1.3-2.6,2.5-4.1,3.5c-2.9,2.1-6.2,3.7-9.6,4.9 c-0.4,1-1,1.8-1.4,2.4c-0.5,0.6-0.9,1.1-1.2,1.4c-1.9,2-4.4,5.5-6.9,12c0.1,1.7,0.3,3.8,1.1,6.2c1.3,4.2,3.6,7.1,5.1,8.7 c-1.1,0.7-2.4,1.4-3.9,2.1c-2.4,1.1-4.5,1.7-6.4,2.1v1.7h19.3c-0.6-1.6-1.5-4.9-0.8-8.9c0.5-2.5,1.4-4.4,2.2-5.7 c-0.5-0.3-1.7-1.2-2.4-2.8c-0.4-1.1-0.4-2-0.4-2.6c0.6-0.3,1.7-0.8,2.6-1.9c0.9-1,1.3-2.2,1.5-3c-0.1-0.2-0.3-0.4-0.4-0.6 c-1.2-1.8-2.7-3.4-4.3-4.8c-1.6-1.5-3.4-2.7-5.2-3.9c0.5,0.3,1,0.5,1.4,0.8c0.5,0.3,0.9,0.6,1.4,0.9c0.9,0.6,1.8,1.2,2.6,1.9 c1.7,1.4,3.2,3,4.5,4.7c0.1,0.2,0.3,0.4,0.4,0.5c0.5,0.7,1,1.5,1.4,2.2c0.5,1,1,1.9,1.4,3c0.7,1.6,1.2,3.2,1.7,4.9 c0.5-1.7,1-3.3,1.7-4.9c0.4-1,0.9-2,1.4-3c0.4-0.8,0.9-1.5,1.4-2.2c0.1-0.2,0.3-0.4,0.4-0.5c1.3-1.8,2.8-3.3,4.5-4.7 c0.8-0.7,1.7-1.3,2.6-1.9c0.5-0.3,0.9-0.6,1.4-0.9c0.5-0.3,0.9-0.5,1.4-0.8c-0.7-0.9-1.4-2-1.9-3.6c-0.2-0.7-0.7-2.5-0.5-4.7 c0.1-0.7,0.2-1.3,0.4-1.9c-0.3-0.4-0.6-0.9-0.8-1.4C61.9,42.5,61.7,42,61.5,41.5z"/><path d="M97.6,69c-3.7-5.5-5-10.2-5.5-13.5c-0.5-3.3-0.4-6.2-2.5-9.1c-1.8-2.6-4.5-3.8-6.4-4.5c-0.2-1.4-0.7-3.5-1.9-5.6 c-0.8-1.5-1.7-2.7-2.5-3.6c0.1-0.9,0.7-5.7-2.5-9.3c-2.2-2.4-5.1-3-7.2-3.4c-1.3-0.3-2.5-0.4-3.6-0.4c-0.3,2.1-0.6,4.2-1.1,6.3 c-0.4,2.1-1,4.2-1.6,6.2c-0.3,1-0.7,2-0.9,3.1c-0.1,0.5-0.2,1-0.3,1.5c-0.1,0.5-0.1,1-0.1,1.6c0,2.1,0.7,4.2,1.6,6.1 c1.2-3.7,4.3-5.9,5-6.3c0.8,1.5,1.9,3.2,3.2,5c1.3,1.8,2.7,3.2,3.9,4.4c1.1,2.8,2.9,6.3,5.7,10c1.5,1.9,3,3.6,4.5,4.9 c-0.6,0.4-2.9,2.3-3.6,5.6c-0.8,4,1.4,7.1,1.7,7.6c0.1-1,0.5-2.8,1.7-4.7c0.9-1.4,1.9-2.3,2.7-2.9c0.5,1.2,1.1,2.5,1.7,3.8 c0.8,1.7,1.7,3.2,2.6,4.5c-0.4,0.2-0.9,0.6-1.4,1.2c-0.9,1-1.1,2.1-1.2,2.7c0.7,0.1,1.7,0.4,2.9,1.2c1,0.6,1.6,1.4,2,1.9 c0.9-0.9,2.2-2.5,3.1-4.8C99,74,98,70.3,97.6,69z"/><path d="M45.8,46.9c2.8-2.1,5.3-4.7,7.3-7.6c1-1.4,1.9-3,2.8-4.5c0.9-1.5,1.7-3.1,2.4-4.7c1.5-3.2,2.7-6.6,3.6-10.1 c-0.3,0.1-0.6,0.1-0.8,0.2c-0.2-0.4-0.6-1-1.3-1.6c-0.5-0.5-1.1-0.8-1.5-1c0.4-0.4,0.9-0.9,1.3-1.5c0.9-1.3,1.3-2.6,1.4-3.4 c-0.6,0-2.4-0.1-3.9,1.1c-0.6,0.5-1.1,1-1.3,1.4c-0.3-0.6-1-1.7-2.3-2.7c-1.4-1-2.9-1.2-3.5-1.3c-0.6,0.1-2.1,0.3-3.5,1.3 c-1.3,0.9-2,2.1-2.3,2.7c-0.3-0.4-0.7-1-1.3-1.4c-1.6-1.2-3.4-1.2-3.9-1.1c0.2,0.8,0.5,2.1,1.4,3.4c0.4,0.6,0.9,1.1,1.3,1.5 c-0.4,0.2-0.9,0.5-1.5,1c-0.6,0.6-1,1.2-1.3,1.6c-1.6-0.4-4.5-0.8-7.9-0.2c-2.2,0.4-5.1,1-7.3,3.4c-3.2,3.5-2.6,8.4-2.5,9.3 c-0.8,0.9-1.7,2.1-2.5,3.6c-1.1,2.2-1.6,4.2-1.9,5.6c-2,0.7-4.6,2-6.4,4.5c-2.1,2.9-2,5.8-2.5,9.1c-0.5,3.3-1.9,8-5.5,13.5 C2,70.3,1,74,2.5,78.3c0.9,2.3,2.2,3.9,3.1,4.8c0.4-0.5,1-1.2,2-1.9c1.1-0.7,2.2-1,2.9-1.2c-0.1-0.5-0.3-1.6-1.2-2.7 c-0.5-0.6-1-0.9-1.4-1.2c0.9-1.3,1.7-2.8,2.6-4.5c0.7-1.3,1.2-2.6,1.7-3.8c0.7,0.6,1.8,1.5,2.7,2.9c1.2,1.9,1.6,3.6,1.7,4.7 c0.4-0.5,2.6-3.5,1.7-7.6c-0.7-3.3-3-5.1-3.6-5.6c1.4-1.3,3-3,4.5-4.9c2.8-3.6,4.6-7.1,5.7-10c1.2-1.2,2.5-2.6,3.9-4.4 c1.4-1.8,2.4-3.5,3.2-5c0.8,0.5,4.8,3.3,5.4,8.2c0.3,2.2-0.2,4.1-0.5,4.7c-0.1,0.4-0.3,0.8-0.4,1.1c1.6-0.7,3.2-1.5,4.8-2.4 C42.9,48.9,44.4,47.9,45.8,46.9z M54.2,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8s-0.8-0.3-0.8-0.8 C53.4,16.7,53.7,16.3,54.2,16.3z M45.8,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8c-0.4,0-0.8-0.3-0.8-0.8 C45.1,16.7,45.4,16.3,45.8,16.3z M44.6,23c0.1-0.2,0.2-0.3,0.3-0.5c0.2-0.3,0.4-0.7,0.6-1c0.2-0.4,0.3-0.7,0.5-1.1 c0.1-0.4,0.2-0.7,0.3-1.1l0.1-0.7l0.3,0.6c0.3,0.6,0.5,1.2,0.4,1.9c0,0.3-0.1,0.6-0.2,0.9c-0.1,0.2-0.2,0.5-0.3,0.7 c0.1,0,0.3-0.1,0.4-0.1c1-0.2,2-0.3,3-0.3c1,0,2,0.1,3,0.3c0.1,0,0.3,0.1,0.4,0.1c-0.1-0.2-0.2-0.4-0.3-0.6 c-0.1-0.3-0.2-0.6-0.2-0.9c-0.1-0.6,0.1-1.3,0.4-1.9l0.3-0.6l0.1,0.7c0.1,0.4,0.2,0.8,0.3,1.1c0.1,0.4,0.3,0.7,0.5,1.1 c0.2,0.4,0.4,0.7,0.6,1c0.1,0.2,0.2,0.3,0.3,0.5c0.1,0.2,0.2,0.3,0.4,0.5c-1-0.2-1.9-0.4-2.9-0.6c-1-0.1-1.9-0.2-2.9-0.1 c-1,0-1.9,0.1-2.9,0.2c-1,0.1-1.9,0.3-2.9,0.5C44.4,23.3,44.5,23.1,44.6,23z"/></g></svg>` }} />
+            <div className="w-10 h-10 text-emerald-500 drop-shadow-lg" dangerouslySetInnerHTML={{ __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor"><g><path d="M55.4,63.3c-0.1,0.2-0.3,0.4-0.4,0.6c0.2,0.7,0.6,1.9,1.5,3c1,1.1,2.1,1.7,2.6,1.9c0,0.5,0.1,1.5-0.4,2.6 c-0.7,1.7-1.9,2.6-2.4,2.8c0.7,1.2,1.7,3.2,2.2,5.7c0.7,4.1-0.2,7.4-0.8,8.9h19.3v-1.7c-1.8-0.4-4-1-6.4-2.1 c-1.5-0.7-2.8-1.4-3.9-2.1c1.5-1.6,3.7-4.6,5.1-8.7c0.8-2.4,1-4.5,
+1.1-6.2c-2.5-6.5-4.9-10-6.9-12c-0.3-0.3-0.7-0.7-1.2-1.4 c-1.8,1.1-3.6,2.4-5.2,3.9C58.1,59.9,56.6,61.5,55.4,63.3z"/><path d="M61.5,41.5c-0.4-1-0.6-2.1-0.7-3.2c-0.1-1.1,0.1-2.2,0.3-3.3c0.2-1.1,0.6-2.1,0.9-3.1c0.3-1,0.6-2,0.9-3.1 c0.3-1,0.6-2.1,0.9-3.1l1.6-6.2c-1.4,0-2.5,0.2-3.5,0.3c-0.3,1.8-0.8,3.5-1.3,5.2c-0.5,1.7-1.1,3.4-1.8,5.1 c-0.7,1.7-1.5,3.3-2.4,4.8c-0.9,1.6-1.8,3.1-2.8,4.6c-1,1.5-2.2,2.9-3.5,4.2c-1.3,1.3-2.6,2.5-4.1,3.5c-2.9,2.1-6.2,3.7-9.6,4.9 c-0.4,1-1,1.8-1.4,2.4c-0.5,0.6-0.9,1.1-1.2,1.4c-1.9,2-4.4,5.5-6.9,12c0.1,1.7,0.3,3.8,1.1,6.2c1.3,4.2,3.6,7.1,5.1,8.7 c-1.1,0.7-2.4,1.4-3.9,2.1c-2.4,1.1-4.5,1.7-6.4,2.1v1.7h19.3c-0.6-1.6-1.5-4.9-0.8-8.9c0.5-2.5,1.4-4.4,2.2-5.7 c-0.5-0.3-1.7-1.2-2.4-2.8c-0.4-1.1-0.4-2-0.4-2.6c0.6-0.3,1.7-0.8,2.6-1.9c0.9-1,1.3-2.2,1.5-3c-0.1-0.2-0.3-0.4-0.4-0.6 c-1.2-1.8-2.7-3.4-4.3-4.8c-1.6-1.5-3.4-2.7-5.2-3.9c0.5,0.3,1,0.5,1.4,0.8c0.5,0.3,0.9,0.6,1.4,0.9c0.9,0.6,1.8,1.2,2.6,1.9 c1.7,1.4,3.2,3,4.5,4.7c0.1,0.2,0.3,0.4,0.4,0.5c0.5,0.7,1,1.5,1.4,2.2c0.5,1,1,1.9,1.4,3c0.7,1.6,1.2,3.2,1.7,4.9 c0.5-1.7,1-3.3,1.7-4.9c0.4-1,0.9-2,1.4-3c0.4-0.8,0.9-1.5,1.4-2.2c0.1-0.2,0.3-0.4,0.4-0.5c1.3-1.8,2.8-3.3,4.5-4.7 c0.8-0.7,1.7-1.3,2.6-1.9c0.5-0.3,0.9-0.6,1.4-0.9c0.5-0.3,0.9-0.5,1.4-0.8c-0.7-0.9-1.4-2-1.9-3.6c-0.2-0.7-0.7-2.5-0.5-4.7 c0.1-0.7,0.2-1.3,0.4-1.9c-0.3-0.4-0.6-0.9-0.8-1.4C61.9,42.5,61.7,42,61.5,41.5z"/><path d="M97.6,69c-3.7-5.5-5-10.2-5.5-13.5c-0.5-3.3-0.4-6.2-2.5-9.1c-1.8-2.6-4.5-3.8-6.4-4.5c-0.2-1.4-0.7-3.5-1.9-5.6 c-0.8-1.5-1.7-2.7-2.5-3.6c0.1-0.9,0.7-5.7-2.5-9.3c-2.2-2.4-5.1-3-7.2-3.4c-1.3-0.3-2.5-0.4-3.6-0.4c-0.3,2.1-0.6,4.2-1.1,6.3 c-0.4,2.1-1,4.2-1.6,6.2c-0.3,1-0.7,2-0.9,3.1c-0.1,0.5-0.2,1-0.3,1.5c-0.1,0.5-0.1,1-0.1,1.6c0,2.1,0.7,4.2,1.6,6.1 c1.2-3.7,4.3-5.9,5-6.3c0.8,1.5,1.9,3.2,3.2,5c1.3,1.8,2.7,3.2,3.9,4.4c1.1,2.8,2.9,6.3,5.7,10c1.5,1.9,3,3.6,4.5,4.9 c-0.6,0.4-2.9,2.3-3.6,5.6c-0.8,4,1.4,7.1,1.7,7.6c0.1-1,0.5-2.8,1.7-4.7c0.9-1.4,1.9-2.3,2.7-2.9c0.5,1.2,1.1,2.5,1.7,3.8 c0.8,1.7,1.7,3.2,2.6,4.5c-0.4,0.2-0.9,0.6-1.4,1.2c-0.9,1-1.1,2.1-1.2,2.7c0.7,0.1,1.7,0.4,2.9,1.2c1,0.6,1.6,1.4,2,1.9 c0.9-0.9,2.2-2.5,3.1-4.8C99,74,98,70.3,97.6,69z"/><path d="M45.8,46.9c2.8-2.1,5.3-4.7,7.3-7.6c1-1.4,1.9-3,2.8-4.5c0.9-1.5,1.7-3.1,2.4-4.7c1.5-3.2,2.7-6.6,3.6-10.1 c-0.3,0.1-0.6,0.1-0.8,0.2c-0.2-0.4-0.6-1-1.3-1.6c-0.5-0.5-1.1-0.8-1.5-1c0.4-0.4,0.9-0.9,1.3-1.5c0.9-1.3,1.3-2.6,1.4-3.4 c-0.6,0-2.4-0.1-3.9,1.1c-0.6,0.5-1.1,1-1.3,1.4c-0.3-0.6-1-1.7-2.3-2.7c-1.4-1-2.9-1.2-3.5-1.3c-0.6,0.1-2.1,0.3-3.5,1.3 c-1.3,0.9-2,2.1-2.3,2.7c-0.3-0.4-0.7-1-1.3-1.4c-1.6-1.2-3.4-1.2-3.9-1.1c0.2,0.8,0.5,2.1,1.4,3.4c0.4,0.6,0.9,1.1,1.3,1.5 c-0.4,0.2-0.9,0.5-1.5,1c-0.6,0.6-1,1.2-1.3,1.6c-1.6-0.4-4.5-0.8-7.9-0.2c-2.2,0.4-5.1,1-7.3,3.4c-3.2,3.5-2.6,8.4-2.5,9.3 c-0.8,0.9-1.7,2.1-2.5,3.6c-1.1,2.2-1.6,4.2-1.9,5.6c-2,0.7-4.6,2-6.4,4.5c-2.1,2.9-2,5.8-2.5,9.1c-0.5,3.3-1.9,8-5.5,13.5 C2,70.3,1,74,2.5,78.3c0.9,2.3,2.2,3.9,3.1,4.8c0.4-0.5,1-1.2,2-1.9c1.1-0.7,2.2-1,2.9-1.2c-0.1-0.5-0.3-1.6-1.2-2.7 c-0.5-0.6-1-0.9-1.4-1.2c0.9-1.3,1.7-2.8,2.6-4.5c0.7-1.3,1.2-2.6,1.7-3.8c0.7,0.6,1.8,1.5,2.7,2.9c1.2,1.9,1.6,3.6,1.7,4.7 c0.4-0.5,2.6-3.5,1.7-7.6c-0.7-3.3-3-5.1-3.6-5.6c1.4-1.3,3-3,4.5-4.9c2.8-3.6,4.6-7.1,5.7-10c1.2-1.2,2.5-2.6,3.9-4.4 c1.4-1.8,2.4-3.5,3.2-5c0.8,0.5,4.8,3.3,5.4,8.2c0.3,2.2-0.2,4.1-0.5,4.7c-0.1,0.4-0.3,0.8-0.4,1.1c1.6-0.7,3.2-1.5,4.8-2.4 C42.9,48.9,44.4,47.9,45.8,46.9z M54.2,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8s-0.8-0.3-0.8-0.8 C53.4,16.7,53.7,16.3,54.2,16.3z M45.8,16.3c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8c-0.4,0-0.8-0.3-0.8-0.8 C45.1,16.7,45.4,16.3,45.8,16.3z M44.6,23c0.1-0.2,0.2-0.3,0.3-0.5c0.2-0.3,0.4-0.7,0.6-1c0.2-0.4,0.3-0.7,0.5-1.1 c0.1-0.4,0.2-0.7,0.3-1.1l0.1-0.7l0.3,0.6c0.3,0.6,0.5,1.2,0.4,1.9c0,0.3-0.1,0.6-0.2,0.9c-0.1,0.2-0.2,0.5-0.3,0.7 c0.1,0,0.3-0.1,0.4-0.1c1-0.2,2-0.3,3-0.3c1,0,2,0.1,3,0.3c0.1,0,0.3,0.1,0.4,0.1c-0.1-0.2-0.2-0.4-0.3-0.6 c-0.1-0.3-0.2-0.6-0.2-0.9c-0.1-0.6,0.1-1.3,0.4-1.9l0.3-0.6l0.1,0.7c0.1,0.4,0.2,0.8,0.3,1.1c0.1,0.4,0.3,0.7,0.5,1.1 c0.2,0.4,0.4,0.7,0.6,1c0.1,0.2,0.2,0.3,0.3,0.5c0.1,0.2,0.2,0.3,0.4,0.5c-1-0.2-1.9-0.4-2.9-0.6c-1-0.1-1.9-0.2-2.9-0.1 c-1,0-1.9,0.1-2.9,0.2c-1,0.1-1.9,0.3-2.9,0.5C44.4,23.3,44.5,23.1,44.6,23z"/></g></svg>` }} />
           </div>
         ),
         description: 'A hulking Orc chosen for its brute strength. It is entrusted with the key that unlocks the passage to the deeper levels of the dungeon.',
@@ -7625,7 +7626,8 @@ const SanctumEditor = ({ stats, updateStatsInFirestore, showMessageBox, processA
                     <button 
                       key={size}
                       onClick={() => setBrushSize(size)}
-                      className={`w-10 h-10 flex items-center justify-center rounded-md transition-all font-bold ${brushSize === size ? 'bg-indigo-500' : 'bg-neutral-700 hover:bg-neutral-600'}`}
+                      className={`w-10 h-10 flex items-center justify-center rounded-md transition-all fon
+t-bold ${brushSize === size ? 'bg-indigo-500' : 'bg-neutral-700 hover:bg-neutral-600'}`}
                       title={`${size}x${size} Brush`}
                     >
                       {size}x{size}
@@ -11790,12 +11792,11 @@ const FlashcardFortressQuizModal = ({ card, allCards, onAnswer, onClose }) => {
 const FlashcardFortressLevelUpModal = ({ onSelectUpgrade, upgrades }) => {
   if (!upgrades || upgrades.length === 0) return null;
 // --- NEW: Definition Descent Game Component ---
-// --- NEW: Definition Descent Game Component ---
 const DefinitionDescent = ({ flashcards, showMessageBox }) => {
   const GAME_WIDTH = 600;
   const GAME_HEIGHT = 800;
   const GRAVITY = 0.3;
-  const JUMP_BOOST = -13;
+  const JUMP_BOOST = -12;
   const WEAK_JUMP_BOOST = -4;
   const PLAYER_WIDTH = 40;
   const PLAYER_HEIGHT = 40;
@@ -11807,19 +11808,18 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
   const lastTimeRef = useRef(0);
   const keysRef = useRef({});
   const mouseXRef = useRef(GAME_WIDTH / 2);
-  const inputModeRef = useRef('mouse'); // NEW: Track input type
+  const isMouseDownRef = useRef(false);
 
   const [uiState, setUiState] = useState({
     mode: 'menu',
     score: 0,
     prompt: '',
-    highScore: 0
+    highScore: 0 // Will load from stats later
   });
 
   const playerRef = useRef({ x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100, vx: 0, vy: 0 });
   const platformsRef = useRef([]);
   const cameraYRef = useRef(0);
-  const currentProblemRef = useRef(null);
   const scoreRef = useRef(0);
 
   const generateNewProblem = useCallback(() => {
@@ -11835,33 +11835,32 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
       distractors.push(available.splice(distractorIndex, 1)[0]);
     }
     
-    currentProblemRef.current = { prompt: correctCard.back, correctAnswer: correctCard.front };
-    
-    setUiState(s => ({...s, prompt: correctCard.back }));
-
+    // Return the full problem object instead of setting state here
     return {
-      correct: correctCard.front,
+      prompt: correctCard.back,
+      correctAnswer: correctCard.front,
       distractors: distractors.map(d => d.front)
     };
   }, [flashcards]);
 
-  const generatePlatforms = useCallback((startY, problem) => {
+  const generatePlatforms = useCallback((baseY, problem) => {
     let newPlatforms = [];
     let answers = [{ text: problem.correct, isCorrect: true }, ...problem.distractors.map(d => ({ text: d, isCorrect: false }))];
     
-    // NEW: Make sure one platform is always reachable
-    const correctIndex = answers.findIndex(a => a.isCorrect);
-    const reachableX = playerRef.current.x + (Math.random() * 160 - 80); // within 80px of player's current x
-    
+    // Shuffle answers
+    for (let i = answers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [answers[i], answers[j]] = [answers[j], answers[i]];
+    }
+
+    const verticalJumpDistance = Math.random() * 60 + 90; // 90 to 150px range
+    const setBaseY = baseY - verticalJumpDistance;
+
     answers.forEach((ans, i) => {
-      const isReachableCorrect = i === correctIndex;
-      const yPos = startY - 140 - (Math.random() * 120); // Tighter vertical band
-      const xPos = isReachableCorrect ? Math.max(0, Math.min(GAME_WIDTH - PLATFORM_WIDTH, reachableX)) : (Math.random() * (GAME_WIDTH - PLATFORM_WIDTH));
-      
       newPlatforms.push({
         id: `plat_${Date.now()}_${i}`,
-        x: xPos,
-        y: yPos,
+        x: (i * (GAME_WIDTH / 3)) + (GAME_WIDTH / 6) - (PLATFORM_WIDTH / 2) + (Math.random() * 40 - 20),
+        y: setBaseY - (Math.random() * 30),
         width: PLATFORM_WIDTH,
         height: PLATFORM_HEIGHT,
         text: ans.text,
@@ -11869,12 +11868,6 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
         isCrumbling: false,
       });
     });
-    
-    // Simple shuffle for other platforms
-    for (let i = newPlatforms.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newPlatforms[i].x, newPlatforms[j].x] = [newPlatforms[j].x, newPlatforms[i].x];
-    }
 
     platformsRef.current.push(...newPlatforms);
   }, []);
@@ -11890,44 +11883,67 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
     }];
     
     const problem = generateNewProblem();
-    if(problem) {
-      generatePlatforms(GAME_HEIGHT - 200, problem);
+    let initialPrompt = '';
+    if (problem) {
+      generatePlatforms(GAME_HEIGHT - 200, { correct: problem.correctAnswer, distractors: problem.distractors });
+      initialPrompt = problem.prompt;
     }
 
-    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: currentProblemRef.current.prompt }));
+    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: initialPrompt }));
   }, [generateNewProblem, generatePlatforms]);
 
   useEffect(() => {
-    const handleKeyDown = e => { keysRef.current[e.key.toLowerCase()] = true; inputModeRef.current = 'keyboard'; };
-    const handleKeyUp = e => { keysRef.current[e.key.toLowerCase()] = false; };
-    const handleMouseMove = e => { 
-      if (gameAreaRef.current) {
-        mouseXRef.current = e.clientX - gameAreaRef.current.getBoundingClientRect().left;
-        inputModeRef.current = 'mouse';
-      }
-    };
-    const handleTouchMove = e => { 
-      if (gameAreaRef.current) {
-        mouseXRef.current = e.touches[0].clientX - gameAreaRef.current.getBoundingClientRect().left;
-        inputModeRef.current = 'mouse';
-      }
+    const handleKey = e => { keysRef.current[e.key.toLowerCase()] = e.type === 'keydown'; };
+    const gameArea = gameAreaRef.current;
+
+    const updateMouseX = (clientX) => {
+        if (gameArea) {
+            mouseXRef.current = clientX - gameArea.getBoundingClientRect().left;
+        }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
+    const handleMouseMove = e => updateMouseX(e.clientX);
+    const handleTouchMove = e => {
+      e.preventDefault(); // Prevent scrolling on mobile
+      updateMouseX(e.touches[0].clientX);
+    };
+    
+    const handleMouseDown = e => { isMouseDownRef.current = true; };
+    const handleMouseUp = e => { isMouseDownRef.current = false; };
+    const handleTouchStart = e => { 
+      e.preventDefault(); // Prevent click events from firing too
+      isMouseDownRef.current = true; 
+    };
+    const handleTouchEnd = e => { isMouseDownRef.current = false; };
+
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+
+    if (gameArea) {
+        gameArea.addEventListener('mousemove', handleMouseMove);
+        gameArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+        gameArea.addEventListener('mousedown', handleMouseDown);
+        gameArea.addEventListener('mouseup', handleMouseUp);
+        gameArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+        gameArea.addEventListener('touchend', handleTouchEnd);
+    }
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+        window.removeEventListener('keydown', handleKey);
+        window.removeEventListener('keyup', handleKey);
+        if (gameArea) {
+            gameArea.removeEventListener('mousemove', handleMouseMove);
+            gameArea.removeEventListener('touchmove', handleTouchMove);
+            gameArea.removeEventListener('mousedown', handleMouseDown);
+            gameArea.removeEventListener('mouseup', handleMouseUp);
+            gameArea.removeEventListener('touchstart', handleTouchStart);
+            gameArea.removeEventListener('touchend', handleTouchEnd);
+        }
+        if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
     };
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (uiState.mode !== 'playing') {
       if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
       lastTimeRef.current = 0;
@@ -11936,37 +11952,44 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
 
     const gameLoop = (timestamp) => {
       if (lastTimeRef.current === 0) lastTimeRef.current = timestamp;
-      let dt = (timestamp - lastTimeRef.current) / 16.67;
+      let dt = (timestamp - lastTimeRef.current) / 16.67; // Normalize to 60 FPS
       lastTimeRef.current = timestamp;
       if (dt > 3) dt = 1;
 
+      let promptToSet = null; // Variable to hold a potential prompt update
+
       // Player Movement
-      if (inputModeRef.current === 'keyboard') {
-        let vx = 0;
-        if (keysRef.current['a'] || keysRef.current['arrowleft']) vx -= 6;
-        if (keysRef.current['d'] || keysRef.current['arrowright']) vx += 6;
-        playerRef.current.x += vx * dt;
-      } else {
-        const targetX = mouseXRef.current;
-        playerRef.current.x += (targetX - playerRef.current.x) * 0.5;
+      let targetX = playerRef.current.x;
+      const isKeyboardMoving = keysRef.current['a'] || keysRef.current['arrowleft'] || keysRef.current['d'] || keysRef.current['arrowright'];
+
+      if (isKeyboardMoving) {
+        if (keysRef.current['a'] || keysRef.current['arrowleft']) targetX -= 6 * dt;
+        if (keysRef.current['d'] || keysRef.current['arrowright']) targetX += 6 * dt;
+      } else if (isMouseDownRef.current) { // Only steer with mouse if held down and no keys are pressed
+        targetX = mouseXRef.current;
       }
+      
+      playerRef.current.x += (targetX - playerRef.current.x) * 0.5;
       if (playerRef.current.x > GAME_WIDTH) playerRef.current.x = 0;
       if (playerRef.current.x < 0) playerRef.current.x = GAME_WIDTH;
 
+      // Player Physics
       playerRef.current.vy += GRAVITY * dt;
       playerRef.current.y += playerRef.current.vy * dt;
       
+      // Collision
       if (playerRef.current.vy > 0) {
         platformsRef.current.forEach(p => {
           if (!p.isCrumbling &&
               playerRef.current.x > p.x && playerRef.current.x < p.x + p.width &&
-              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 15) {
-            
+              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 10) {
+
             if (p.isCorrect) {
               playerRef.current.vy = JUMP_BOOST;
-              if (p.id !== 'start') {
-                const problem = generateNewProblem();
-                if (problem) generatePlatforms(p.y, problem);
+              const problem = generateNewProblem();
+              if (problem) {
+                generatePlatforms(p.y, { correct: problem.correctAnswer, distractors: problem.distractors });
+                promptToSet = problem.prompt; // Store the new prompt to be updated
               }
             } else {
               playerRef.current.vy = WEAK_JUMP_BOOST;
@@ -11977,25 +12000,48 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
         });
       }
       
+      // Update crumbling platforms
       platformsRef.current.forEach(p => {
         if(p.isCrumbling) {
           p.crumbleTimer -= dt * 16.67;
-          if(p.crumbleTimer <= 0) p.y += 10 * dt;
+          if(p.crumbleTimer <= 0) p.y += 10 * dt; // Make it fall
         }
       });
 
+      // Update camera and score
       if (playerRef.current.y < cameraYRef.current + GAME_HEIGHT / 2) {
         cameraYRef.current = playerRef.current.y - GAME_HEIGHT / 2;
       }
       scoreRef.current = Math.max(scoreRef.current, -Math.floor(cameraYRef.current / 10));
 
+      // Remove off-screen platforms
       platformsRef.current = platformsRef.current.filter(p => p.y < cameraYRef.current + GAME_HEIGHT + 50);
 
+      // Game Over
       if (playerRef.current.y > cameraYRef.current + GAME_HEIGHT) {
         setUiState(s => ({...s, mode: 'gameover'}));
       }
       
-      setUiState(s => ({...s, score: scoreRef.current}));
+      // Force a re-render to update the screen
+      if(gameAreaRef.current) {
+        gameAreaRef.current.style.transform = `translateY(${-cameraYRef.current}px)`;
+        const playerEl = gameAreaRef.current.querySelector('.player');
+        if(playerEl) playerEl.style.transform = `translate(${playerRef.current.x - PLAYER_WIDTH/2}px, ${playerRef.current.y}px)`;
+        
+        platformsRef.current.forEach(p => {
+          const platEl = gameAreaRef.current.querySelector(`#${p.id}`);
+          if(platEl) platEl.style.transform = `translate(${p.x}px, ${p.y}px)`;
+        });
+      }
+      
+      // Update state for score and potentially the prompt in one batch
+      setUiState(s => {
+        const updatedState = { ...s, score: scoreRef.current };
+        if (promptToSet !== null) {
+          updatedState.prompt = promptToSet;
+        }
+        return updatedState;
+      });
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
@@ -12006,109 +12052,46 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
      return <div className="text-center p-8 bg-slate-900 rounded-lg"><h3 className="text-2xl font-bold text-yellow-400">Not Enough Flashcards!</h3><p className="text-slate-300 mt-2">Definition Descent requires at least 3 flashcards to play.</p></div>;
   }
   
-  const playerX = playerRef.current.x - PLAYER_WIDTH / 2;
-  const playerY = playerRef.current.y;
-  
   return (
     <div className="flex flex-col items-center">
       <div className="w-full max-w-lg flex justify-between mb-2 text-white font-bold text-lg">
         <span>Height: {uiState.score}m</span>
         <span>High Score: {uiState.highScore}m</span>
       </div>
-      <div ref={gameAreaRef} className="relative border-4 border-slate-900 rounded-lg overflow-hidden select-none" style={{ width: GAME_WIDTH, height: GAME_HEIGHT, cursor: 'none' }}>
+      <div className="relative border-4 border-slate-900 rounded-lg overflow-hidden" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
         <div className="absolute inset-0 bg-gradient-to-b from-sky-700 to-indigo-900"/>
         
+        {uiState.mode === 'playing' && (
+          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20">
+            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
+          </div>
+        )}
+        
         {uiState.mode === 'menu' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center" style={{cursor: 'default'}}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center">
             <h3 className="text-4xl font-bold text-white mb-2">Definition Descent</h3>
             <p className="text-slate-300 mb-6 max-w-md">Jump on the correct term to climb higher. Use A/D, arrow keys, or your mouse to steer.</p>
             <button onClick={resetGame} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600">Start Climbing</button>
           </div>
         )}
         {uiState.mode === 'gameover' && (
-           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10" style={{cursor: 'default'}}>
+           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
             <h3 className="text-4xl font-bold text-red-500">Game Over</h3>
             <p className="text-2xl text-white my-4">Final Height: {uiState.score}m</p>
             <button onClick={resetGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-xl hover:bg-blue-600">Try Again</button>
           </div>
         )}
 
-        <div className="absolute inset-0" style={{ transform: `translateY(${-cameraYRef.current}px)` }}>
-          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20" style={{transform: `translateY(${cameraYRef.current}px)`}}>
-            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
-          </div>
-          <div className="player absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerX}px, ${playerY}px)` }}>
+        <div ref={gameAreaRef} className="absolute inset-0">
+          <div className="player absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerRef.current.x - PLAYER_WIDTH/2}px, ${playerRef.current.y}px)` }}>
             <div className="w-full h-full bg-yellow-400 rounded-full" />
           </div>
           {platformsRef.current.map(p => (
-            <div key={p.id} id={p.id} className={`absolute transition-opacity duration-300 ${p.isCrumbling ? 'opacity-0' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
-              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 text-white ${p.id === 'start' ? 'bg-indigo-600' : 'bg-slate-600'}`}>{p.text}</div>
+            <div key={p.id} id={p.id} className={`absolute transition-all duration-100 ${p.isCrumbling ? 'opacity-50' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
+              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 bg-slate-600`}>{p.text}</div>
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-};
-
-// --- NEW: Study Arcade Hub Component ---
-const StudyArcade = ({ studyZoneState, showMessageBox, stats }) => {
-  const [activeGame, setActiveGame] = useState('menu'); // 'menu', 'asteroid', 'descent', 'run'
-
-  const parsedFlashcards = useMemo(() => {
-    // NEW: Aggregate cards from all decks in the new data structure
-    if (!studyZoneState.cardData) return [];
-    return Object.values(studyZoneState.cardData).flat();
-  }, [studyZoneState.cardData]);
-
-  const GameCard = ({ title, description, onClick, disabled = false }) => (
-    <div className={`bg-slate-800/50 border border-slate-700 p-6 rounded-lg text-center flex flex-col ${disabled ? 'opacity-50' : 'hover:bg-slate-800/80 transition-colors'}`}>
-      <h4 className="text-2xl font-bold text-white">{title}</h4>
-      <p className="text-sm text-slate-400 mt-2 flex-grow">{description}</p>
-      {disabled ? (
-        <span className="mt-4 block w-full bg-slate-600 text-slate-400 font-bold py-3 rounded-lg cursor-not-allowed">Coming Soon</span>
-      ) : (
-        <button onClick={onClick} className="mt-4 w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">
-          Play Now
-        </button>
-      )}
-    </div>
-  );
-
-  if (activeGame !== 'menu') {
-    return (
-      <div>
-        <button onClick={() => setActiveGame('menu')} className="mb-4 bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-500">
-          ← Back to Arcade Menu
-        </button>
-        {activeGame === 'asteroid' && <AsteroidAnnihilator flashcards={parsedFlashcards} showMessageBox={showMessageBox} />}
-        {/* Placeholders for other games */}
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div className="text-center mb-8">
-        <h3 className="text-4xl font-bold text-white">Study Arcade</h3>
-        <p className="text-slate-400 mt-2">Quick, fun games to test your knowledge.</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <GameCard 
-          title="Asteroid Annihilator"
-          description="Shoot the correct asteroid that matches the definition. Drills rapid recognition under pressure."
-          onClick={() => setActiveGame('asteroid')}
-        />
-        <GameCard 
-          title="Definition Descent"
-          description="Jump your way up an endless tower of platforms by landing on the correct term."
-          disabled={true}
-        />
-        <GameCard 
-          title="Term-ple Run"
-          description="Switch lanes to run through the correct gate in a fast-paced, endless runner."
-          disabled={true}
-        />
       </div>
     </div>
   );
@@ -12646,7 +12629,8 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
                 let goldAmount = Math.round((e.gold || 10) * comboMultiplier * goldRushMultiplier * goldMultiplier);
                 newState.goldDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: goldAmount });
                 const xpBoostLevels = newState.playerUpgrades.filter(u => u === 'xp_boost').length;
-                const xpMultiplier = Math.pow(1.25, xpBoostLevels);
+  
+              const xpMultiplier = Math.pow(1.25, xpBoostLevels);
                 let xpAmount = (e.xp || 1) * comboMultiplier * xpMultiplier;
                 newState.xpFragmentDrops.push({ id: Math.random(), x: e.x, y: dropY, amount: xpAmount });
                 return false;
@@ -13078,11 +13062,12 @@ const FlashcardFortressGame = ({ stats, studyZoneState, updateStudyZoneState, sh
 };
 // --- NEW: Study Arcade Hub Component ---
 // --- NEW: Definition Descent Game Component ---
+// --- NEW: Definition Descent Game Component ---
 const DefinitionDescent = ({ flashcards, showMessageBox }) => {
   const GAME_WIDTH = 600;
   const GAME_HEIGHT = 800;
   const GRAVITY = 0.3;
-  const JUMP_BOOST = -13; // Increased jump power
+  const JUMP_BOOST = -12;
   const WEAK_JUMP_BOOST = -4;
   const PLAYER_WIDTH = 40;
   const PLAYER_HEIGHT = 40;
@@ -13094,6 +13079,7 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
   const lastTimeRef = useRef(0);
   const keysRef = useRef({});
   const mouseXRef = useRef(GAME_WIDTH / 2);
+  const isMouseDownRef = useRef(false);
 
   const [uiState, setUiState] = useState({
     mode: 'menu',
@@ -13105,7 +13091,6 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
   const playerRef = useRef({ x: GAME_WIDTH / 2, y: GAME_HEIGHT - 100, vx: 0, vy: 0 });
   const platformsRef = useRef([]);
   const cameraYRef = useRef(0);
-  const currentProblemRef = useRef(null);
   const scoreRef = useRef(0);
 
   const generateNewProblem = useCallback(() => {
@@ -13121,34 +13106,32 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
       distractors.push(available.splice(distractorIndex, 1)[0]);
     }
     
-    currentProblemRef.current = { prompt: correctCard.back, correctAnswer: correctCard.front };
-    
-    setUiState(s => ({...s, prompt: correctCard.back }));
-
+    // Return the full problem object instead of setting state here
     return {
-      correct: correctCard.front,
+      prompt: correctCard.back,
+      correctAnswer: correctCard.front,
       distractors: distractors.map(d => d.front)
     };
   }, [flashcards]);
 
-  const generatePlatforms = useCallback((startY, problem) => {
+  const generatePlatforms = useCallback((baseY, problem) => {
     let newPlatforms = [];
     let answers = [{ text: problem.correct, isCorrect: true }, ...problem.distractors.map(d => ({ text: d, isCorrect: false }))];
     
+    // Shuffle answers
     for (let i = answers.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [answers[i], answers[j]] = [answers[j], answers[i]];
     }
 
+    const verticalJumpDistance = Math.random() * 60 + 90; // 90 to 150px range
+    const setBaseY = baseY - verticalJumpDistance;
+
     answers.forEach((ans, i) => {
-      // NEW, more controlled placement logic
-      const yPos = startY - 120 - (i * 70) + (Math.random() * 30 - 15);
-      const xPos = (Math.random() * (GAME_WIDTH - PLATFORM_WIDTH));
-      
       newPlatforms.push({
         id: `plat_${Date.now()}_${i}`,
-        x: xPos,
-        y: yPos,
+        x: (i * (GAME_WIDTH / 3)) + (GAME_WIDTH / 6) - (PLATFORM_WIDTH / 2) + (Math.random() * 40 - 20),
+        y: setBaseY - (Math.random() * 30),
         width: PLATFORM_WIDTH,
         height: PLATFORM_HEIGHT,
         text: ans.text,
@@ -13171,33 +13154,67 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
     }];
     
     const problem = generateNewProblem();
-    if(problem) {
-      generatePlatforms(GAME_HEIGHT - 200, problem);
+    let initialPrompt = '';
+    if (problem) {
+      generatePlatforms(GAME_HEIGHT - 200, { correct: problem.correctAnswer, distractors: problem.distractors });
+      initialPrompt = problem.prompt;
     }
 
-    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: currentProblemRef.current.prompt }));
+    setUiState(s => ({ ...s, mode: 'playing', score: 0, prompt: initialPrompt }));
   }, [generateNewProblem, generatePlatforms]);
 
   useEffect(() => {
     const handleKey = e => { keysRef.current[e.key.toLowerCase()] = e.type === 'keydown'; };
-    const handleMouseMove = e => { if (gameAreaRef.current) mouseXRef.current = e.clientX - gameAreaRef.current.getBoundingClientRect().left; };
-    const handleTouchMove = e => { if (gameAreaRef.current) mouseXRef.current = e.touches[0].clientX - gameAreaRef.current.getBoundingClientRect().left; };
+    const gameArea = gameAreaRef.current;
+
+    const updateMouseX = (clientX) => {
+        if (gameArea) {
+            mouseXRef.current = clientX - gameArea.getBoundingClientRect().left;
+        }
+    };
+
+    const handleMouseMove = e => updateMouseX(e.clientX);
+    const handleTouchMove = e => {
+      e.preventDefault(); // Prevent scrolling on mobile
+      updateMouseX(e.touches[0].clientX);
+    };
+    
+    const handleMouseDown = e => { isMouseDownRef.current = true; };
+    const handleMouseUp = e => { isMouseDownRef.current = false; };
+    const handleTouchStart = e => { 
+      e.preventDefault(); // Prevent click events from firing too
+      isMouseDownRef.current = true; 
+    };
+    const handleTouchEnd = e => { isMouseDownRef.current = false; };
 
     window.addEventListener('keydown', handleKey);
     window.addEventListener('keyup', handleKey);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
+
+    if (gameArea) {
+        gameArea.addEventListener('mousemove', handleMouseMove);
+        gameArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+        gameArea.addEventListener('mousedown', handleMouseDown);
+        gameArea.addEventListener('mouseup', handleMouseUp);
+        gameArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+        gameArea.addEventListener('touchend', handleTouchEnd);
+    }
 
     return () => {
-      window.removeEventListener('keydown', handleKey);
-      window.removeEventListener('keyup', handleKey);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
+        window.removeEventListener('keydown', handleKey);
+        window.removeEventListener('keyup', handleKey);
+        if (gameArea) {
+            gameArea.removeEventListener('mousemove', handleMouseMove);
+            gameArea.removeEventListener('touchmove', handleTouchMove);
+            gameArea.removeEventListener('mousedown', handleMouseDown);
+            gameArea.removeEventListener('mouseup', handleMouseUp);
+            gameArea.removeEventListener('touchstart', handleTouchStart);
+            gameArea.removeEventListener('touchend', handleTouchEnd);
+        }
+        if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
     };
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (uiState.mode !== 'playing') {
       if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
       lastTimeRef.current = 0;
@@ -13210,15 +13227,19 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
       lastTimeRef.current = timestamp;
       if (dt > 3) dt = 1;
 
-      let newState = { ...uiState }; // Use a mutable copy for this frame
+      let promptToSet = null; // Variable to hold a potential prompt update
 
       // Player Movement
       let targetX = playerRef.current.x;
-      if (keysRef.current['a'] || keysRef.current['arrowleft']) targetX -= 6 * dt;
-      if (keysRef.current['d'] || keysRef.current['arrowright']) targetX += 6 * dt;
-      if (!keysRef.current['a'] && !keysRef.current['arrowleft'] && !keysRef.current['d'] && !keysRef.current['arrowright']) {
-          targetX = mouseXRef.current;
+      const isKeyboardMoving = keysRef.current['a'] || keysRef.current['arrowleft'] || keysRef.current['d'] || keysRef.current['arrowright'];
+
+      if (isKeyboardMoving) {
+        if (keysRef.current['a'] || keysRef.current['arrowleft']) targetX -= 6 * dt;
+        if (keysRef.current['d'] || keysRef.current['arrowright']) targetX += 6 * dt;
+      } else if (isMouseDownRef.current) { // Only steer with mouse if held down and no keys are pressed
+        targetX = mouseXRef.current;
       }
+      
       playerRef.current.x += (targetX - playerRef.current.x) * 0.5;
       if (playerRef.current.x > GAME_WIDTH) playerRef.current.x = 0;
       if (playerRef.current.x < 0) playerRef.current.x = GAME_WIDTH;
@@ -13232,13 +13253,14 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
         platformsRef.current.forEach(p => {
           if (!p.isCrumbling &&
               playerRef.current.x > p.x && playerRef.current.x < p.x + p.width &&
-              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 15) {
+              playerRef.current.y + PLAYER_HEIGHT > p.y && playerRef.current.y + PLAYER_HEIGHT < p.y + p.height + 10) {
 
             if (p.isCorrect) {
               playerRef.current.vy = JUMP_BOOST;
               const problem = generateNewProblem();
               if (problem) {
-                generatePlatforms(p.y, problem);
+                generatePlatforms(p.y, { correct: problem.correctAnswer, distractors: problem.distractors });
+                promptToSet = problem.prompt; // Store the new prompt to be updated
               }
             } else {
               playerRef.current.vy = WEAK_JUMP_BOOST;
@@ -13249,27 +13271,48 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
         });
       }
       
+      // Update crumbling platforms
       platformsRef.current.forEach(p => {
         if(p.isCrumbling) {
           p.crumbleTimer -= dt * 16.67;
-          if(p.crumbleTimer <= 0) p.y += 10 * dt;
+          if(p.crumbleTimer <= 0) p.y += 10 * dt; // Make it fall
         }
       });
 
+      // Update camera and score
       if (playerRef.current.y < cameraYRef.current + GAME_HEIGHT / 2) {
         cameraYRef.current = playerRef.current.y - GAME_HEIGHT / 2;
       }
       scoreRef.current = Math.max(scoreRef.current, -Math.floor(cameraYRef.current / 10));
 
+      // Remove off-screen platforms
       platformsRef.current = platformsRef.current.filter(p => p.y < cameraYRef.current + GAME_HEIGHT + 50);
 
+      // Game Over
       if (playerRef.current.y > cameraYRef.current + GAME_HEIGHT) {
-        newState.mode = 'gameover';
+        setUiState(s => ({...s, mode: 'gameover'}));
       }
       
-      // Batch state updates
-      newState.score = scoreRef.current;
-      setUiState(newState);
+      // Force a re-render to update the screen
+      if(gameAreaRef.current) {
+        gameAreaRef.current.style.transform = `translateY(${-cameraYRef.current}px)`;
+        const playerEl = gameAreaRef.current.querySelector('.player');
+        if(playerEl) playerEl.style.transform = `translate(${playerRef.current.x - PLAYER_WIDTH/2}px, ${playerRef.current.y}px)`;
+        
+        platformsRef.current.forEach(p => {
+          const platEl = gameAreaRef.current.querySelector(`#${p.id}`);
+          if(platEl) platEl.style.transform = `translate(${p.x}px, ${p.y}px)`;
+        });
+      }
+      
+      // Update state for score and potentially the prompt in one batch
+      setUiState(s => {
+        const updatedState = { ...s, score: scoreRef.current };
+        if (promptToSet !== null) {
+          updatedState.prompt = promptToSet;
+        }
+        return updatedState;
+      });
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
@@ -13286,34 +13329,37 @@ const DefinitionDescent = ({ flashcards, showMessageBox }) => {
         <span>Height: {uiState.score}m</span>
         <span>High Score: {uiState.highScore}m</span>
       </div>
-      <div className="relative border-4 border-slate-900 rounded-lg overflow-hidden select-none" style={{ width: GAME_WIDTH, height: GAME_HEIGHT, cursor: 'none' }}>
+      <div className="relative border-4 border-slate-900 rounded-lg overflow-hidden" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
         <div className="absolute inset-0 bg-gradient-to-b from-sky-700 to-indigo-900"/>
         
+        {uiState.mode === 'playing' && (
+          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20">
+            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
+          </div>
+        )}
+        
         {uiState.mode === 'menu' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center" style={{cursor: 'default'}}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-center">
             <h3 className="text-4xl font-bold text-white mb-2">Definition Descent</h3>
             <p className="text-slate-300 mb-6 max-w-md">Jump on the correct term to climb higher. Use A/D, arrow keys, or your mouse to steer.</p>
             <button onClick={resetGame} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg text-2xl hover:bg-green-600">Start Climbing</button>
           </div>
         )}
         {uiState.mode === 'gameover' && (
-           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10" style={{cursor: 'default'}}>
+           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
             <h3 className="text-4xl font-bold text-red-500">Game Over</h3>
             <p className="text-2xl text-white my-4">Final Height: {uiState.score}m</p>
             <button onClick={resetGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg text-xl hover:bg-blue-600">Try Again</button>
           </div>
         )}
 
-        <div className="absolute inset-0" style={{ transform: `translateY(${-cameraYRef.current}px)` }}>
-          <div className="absolute w-full top-0 text-center p-4 bg-black/30 z-20" style={{transform: `translateY(${cameraYRef.current}px)`}}>
-            <p className="text-lg font-semibold text-white">{uiState.prompt}</p>
-          </div>
+        <div ref={gameAreaRef} className="absolute inset-0">
           <div className="player absolute" style={{ width: PLAYER_WIDTH, height: PLAYER_HEIGHT, transform: `translate(${playerRef.current.x - PLAYER_WIDTH/2}px, ${playerRef.current.y}px)` }}>
             <div className="w-full h-full bg-yellow-400 rounded-full" />
           </div>
           {platformsRef.current.map(p => (
-            <div key={p.id} id={p.id} className={`absolute transition-opacity duration-300 ${p.isCrumbling ? 'opacity-0' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
-              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 text-white ${p.id === 'start' ? 'bg-indigo-600' : 'bg-slate-600'}`}>{p.text}</div>
+            <div key={p.id} id={p.id} className={`absolute transition-all duration-100 ${p.isCrumbling ? 'opacity-50' : ''}`} style={{ width: p.width, height: p.height, transform: `translate(${p.x}px, ${p.y}px)` }}>
+              <div className={`w-full h-full rounded flex items-center justify-center text-center text-xs font-bold p-1 bg-slate-600`}>{p.text}</div>
             </div>
           ))}
         </div>
@@ -13384,8 +13430,6 @@ const StudyArcade = ({ studyZoneState, showMessageBox, stats }) => {
     </div>
   );
 };
-
-
 // --- NEW: Asteroid Annihilator Game Component ---
 const AsteroidAnnihilator = ({ flashcards, showMessageBox }) => {
   const GAME_WIDTH = 960;
