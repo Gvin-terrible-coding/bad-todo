@@ -9,7 +9,7 @@ import {
   getDocs as originalGetDocs, orderBy, limit, increment, arrayUnion, writeBatch, deleteField, arrayRemove, startAfter
 } from 'firebase/firestore';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-
+import FlashcardRogue from './FlashcardRogue';
 // Asset Imports for Focus Navigator
 import cockpitImage from './assets/images/Space_Focus_Timer/Cockpit_View.png';
 import starmapImage from './assets/images/Space_Focus_Timer/Starmap_Select_Background.png';
@@ -1356,7 +1356,7 @@ const OperationsRoomHelpModal = ({ isOpen, onClose }) => {
   );
 }
 
-const DayDetailModal = ({ isOpen, onClose, dayData, divisionMembers, allAssignments, user, onRsvp, onDeleteEvent, onVoteToDelete, isRsvping }) => {
+const DayDetailModal = ({ isOpen, onClose, dayData, divisionMembers, allAssignments, user, onRsvp, onDeleteEvent, onVoteToDelete, isRsvping, onEditEvent }) => {
   if (!isOpen) return null;
 
   const { date, events } = dayData;
@@ -1413,7 +1413,10 @@ const DayDetailModal = ({ isOpen, onClose, dayData, divisionMembers, allAssignme
                         </button>
                       </div>
                     ) : <div />}
-                    <div>
+                    <div className="flex gap-2">
+                      {event.creatorId === user.uid && (
+                        <button onClick={() => onEditEvent(event)} className="text-xs text-indigo-400 hover:text-indigo-300">Edit</button>
+                      )}
                       {event.creatorId === user.uid ? (
                         <button onClick={() => onDeleteEvent(event.id)} className="text-xs text-red-400 hover:text-red-300">Delete Operation</button>
                       ) : (
@@ -1517,7 +1520,7 @@ const FindTimeModal = ({ isOpen, onClose, onSchedule, onFind, assignments }) => 
 };
 
 
-const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignments, showMessageBox, prefilledTime }) => {
+const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignments, showMessageBox, prefilledTime, editingEvent }) => {
   const [eventData, setEventData] = useState({
     title: '',
     startTime: '',
@@ -1529,26 +1532,43 @@ const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignment
     linkedAssignmentId: '',
   });
 
-  // Effect to reset form when modal is reopened for a new event
+  // Effect to reset form when modal is reopened for a new event or when editing an event
   useEffect(() => {
     if (isOpen) {
-      // Convert prefilledTime to the format required by datetime-local input
-      const startTimeISO = prefilledTime ? new Date(prefilledTime.getTime() - (prefilledTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
-      const endTimeDate = prefilledTime ? new Date(prefilledTime.getTime() + 3600000) : '';
-      const endTimeISO = endTimeDate ? new Date(endTimeDate.getTime() - (endTimeDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
+      if (editingEvent) {
+        // Pre-fill with editing event data
+        const startTimeISO = new Date(editingEvent.startTime.getTime() - (editingEvent.startTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        const endTimeISO = new Date(editingEvent.endTime.getTime() - (editingEvent.endTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        
+        setEventData({
+          title: editingEvent.title || '',
+          startTime: startTimeISO,
+          endTime: endTimeISO,
+          priority: editingEvent.priority || 'Medium',
+          eventType: editingEvent.eventType || 'group_operation',
+          recurrenceType: editingEvent.recurrenceType || 'none',
+          recurrenceEndDate: editingEvent.recurrenceEndDate ? new Date(editingEvent.recurrenceEndDate.getTime() - (editingEvent.recurrenceEndDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0] : '',
+          linkedAssignmentId: editingEvent.linkedAssignmentId || '',
+        });
+      } else {
+        // Convert prefilledTime to the format required by datetime-local input
+        const startTimeISO = prefilledTime ? new Date(prefilledTime.getTime() - (prefilledTime.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
+        const endTimeDate = prefilledTime ? new Date(prefilledTime.getTime() + 3600000) : '';
+        const endTimeISO = endTimeDate ? new Date(endTimeDate.getTime() - (endTimeDate.getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
 
-      setEventData({
-        title: '', 
-        startTime: startTimeISO, 
-        endTime: endTimeISO, 
-        priority: 'Medium',
-        eventType: 'group_operation', 
-        recurrenceType: 'none', 
-        recurrenceEndDate: '',
-        linkedAssignmentId: '',
-      });
+        setEventData({
+          title: '', 
+          startTime: startTimeISO, 
+          endTime: endTimeISO, 
+          priority: 'Medium',
+          eventType: 'group_operation', 
+          recurrenceType: 'none', 
+          recurrenceEndDate: '',
+          linkedAssignmentId: '',
+        });
+      }
     }
-  }, [isOpen, prefilledTime]);
+  }, [isOpen, prefilledTime, editingEvent]);
 
   if (!isOpen) return null;
 
@@ -1573,13 +1593,14 @@ const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignment
       startTime: new Date(eventData.startTime),
       endTime: new Date(eventData.endTime),
       recurrenceEndDate: eventData.recurrenceEndDate ? new Date(eventData.recurrenceEndDate) : null,
+      ...(editingEvent && { id: editingEvent.id }) // Include event ID if editing
     });
   };
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-lg shadow-lg" onClick={e => e.stopPropagation()}>
-        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">SCHEDULE OPERATION for "{activeDivision?.squadName}"</h3>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">{editingEvent ? 'EDIT OPERATION' : 'SCHEDULE OPERATION'} for "{activeDivision?.squadName}"</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-bold text-slate-400 mb-1">Operation Title</label>
@@ -1640,7 +1661,7 @@ const AddEventModal = ({ isOpen, onClose, onAddEvent, activeDivision, assignment
           </div>
           <div className="flex justify-end gap-4 pt-4 border-t border-slate-700">
             <button type="button" onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
-            <button type="submit" className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Schedule</button>
+            <button type="submit" className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">{editingEvent ? 'Save Changes' : 'Schedule'}</button>
           </div>
         </form>
       </div>
@@ -1889,7 +1910,7 @@ const ScheduleLinkedOperationModal = ({ isOpen, onClose, onSchedule, assignmentT
   );
 };
 
-const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divisionData, friendProfiles, showMessageBox }) => {
+const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divisionData, friendProfiles, showMessageBox, setActiveSheet, setIsSidebarOpen, monthlyEvents, setMonthlyEvents, lastEventCheckTime }) => {
   const [view, setView] = useState('divisions'); // 'divisions' or 'members'
   const [activeDivisionId, setActiveDivisionId] = useState(null);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
@@ -1901,9 +1922,9 @@ const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divi
   const [isFindTimeModalOpen, setIsFindTimeModalOpen] = useState(false);
   const [timeSuggestions, setTimeSuggestions] = useState([]);
   const [prefilledEventTime, setPrefilledEventTime] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null); // NEW: State for editing events
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [monthlyEvents, setMonthlyEvents] = useState([]);
   const [isDayDetailModalOpen, setIsDayDetailModalOpen] = useState(false);
   const [selectedDayDetails, setSelectedDayDetails] = useState({ date: null, events: [] });
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -2171,9 +2192,17 @@ const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divi
     showMessageBox(`${memberUsername} has been removed from the division.`, 'info');
   };
 
+  // NEW: Handle opening edit modal for an event
+  const handleEditEvent = (event) => {
+    setEditingEvent(event);
+    setEventModalOpen(true);
+  };
+
   const handleCreateEvent = async (eventData) => {
     const lastEventTime = stats.cooldowns?.createEvent?.toDate()?.getTime();
-    if (lastEventTime && Date.now() - lastEventTime < 30000) { // 30 second cooldown
+    
+    // Only apply cooldown to new events, not edits
+    if (!eventData.id && lastEventTime && Date.now() - lastEventTime < 30000) { // 30 second cooldown
       showMessageBox("You can create an event every 30 seconds.", "error");
       return;
     }
@@ -2182,23 +2211,36 @@ const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divi
       return;
     }
 
-    const eventCollectionRef = collection(db, `squads/${activeDivisionId}/events`);
-    const newEventData = {
-      ...eventData,
-      creatorId: user.uid,
-      creatorUsername: stats.username,
-      createdAt: serverTimestamp(),
-    };
-
     try {
-      await addDoc(eventCollectionRef, newEventData);
-      // Also update the user's cooldown in their stats doc
-      await updateStatsInFirestore({ 'cooldowns.createEvent': serverTimestamp() });
-      showMessageBox("Operation successfully scheduled!", "info");
+      if (eventData.id) {
+        // EDITING: Update existing event
+        const eventDocRef = doc(db, `squads/${activeDivisionId}/events`, eventData.id);
+        const { id, ...dataToUpdate } = eventData;
+        await updateDoc(eventDocRef, {
+          ...dataToUpdate,
+          updatedAt: serverTimestamp(),
+        });
+        showMessageBox("Operation updated successfully!", "info");
+      } else {
+        // CREATING: New event
+        const eventCollectionRef = collection(db, `squads/${activeDivisionId}/events`);
+        const newEventData = {
+          ...eventData,
+          creatorId: user.uid,
+          creatorUsername: stats.username,
+          createdAt: serverTimestamp(),
+        };
+        await addDoc(eventCollectionRef, newEventData);
+        // Also update the user's cooldown in their stats doc
+        await updateStatsInFirestore({ 'cooldowns.createEvent': serverTimestamp() });
+        showMessageBox("Operation successfully scheduled!", "info");
+      }
+      
       setEventModalOpen(false);
+      setEditingEvent(null);
     } catch (error) {
-      console.error("Error creating event:", error);
-      showMessageBox("Failed to schedule operation.", "error");
+      console.error("Error creating/updating event:", error);
+      showMessageBox(eventData.id ? "Failed to update operation." : "Failed to schedule operation.", "error");
     }
   };
 
@@ -2288,7 +2330,7 @@ const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divi
 
       <CreateDivisionModal isOpen={isCreateModalOpen} onClose={() => setCreateModalOpen(false)} onCreateDivision={handleCreateDivision} divisionCount={divisionCount} />
       <InviteFriendModal isOpen={isInviteModalOpen} onClose={() => setInviteModalOpen(false)} friends={friendProfiles} divisionMembers={activeDivision?.members || {}} onInvite={handleInviteFriend} />
-      <AddEventModal isOpen={isEventModalOpen} onClose={() => setEventModalOpen(false)} onAddEvent={handleCreateEvent} activeDivision={activeDivision} assignments={assignments.filter(a => a.status !== 'Completed')} showMessageBox={showMessageBox} prefilledTime={prefilledEventTime} />
+      <AddEventModal isOpen={isEventModalOpen} onClose={() => { setEventModalOpen(false); setEditingEvent(null); setPrefilledEventTime(null); }} onAddEvent={handleCreateEvent} activeDivision={activeDivision} assignments={assignments.filter(a => a.status !== 'Completed')} showMessageBox={showMessageBox} prefilledTime={prefilledEventTime} editingEvent={editingEvent} />
       <OperationsRoomHelpModal isOpen={isHelpModalOpen} onClose={() => setHelpModalOpen(false)} />
 <FindTimeModal isOpen={isFindTimeModalOpen} onClose={() => setIsFindTimeModalOpen(false)} suggestions={timeSuggestions} onSchedule={handleScheduleFromSuggestion} onFind={handleFindBestTime} assignments={assignments.filter(a => a.status !== 'Completed')} />
       <DayDetailModal 
@@ -2302,6 +2344,7 @@ const OperationsRoom = ({ stats, user, updateStatsInFirestore, assignments, divi
         onDeleteEvent={handleDeleteEvent}
         onVoteToDelete={handleVoteToDelete}
         isRsvping={rsvpingEventId}
+        onEditEvent={handleEditEvent}
       />
     </div>
   );
@@ -9632,23 +9675,23 @@ const getCachedData = (key, maxAgeSeconds = 60) => {
   if (!itemStr) return null;
 
   try {
-    const item = JSON.parse(itemStr);
+    // Use reviver function directly during JSON.parse to properly restore Date objects
+    const item = JSON.parse(itemStr, (k, v) => {
+        if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v)) {
+            return new Date(v);
+        }
+        if (typeof v === 'object' && v !== null && v.seconds && typeof v.nanoseconds === 'number') {
+            return new Date(v.seconds * 1000 + v.nanoseconds / 1000000);
+        }
+        return v;
+    });
+    
     const now = Date.now();
     if (now - item.timestamp > maxAgeSeconds * 1000) {
       sessionStorage.removeItem(key);
       return null;
     }
-    // IMPORTANT: Revive Date and Timestamp objects from their string representations
-    const revivedData = JSON.parse(JSON.stringify(item.data), (k, v) => {
-        if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v)) {
-            return new Date(v);
-        }
-        if (typeof v === 'object' && v !== null && v.seconds && v.nanoseconds) {
-            return new Date(v.seconds * 1000 + v.nanoseconds / 1000000);
-        }
-        return v;
-    });
-    return revivedData;
+    return item.data;
   } catch (error) {
     console.error("Failed to parse cached data:", error);
     sessionStorage.removeItem(key);
@@ -10050,49 +10093,125 @@ const AssignmentTracker = ({ stats, assignments, setIsAddModalOpen, handleComple
     
 // Component for My Profile Sheet
 const AvailabilityPreferencesModal = ({ isOpen, onClose, currentPrefs, onSave }) => {
-  const [prefs, setPrefs] = useState(currentPrefs || { primeTimes: [], unavailableDays: [] });
+  // Initialize with time grid format: array of 7 days, each with 24 hour slots
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const timeBlocks = ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'];
+  
+  // Parse current prefs or create empty grid
+  const [timeGrid, setTimeGrid] = useState(
+    currentPrefs?.timeGrid || Array(7).fill(null).map(() => Array(24).fill(false))
+  );
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragMode, setDragMode] = useState('select'); // 'select' or 'deselect'
 
   useEffect(() => {
     if (isOpen) {
-      setPrefs(currentPrefs || { primeTimes: [], unavailableDays: [] });
+      setTimeGrid(currentPrefs?.timeGrid || Array(7).fill(null).map(() => Array(24).fill(false)));
+      setIsDragging(false);
     }
   }, [isOpen, currentPrefs]);
 
-  const handlePrimeTimeChange = (time) => {
-    setPrefs(p => ({ ...p, primeTimes: p.primeTimes.includes(time) ? p.primeTimes.filter(t => t !== time) : [...p.primeTimes, time] }));
+  // Handle mouseup to stop dragging
+  useEffect(() => {
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => document.removeEventListener('mouseup', handleMouseUp);
+    }
+  }, [isDragging]);
+
+  const handleCellMouseDown = (day, hour) => {
+    setIsDragging(true);
+    setDragMode(!timeGrid[day][hour] ? 'select' : 'deselect');
+    toggleCell(day, hour);
   };
-  
-  const handleDayChange = (dayIndex) => {
-    setPrefs(p => ({ ...p, unavailableDays: p.unavailableDays.includes(dayIndex) ? p.unavailableDays.filter(d => d !== dayIndex) : [...p.unavailableDays, dayIndex] }));
+
+  const handleCellMouseEnter = (day, hour) => {
+    if (isDragging) {
+      const newGrid = timeGrid.map(row => [...row]);
+      newGrid[day][hour] = dragMode === 'select';
+      setTimeGrid(newGrid);
+    }
+  };
+
+  const toggleCell = (day, hour) => {
+    const newGrid = timeGrid.map(row => [...row]);
+    newGrid[day][hour] = !newGrid[day][hour];
+    setTimeGrid(newGrid);
+  };
+
+  const fillDay = (dayIndex) => {
+    const newGrid = timeGrid.map((row, idx) => idx === dayIndex ? Array(24).fill(true) : [...row]);
+    setTimeGrid(newGrid);
+  };
+
+  const clearDay = (dayIndex) => {
+    const newGrid = timeGrid.map((row, idx) => idx === dayIndex ? Array(24).fill(false) : [...row]);
+    setTimeGrid(newGrid);
+  };
+
+  const fillAllDays = () => {
+    setTimeGrid(Array(7).fill(null).map(() => Array(24).fill(true)));
+  };
+
+  const clearAllDays = () => {
+    setTimeGrid(Array(7).fill(null).map(() => Array(24).fill(false)));
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={onClose}>
-      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-lg shadow-lg" onClick={e => e.stopPropagation()}>
-        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Set Availability</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-slate-400 mb-2">Prime Times (When you prefer to collaborate)</label>
-            <div className="flex gap-2">
-              {['mornings', 'afternoons', 'evenings'].map(time => (
-                <button key={time} onClick={() => handlePrimeTimeChange(time)} className={`px-4 py-2 rounded-md capitalize ${prefs.primeTimes.includes(time) ? 'bg-green-600' : 'bg-slate-700'}`}>{time}</button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-400 mb-2">Generally Unavailable Days</label>
-            <div className="flex gap-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                <button key={day} onClick={() => handleDayChange(index)} className={`px-4 py-2 rounded-md ${prefs.unavailableDays.includes(index) ? 'bg-red-600' : 'bg-slate-700'}`}>{day}</button>
-              ))}
-            </div>
-          </div>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-lg w-full max-w-6xl shadow-lg my-4" onClick={e => e.stopPropagation()}>
+        <h3 className="text-2xl font-bold mb-4 font-mono text-green-400">Set Your Availability</h3>
+        <p className="text-sm text-slate-400 mb-4">Click and drag to select times when you're available for group operations. <strong>Green</strong> = Available, <strong>Gray</strong> = Not Available.</p>
+        
+        <div className="flex justify-end gap-2 mb-4">
+          <button onClick={fillAllDays} className="px-3 py-1 text-xs bg-green-600 hover:bg-green-700 rounded">Fill All</button>
+          <button onClick={clearAllDays} className="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 rounded">Clear All</button>
         </div>
+
+        <div className="overflow-x-auto bg-slate-800/50 rounded-lg p-4">
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr>
+                <th className="bg-slate-700 p-2 text-left">Day</th>
+                {timeBlocks.map(time => (
+                  <th key={time} className="bg-slate-700 p-1 text-center h-8 text-xs">{time}</th>
+                ))}
+                <th className="bg-slate-700 p-2 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dayNames.map((day, dayIndex) => (
+                <tr key={day}>
+                  <td className="bg-slate-800 p-2 font-semibold text-slate-300">{day}</td>
+                  {Array(24).fill(null).map((_, hour) => (
+                    <td
+                      key={`${dayIndex}-${hour}`}
+                      onMouseDown={() => handleCellMouseDown(dayIndex, hour)}
+                      onMouseEnter={() => handleCellMouseEnter(dayIndex, hour)}
+                      className={`p-1 border border-slate-700 cursor-pointer h-8 transition-colors ${
+                        timeGrid[dayIndex][hour] ? 'bg-green-600/60 hover:bg-green-500' : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    />
+                  ))}
+                  <td className="bg-slate-800 p-2 flex gap-1">
+                    <button onClick={() => fillDay(dayIndex)} className="px-2 py-0.5 text-xs bg-green-700 hover:bg-green-600 rounded">Fill</button>
+                    <button onClick={() => clearDay(dayIndex)} className="px-2 py-0.5 text-xs bg-red-700 hover:bg-red-600 rounded">Clear</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <div className="flex justify-end gap-4 pt-4 mt-4 border-t border-slate-700">
           <button onClick={onClose} className="px-5 py-2 bg-slate-600 rounded hover:bg-slate-500">Cancel</button>
-          <button onClick={() => onSave(prefs)} className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Save Preferences</button>
+          <button onClick={() => onSave({ timeGrid })} className="px-5 py-2 bg-green-600 text-black font-bold rounded hover:bg-green-700">Save Preferences</button>
         </div>
       </div>
     </div>
@@ -11164,12 +11283,18 @@ const StudyZone = ({ stats, updateStatsInFirestore, showMessageBox, processAchie
       <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl">
         <div className="relative z-10 flex border-b border-slate-700">
           <StudyZoneTabButton tabName="flashcards">Flashcard Deck</StudyZoneTabButton>
+          <StudyZoneTabButton tabName="rogue">Flashcard Rogue</StudyZoneTabButton>
           <StudyZoneTabButton tabName="arcade">Study Arcade</StudyZoneTabButton>
           <StudyZoneTabButton tabName="fortress">Flashcard Fortress</StudyZoneTabButton>
           <StudyZoneTabButton tabName="platformer">Platformer Game</StudyZoneTabButton>
         </div>
         <div className="p-6">
           {activeTab === 'arcade' && <StudyArcade studyZoneState={studyZoneState} showMessageBox={showMessageBox} stats={stats} />}
+          {activeTab === 'rogue' && (
+            (studyZoneState.cardData && Object.keys(studyZoneState.cardData).length > 0) ? 
+              <FlashcardRogue studyZoneState={studyZoneState} showMessageBox={showMessageBox} stats={stats} /> : 
+              <div className="text-center p-8"><p className="text-slate-400">Loading Flashcards from Firebase...</p></div>
+          )}
           {activeTab === 'platformer' && <PlatformerGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} isMobile={isMobile} />}
           {activeTab === 'fortress' && <FlashcardFortressGame stats={stats} studyZoneState={studyZoneState} updateStudyZoneState={updateStudyZoneState} showMessageBox={showMessageBox} processAchievement={processAchievement} />}
           {activeTab === 'flashcards' && (
@@ -14256,6 +14381,10 @@ const App = () => {
   const [lastVisibleAssignment, setLastVisibleAssignment] = useState(null);
   const [hasMoreAssignments, setHasMoreAssignments] = useState(true);
   const pinCooldownsRef = useRef({});
+  
+  // NEW: State for Operations Room events tracking
+  const [monthlyEvents, setMonthlyEvents] = useState([]);
+  const [lastEventCheckTime, setLastEventCheckTime] = useState(null);
 
   // Effect to handle sidebar state when resizing across the breakpoint
   useEffect(() => {
@@ -14303,6 +14432,21 @@ const App = () => {
   useEffect(() => {
     statsRef.current = stats;
   }, [stats]);
+
+  // NEW: Compute if there are new events
+  const hasNewEvents = useMemo(() => {
+    if (!lastEventCheckTime || monthlyEvents.length === 0) return false;
+    return monthlyEvents.some(event => {
+      const eventCreatedTime = event.createdAt?.toDate?.()?.getTime?.() || 0;
+      return eventCreatedTime > lastEventCheckTime;
+    });
+  }, [monthlyEvents, lastEventCheckTime]);
+
+  const handleOpenOperationsRoom = () => {
+    setActiveSheet('Operations Room');
+    setLastEventCheckTime(Date.now());
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
+  };
 
     // REFACTORED: Single update function for the consolidated stats document
   const updateStatsInFirestore = useCallback(async (dataToUpdate) => {
@@ -14798,13 +14942,25 @@ setLinkedAssignmentTitle(assignmentTitle);
     tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10);
     tenDaysFromNow.setHours(23, 59, 59, 999);
 
-    return assignments.filter(a => {
+    const triage = assignments.filter(a => {
       if (a.status === 'Completed' || !a.dueDate) {
         return false;
       }
+      // Ensure dueDate is a valid Date object for comparison
+      const dueDateObj = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
       // Task must be due between the start of today and 10 days from now.
-      return a.dueDate >= startOfToday && a.dueDate <= tenDaysFromNow;
+      return dueDateObj >= startOfToday && dueDateObj <= tenDaysFromNow;
     });
+    
+    if (triage.length === 0 && assignments.length > 0) {
+      console.warn("[Triage Debug] No triageable assignments found. Total assignments:", assignments.length);
+      console.warn("[Triage Debug] Sample assignment:", assignments[0]);
+      assignments.forEach((a, i) => {
+        console.warn(`[Triage Debug] Assignment ${i}: status=${a.status}, dueDate=${a.dueDate}, dueDate instanceof Date=${a.dueDate instanceof Date}`);
+      });
+    }
+    
+    return triage;
   }, [assignments]);
 
   // --- NEW: Triage and Buff Logic ---
@@ -15888,7 +16044,25 @@ return (
             { name: 'Science Lab', sheet: 'Science Lab', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 2a.5.5 0 01.5.5V3h5V2.5a.5.5 0 011 0V3h1a2 2 0 012 2v1.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a1 1 0 00-1-1H7a1 1 0 00-1 1v.5a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5V5a2 2 0 012-2h1V2.5A.5.5 0 017 2zM4.002 8.5a.5.5 0 01.498.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM16 8.5a.5.5 0 01.5.5v7a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1zM7 9a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v5a1 1 0 102 0v-5a1 1 0 00-1-1z" clipRule="evenodd" /></svg>},
             { name: 'Study Zone', sheet: 'Study Zone', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L9 9.58v5.528l-3-1.286a1 1 0 00-1.212.86l-.5 2.5a1 1 0 00.97 1.245l5-1a1 1 0 00.484 0l5 1a1 1 0 00.97-1.245l-.5-2.5a1 1 0 00-1.212-.86l-3 1.286V9.58l6.406-2.658a1 1 0 000-1.84l-7-3zM9 4.399l5.223 2.155L10 8.517 4.777 6.554 9 4.399z" /></svg>},
           ].map((item) => (
-            <li key={item.name}><button onClick={() => {setActiveSheet(item.sheet); if(isMobile) setIsSidebarOpen(false);}} className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1'}`}>{item.icon}<span>{item.name}</span></button></li>
+            <li key={item.name}>
+              <button 
+                onClick={() => {
+                  if (item.sheet === 'Operations Room') {
+                    handleOpenOperationsRoom();
+                  } else {
+                    setActiveSheet(item.sheet); 
+                    if(isMobile) setIsSidebarOpen(false);
+                  }
+                }} 
+                className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 relative ${activeSheet === item.sheet ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1'}`}
+              >
+                {item.icon}
+                <span>{item.name}</span>
+                {item.sheet === 'Operations Room' && hasNewEvents && (
+                  <div className="absolute right-2 top-2.5 w-2 h-2 bg-red-500 rounded-full"></div>
+                )}
+              </button>
+            </li>
           ))}
         </ul>
 
@@ -15898,8 +16072,15 @@ return (
         </ul>
 
         <div className={`pt-4 space-y-2 ${isMobile ? '' : 'mt-auto'}`}>
-            <button onClick={() => {setActiveSheet('My Profile'); if(isMobile) setIsSidebarOpen(false);}} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-all duration-200 hover:translate-x-1">
-                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl border-2 border-slate-600">{equippedAvatarDisplay}</div>
+            <button onClick={() => {setActiveSheet('My Profile'); if(isMobile) setIsSidebarOpen(false);}} className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-slate-800 transition-all duration-200 hover:translate-x-1 relative">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl border-2 border-slate-600">{equippedAvatarDisplay}</div>
+                  {((stats.squadInvites?.length || 0) > 0) && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border border-slate-800">
+                      {Math.min(stats.squadInvites.length, 9)}
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 text-left"><p className="text-sm font-semibold text-white">My Profile</p><p className="text-xs text-slate-400 truncate">ID: {user?.uid}</p></div>
             </button>
             <button onClick={handleSignOut} className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-900/50 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg><span>Sign Out</span></button>
@@ -15919,7 +16100,7 @@ return (
         {activeSheet === 'My Profile' && <MyProfile stats={stats} user={user} userId={user?.uid} updateStatsInFirestore={updateStatsInFirestore} handleEvolvePet={handleEvolvePet} getFullPetDetails={getFullPetDetails} getFullCosmeticDetails={getFullCosmeticDetails} getItemStyle={getItemStyle} db={db} appId={appId} showMessageBox={showMessageBox} actionLock={actionLock} processAchievement={processAchievement} calculateLevelInfo={calculateLevelInfo} onAcceptInvite={handleAcceptInvite} onDeclineInvite={handleDeclineInvite} divisionData={divisionData} friendProfiles={friendProfiles} />}
         {activeSheet === 'Sanctum' && <Sanctum stats={stats} setEditMode={setSanctumEditMode} />}
         {activeSheet === 'Alchemist\'s Workshop' && <AlchemistsWorkshop stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} />}
-        {activeSheet === 'Operations Room' && <OperationsRoom stats={stats} user={user} updateStatsInFirestore={updateStatsInFirestore} assignments={assignments} divisionData={divisionData} friendProfiles={Object.values(friendProfiles)} showMessageBox={showMessageBox} />}
+        {activeSheet === 'Operations Room' && <OperationsRoom stats={stats} user={user} updateStatsInFirestore={updateStatsInFirestore} assignments={assignments} divisionData={divisionData} friendProfiles={Object.values(friendProfiles)} showMessageBox={showMessageBox} setActiveSheet={setActiveSheet} setIsSidebarOpen={setIsSidebarOpen} monthlyEvents={monthlyEvents} setMonthlyEvents={setMonthlyEvents} lastEventCheckTime={lastEventCheckTime} />}
         {activeSheet === 'Calendar View' && <CalendarView assignments={assignments}/>}
         {activeSheet === 'Dungeon Crawler' && <DungeonCrawler key={dungeonResetKey} stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} getFullPetDetails={getFullPetDetails} onResetDungeon={resetDungeonGame} getFullCosmeticDetails={getFullCosmeticDetails} processAchievement={processAchievement} syncDungeonXp={newXp => { dungeonXpRef.current = newXp; }} isMobile={isMobile} addIngredientToInventory={addIngredientToInventory} />}
         {activeSheet === 'Tower Defense' && <TowerDefenseGame stats={stats} updateStatsInFirestore={updateStatsInFirestore} showMessageBox={showMessageBox} onResetGame={resetTowerDefenseGame} getFullCosmeticDetails={getFullCosmeticDetails} generatePath={generatePath} processAchievement={processAchievement} addIngredientToInventory={addIngredientToInventory} />}
