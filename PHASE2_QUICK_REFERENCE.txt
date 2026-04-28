@@ -1,0 +1,167 @@
+# Phase 2 Quick Reference - What Changed
+
+## 🎯 TL;DR - Three Main Additions
+
+### 1. Visual Animations ✨
+Battles now have:
+- Attack movement (Pokémon moves toward opponent)
+- Damage flash (white tint when hit)
+- Floating damage numbers (fade out while moving up)
+- Smooth HP bar animation (300ms, color-coded)
+
+**Result:** Battles feel alive and satisfying!
+
+### 2. XP & Leveling 📈
+- Defeat enemy → gain XP (`level × 20`)
+- Accumulate XP → level up (when XP ≥ `100 × level`)
+- Level up → stats increase, HP restores
+- Messages inform player of progress
+
+**Result:** Pokémon grow stronger, progression feels rewarding!
+
+### 3. Reward Screen 🎁
+- After boss battles (wave 5, 10, 15...)
+- Choose 1 of 3 random Pokémon
+- Recruit to your team
+- Continue with larger team
+
+**Result:** Team grows, players can customize their roster!
+
+---
+
+## 📂 New Directory
+
+```
+src/assets/                    ← NEW
+├── sprites/pokemon/front/     ← Add PNG files here
+├── audio/sfx/                 ← Add MP3 files here
+└── ...
+```
+
+**See:** `ASSET_GUIDE.md` for detailed instructions
+
+---
+
+## 🔧 Code Changes Summary
+
+### game-data.js (+57 lines)
+
+**4 new functions:**
+```javascript
+calculateXpGain(enemy)        // Returns XP to award
+getXpToNextLevel(level)       // Returns XP needed
+checkLevelUp(pokemon)         // Returns level-up data
+applyLevelUp(pokemon, level)  // Applies level-up
+```
+
+### FlashcardRogue.js (+180 lines)
+
+**BattleScene additions:**
+```javascript
+animateAttack()              // Attack movement
+animateDamageFlash()         // White flash
+createDamagePopup()          // Floating numbers
+animateHealthBar()           // Smooth bar animation
+```
+
+**React component updates:**
+```javascript
+// New state fields
+isShowingReward: true/false
+rewardCandidates: [poke1, poke2, poke3]
+
+// New function
+selectReward(selectedPokemon)
+
+// Updated function
+handleBattleEnd()            // Now includes XP, leveling, rewards
+```
+
+---
+
+## ✅ Verification
+
+- [x] Zero compilation errors
+- [x] All animations working
+- [x] XP system functional
+- [x] Reward screen appears at wave 5, 10, 15...
+- [x] Team expands correctly
+- [x] Level-up increases stats
+- [x] HP restores on level-up
+- [x] Asset directories created
+
+---
+
+## 🎮 How to Test
+
+**Quick test (2 minutes):**
+1. Add 5+ flashcards to StudyZone
+2. Start Flashcard Rogue game
+3. Win a battle → see "XP gained" message
+4. Use move → see attack animation + damage number + HP bar animation
+5. Reach wave 5 → see reward screen
+6. Click a Pokémon → joins team
+7. Continue playing, notice leveling messages
+
+---
+
+## 📝 Documentation
+
+**For detailed info on:**
+
+| Topic | File |
+|-------|------|
+| All Phase 2 features explained | `FLASHCARD_ROGUE_PHASE2_GUIDE.md` |
+| Everything that changed | `FLASHCARD_ROGUE_PHASE2_SUMMARY.md` |
+| Where to put sprites/audio | `ASSET_GUIDE.md` |
+| Original game overview | `README_FLASHCARD_ROGUE.md` |
+| Battle system flow | `FLASHCARD_ROGUE_STATE_MACHINE.md` |
+
+---
+
+## 🚀 Next Steps
+
+### To Add Graphics (Phase 3)
+1. Get Pokémon sprite PNGs (192×192px)
+2. Save to `src/assets/sprites/pokemon/front/`
+3. Update `renderPokemon()` in FlashcardRogue.js
+4. Sprites load automatically!
+
+### To Add Audio (Phase 3)
+1. Get MP3 files
+2. Save to `src/assets/audio/`
+3. Update `create()` in BattleScene
+4. Audio plays automatically!
+
+---
+
+## ⚙️ Configuration
+
+All in `GAME_CONFIG` (src/game-data.js):
+
+```javascript
+CORRECT_ANSWER_BONUS_DAMAGE: 1.2      // 20% bonus (modify if wanted)
+WAVES_PER_GYM_LEADER: 5               // Boss every 5 waves
+STARTING_TEAM_SIZE: 3                 // Start with 3 Pokémon
+MAX_TEAM_SIZE: 6                      // Max 6 Pokémon
+```
+
+---
+
+## 📊 Impact
+
+**Before Phase 2:**
+- Static battles (instant health changes)
+- No progression (endless grinding)
+- All random encounters (no team building)
+
+**After Phase 2:**
+- Polished animations (satisfying feedback)
+- Meaningful progression (leveling & rewards)
+- Team building (recruit new members)
+
+**Result:** Game went from "prototype" to "polished game" ✨
+
+---
+
+**Ready to play! Check FLASHCARD_ROGUE_PHASE2_GUIDE.md for complete details.** 🎮
